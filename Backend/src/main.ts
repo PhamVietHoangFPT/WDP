@@ -22,8 +22,8 @@ async function bootstrap() {
 
   // Tạo một đối tượng cấu hình cơ bản cho Swagger document
   const config = new DocumentBuilder()
-    .setTitle('betta-fish-shop') // Tiêu đề hiển thị trên Swagger UI
-    .setDescription('Shop bán cá betta') // Mô tả chi tiết hơn về API
+    .setTitle('ADN-Testing-Management') // Tiêu đề hiển thị trên Swagger UI
+    .setDescription('ADN Testing Management System') // Mô tả chi tiết hơn về API
     .setVersion('1.0') // Phiên bản API
     // .addTag('auth') // Thêm các tag để nhóm các API (ví dụ: auth, users, products)
     // .addTag('users')
