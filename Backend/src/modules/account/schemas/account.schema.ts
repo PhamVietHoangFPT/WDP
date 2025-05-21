@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument } from 'mongoose'
 import mongoose from 'mongoose'
-import { BaseEntity } from 'src/common/schema/base_entity.schema'
+import { BaseEntity } from 'src/common/schema/baseEntity.schema'
 
 export type AccountDocument = HydratedDocument<Account>
 @Schema()
@@ -39,10 +39,10 @@ export class Account extends BaseEntity {
   @Prop({ type: Date, default: null })
   dateOfBirth: Date
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'role', required: true })
   role: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'facility' })
   facility?: mongoose.Schema.Types.ObjectId
 }
 

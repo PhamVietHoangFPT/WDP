@@ -24,4 +24,15 @@ export abstract class BaseEntity {
 
   @Prop({ type: Date, default: Date.now })
   updated_at: Date
+
+  @Prop({ type: Date, default: null })
+  deleted_at: Date
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: false,
+    index: true,
+  })
+  deleted_by: mongoose.Schema.Types.ObjectId
 }
