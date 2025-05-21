@@ -29,9 +29,8 @@ export class AccountsService implements IAccountsService {
       _id: user._id,
       name: user.name,
       email: user.email,
-      is_active: user.is_active,
-      point: user.point,
-      phone_number: user.phone_number,
+      phoneNumber: user.phoneNumber,
+
       role: user.role,
       facility: user.facility,
     })
@@ -40,7 +39,7 @@ export class AccountsService implements IAccountsService {
   async createAccount(
     createUserDto: CreateAccountDto,
   ): Promise<AccountResponseDto> {
-    const { email, password, name, role, facility, phone_number } =
+    const { email, password, name, role, facility, phoneNumber, gender } =
       createUserDto
 
     const existingUser = await this.accountsRepository.findByEmail(email)
@@ -49,10 +48,10 @@ export class AccountsService implements IAccountsService {
     }
 
     const existingPhoneNumber =
-      await this.accountsRepository.findByPhoneNumber(phone_number)
+      await this.accountsRepository.findByPhoneNumber(phoneNumber)
     if (existingPhoneNumber) {
       throw new ConflictException(
-        `Số điện thoại "${phone_number}" đã được sử dụng.`,
+        `Số điện thoại "${phoneNumber}" đã được sử dụng.`,
       )
     }
 
@@ -107,11 +106,10 @@ export class AccountsService implements IAccountsService {
         name: name,
         email: email,
         password: passwordHash,
-        point: 0,
-        phone_number: phone_number,
+        phoneNumber: phoneNumber,
+        gender: gender,
         role: roleObjectId as any,
         facility: facilityObjectId as any,
-        is_active: true,
       })
 
       return this.mapToResponseDto(newUser)

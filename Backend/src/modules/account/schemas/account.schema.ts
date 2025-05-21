@@ -27,20 +27,23 @@ export class Account extends BaseEntity {
   @Prop({ type: String, required: true, select: false })
   password: string
 
-  @Prop({ type: Number, default: 0 })
-  point: number
+  @Prop({ type: String, default: null, unique: true })
+  phoneNumber: string
+
+  @Prop({ type: Boolean, default: null })
+  gender: boolean
 
   @Prop({ type: String, default: null, unique: true })
-  phone_number: string
+  personalId: string
+
+  @Prop({ type: Date, default: null })
+  dateOfBirth: Date
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true })
   role: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility?: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: Boolean, default: true })
-  is_active: boolean
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account)

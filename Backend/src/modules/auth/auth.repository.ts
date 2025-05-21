@@ -18,8 +18,7 @@ export class AuthRepository implements IAuthRepository {
     const newAccount = new this.accountModel({
       email: email.toLowerCase(),
       password,
-      firstName,
-      lastName,
+      name: firstName + ' ' + lastName,
     })
     return await newAccount.save()
   }
@@ -29,6 +28,6 @@ export class AuthRepository implements IAuthRepository {
   ): mongoose.Query<AccountDocument | null, AccountDocument> {
     return this.accountModel
       .findOne({ email: email.toLowerCase() })
-      .select('email') // Only include email and password
+      .select('+password')
   }
 }

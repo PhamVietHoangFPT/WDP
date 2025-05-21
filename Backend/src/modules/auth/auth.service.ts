@@ -49,10 +49,7 @@ export class AuthService {
     try {
       const { email, password } = loginDto
 
-      const account = await this.authRepository
-        .loginByEmail(email)
-        .select('+password') // <--- Yêu cầu lấy thêm password
-        .exec()
+      const account = await this.authRepository.loginByEmail(email).exec()
 
       if (!account) {
         throw new NotFoundException('Tài khoản không tồn tại')
@@ -66,12 +63,16 @@ export class AuthService {
         throw new HttpException('Sai mật khẩu', 401)
       }
 
+      console.log('account', account)
+
       const token = await this.generateToken({
         id: account._id,
         email: account.email,
         name: account.name,
-        point: account.point,
-        phone_number: account.phone_number,
+        phoneNumber: account.phoneNumber,
+        role: account.role,
+        facility: account.facility,
+        gender: account.gender,
       })
 
       return new LoginResponseDto({

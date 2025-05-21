@@ -7,10 +7,12 @@ import { AccountsRepository } from './account.repository'
 import { Account, AccountSchema } from './schemas/account.schema'
 import { IAccountsRepository } from './interfaces/iaccount.repository'
 import { IAccountsService } from './interfaces/iaccount.service'
+import { RoleModule } from '../role/role.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
+    RoleModule,
   ],
   controllers: [AccountsController],
   providers: [

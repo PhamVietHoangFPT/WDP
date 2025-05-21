@@ -41,5 +41,9 @@ export class CreateAccountDto {
   @ApiProperty({ example: '0987654321' })
   @IsString()
   @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
-  phone_number: string
+  phoneNumber: string
+
+  @ApiProperty({ example: true })
+  @IsNotEmpty({ message: 'Giới tính không được để trống' })
+  gender: boolean
 }
