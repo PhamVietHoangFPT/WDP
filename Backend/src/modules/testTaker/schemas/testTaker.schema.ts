@@ -28,10 +28,10 @@ export class TestTaker extends BaseEntity {
   @Prop({ type: Date, default: null })
   dateOfBirth: Date
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'account' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   accountId: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'testTakerRelationShip' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TestTakerRelationShip' })
   testTakerRelationShipId: mongoose.Schema.Types.ObjectId
 }
 

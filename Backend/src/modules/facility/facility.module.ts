@@ -1,18 +1,18 @@
 // src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { TestTaker, TestTakerSchema } from './schemas/testTaker.schema'
-import { TestTakerRelationshipModule } from '../testTakerRelationship/testTakerRelationship.module'
+import { Facility, FacilitySchema } from './schemas/facility.schema'
+import { AddressModule } from '../address/address.module'
 import { AccountModule } from '../account/account.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: TestTaker.name, schema: TestTakerSchema },
+      { name: Facility.name, schema: FacilitySchema },
     ]),
-    TestTakerRelationshipModule,
+    AddressModule,
     AccountModule,
   ],
 
   exports: [MongooseModule],
 })
-export class TestTakerModule {}
+export class FacilityModule {}

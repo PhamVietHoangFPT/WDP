@@ -1,7 +1,7 @@
 // src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Role, RoleSchema } from './schema/role.schema'
+import { Role, RoleSchema } from './schemas/role.schema'
 // import { RoleService } from './role.service'; // Nếu có
 // import { RoleController } from './role.controller'; // Nếu có
 

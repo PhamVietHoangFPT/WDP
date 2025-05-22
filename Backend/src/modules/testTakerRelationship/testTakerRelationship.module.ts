@@ -15,4 +15,4 @@ import {
 
   exports: [MongooseModule],
 })
-export class TestTakerModule {}
+export class TestTakerRelationshipModule {}

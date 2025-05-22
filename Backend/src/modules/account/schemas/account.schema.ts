@@ -39,10 +39,10 @@ export class Account extends BaseEntity {
   @Prop({ type: Date, default: null })
   dateOfBirth: Date
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'role', required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true })
   role: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'facility' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility?: mongoose.Schema.Types.ObjectId
 }
 
