@@ -50,7 +50,6 @@ export class AccountsRepository implements IAccountsRepository {
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.accountModel.countDocuments(filter).exec()
-    // Hoặc return this.accountModel.countDocuments(filter);
   }
 
   // CÓ THỂ giữ lại hàm find cơ bản nếu muốn, nhưng PHẢI trả về Query

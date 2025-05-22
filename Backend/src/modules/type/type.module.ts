@@ -4,10 +4,10 @@ import { Type, TypeSchema } from './schemas/type.schema'
 import { ConditionModule } from '../condition/condition.module'
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Type.name, schema: TypeSchema }]),
-        ConditionModule,
-    ],
-    exports: [MongooseModule],
+  imports: [
+    MongooseModule.forFeature([{ name: Type.name, schema: TypeSchema }]),
+    ConditionModule,
+  ],
+  exports: [MongooseModule],
 })
-export class TypeModule { }
+export class TypeModule {}

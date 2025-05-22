@@ -24,6 +24,9 @@ export class SlotTemplate extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: Boolean, default: true })
+  isActive: boolean
 }
 
 export const SlotTemplateSchema = SchemaFactory.createForClass(SlotTemplate)

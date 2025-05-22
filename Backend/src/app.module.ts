@@ -5,6 +5,7 @@ import { databaseConfig } from './config/database.config'
 import { AccountModule } from './modules/account/account.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
+import { SlotTemplateModule } from './modules/slotTemplate/slotTemplate.module'
 @Module({
   imports: [
     databaseConfig,
@@ -13,6 +14,7 @@ import { ConfigModule } from '@nestjs/config'
     }),
     AccountModule,
     AuthModule,
+    SlotTemplateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
