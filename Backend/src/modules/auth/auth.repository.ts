@@ -29,5 +29,6 @@ export class AuthRepository implements IAuthRepository {
     return this.accountModel
       .findOne({ email: email.toLowerCase() })
       .select('+password')
+      .populate({ path: 'role', select: 'role' })
   }
 }
