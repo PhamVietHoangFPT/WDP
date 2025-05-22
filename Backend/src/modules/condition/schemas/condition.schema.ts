@@ -18,4 +18,4 @@ export class Condition extends BaseEntity {
     conditionFee: number
 }
 
-export const ConditionDocument = SchemaFactory.createForClass(Condition)
+export const ConditionSchema = SchemaFactory.createForClass(Condition)

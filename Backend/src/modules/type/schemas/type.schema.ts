@@ -27,4 +27,4 @@ export class Type extends BaseEntity {
     description: string
 }
 
-export const TypeDocument = SchemaFactory.createForClass(Type)
+export const TypeSchema = SchemaFactory.createForClass(Type)
