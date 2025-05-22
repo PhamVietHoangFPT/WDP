@@ -25,4 +25,4 @@ export class Relationship extends BaseEntity {
     relationshipGap: number
 }
 
-export const RelationshipDocument = SchemaFactory.createForClass(Relationship)
+export const RelationshipSchema = SchemaFactory.createForClass(Relationship)

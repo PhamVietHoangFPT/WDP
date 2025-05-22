@@ -23,4 +23,4 @@ export class TimeReturn extends BaseEntity {
 
 }
 
-export const TimeReturnDocument = SchemaFactory.createForClass(TimeReturn)
+export const TimeReturnSchema = SchemaFactory.createForClass(TimeReturn)
