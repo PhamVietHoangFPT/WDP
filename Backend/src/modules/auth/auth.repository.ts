@@ -3,6 +3,10 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
 import { IAuthRepository } from './interfaces/iauth.repository'
+import {
+  LeanPopulatedAccount,
+  PopulatedRoleDetails,
+} from '../account/interfaces/iaccount.response'
 @Injectable()
 export class AuthRepository implements IAuthRepository {
   constructor(
@@ -25,10 +29,14 @@ export class AuthRepository implements IAuthRepository {
 
   loginByEmail(
     email: string,
-  ): mongoose.Query<AccountDocument | null, AccountDocument> {
+  ): mongoose.Query<LeanPopulatedAccount | null, AccountDocument> {
     return this.accountModel
       .findOne({ email: email.toLowerCase() })
+      .lean<LeanPopulatedAccount>()
       .select('+password')
-      .populate({ path: 'role', select: 'role' })
+      .populate<{
+        roleId: PopulatedRoleDetails
+      }>({ path: 'role', select: 'role -_id' })
+      .populate({ path: 'facility', select: 'facilityName' })
   }
 }

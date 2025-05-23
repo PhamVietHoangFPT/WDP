@@ -30,7 +30,6 @@ export class AccountsService implements IAccountsService {
       name: user.name,
       email: user.email,
       phoneNumber: user.phoneNumber,
-
       role: user.role,
       facility: user.facility,
     })

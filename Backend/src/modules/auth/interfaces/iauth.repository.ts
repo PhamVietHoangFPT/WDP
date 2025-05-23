@@ -3,10 +3,11 @@ import {
   Account,
 } from 'src/modules/account/schemas/account.schema'
 import mongoose from 'mongoose'
+import { LeanPopulatedAccount } from 'src/modules/account/interfaces/iaccount.response'
 export interface IAuthRepository {
   loginByEmail(
     email: string,
-  ): mongoose.Query<AccountDocument | null, AccountDocument>
+  ): mongoose.Query<LeanPopulatedAccount | null, AccountDocument>
   register(
     email: string,
     password: string,

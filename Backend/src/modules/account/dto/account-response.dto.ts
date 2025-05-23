@@ -29,9 +29,13 @@ export class AccountResponseDto {
   @ApiProperty({ example: '0987654321' })
   phoneNumber: string
 
+  // @Expose()
+  // @ApiProperty({ type: Object })
+  // role: any
+
   @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
+  @ApiProperty({ example: 'Customer', type: String })
+  @Transform(({ value }) => value?.role, { toPlainOnly: true })
   role: mongoose.Schema.Types.ObjectId
 
   @Expose()
