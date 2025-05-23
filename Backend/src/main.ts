@@ -3,12 +3,13 @@ import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common' // Nên có để validate DTOs
 import * as dotenv from 'dotenv'
+import { ConfigService } from '@nestjs/config'
 
 dotenv.config()
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-
+  const configService = app.get(ConfigService)
   // (Tùy chọn nhưng khuyến khích) Bật Global Validation Pipe
   // Giúp Swagger hoạt động tốt với các validation decorator trong DTO
   app.useGlobalPipes(
@@ -43,7 +44,7 @@ async function bootstrap() {
 
   // --- Kết thúc cấu hình Swagger ---
 
-  const port = process.env.PORT || 3000
+  const port = configService.get<number>('PORT') || 3000
   await app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
