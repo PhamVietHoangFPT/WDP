@@ -29,10 +29,10 @@ export class TestTaker extends BaseEntity {
   dateOfBirth: Date
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
-  accountId: mongoose.Schema.Types.ObjectId
+  account: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TestTakerRelationShip' })
-  testTakerRelationShipId: mongoose.Schema.Types.ObjectId
+  testTakerRelationShip: mongoose.Schema.Types.ObjectId
 }
 
 export const TestTakerSchema = SchemaFactory.createForClass(TestTaker)

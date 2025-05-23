@@ -29,13 +29,13 @@ export class KitShipment extends BaseEntity {
   selfCollectionConsent: boolean
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
-  shipperId: mongoose.Schema.Types.ObjectId
+  account: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
-  facilityId: mongoose.Schema.Types.ObjectId
+  facility: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SamplingKitInventory' })
-  samplingKitInventoryId: mongoose.Schema.Types.ObjectId
+  samplingKitInventory: mongoose.Schema.Types.ObjectId
 }
 
 export const KitShipmentSchema = SchemaFactory.createForClass(KitShipment)

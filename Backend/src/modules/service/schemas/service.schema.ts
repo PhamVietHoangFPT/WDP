@@ -20,17 +20,17 @@ export class Service extends BaseEntity {
     ref: 'Relationship',
     required: true,
   })
-  relationshipId: mongoose.Schema.Types.ObjectId
+  relationship: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TimeReturn',
     required: true,
   })
-  timeReturnId: mongoose.Schema.Types.ObjectId
+  timeReturn: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Type', required: true })
-  typeId: mongoose.Schema.Types.ObjectId
+  type: mongoose.Schema.Types.ObjectId
 }
 
 export const ServiceDocument = SchemaFactory.createForClass(Service)

@@ -26,14 +26,14 @@ export class Blog extends BaseEntity {
     required: true,
     ref: 'Service',
   })
-  serviceId: mongoose.Schema.Types.ObjectId
+  service: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Account',
   })
-  authorId: mongoose.Schema.Types.ObjectId
+  account: mongoose.Schema.Types.ObjectId
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog)

@@ -16,14 +16,17 @@ export class Address extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   fullName: string
 
+  @Prop({ type: String, required: true, trim: true })
+  fullAddress: string
+
   @Prop({ type: Boolean, trim: true })
   isKitShippingAddress: boolean
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
-  accountId: mongoose.Schema.Types.ObjectId
+  account: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TestTaker' })
-  testTakerId: mongoose.Schema.Types.ObjectId
+  testTaker: mongoose.Schema.Types.ObjectId
 }
 
 export const AddressSchema = SchemaFactory.createForClass(Address)
