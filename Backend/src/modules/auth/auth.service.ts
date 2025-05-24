@@ -63,15 +63,13 @@ export class AuthService {
         throw new HttpException('Sai mật khẩu', 401)
       }
 
-      console.log('account', account.role)
-
       const token = await this.generateToken({
         id: account._id,
         email: account.email,
         name: account.name,
         phoneNumber: account.phoneNumber,
-        roleId: account.role.role,
-        facilityId: account.facility,
+        role: account.role.role,
+        facility: account.facility,
         gender: account.gender,
       })
 
