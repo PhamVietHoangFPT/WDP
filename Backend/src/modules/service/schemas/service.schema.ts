@@ -33,4 +33,4 @@ export class Service extends BaseEntity {
   type: mongoose.Schema.Types.ObjectId
 }
 
-export const ServiceDocument = SchemaFactory.createForClass(Service)
+export const ServiceSchema = SchemaFactory.createForClass(Service)
