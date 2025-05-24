@@ -62,6 +62,9 @@ export class AccountsRepository implements IAccountsRepository {
   findWithQuery(
     filter: Record<string, unknown>,
   ): mongoose.Query<AccountDocument[], AccountDocument> {
-    return this.accountModel.find(filter).lean() // Return a query object for chaining
+    return this.accountModel
+      .find(filter)
+      .lean()
+      .populate({ path: 'role', select: 'role -_id' })
   }
 }

@@ -25,7 +25,7 @@ export class Type extends BaseEntity {
     ref: 'Condition',
     required: true,
   })
-  conditionId: mongoose.Schema.Types.ObjectId
+  condition: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: String })
   description: string

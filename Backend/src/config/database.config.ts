@@ -1,9 +1,10 @@
 import { MongooseModule } from '@nestjs/mongoose'
-
+import { ConfigService } from '@nestjs/config'
 export const databaseConfig = MongooseModule.forRootAsync({
-  useFactory: () => {
+  inject: [ConfigService],
+  useFactory: (configService: ConfigService) => {
     try {
-      const mongoUri = process.env.MONGO_URI
+      const mongoUri = configService.get<string>('MONGO_URI')
 
       // Kiểm tra nếu mongoUri là undefined hoặc null
       if (!mongoUri) {

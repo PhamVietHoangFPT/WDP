@@ -6,11 +6,12 @@ import { AccountModule } from './modules/account/account.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { SlotTemplateModule } from './modules/slotTemplate/slotTemplate.module'
+
 @Module({
   imports: [
     databaseConfig,
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule available globally
+      isGlobal: true,
     }),
     AccountModule,
     AuthModule,

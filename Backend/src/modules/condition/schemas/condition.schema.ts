@@ -11,6 +11,7 @@ export class Condition extends BaseEntity {
     default: () => new mongoose.Types.ObjectId(),
   })
   _id: mongoose.Schema.Types.ObjectId
+
   @Prop({ type: String, required: true })
   name: string
 

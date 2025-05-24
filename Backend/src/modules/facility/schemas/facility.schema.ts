@@ -20,10 +20,10 @@ export class Facility extends BaseEntity {
   phoneNumber: string
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Address' })
-  addressId: mongoose.Schema.Types.ObjectId
+  address: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
-  managerId: mongoose.Schema.Types.ObjectId
+  manager: mongoose.Schema.Types.ObjectId
 }
 
 export const FacilitySchema = SchemaFactory.createForClass(Facility)
