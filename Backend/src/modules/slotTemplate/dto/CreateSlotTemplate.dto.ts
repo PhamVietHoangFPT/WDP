@@ -3,16 +3,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
-import { IsString, IsNotEmpty, MinLength, Matches } from 'class-validator'
+import { IsString, IsNotEmpty, Matches } from 'class-validator'
 import mongoose from 'mongoose'
 
 export class CreateSlotTemplateDto {
-  @ApiProperty({ example: 'Monday', required: true })
-  @IsString()
-  @IsNotEmpty({ message: 'Không được để trống' })
-  @MinLength(3, { message: 'Phải có ít nhất 3 ký tự' })
-  daysOfWeek: string
-
   @ApiProperty({ example: '09:00:00', required: true })
   @IsString()
   @IsNotEmpty({ message: 'Không được để trống' })
@@ -30,6 +24,11 @@ export class CreateSlotTemplateDto {
     message: 'Thời gian kết thúc phải có định dạng HH:mm:ss',
   })
   workTimeEnd: string
+
+  @ApiProperty({ example: 1.5, required: true })
+  @IsNotEmpty({ message: 'Không được để trống' })
+  @Transform(({ value }) => Number(value), { toPlainOnly: true })
+  slotDuration: number
 
   @ApiProperty({ example: '67f697151bfaa0e9cf14ec92', required: true })
   @IsNotEmpty({ message: 'Không được để trống' })

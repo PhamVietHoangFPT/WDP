@@ -13,8 +13,8 @@ import {
 import { IAuthService } from './interfaces/iauth.service'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
-import { LoginResponseDto } from './dto/login-response.dto'
-import { RegisterResponseDto } from './dto/register-response.dto'
+import { LoginResponseDto } from './dto/loginResponse.dto'
+import { RegisterResponseDto } from './dto/registerResponse.dto'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 

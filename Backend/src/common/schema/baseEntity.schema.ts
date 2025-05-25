@@ -8,6 +8,7 @@ export abstract class BaseEntity {
     ref: 'Account',
     required: false,
     index: true,
+    default: null,
   })
   created_by: mongoose.Schema.Types.ObjectId
 
@@ -16,13 +17,14 @@ export abstract class BaseEntity {
     ref: 'Account',
     required: false,
     index: true,
+    default: null,
   })
   updated_by: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: Date, default: Date.now })
   created_at: Date
 
-  @Prop({ type: Date, default: Date.now })
+  @Prop({ type: Date, default: null })
   updated_at: Date
 
   @Prop({ type: Date, default: null })
@@ -31,6 +33,7 @@ export abstract class BaseEntity {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
+    default: null,
     required: false,
     index: true,
   })

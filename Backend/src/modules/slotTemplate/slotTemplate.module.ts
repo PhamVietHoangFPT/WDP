@@ -8,12 +8,15 @@ import { SlotTemplateService } from './slotTemplate.service'
 import { ISlotTemplateService } from './interfaces/islotTemplate.service'
 import { ISlotTemplateRepository } from './interfaces/islotTemplate.repository'
 import { FacilityModule } from '../facility/facility.module'
+import { AuthModule } from '../auth/auth.module'
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: SlotTemplate.name, schema: SlotTemplateSchema },
     ]),
     FacilityModule,
+    AuthModule,
   ],
   controllers: [SlotTemplateController],
 
@@ -28,6 +31,6 @@ import { FacilityModule } from '../facility/facility.module'
     },
   ],
 
-  exports: [ISlotTemplateService],
+  exports: [ISlotTemplateService, ISlotTemplateRepository],
 })
 export class SlotTemplateModule {}

@@ -1,7 +1,7 @@
 import {
   Injectable,
   Inject,
-  // ConflictException,
+  ConflictException,
   NotFoundException,
   // InternalServerErrorException,
   // BadRequestException,
@@ -11,8 +11,8 @@ import {
 
 import { ISlotTemplateRepository } from './interfaces/islotTemplate.repository'
 import { ISlotTemplateService } from './interfaces/islotTemplate.service'
-import { CreateSlotTemplateDto } from './dto/CreateSlotTemplate.dto'
-import { SlotTemplateResponseDto } from './dto/SlotTemplateResponse.dto'
+import { CreateSlotTemplateDto } from './dto/createSlotTemplate.dto'
+import { SlotTemplateResponseDto } from './dto/slotTemplateResponse.dto'
 import { SlotTemplate } from './schemas/slotTemplate.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 
@@ -28,9 +28,10 @@ export class SlotTemplateService implements ISlotTemplateService {
   ): SlotTemplateResponseDto {
     return new SlotTemplateResponseDto({
       _id: slotTemplate._id,
-      daysOfWeek: slotTemplate.daysOfWeek,
+      isSunday: slotTemplate.isSunday,
       workTimeStart: slotTemplate.workTimeStart,
       workTimeEnd: slotTemplate.workTimeEnd,
+      slotDuration: slotTemplate.slotDuration,
       facility: slotTemplate.facility,
     })
   }
@@ -78,21 +79,52 @@ export class SlotTemplateService implements ISlotTemplateService {
 
   async createSlotTemplate(
     createSlotTemplateDto: CreateSlotTemplateDto,
-  ): Promise<SlotTemplateResponseDto> {
+    userId: string,
+  ): Promise<any> {
+    const isExistAndNotDeleted =
+      await this.slotTemplateRepository.checkExistByFacilityAndNotDeleted(
+        createSlotTemplateDto,
+      )
+    if (isExistAndNotDeleted) {
+      throw new ConflictException(`Mẫu khung giờ đã tồn tại cho cơ sở trên`)
+    }
+
     const newSlotTemplate = await this.slotTemplateRepository.create(
-      createSlotTemplateDto,
+      {
+        ...createSlotTemplateDto,
+        isSunday: false,
+      },
+      userId,
     )
-    return this.mapToResponseDto(newSlotTemplate)
+    const newSlotTemplateSunday = await this.slotTemplateRepository.create(
+      {
+        ...createSlotTemplateDto,
+        isSunday: true,
+      },
+      userId,
+    )
+
+    const newSlotTemplateResponse = this.mapToResponseDto(newSlotTemplate)
+    const newSlotTemplateSundayResponse = this.mapToResponseDto(
+      newSlotTemplateSunday,
+    )
+
+    return {
+      normal: newSlotTemplateResponse,
+      sunday: newSlotTemplateSundayResponse,
+    }
   }
 
   async updateSlotTemplate(
     id: string,
     updateSlotTemplateDto: Partial<SlotTemplate>,
+    userId: string,
   ): Promise<SlotTemplateResponseDto> {
     const updatedSlotTemplate =
       await this.slotTemplateRepository.findByIdAndUpdate(
         id,
         updateSlotTemplateDto,
+        userId,
       )
     if (!updatedSlotTemplate) {
       throw new NotFoundException(
@@ -102,12 +134,34 @@ export class SlotTemplateService implements ISlotTemplateService {
     return this.mapToResponseDto(updatedSlotTemplate)
   }
 
-  async deleteSlotTemplate(id: string): Promise<void> {
-    const deletedSlotTemplate = await this.slotTemplateRepository.delete(id)
+  async deleteSlotTemplate(id: string, userId: string): Promise<void> {
+    const deletedSlotTemplate = await this.slotTemplateRepository.delete(
+      id,
+      userId,
+    )
+    const isDeleted = await this.slotTemplateRepository.checkDeleted(id)
+    if (isDeleted) {
+      throw new ConflictException(
+        `Mẫu khung giờ với ID "${id}" đã được xóa trước đó.`,
+      )
+    }
     if (!deletedSlotTemplate) {
       throw new NotFoundException(
         `Không tìm thấy mẫu khung giờ với ID "${id}".`,
       )
     }
+  }
+
+  async findSlotByFacilityId(facilityId: string): Promise<any> {
+    const slotTemplates =
+      await this.slotTemplateRepository.findByFacilityId(facilityId)
+    if (!slotTemplates || slotTemplates.length === 0) {
+      throw new NotFoundException(
+        `Không tìm thấy mẫu khung giờ cho cơ sở với ID "${facilityId}".`,
+      )
+    }
+    return slotTemplates.map((slotTemplate) =>
+      this.mapToResponseDto(slotTemplate),
+    )
   }
 }

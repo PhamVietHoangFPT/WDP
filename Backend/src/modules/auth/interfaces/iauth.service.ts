@@ -1,6 +1,6 @@
 import { LoginDto } from '../dto/login.dto'
-import { LoginResponseDto } from '../dto/login-response.dto'
-import { RegisterResponseDto } from '../dto/register-response.dto'
+import { LoginResponseDto } from '../dto/loginResponse.dto'
+import { RegisterResponseDto } from '../dto/registerResponse.dto'
 import { RegisterDto } from '../dto/register.dto'
 export interface IAuthService {
   login(loginDto: LoginDto): Promise<LoginResponseDto>

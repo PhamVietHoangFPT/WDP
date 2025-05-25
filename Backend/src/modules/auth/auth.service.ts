@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt'
 
 import { IAuthRepository } from './interfaces/iauth.repository'
 import { LoginDto } from './dto/login.dto'
-import { LoginResponseDto } from './dto/login-response.dto'
+import { LoginResponseDto } from './dto/loginResponse.dto'
 // import { hashPassword } from 'src/utils/hashPassword'
 @Injectable()
 export class AuthService {

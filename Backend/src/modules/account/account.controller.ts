@@ -24,8 +24,8 @@ import {
 } from '@nestjs/swagger'
 
 import { IAccountsService } from './interfaces/iaccount.service'
-import { CreateAccountDto } from './dto/create-account.dto'
-import { AccountResponseDto } from './dto/account-response.dto'
+import { CreateAccountDto } from './dto/createAccount.dto'
+import { AccountResponseDto } from './dto/accountResponse.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
