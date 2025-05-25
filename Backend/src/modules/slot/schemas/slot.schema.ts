@@ -22,8 +22,14 @@ export class Slot extends BaseEntity {
   @Prop({ type: String, required: true }) // e.g., "10:30"
   endTime: string
 
+  @Prop({ type: Boolean, default: false }) // Trạng thái đã được đặt hay chưa
+  isBooked: boolean
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SlotTemplate' })
   slotTemplate: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
+  facility: mongoose.Schema.Types.ObjectId
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)

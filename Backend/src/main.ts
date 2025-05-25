@@ -2,11 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common' // Nên có để validate DTOs
-import * as dotenv from 'dotenv'
 import { ConfigService } from '@nestjs/config'
-
-dotenv.config()
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const configService = app.get(ConfigService)
@@ -25,12 +21,9 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('ADN-Testing-Management') // Tiêu đề hiển thị trên Swagger UI
     .setDescription('ADN Testing Management System') // Mô tả chi tiết hơn về API
-    .setVersion('1.0') // Phiên bản API
-    // .addTag('auth') // Thêm các tag để nhóm các API (ví dụ: auth, users, products)
-    // .addTag('users')
-    .addBearerAuth() // Nếu bạn sử dụng JWT Bearer Token để xác thực
-    // Thêm các cấu hình khác nếu cần (ví dụ: addApiKey(), addOAuth2())
-    .build() // Hoàn tất cấu hình
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build()
 
   // Tạo Swagger document dựa trên cấu hình và ứng dụng NestJS
   // NestJS sẽ tự động quét các controller và DTO có decorator của @nestjs/swagger

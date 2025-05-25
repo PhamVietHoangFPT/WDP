@@ -13,14 +13,17 @@ export class SlotTemplate extends BaseEntity {
   })
   _id: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: String, required: true, trim: true })
-  daysOfWeek: string
-
-  @Prop({ type: String, required: true, trim: true })
+  @Prop({ type: String, required: true })
   workTimeStart: string
 
-  @Prop({ type: String, default: null, unique: true })
+  @Prop({ type: String, required: true })
   workTimeEnd: string
+
+  @Prop({ type: Number, required: true, default: 1.5 })
+  slotDuration: number
+
+  @Prop({ type: Boolean, required: true })
+  isSunday: boolean
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility: mongoose.Schema.Types.ObjectId

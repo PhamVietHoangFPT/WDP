@@ -1,5 +1,5 @@
-import { CreateAccountDto } from '../dto/create-account.dto'
-import { AccountResponseDto } from '../dto/account-response.dto'
+import { CreateAccountDto } from '../dto/createAccount.dto'
+import { AccountResponseDto } from '../dto/accountResponse.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 // Interface định nghĩa các phương thức mà Service phải có
 export interface IAccountsService {
