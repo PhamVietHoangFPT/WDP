@@ -22,18 +22,22 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "22.x"
+          cache: "yarn" # Thêm dòng này để cache các gói của Yarn, giúp tăng tốc độ build
 
-      - name: yarn install, build, and test in Backend
+      - name: Install dependencies in Backend (Yarn)
         working-directory: ./Backend
-        env: # <--- Thêm các biến môi trường cho bước này
+        run: yarn install --frozen-lockfile # Cài đặt từ yarn.lock, bao gồm cả devDependencies
+
+      - name: Build and test in Backend (Yarn)
+        working-directory: ./Backend
+        env: # Các biến môi trường này dành cho quá trình build và test
           NODE_ENV: production
-          PORT: ${{ secrets.PORT }} # Giả sử bạn có secret tên PORT
-          MONGO_URI: ${{ secrets.MONGO_URI }} # Giả sử bạn có secret tên DATABASE_URL
+          PORT: ${{ secrets.PORT }}
+          MONGO_URL: ${{ secrets.MONGO_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          yarn install
-          yarn build --if-present # Giả sử lệnh này tạo ra thư mục 'dist' trong './Backend'
-          yarn test --if-present
+          yarn build # Script "build" trong package.json của bạn là "nest build"
+          yarn test --if-present # Giả sử bạn có script "test"
 
       - name: Zip artifact for deployment
         # Nén nội dung của thư mục Backend/dist (hoặc thư mục build output của bạn)
