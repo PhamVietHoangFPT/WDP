@@ -31,7 +31,7 @@ jobs:
         env: # Các biến môi trường này dành cho quá trình build và test (nếu cần)
           NODE_ENV: production
           PORT: ${{ secrets.PORT }} # Đảm bảo secret này được cấu hình trên GitHub
-          MONGO_URL: ${{ secrets.MONGO_URL }} # Đổi từ MONGO_URI nếu secret của bạn là MONGO_URL
+          MONGO_URI: ${{ secrets.MONGO_URI }} # Đổi từ MONGO_URI nếu secret của bạn là MONGO_URL
           JWT_SECRET: ${{ secrets.JWT_SECRET }} # Đảm bảo secret này được cấu hình trên GitHub
         run: |
           yarn install
