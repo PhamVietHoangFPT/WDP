@@ -37,8 +37,8 @@ jobs:
           MONGO_URL: ${{ secrets.MONGO_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          yarn build # Script "build" trong package.json của bạn là "nest build"
-          yarn test --if-present # Giả sử bạn có script "test"
+          yarn build
+          yarn test
 
       - name: Zip artifact for deployment
         # Nén nội dung của thư mục Backend/dist (hoặc thư mục build output của bạn)
