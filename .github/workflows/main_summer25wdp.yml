@@ -44,7 +44,6 @@ jobs:
           mkdir deploy_package
           cp -r Backend/dist/* deploy_package/
           cp Backend/package.json Backend/yarn.lock deploy_package/
-          cd deploy_package && zip -r ../release.zip
       - name: Upload artifact for deployment job # Bước này giữ nguyên
         uses: actions/upload-artifact@v4
         with:
