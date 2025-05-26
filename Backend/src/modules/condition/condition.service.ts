@@ -19,11 +19,13 @@ export class ConditionService implements IConditionService {
     }
 
     async createCondition(createConditionDto: CreateConditionDto): Promise<ConditionResponseDto> {
+        const existingCondition = await this.conditionModel.findOne({ name: createConditionDto.name });
+
+        if (existingCondition) {
+            throw new ConflictException("Tình trạng của mẫu thử đã tồn tại.");
+        }
+
         try {
-            const existingCondition = await this.conditionModel.findOne({ name: createConditionDto.name });
-            if (existingCondition) {
-                throw new ConflictException("Tình trạng của mẫu thử đã tồn tại.");
-            }
             let newCondition = await this.conditionModel.create({
                 name: createConditionDto.name,
                 conditionFee: createConditionDto.conditionFee,
@@ -31,9 +33,9 @@ export class ConditionService implements IConditionService {
             });
             return this.mapToResponseDto(newCondition)
         } catch (error) {
-            console.error('Error creating condition:', error)
-            throw new InternalServerErrorException('Không thể tạo tình trạng của mẫu thử.')
+            throw new InternalServerErrorException("Lỗi khi tạo tình trạng của mẫu thử.");
         }
+
     }
 
     //  async findAllAccounts(

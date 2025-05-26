@@ -16,24 +16,10 @@ export class ConditionController {
   ) { }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo người dùng mới' })
   @ApiBody({ type: CreateConditionDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    type: ApiResponseDto<ConditionResponseDto>,
-  })
-  @HttpCode(HttpStatus.CREATED)
-  async createCondition(
-    @Body() createConditionDto: CreateConditionDto)
-    : Promise<ApiResponseDto<ConditionResponseDto>> {
-    const newConditionData =
-      await this.conditionService.createCondition(createConditionDto)
-    return {
-      data: [newConditionData],
-      success: true,
-      message: 'Tài khoản được tạo thành công',
-      statusCode: HttpStatus.CREATED,
-    }
+  @ApiOperation({ summary: 'Tạo tình trạng mẫu thử mới thành công' })
+  create(@Body() createConditionDto: CreateConditionDto) {
+    return this.conditionService.createCondition(createConditionDto)
   }
 
   // @Post()
