@@ -39,12 +39,15 @@ jobs:
         run: |
           yarn build
           yarn test
+
       - name: Prepare deployment package
         run: |
           mkdir deploy_package
           cp -r Backend/dist/* deploy_package/
           cp Backend/package.json Backend/yarn.lock deploy_package/
-      - name: Upload artifact for deployment job # Bước này giữ nguyên
+          (cd deploy_package && zip -r ../release.zip .)
+
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
