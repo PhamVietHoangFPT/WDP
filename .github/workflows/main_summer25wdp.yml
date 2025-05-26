@@ -11,58 +11,73 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-latest # Chạy job build trên Windows
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read # Cần quyền đọc để checkout code
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: "22.x"
+          cache: "yarn" # Bật cache cho yarn
+          cache-dependency-path: Backend/yarn.lock # Đường dẫn tới file lock để cache
 
-      - name: npm install, build, and test
+      - name: YARN install, build, and test in Backend
+        working-directory: ./Backend # Thư mục làm việc cho các lệnh yarn
+        env: # Các biến môi trường này dành cho quá trình build và test (nếu cần)
+          NODE_ENV: production
+          PORT: ${{ secrets.PORT }} # Đảm bảo secret này được cấu hình trên GitHub
+          MONGO_URL: ${{ secrets.MONGO_URL }} # Đổi từ MONGO_URI nếu secret của bạn là MONGO_URL
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} # Đảm bảo secret này được cấu hình trên GitHub
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-      
+          yarn install
+          yarn build --if-present
+          yarn test --if-present
+
+      - name: Prepare deployment package
+        shell: pwsh # Sử dụng PowerShell cho các lệnh trên Windows runner
+        run: |
+          New-Item -ItemType Directory -Force -Path deploy_package
+          Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
+          Copy-Item -Path Backend\package.json -Destination deploy_package -Force
+          # Copy yarn.lock nếu tồn tại, quan trọng để Azure cài đặt đúng dependencies
+          if (Test-Path Backend\yarn.lock) {
+            Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
+          }
+          Compress-Archive -Path deploy_package\* -DestinationPath release.zip -Force
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: release.zip # Tải lên file release.zip đã được chuẩn bị
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Job deploy có thể chạy trên Ubuntu
     needs: build
     environment:
-      name: 'Production'
+      name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E0BC7101EA8E4A11B9F7D17C99ECF961 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FD3DBE589FC1461094B0E897BFF9EDA3 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EB578954FBF547BF8C3D2BA4CAEF073F }}
+          name: node-app # Tải về node-app (chứa release.zip)
 
-      - name: 'Deploy to Azure Web App'
+      # Không cần bước giải nén nếu bạn deploy trực tiếp file .zip
+      # - name: Unzip artifact for deployment
+      #   run: unzip release.zip
+
+      - name: "Deploy to Azure Web App"
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'summer25wdp'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: "summer25wdp"
+          slot-name: "Production"
+          package: release.zip # Deploy trực tiếp file release.zip
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_17d04d1aa3834efeb044b99e247a72bc }}
