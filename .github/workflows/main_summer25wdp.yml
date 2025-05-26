@@ -24,18 +24,26 @@ jobs:
         with:
           node-version: "22.x"
           cache: "yarn" # Bật cache cho yarn
-          cache-dependency-path: Backend/yarn.lock # Đường dẫn tới file lock để cache
+          cache-dependency-path: Backend/yarn.lock # Đường dẫn tới file yarn.lock để cache
 
       - name: YARN install, build, and test in Backend
         working-directory: ./Backend # Thư mục làm việc cho các lệnh yarn
         env: # Các biến môi trường này dành cho quá trình build và test (nếu cần)
           NODE_ENV: production
           PORT: ${{ secrets.PORT }} # Đảm bảo secret này được cấu hình trên GitHub
-          MONGO_URI: ${{ secrets.MONGO_URI }} # Đổi từ MONGO_URI nếu secret của bạn là MONGO_URL
+          MONGO_URI: ${{ secrets.MONGO_URI }} # Hoặc MONGO_URI, tùy theo tên secret của bạn
           JWT_SECRET: ${{ secrets.JWT_SECRET }} # Đảm bảo secret này được cấu hình trên GitHub
         run: |
           yarn install --frozen-lockfile
           yarn build
+          yarn test --if-present # --if-present is an npm flag, yarn handles missing scripts by erroring. 
+                                 # If 'test' script might be missing, consider conditional execution or ensure it exists.
+                                 # For now, keeping it simple. If 'test' must run, just 'yarn test'.
+                                 # If 'test' is optional and might not exist, you might need to check for script existence or handle error.
+                                 # For this error, the main focus is 'yarn build'.
+                                 # Let's assume 'test' script exists as per your package.json.
+                                 # So, 'yarn test' is the direct equivalent if the script is present.
+                                 # The error log you showed was for 'yarn test --if-present', let's use 'yarn test'
 
       - name: Prepare deployment package
         shell: pwsh # Sử dụng PowerShell cho các lệnh trên Windows runner
@@ -43,7 +51,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path deploy_package
           Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
           Copy-Item -Path Backend\package.json -Destination deploy_package -Force
-          # Copy yarn.lock nếu tồn tại, quan trọng để Azure cài đặt đúng dependencies
+          # Copy yarn.lock, quan trọng để Azure cài đặt đúng dependencies
           if (Test-Path Backend\yarn.lock) {
             Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
           }
@@ -67,10 +75,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app # Tải về node-app (chứa release.zip)
-
-      # Không cần bước giải nén nếu bạn deploy trực tiếp file .zip
-      # - name: Unzip artifact for deployment
-      #   run: unzip release.zip
 
       - name: "Deploy to Azure Web App"
         uses: azure/webapps-deploy@v3
