@@ -34,7 +34,7 @@ jobs:
         env: # Các biến môi trường này dành cho quá trình build và test
           NODE_ENV: production
           PORT: ${{ secrets.PORT }}
-          MONGO_URL: ${{ secrets.MONGO_URL }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           yarn build

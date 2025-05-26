@@ -3,30 +3,38 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Transform } from 'class-transformer'
-import { Facility } from '../schemas/facility.schema'
+import { Booking } from '../schemas/booking.schema'
 import mongoose from 'mongoose'
 
 @Exclude()
-export class FacilityResponseDto {
+export class BookingResponseDto {
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   _id: mongoose.Schema.Types.ObjectId
 
   @Expose()
-  @ApiProperty({ example: 'Phòng khám ABC' })
-  name: string
+  @ApiProperty({ example: '2023-10-01T10:00:00Z', type: Date })
+  bookingDate: Date
+
+  @Expose()
+  @ApiProperty({ example: 'Bị bệnh nền', type: String })
+  note: string
 
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  address: mongoose.Schema.Types.ObjectId
+  slot: mongoose.Schema.Types.ObjectId
 
   @Expose()
-  @ApiProperty({ example: '0987654321' })
-  phoneNumber: string
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
+  account: mongoose.Schema.Types.ObjectId
 
-  constructor(partial: Partial<Facility>) {
+  @Expose()
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
+  payment: mongoose.Schema.Types.ObjectId
+
+  constructor(partial: Partial<Booking>) {
     Object.assign(this, partial)
   }
 }

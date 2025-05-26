@@ -20,7 +20,7 @@ import { Slot } from './schemas/slot.schema'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
-@ApiTags('Slots')
+@ApiTags('slots')
 @Controller('slots')
 export class SlotController {
   constructor(
@@ -35,7 +35,7 @@ export class SlotController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách các slots (có thể lọc)' })
+  @ApiOperation({ summary: 'Lấy danh sách các slots theo cơ sở' })
   @ApiQuery({
     name: 'startDate',
     required: false,
@@ -48,7 +48,7 @@ export class SlotController {
     type: String,
     description: 'YYYY-MM-DD',
   })
-  @ApiQuery({ name: 'slotTemplateId', required: false, type: String })
+  @ApiQuery({ name: 'facilityId', required: true, type: String })
   @ApiQuery({
     name: 'isAvailable',
     required: false,

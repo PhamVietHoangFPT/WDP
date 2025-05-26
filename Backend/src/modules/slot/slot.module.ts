@@ -10,6 +10,7 @@ import { SlotService } from './slot.service'
 import { SlotController } from './slot.controller'
 import { AuthModule } from '../auth/auth.module'
 import { FacilityModule } from '../facility/facility.module'
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Slot.name, schema: SlotSchema }]),

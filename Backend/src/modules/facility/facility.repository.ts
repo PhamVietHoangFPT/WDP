@@ -32,9 +32,18 @@ export class FacilityRepository implements IFacilityRepository {
   async update(
     id: string,
     updateFacilityDto: Partial<Facility>,
+    userId: string,
   ): Promise<FacilityDocument | null> {
     return this.facilityModel
-      .findByIdAndUpdate(id, updateFacilityDto, { new: true })
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateFacilityDto,
+          updated_by: new mongoose.Types.ObjectId(userId) as any,
+          updated_at: new Date(),
+        },
+        { new: true },
+      )
       .exec()
   }
 
@@ -46,5 +55,18 @@ export class FacilityRepository implements IFacilityRepository {
         { new: true },
       )
       .exec()
+  }
+
+  findWithQuery(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<FacilityDocument[], FacilityDocument> {
+    return this.facilityModel
+      .find(filter)
+      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .lean()
+  }
+
+  async countDocuments(filter: Record<string, unknown>): Promise<number> {
+    return this.facilityModel.countDocuments(filter).exec()
   }
 }
