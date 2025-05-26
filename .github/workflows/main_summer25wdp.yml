@@ -41,11 +41,16 @@ jobs:
           yarn test
 
       - name: Prepare deployment package
+        shell: pwsh # Sử dụng PowerShell cho các lệnh trên Windows runner
         run: |
-          mkdir deploy_package
-          cp -r Backend/dist/* deploy_package/
-          cp Backend/package.json Backend/yarn.lock deploy_package/
-          (cd deploy_package && zip -r ../release.zip .)
+          New-Item -ItemType Directory -Force -Path deploy_package
+          Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
+          Copy-Item -Path Backend\package.json -Destination deploy_package -Force
+          # Copy yarn.lock, quan trọng để Azure cài đặt đúng dependencies
+          if (Test-Path Backend\yarn.lock) {
+            Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
+          }
+          Compress-Archive -Path deploy_package\* -DestinationPath release.zip -Force
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
