@@ -12,15 +12,6 @@ export class CreateBookingDto {
   @IsNotEmpty()
   account: string
 
-  @ApiProperty({ description: 'ID của phương thức thanh toán', type: String })
-  @IsMongoId()
-  @IsNotEmpty()
-  payment: string
-
-  @ApiProperty({ description: 'Ngày đặt', type: Date })
-  @IsNotEmpty()
-  bookingDate: Date
-
   @ApiProperty({ description: 'Ghi chú', type: String })
   @IsString()
   @IsNotEmpty()
