@@ -22,11 +22,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "22.x"
-          cache: "yarn" # Thêm dòng này để cache các gói của Yarn, giúp tăng tốc độ build
+          cache: "yarn"
+          cache-dependency-path: Backend/yarn.lock
 
       - name: Install dependencies in Backend (Yarn)
         working-directory: ./Backend
-        run: yarn install
+        run: yarn install --frozen-lockfile
 
       - name: Build and test in Backend (Yarn)
         working-directory: ./Backend
