@@ -46,9 +46,14 @@ jobs:
           New-Item -ItemType Directory -Force -Path deploy_package
           Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
           Copy-Item -Path Backend\package.json -Destination deploy_package -Force
-          # Copy yarn.lock, quan trọng để Azure cài đặt đúng dependencies
           if (Test-Path Backend\yarn.lock) {
             Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
+          }
+          # Thêm dòng sau để copy web.config nếu nó nằm trong thư mục Backend
+          if (Test-Path Backend\web.config) {
+            Copy-Item -Path Backend\web.config -Destination deploy_package -Force
+          } elseif (Test-Path web.config) { # Hoặc nếu nó nằm ở thư mục gốc của repo
+            Copy-Item -Path web.config -Destination deploy_package -Force
           }
           Compress-Archive -Path deploy_package\* -DestinationPath release.zip -Force
 
