@@ -11,64 +11,57 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest # Chạy job build trên Windows
+    runs-on: windows-latest
     permissions:
-      contents: read # Cần quyền đọc để checkout code
+      contents: read #This is required for actions/checkout
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: "22.x"
-          cache: "yarn" # Bật cache cho yarn
-          cache-dependency-path: Backend/yarn.lock # Đường dẫn tới file yarn.lock để cache
+          cache: "yarn"
+          cache-dependency-path: Backend/yarn.lock
 
-      - name: YARN install, build, and test in Backend
-        working-directory: ./Backend # Thư mục làm việc cho các lệnh yarn
-        env: # Các biến môi trường này dành cho quá trình build và test (nếu cần)
+      - name: Install dependencies in Backend (Yarn)
+        working-directory: ./Backend
+        run: yarn install --frozen-lockfile
+
+      - name: Build and test in Backend (Yarn)
+        working-directory: ./Backend
+        env: # Các biến môi trường này dành cho quá trình build và test
           NODE_ENV: production
-          PORT: ${{ secrets.PORT }} # Đảm bảo secret này được cấu hình trên GitHub
-          MONGO_URI: ${{ secrets.MONGO_URI }} # Hoặc MONGO_URI, tùy theo tên secret của bạn
-          JWT_SECRET: ${{ secrets.JWT_SECRET }} # Đảm bảo secret này được cấu hình trên GitHub
+          PORT: ${{ secrets.PORT }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          yarn install --frozen-lockfile
           yarn build
-          yarn test --if-present # --if-present is an npm flag, yarn handles missing scripts by erroring. 
-                                 # If 'test' script might be missing, consider conditional execution or ensure it exists.
-                                 # For now, keeping it simple. If 'test' must run, just 'yarn test'.
-                                 # If 'test' is optional and might not exist, you might need to check for script existence or handle error.
-                                 # For this error, the main focus is 'yarn build'.
-                                 # Let's assume 'test' script exists as per your package.json.
-                                 # So, 'yarn test' is the direct equivalent if the script is present.
-                                 # The error log you showed was for 'yarn test --if-present', let's use 'yarn test'
+          yarn test
 
       - name: Prepare deployment package
-        shell: pwsh # Sử dụng PowerShell cho các lệnh trên Windows runner
         run: |
-          New-Item -ItemType Directory -Force -Path deploy_package
-          Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
-          Copy-Item -Path Backend\package.json -Destination deploy_package -Force
-          # Copy yarn.lock, quan trọng để Azure cài đặt đúng dependencies
-          if (Test-Path Backend\yarn.lock) {
-            Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
-          }
-          Compress-Archive -Path deploy_package\* -DestinationPath release.zip -Force
+          mkdir deploy_package
+          cp -r Backend/dist/* deploy_package/
+          cp Backend/package.json Backend/yarn.lock deploy_package/
+          (cd deploy_package && zip -r ../release.zip .)
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip # Tải lên file release.zip đã được chuẩn bị
+          path: release.zip # release.zip giờ chỉ chứa các file từ Backend/dist
 
   deploy:
-    runs-on: ubuntu-latest # Job deploy có thể chạy trên Ubuntu
+    runs-on: ubuntu-latest
     needs: build
     environment:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -76,11 +69,20 @@ jobs:
         with:
           name: node-app # Tải về node-app (chứa release.zip)
 
+      - name: Unzip artifact for deployment
+        run: unzip release.zip # Giải nén release.zip, giờ đây thư mục hiện tại sẽ chứa các file từ Backend/dist
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0D7F8B8AA99D4D5D86D2CA344D266D25 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5453BC304903408F88E5C3B6A9864801 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D70EED4880C47D093DA525A43F51198 }}
+
       - name: "Deploy to Azure Web App"
-        uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
           app-name: "summer25wdp"
           slot-name: "Production"
-          package: release.zip # Deploy trực tiếp file release.zip
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_17d04d1aa3834efeb044b99e247a72bc }}
+          package: . # <--- Deploy nội dung đã giải nén (từ Backend/dist)
