@@ -182,6 +182,11 @@ export class SlotGenerationService {
           'Định dạng startDate không hợp lệ. Vui lòng dùng YYYY-MM-DD.',
         )
       }
+      if (parsedDate < new Date()) {
+        throw new BadRequestException(
+          'Ngày bắt đầu không được nhỏ hơn ngày hiện tại.',
+        )
+      }
       startDate = new Date(
         Date.UTC(
           parsedDate.getUTCFullYear(),

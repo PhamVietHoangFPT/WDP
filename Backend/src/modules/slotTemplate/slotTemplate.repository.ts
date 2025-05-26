@@ -111,6 +111,7 @@ export class SlotTemplateRepository implements ISlotTemplateRepository {
       .find({
         facility: facilityId,
         deleted_at: null,
+        isSunday: false,
       })
       .exec()
   }

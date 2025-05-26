@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNotEmpty, IsMongoId } from 'class-validator'
 
-export class CreateFacilityDto {
+export class UpdateFacilityDto {
   @ApiProperty({
     example: 'Phòng khám Đa khoa ABC',
     description: 'Tên cơ sở y tế',

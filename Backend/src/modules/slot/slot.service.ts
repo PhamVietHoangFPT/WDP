@@ -47,13 +47,22 @@ export class SlotService implements ISlotService {
   }
 
   async findAll(query: QuerySlotDto): Promise<SlotResponseDto[]> {
-    const slots = await this.slotRepository.findAll(query)
-    if (!slots || slots.length === 0) {
+    const facilityExist = await this.slotRepository.findSlotByFacility(
+      query.facilityId,
+    )
+    if (facilityExist) {
+      const slots = await this.slotRepository.findAll(query)
+      if (!slots || slots.length === 0) {
+        throw new NotFoundException(
+          `Không tìm thấy slot nào tuơng ứng với: ${JSON.stringify(query)}`,
+        )
+      }
+      return slots.map((slot) => this.mapToResponseDto(slot))
+    } else {
       throw new NotFoundException(
         `Không tìm thấy slot nào tuơng ứng với: ${JSON.stringify(query)}`,
       )
     }
-    return slots.map((slot) => this.mapToResponseDto(slot))
   }
 
   async update(

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import { Model } from 'mongoose'
 import { Slot, SlotDocument } from './schemas/slot.schema'
 import { ISlotRepository } from './interfaces/islot.repository'
 import { CreateSlotDto } from './dto/createSlot.dto'
 import { QuerySlotDto } from './dto/querySlot.dto'
+import { ISlotTemplateRepository } from '../slotTemplate/interfaces/islotTemplate.repository'
 
 @Injectable()
 export class SlotRepository implements ISlotRepository {
@@ -13,6 +14,8 @@ export class SlotRepository implements ISlotRepository {
   constructor(
     @InjectModel(Slot.name)
     private slotModel: Model<SlotDocument>,
+    @Inject(ISlotTemplateRepository)
+    private slotTemplateRepository: ISlotTemplateRepository,
   ) {}
 
   async create(createSlotDto: CreateSlotDto): Promise<SlotDocument> {
@@ -45,20 +48,6 @@ export class SlotRepository implements ISlotRepository {
       }
     }
 
-    if (queryDto.slotTemplateId) {
-      if (mongoose.Types.ObjectId.isValid(queryDto.slotTemplateId)) {
-        mongoQuery.slotTemplate = new mongoose.Types.ObjectId(
-          queryDto.slotTemplateId,
-        )
-      } else {
-        this.logger.warn(
-          `Invalid slotTemplateId format: ${queryDto.slotTemplateId}. Ignoring filter.`,
-        )
-        // Hoặc có thể trả về mảng rỗng nếu ID không hợp lệ là yêu cầu
-        // return [];
-      }
-    }
-
     // Xử lý isAvailable (ánh xạ sang isBooked)
     // queryDto.isAvailable là boolean (sau khi transform từ string "true"/"false")
     if (
@@ -70,18 +59,16 @@ export class SlotRepository implements ISlotRepository {
 
     mongoQuery.deleted_at = null
 
+    const slotTemplate = await this.slotTemplateRepository.findByFacilityId(
+      queryDto.facilityId,
+    )
+    mongoQuery.slotTemplate = slotTemplate[0]._id
+
     return (
       this.slotModel
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         .find(mongoQuery)
-        .populate({
-          path: 'slotTemplate',
-          select: 'facility -_id',
-          populate: {
-            path: 'facility',
-            select: 'facilityName address -_id', // Chỉ lấy tên và địa chỉ của facility
-          },
-        })
+        .select('slotDate startTime endTime')
         .sort({ slotDate: 1, startTime: 1 })
         .exec()
     )
@@ -113,5 +100,13 @@ export class SlotRepository implements ISlotRepository {
     return this.slotModel
       .findByIdAndUpdate(slotId, { isBooked }, { new: true })
       .exec()
+  }
+
+  async findSlotByFacility(id: string): Promise<boolean> {
+    const facility = await this.slotTemplateRepository.findByFacilityId(id)
+    if (facility) {
+      return true
+    }
+    return false
   }
 }

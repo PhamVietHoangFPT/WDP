@@ -68,13 +68,13 @@ export class AccountsController {
     name: 'pageSize',
     required: false,
     type: Number,
-    description: 'Số lượng mục trên mỗi trang (mặc định: -1)',
+    description: 'Số lượng mục trên mỗi trang',
   })
   @ApiQuery({
     name: 'pageNumber',
     required: false,
     type: Number,
-    description: 'Số trang (mặc định: -1)',
+    description: 'Số trang',
   })
   @ApiResponse({
     status: 200,

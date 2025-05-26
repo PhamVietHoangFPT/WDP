@@ -28,10 +28,10 @@ export class QuerySlotDto {
   @IsDateString()
   endDate?: string
 
-  @ApiPropertyOptional({ description: 'Lọc theo ID của SlotTemplate' })
+  @ApiPropertyOptional({ description: 'Lọc theo ID của Cơ sở' })
   @IsOptional()
   @IsMongoId()
-  slotTemplateId?: string
+  facilityId?: string
 
   @ApiPropertyOptional({
     example: true,
