@@ -21,22 +21,33 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: "22.x"
 
-      - name: npm install, build, and test
+      - name: npm install, build, and test in Backend
+        working-directory: ./Backend
+        env: # <--- Thêm các biến môi trường cho bước này
+          NODE_ENV: production
+          PORT: ${{ secrets.PORT }} # Giả sử bạn có secret tên PORT
+          MONGO_URI: ${{ secrets.MONGO_URI }} # Giả sử bạn có secret tên DATABASE_URL
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm install
-          npm run build --if-present
+          npm run build --if-present # Giả sử lệnh này tạo ra thư mục 'dist' trong './Backend'
           npm run test --if-present
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        # Nén nội dung của thư mục Backend/dist (hoặc thư mục build output của bạn)
+        # (cd Backend/dist && zip -r ../../release.zip .)
+        #   - cd Backend/dist: Di chuyển vào thư mục build output.
+        #   - zip -r ../../release.zip .: Nén toàn bộ nội dung của thư mục hiện tại (Backend/dist)
+        #                                  vào file release.zip ở thư mục gốc của repository.
+        run: (cd Backend/dist && zip -r ../../release.zip .) # <--- THAY ĐỔI: Chỉ nén output của Backend
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: release.zip # release.zip giờ chỉ chứa các file từ Backend/dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,11 +63,11 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: node-app # Tải về node-app (chứa release.zip)
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
+        run: unzip release.zip # Giải nén release.zip, giờ đây thư mục hiện tại sẽ chứa các file từ Backend/dist
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -64,11 +75,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5453BC304903408F88E5C3B6A9864801 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D70EED4880C47D093DA525A43F51198 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'summer25wdp'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: "summer25wdp"
+          slot-name: "Production"
+          package: . # <--- Deploy nội dung đã giải nén (từ Backend/dist)
