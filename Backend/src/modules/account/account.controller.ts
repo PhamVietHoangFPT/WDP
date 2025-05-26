@@ -37,7 +37,7 @@ export class AccountsController {
   constructor(
     @Inject(IAccountsService)
     private readonly accountsService: IAccountsService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   // Các phương thức xử lý route giữ nguyên, chúng chỉ gọi AccountsService đã inject
 
