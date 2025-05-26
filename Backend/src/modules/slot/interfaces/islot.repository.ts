@@ -14,6 +14,7 @@ export interface ISlotRepository {
     slotId: string,
     isBooked: boolean,
   ): Promise<SlotDocument | null>
+  findSlotByFacility(id: string): Promise<boolean>
 }
 
 export const ISlotRepository = Symbol('ISlotRepository')

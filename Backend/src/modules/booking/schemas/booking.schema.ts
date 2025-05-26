@@ -24,6 +24,12 @@ export class Booking extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Payment' })
+  payment: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'BookingStatus' })
+  bookingStatus: mongoose.Schema.Types.ObjectId
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking)

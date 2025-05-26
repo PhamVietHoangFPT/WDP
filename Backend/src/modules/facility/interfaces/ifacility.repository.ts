@@ -1,5 +1,6 @@
 import { Facility, FacilityDocument } from '../schemas/facility.schema'
 import { CreateFacilityDto } from '../dto/createFacility.dto'
+import mongoose from 'mongoose'
 
 export interface IFacilityRepository {
   create(
@@ -11,7 +12,12 @@ export interface IFacilityRepository {
   update(
     id: string,
     updateFacilityDto: Partial<Facility>,
+    userId: string,
   ): Promise<FacilityDocument | null>
   delete(id: string, userId: string): Promise<FacilityDocument | null>
+  findWithQuery(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<FacilityDocument[], FacilityDocument>
+  countDocuments(filter: Record<string, unknown>): Promise<number>
 }
 export const IFacilityRepository = Symbol('IFacilityRepository')

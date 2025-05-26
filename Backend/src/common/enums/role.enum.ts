@@ -3,6 +3,6 @@ export enum RoleEnum {
   MANAGER = 'Manager',
   STAFF = 'Staff',
   DOCTOR = 'Doctor',
-  SHIPPER = 'Shipper',
+  DELIVERY_STAFF = 'Delivery Staff',
   CUSTOMER = 'Customer',
 }
