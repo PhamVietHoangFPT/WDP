@@ -7,7 +7,9 @@ import { IConditionService } from './interfaces/icondition.service'
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Condition.name, schema: ConditionSchema }]),
+    MongooseModule.forFeature([
+      { name: Condition.name, schema: ConditionSchema },
+    ]),
   ],
   controllers: [ConditionController],
   providers: [
@@ -15,8 +17,7 @@ import { IConditionService } from './interfaces/icondition.service'
       provide: IConditionService,
       useClass: ConditionService,
     },
-
   ],
   exports: [MongooseModule],
 })
-export class ConditionModule { }
+export class ConditionModule {}

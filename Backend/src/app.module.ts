@@ -22,9 +22,9 @@ import { ConditionModule } from './modules/condition/condition.module'
     SlotModule,
     SlotGenerationModule,
     ScheduleModule.forRoot(),
-    ConditionModule
+    ConditionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

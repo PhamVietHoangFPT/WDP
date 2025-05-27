@@ -1,19 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, HttpStatus, HttpCode } from '@nestjs/common';
-import { CreateConditionDto } from './dto/create-condition.dto';
-import { IConditionService } from './interfaces/icondition.service';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/api-response.dto';
-import { ConditionResponseDto } from './dto/condition-response.dto';
-
-
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Inject,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common'
+import { CreateConditionDto } from './dto/create-condition.dto'
+import { IConditionService } from './interfaces/icondition.service'
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { ConditionResponseDto } from './dto/condition-response.dto'
 
 @Controller('conditions')
 export class ConditionController {
-
   constructor(
     @Inject(IConditionService)
     private readonly conditionService: IConditionService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @Post()
   @ApiBody({ type: CreateConditionDto })
