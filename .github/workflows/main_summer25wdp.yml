@@ -1,98 +1,87 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+name: Deploy NestJS App to AWS EC2
 
-name: Build and deploy Node.js app to Azure Web App - summer25wdp
-
+# Kích hoạt workflow khi có push lên nhánh 'main'
+# Bạn có thể thay 'main' bằng nhánh chính của bạn (ví dụ: 'master', 'develop')
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
+  deploy:
+    runs-on: ubuntu-latest # Sử dụng máy ảo Ubuntu mới nhất của GitHub Actions
 
     steps:
-      - uses: actions/checkout@v4
+      # Bước 1: Checkout code từ repository
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      # Bước 2: Thiết lập môi trường Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
-          cache: "yarn"
-          cache-dependency-path: Backend/yarn.lock
+          node-version: "18" # Thay bằng phiên bản Node.js bạn đang sử dụng (ví dụ: 18, 20, ...)
+          cache: "yarn" # Sử dụng cache cho yarn để tăng tốc độ cài đặt
 
-      - name: Install dependencies in Backend (Yarn)
-        working-directory: ./Backend
+      # Bước 3: Cài đặt các dependencies
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build and test in Backend (Yarn)
-        working-directory: ./Backend
-        env: # Các biến môi trường này dành cho quá trình build và test
-          NODE_ENV: production
-          PORT: ${{ secrets.PORT }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: |
-          yarn build
-          yarn test
+      # Bước 4: Build ứng dụng NestJS
+      # Lệnh này thường tạo ra thư mục 'dist' chứa code đã build
+      - name: Build application
+        run: yarn build
 
+      # Bước 5: Chuẩn bị gói deploy
+      # Tạo một thư mục tạm chứa các file cần thiết cho việc deploy
       - name: Prepare deployment package
-        shell: pwsh # Sử dụng PowerShell cho các lệnh trên Windows runner
         run: |
-          New-Item -ItemType Directory -Force -Path deploy_package
-          Copy-Item -Path Backend\dist\* -Destination deploy_package -Recurse -Force
-          Copy-Item -Path Backend\package.json -Destination deploy_package -Force
-          if (Test-Path Backend\yarn.lock) {
-            Copy-Item -Path Backend\yarn.lock -Destination deploy_package -Force
-          }
-          # Thêm dòng sau để copy web.config nếu nó nằm trong thư mục Backend
-          if (Test-Path Backend\web.config) {
-            Copy-Item -Path Backend\web.config -Destination deploy_package -Force
-          } elseif (Test-Path web.config) { # Hoặc nếu nó nằm ở thư mục gốc của repo
-            Copy-Item -Path web.config -Destination deploy_package -Force
-          }
-          Compress-Archive -Path deploy_package\* -DestinationPath release.zip -Force
+          mkdir deploy_package
+          cp -R dist deploy_package/
+          cp package.json deploy_package/
+          cp yarn.lock deploy_package/
+          # Nếu bạn có file .env.production hoặc các file config khác cần deploy, hãy thêm lệnh copy vào đây
+          # Ví dụ: cp .env.production deploy_package/
+          # LƯU Ý: Không nên commit file .env chứa thông tin nhạy cảm.
+          # Các biến môi trường nên được quản lý trên server hoặc qua dịch vụ của AWS.
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+      # Bước 6: Sao chép các file đã build lên EC2 instance
+      # Sử dụng action appleboy/scp-action để sao chép file qua SCP
+      - name: Copy files to EC2 via SCP
+        uses: appleboy/scp-action@master
         with:
-          name: node-app
-          path: release.zip # release.zip giờ chỉ chứa các file từ Backend/dist
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_SSH_KEY }} # Private key để SSH
+          port: 22 # Port SSH, mặc định là 22
+          source: "./deploy_package/*" # Sao chép toàn bộ nội dung của thư mục deploy_package
+          target: ${{ secrets.AWS_TARGET_DIRECTORY }} # Thư mục đích trên EC2
+          strip_components: 1 # Loại bỏ thư mục 'deploy_package' ở đích, chỉ giữ lại nội dung bên trong
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: "Production"
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+      # Bước 7: Thực thi các lệnh trên EC2 để cài đặt và khởi động lại ứng dụng
+      # Sử dụng action appleboy/ssh-action để chạy lệnh trên EC2
+      - name: Execute deployment commands on EC2
+        uses: appleboy/ssh-action@master
         with:
-          name: node-app # Tải về node-app (chứa release.zip)
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          port: 22
+          script: |
+            # Di chuyển vào thư mục ứng dụng trên EC2
+            cd ${{ secrets.AWS_TARGET_DIRECTORY }}
+            echo "Current directory: $(pwd)"
+            echo "Listing files after scp: $(ls -la)"
 
-      # - name: Unzip artifact for deployment
-      #   run: unzip release.zip # Giải nén release.zip, giờ đây thư mục hiện tại sẽ chứa các file từ Backend/dist
+            # Cài đặt chỉ các production dependencies dựa trên yarn.lock
+            yarn install --production --frozen-lockfile
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0D7F8B8AA99D4D5D86D2CA344D266D25 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5453BC304903408F88E5C3B6A9864801 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D70EED4880C47D093DA525A43F51198 }}
+            # Khởi động hoặc restart ứng dụng bằng PM2
+            # Thay 'your-app-name' bằng tên ứng dụng thực tế bạn đặt cho PM2
+            # Nếu ứng dụng chưa chạy, PM2 sẽ start nó. Nếu đã chạy, PM2 sẽ restart.
+            pm2 restart your-app-name || pm2 start dist/main.js --name your-app-name
 
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: "summer25wdp"
-          slot-name: "Production"
-          package: release.zip # <--- Deploy nội dung đã giải nén (từ Backend/dist)
+            # (Tùy chọn) Lưu lại cấu hình PM2 để tự động khởi động lại sau khi server reboot
+            pm2 save
+
+            echo "Deployment to EC2 completed successfully!"
