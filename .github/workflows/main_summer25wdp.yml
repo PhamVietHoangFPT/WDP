@@ -1,7 +1,5 @@
 name: Deploy NestJS App to AWS EC2
 
-# Kích hoạt workflow khi có push lên nhánh 'main'
-# Bạn có thể thay 'main' bằng nhánh chính của bạn (ví dụ: 'master', 'develop')
 on:
   push:
     branches:
@@ -9,57 +7,51 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Sử dụng máy ảo Ubuntu mới nhất của GitHub Actions
+    runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Checkout code từ repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Bước 2: Thiết lập môi trường Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18" # Thay bằng phiên bản Node.js bạn đang sử dụng (ví dụ: 18, 20, ...)
-          cache: "yarn" # Sử dụng cache cho yarn để tăng tốc độ cài đặt
+          node-version: "22" # Thay bằng phiên bản Node.js của bạn
+          cache: "yarn"
 
-      # Bước 3: Cài đặt các dependencies
+      # Chạy yarn install trong thư mục Backend
       - name: Install dependencies
+        working-directory: ./Backend # <--- THAY ĐỔI Ở ĐÂY
         run: yarn install --frozen-lockfile
 
-      # Bước 4: Build ứng dụng NestJS
-      # Lệnh này thường tạo ra thư mục 'dist' chứa code đã build
+      # Chạy yarn build trong thư mục Backend
       - name: Build application
+        working-directory: ./Backend # <--- THAY ĐỔI Ở ĐÂY
         run: yarn build
 
-      # Bước 5: Chuẩn bị gói deploy
-      # Tạo một thư mục tạm chứa các file cần thiết cho việc deploy
+      # Chuẩn bị gói deploy từ bên trong thư mục Backend
       - name: Prepare deployment package
+        working-directory: ./Backend # <--- THAY ĐỔI Ở ĐÂY
         run: |
-          mkdir deploy_package
-          cp -R dist deploy_package/
-          cp package.json deploy_package/
-          cp yarn.lock deploy_package/
-          # Nếu bạn có file .env.production hoặc các file config khác cần deploy, hãy thêm lệnh copy vào đây
-          # Ví dụ: cp .env.production deploy_package/
-          # LƯU Ý: Không nên commit file .env chứa thông tin nhạy cảm.
-          # Các biến môi trường nên được quản lý trên server hoặc qua dịch vụ của AWS.
+          # Tạo thư mục deploy_package ở thư mục gốc của checkout (bên ngoài thư mục Backend)
+          mkdir ../deploy_package
+          cp -R dist ../deploy_package/
+          cp package.json ../deploy_package/
+          cp yarn.lock ../deploy_package/
+          # Sao chép thêm các file cần thiết khác nếu có
 
-      # Bước 6: Sao chép các file đã build lên EC2 instance
-      # Sử dụng action appleboy/scp-action để sao chép file qua SCP
+      # Bước sao chép file vẫn giữ nguyên source vì deploy_package được tạo ở gốc
       - name: Copy files to EC2 via SCP
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_SSH_KEY }} # Private key để SSH
-          port: 22 # Port SSH, mặc định là 22
-          source: "./deploy_package/*" # Sao chép toàn bộ nội dung của thư mục deploy_package
-          target: ${{ secrets.AWS_TARGET_DIRECTORY }} # Thư mục đích trên EC2
-          strip_components: 1 # Loại bỏ thư mục 'deploy_package' ở đích, chỉ giữ lại nội dung bên trong
+          key: ${{ secrets.AWS_SSH_KEY }}
+          port: 22
+          source: "./deploy_package/*" # Nguồn là nội dung của deploy_package đã tạo ở gốc
+          target: ${{ secrets.AWS_TARGET_DIRECTORY }}
+          strip_components: 1
 
-      # Bước 7: Thực thi các lệnh trên EC2 để cài đặt và khởi động lại ứng dụng
-      # Sử dụng action appleboy/ssh-action để chạy lệnh trên EC2
       - name: Execute deployment commands on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -68,20 +60,9 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           port: 22
           script: |
-            # Di chuyển vào thư mục ứng dụng trên EC2
             cd ${{ secrets.AWS_TARGET_DIRECTORY }}
-            echo "Current directory: $(pwd)"
-            echo "Listing files after scp: $(ls -la)"
-
-            # Cài đặt chỉ các production dependencies dựa trên yarn.lock
             yarn install --production --frozen-lockfile
-
-            # Khởi động hoặc restart ứng dụng bằng PM2
-            # Thay 'your-app-name' bằng tên ứng dụng thực tế bạn đặt cho PM2
-            # Nếu ứng dụng chưa chạy, PM2 sẽ start nó. Nếu đã chạy, PM2 sẽ restart.
-            pm2 restart your-app-name || pm2 start dist/main.js --name your-app-name
-
-            # (Tùy chọn) Lưu lại cấu hình PM2 để tự động khởi động lại sau khi server reboot
+            # Thay 'your-app-name' hoặc 'backend' bằng tên ứng dụng PM2 của bạn
+            pm2 restart backend || pm2 start dist/main.js --name backend
             pm2 save
-
-            echo "Deployment to EC2 completed successfully!"
+            echo "Deployment completed"
