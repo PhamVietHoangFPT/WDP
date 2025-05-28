@@ -1,6 +1,7 @@
-import { Booking, BookingDocument } from '../schemas/booking.schema'
+import { BookingDocument } from '../schemas/booking.schema'
 import { CreateBookingDto } from '../dto/createBooking.dto'
 import mongoose from 'mongoose'
+import { UpdateBookingDto } from '../dto/updateBooking.dto'
 
 export interface IBookingRepository {
   create(
@@ -11,7 +12,7 @@ export interface IBookingRepository {
   findAll(): Promise<BookingDocument[]>
   update(
     id: string,
-    updateBookingDto: Partial<Booking>,
+    updateBookingDto: UpdateBookingDto,
   ): Promise<BookingDocument | null>
   delete(id: string, userId: string): Promise<BookingDocument | null>
   findWithQuery(
