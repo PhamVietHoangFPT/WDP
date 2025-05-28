@@ -9,6 +9,8 @@ import { SlotTemplateModule } from './modules/slotTemplate/slotTemplate.module'
 import { SlotModule } from './modules/slot/slot.module'
 import { SlotGenerationModule } from './modules/slotGenerator/slotGenerator.module'
 import { ScheduleModule } from '@nestjs/schedule'
+import { TestTakerModule } from './modules/testTaker/testTaker.module'
+import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
 @Module({
   imports: [
     databaseConfig,
@@ -20,6 +22,8 @@ import { ScheduleModule } from '@nestjs/schedule'
     SlotTemplateModule,
     SlotModule,
     SlotGenerationModule,
+    TestTakerModule,
+    TestTakerRelationshipModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

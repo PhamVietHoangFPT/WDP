@@ -19,9 +19,6 @@ export class TestTaker extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   personalId: string
 
-  @Prop({ type: String, default: null, unique: true })
-  phoneNumber: string
-
   @Prop({ type: Boolean, default: null })
   gender: boolean
 

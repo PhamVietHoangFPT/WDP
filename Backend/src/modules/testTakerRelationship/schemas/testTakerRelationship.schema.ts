@@ -3,8 +3,9 @@ import { HydratedDocument } from 'mongoose'
 import mongoose from 'mongoose'
 import { BaseEntity } from 'src/common/schema/baseEntity.schema'
 
-export type testTakerRelationShipDocument =
+export type TestTakerRelationshipDocument =
   HydratedDocument<TestTakerRelationship>
+
 @Schema()
 export class TestTakerRelationship extends BaseEntity {
   @Prop({
