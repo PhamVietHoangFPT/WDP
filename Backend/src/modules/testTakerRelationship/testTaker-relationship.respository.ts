@@ -13,7 +13,7 @@ export class TestTakerRelationshipRepository
 {
   constructor(
     @InjectModel(TestTakerRelationship.name)
-    private readonly relationshipModel: Model<TestTakerRelationshipDocument>,
+    private relationshipModel: Model<TestTakerRelationshipDocument>,
   ) {}
 
   async create(
@@ -30,15 +30,17 @@ export class TestTakerRelationshipRepository
     return this.relationshipModel
       .findOne({
         _id: new mongoose.Types.ObjectId(id),
-        deleted_at: { $exists: false },
+        deleted_at: null,
       })
+      .lean()
       .exec() as Promise<TestTakerRelationship | null>
   }
 
   async findAll(): Promise<TestTakerRelationship[]> {
     return this.relationshipModel
-      .find({ deleted_at: { $exists: false } })
+      .find({ deleted_at: null })
       .sort({ testTakerRelationship: 1 })
+      .lean()
       .exec() as Promise<TestTakerRelationship[]>
   }
 
@@ -48,7 +50,7 @@ export class TestTakerRelationshipRepository
     return this.relationshipModel
       .find({
         ...filter,
-        deleted_at: { $exists: false },
+        deleted_at: null,
       })
       .exec() as Promise<TestTakerRelationship[]>
   }
@@ -60,15 +62,16 @@ export class TestTakerRelationshipRepository
     TestTakerRelationshipDocument
   > {
     return this.relationshipModel
-      .find({ ...filter, deleted_at: { $exists: false } })
+      .find({ ...filter, deleted_at: null })
       .sort({ generation: 1 })
+      .lean()
   }
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.relationshipModel
       .countDocuments({
         ...filter,
-        deleted_at: { $exists: false },
+        deleted_at: null,
       })
       .exec()
   }

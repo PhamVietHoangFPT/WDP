@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { TestTaker, TestTakerDocument } from './schemas/testTaker.schema'
@@ -8,8 +8,6 @@ import { QueryTestTakerDto } from './dto/query-testtaker.dto'
 
 @Injectable()
 export class TestTakerRepository implements ITestTakerRepository {
-  private readonly logger = new Logger(TestTakerRepository.name)
-
   constructor(
     @InjectModel(TestTaker.name)
     private readonly testTakerModel: Model<TestTakerDocument>,
@@ -23,8 +21,9 @@ export class TestTakerRepository implements ITestTakerRepository {
   async findById(id: string): Promise<TestTaker | null> {
     return this.testTakerModel
       .findById(id)
-      .populate('account', 'name email') // Populate account info if needed
-      .populate('testTakerRelationShip', 'testTakerRelationShip') // Populate relationship
+      .populate({ path: 'account', select: 'name email' }) // Populate account info if needed
+      .populate({ path: 'testTakerRelationShip' }) // Populate relationship
+      .lean()
       .exec()
   }
 
@@ -69,8 +68,9 @@ export class TestTakerRepository implements ITestTakerRepository {
       .skip(skip)
       .limit(limit)
       .sort({ name: 1 })
-      .populate('account', 'name')
-      .populate('testTakerRelationship', 'testTakerRelationship')
+      .populate({ path: 'account', select: 'name email' })
+      .populate({ path: 'testTakerRelationShip' })
+      .lean()
       .exec()
   }
 

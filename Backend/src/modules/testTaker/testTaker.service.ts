@@ -53,7 +53,7 @@ export class TestTakerService implements ITestTakerService {
 
       const totalPages = Math.ceil(total / pageSize)
 
-      return new PaginatedResponseDto<TestTakerResponseDto>({
+      const data = new PaginatedResponseDto<TestTakerResponseDto>({
         data: results.map((item) => this.mapToResponseDto(item)),
         pagination: {
           totalItems: total,
@@ -63,6 +63,7 @@ export class TestTakerService implements ITestTakerService {
         },
         statusCode: 200,
       })
+      return data
     } catch (error) {
       this.logger.error('Error retrieving TestTakers:', error)
       throw new InternalServerErrorException('Không thể truy vấn danh sách.')

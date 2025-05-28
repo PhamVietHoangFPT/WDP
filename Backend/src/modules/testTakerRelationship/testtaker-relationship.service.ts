@@ -54,7 +54,6 @@ export class TestTakerRelationshipService
       .skip(skip)
       .limit(pageSize)
       .exec()
-
     const total = await this.relationshipRepository.countDocuments({})
 
     return {
