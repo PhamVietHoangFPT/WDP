@@ -5,16 +5,27 @@ import { Booking, BookingDocument } from './schemas/booking.schema'
 import { IBookingRepository } from './interfaces/ibooking.repository'
 import { CreateBookingDto } from './dto/createBooking.dto'
 import { UpdateBookingDto } from './dto/updateBooking.dto'
+import { Slot, SlotDocument } from '../slot/schemas/slot.schema'
 
 @Injectable()
 export class BookingRepository implements IBookingRepository {
   constructor(
     @InjectModel(Booking.name)
     private bookingModel: Model<BookingDocument>,
+    @InjectModel(Slot.name)
+    private slotModel: Model<Slot>,
   ) {}
 
-  async create(createBookingDto: CreateBookingDto): Promise<BookingDocument> {
-    const newBooking = new this.bookingModel(createBookingDto)
+  async create(
+    createBookingDto: CreateBookingDto,
+    bookingDate: any,
+    userId: string,
+  ): Promise<BookingDocument> {
+    const newBooking = new this.bookingModel({
+      ...createBookingDto,
+      bookingDate,
+      created_by: userId,
+    })
     return await newBooking.save()
   }
 
@@ -47,5 +58,9 @@ export class BookingRepository implements IBookingRepository {
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.bookingModel.countDocuments(filter).exec()
+  }
+
+  async findBySlotId(slotId: string): Promise<SlotDocument | null> {
+    return this.slotModel.findById(slotId).exec()
   }
 }

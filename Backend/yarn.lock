@@ -2703,6 +2703,11 @@ cross-spawn@^7.0.3, cross-spawn@^7.0.6:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+dayjs@^1.11.13:
+  version "1.11.13"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.13.tgz#92430b0139055c3ebb60150aa13e860a4b5a366c"
+  integrity sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==
+
 debug@4, debug@4.x, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@^4.3.5, debug@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.0.tgz#2b3f2aea2ffeb776477460267377dc8710faba8a"
@@ -4778,6 +4783,11 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
+nestjs-vnpay@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/nestjs-vnpay/-/nestjs-vnpay-1.0.1.tgz#21b7a6bb9f565366d38ea3d9b3ab9989d7f3c891"
+  integrity sha512-venS1m8pKJon8Czy3Jmq+emSOW5o2XefRVSbNzeTh7GVT0hxaGNttfCPFx37xlTC5nTffHlMxDM8fPtma8yQwQ==
+
 node-abort-controller@^3.0.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-3.1.1.tgz#a94377e964a9a37ac3976d848cb5c765833b8548"
@@ -6128,6 +6138,13 @@ vary@^1, vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
+
+vnpay@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-2.2.0.tgz#d9cbfcb59d6152e2c594f86a826ff84ac3dc49e4"
+  integrity sha512-3cqjAD7dHBRNjOeIbfZibL4JzwQRzjDERMy33T1pRJdJHtfB0fZskWPg63IoXnpEo+wduwTyaqyMH10wN4uAhQ==
+  dependencies:
+    dayjs "^1.11.13"
 
 walker@^1.0.8:
   version "1.0.8"
