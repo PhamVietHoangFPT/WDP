@@ -55,4 +55,12 @@ export class PaymentRepository implements IPaymentRepository {
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.paymentModel.countDocuments(filter).exec()
   }
+
+  async findWithTransactionReferenceNumber(
+    transactionReferenceNumber: string,
+  ): Promise<boolean> {
+    return await this.paymentModel
+      .exists({ transactionReferenceNumber })
+      .then((exists) => !!exists)
+  }
 }

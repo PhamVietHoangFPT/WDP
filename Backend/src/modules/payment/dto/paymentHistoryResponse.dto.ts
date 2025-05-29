@@ -15,7 +15,7 @@ export class PaymentHistoryResponseDto {
 
   @Expose()
   @ApiProperty({ example: 'transactionId' })
-  transactionId: string
+  tmnCode: string
 
   @Expose()
   @ApiProperty({ example: 100000 })
@@ -23,14 +23,27 @@ export class PaymentHistoryResponseDto {
 
   @Expose()
   @ApiProperty({ example: 'Thành công' })
-  paymentStatus: string
+  transactionStatus: string
 
   @Expose()
+  @ApiProperty({ example: 'Thành công' })
+  responseCode: string
+
+  @Expose()
+  @ApiProperty({ example: new Date() })
   payDate: Date
 
   @Expose()
+  @ApiProperty({ example: '1234567890' })
+  transactionReferenceNumber: string
+
+  @Expose()
   @ApiProperty({ example: 'Thanh toan don hang #DH12345' })
-  description: string
+  orderInfo: string
+
+  @Expose()
+  @ApiProperty({ example: 'transactionNo' })
+  transactionNo: string
 
   constructor(partial: Partial<Payment>) {
     Object.assign(this, partial)

@@ -16,6 +16,9 @@ export interface IPaymentRepository {
   ): mongoose.Query<PaymentDocument[], PaymentDocument>
 
   countDocuments(filter: Record<string, unknown>): Promise<number>
+  findWithTransactionReferenceNumber(
+    transactionReferenceNumber: string,
+  ): Promise<boolean>
 }
 
 export const IPaymentRepository = Symbol('IPaymentRepository')

@@ -11,7 +11,6 @@ import {
   HttpStatus,
   ValidationPipe,
 } from '@nestjs/common'
-import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import {
   ApiTags,
   ApiOperation,
@@ -29,6 +28,7 @@ import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
+import { CheckVnPayPaymentDto } from './dto/checkVnPayPayment.dto'
 
 @ApiTags('payments')
 @Controller('payments')
@@ -40,20 +40,38 @@ export class PaymentController {
     private readonly paymentService: IPaymentService,
   ) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Tạo lịch sử thanh toán' })
-  @ApiBody({ type: CreatePaymentHistoryDto })
+  @Post('booking')
+  @ApiOperation({ summary: 'Tạo lịch sử thanh toán cho đặt chỗ' })
+  @ApiBody({ type: CheckVnPayPaymentDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Lịch sử thanh toán được tạo thành công',
   })
-  createPaymentHistory(
-    @Body(ValidationPipe) createPaymentHistoryDto: CreatePaymentHistoryDto,
+  createPaymentHistoryForBooking(
+    @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
     @Req() req: any, // Assuming you might need the request object for user info
   ) {
     const userId = req.user.id
 
-    return this.paymentService.create(createPaymentHistoryDto, userId)
+    return this.paymentService.createForBooking(CheckVnPayPaymentDto, userId)
+  }
+
+  @Post('case')
+  @ApiOperation({
+    summary: 'Tạo lịch sử thanh toán cho trường hợp xét nghiệm',
+  })
+  @ApiBody({ type: CheckVnPayPaymentDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Lịch sử thanh toán được tạo thành công',
+  })
+  createPaymentHistoryForCase(
+    @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
+    @Req() req: any, // Assuming you might need the request object for user info
+  ) {
+    const userId = req.user.id
+
+    return this.paymentService.createForCase(CheckVnPayPaymentDto, userId)
   }
 
   @Get()
