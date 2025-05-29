@@ -1,7 +1,9 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -9,11 +11,15 @@ import { Condition } from './schemas/condition.schema'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
 import { ConditionResponseDto } from './dto/condition-response.dto'
+import { IConditionRepository } from './interfaces/icondition.repository'
 @Injectable()
 export class ConditionService implements IConditionService {
+  private readonly logger = new Logger(ConditionService.name)
   constructor(
-    @InjectModel(Condition.name) private conditionModel: Model<Condition>,
+    @Inject(IConditionRepository)
+    private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
   ) { }
+
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -29,20 +35,18 @@ export class ConditionService implements IConditionService {
     userId: string,
     createConditionDto: CreateConditionDto,
   ): Promise<ConditionResponseDto> {
-    const existingCondition = await this.conditionModel.findOne({
-      name: createConditionDto.name,
-    })
-    if (existingCondition) {
-      throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
-    }
+    // const existingCondition = await this.conditionRepository.findOne({
+    //   name: createConditionDto.name,
+    // })
+    // if (existingCondition) {
+    //   throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
+    // }
 
     try {
-      let newCondition = await this.conditionModel.create({
-        name: createConditionDto.name,
-        conditionFee: createConditionDto.conditionFee,
-        created_at: new Date(),
-        created_by: userId
-      })
+      let newCondition = await this.conditionRepository.create(
+        userId,
+        createConditionDto
+      )
       return this.mapToResponseDto(newCondition)
     } catch (error) {
       throw new InternalServerErrorException(

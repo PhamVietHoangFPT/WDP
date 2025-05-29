@@ -5,6 +5,8 @@ import { ConditionController } from './condition.controller'
 import { ConditionService } from './condition.service'
 import { IConditionService } from './interfaces/icondition.service'
 import { AuthModule } from '../auth/auth.module'
+import { ConditionRepository } from './condition.repository'
+import { IConditionRepository } from './interfaces/icondition.repository'
 
 @Module({
   imports: [
@@ -19,7 +21,11 @@ import { AuthModule } from '../auth/auth.module'
       provide: IConditionService,
       useClass: ConditionService,
     },
+    {
+      provide: IConditionRepository,
+      useClass: ConditionRepository,
+    }
   ],
-  exports: [MongooseModule],
+  exports: [IConditionService, IConditionRepository],
 })
 export class ConditionModule { }
