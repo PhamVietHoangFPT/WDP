@@ -12,6 +12,8 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
 import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
 import { ConditionModule } from './modules/condition/condition.module'
+import { VnPayModule } from './modules/vnpay/vnpay.module'
+import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
 import { LocationModule } from './modules/location/location.module'
 @Module({
@@ -31,6 +33,8 @@ import { LocationModule } from './modules/location/location.module'
     LocationModule,
     ScheduleModule.forRoot(),
     ConditionModule,
+    VnPayModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
