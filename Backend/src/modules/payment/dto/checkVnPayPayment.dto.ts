@@ -1,48 +1,60 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNotEmpty } from 'class-validator'
 
-export class CreatePaymentHistoryDto {
+export class CheckVnPayPaymentDto {
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
-  amount: number
+  vnp_Amount: number
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  transactionStatus: string
+  vnp_BankCode: string
+
+  @ApiProperty()
+  vnp_BankTranNo: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  responseCode: string
+  vnp_CardType: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  payDate: string
+  vnp_OrderInfo: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  vnp_PayDate: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  transactionReferenceNumber: string
+  vnp_ResponseCode: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  orderInfo: string
+  vnp_TmnCode: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  transactionNo: string
+  vnp_TransactionNo: string
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  tmnCode: string
+  vnp_TransactionStatus: string
 
   @ApiProperty()
+  @IsString()
   @IsNotEmpty()
-  isForBooking: boolean
+  vnp_TxnRef: string
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  vnp_SecureHash: string
 }

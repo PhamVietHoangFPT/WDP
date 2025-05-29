@@ -1,11 +1,15 @@
 import { PaymentDocument } from '../schemas/payment.schema'
-import { CreatePaymentHistoryDto } from '../dto/createPaymentHistory.dto'
+import { CheckVnPayPaymentDto } from '../dto/checkVnPayPayment.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaymentHistoryResponseDto } from '../dto/paymentHistoryResponse.dto'
 
 export interface IPaymentService {
-  create(
-    createPaymentHistoryDto: CreatePaymentHistoryDto,
+  createForBooking(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+  ): Promise<PaymentDocument>
+  createForCase(
+    checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,
   ): Promise<PaymentDocument>
   findById(

@@ -1,12 +1,13 @@
-import { Injectable, Inject } from '@nestjs/common'
-
+import { Injectable, Inject, ForbiddenException } from '@nestjs/common'
 import { IPaymentService } from './interfaces/ipayment.service'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
-import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
+import { CheckVnPayPaymentDto } from './dto/checkVnPayPayment.dto'
 import { Payment, PaymentDocument } from './schemas/payment.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
-import { paymentStatusEnum } from 'src/common/enums/paymentStatus.enum'
+import { transactionStatusEnum } from 'src/common/enums/transactionStatus.enum'
+import { responseCodeEnum } from 'src/common/enums/responseCode.enum'
+import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 @Injectable()
 export class PaymentService implements IPaymentService {
   constructor(
@@ -15,26 +16,79 @@ export class PaymentService implements IPaymentService {
   ) {}
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
-    const statusDescription =
-      paymentStatusEnum[
-        payment.paymentStatus as unknown as keyof typeof paymentStatusEnum
+    const responseCode =
+      responseCodeEnum[
+        payment.responseCode as unknown as keyof typeof responseCodeEnum
+      ]
+    const transactionStatus =
+      transactionStatusEnum[
+        payment.transactionStatus as unknown as keyof typeof transactionStatusEnum
       ]
     return new PaymentHistoryResponseDto({
       _id: payment._id,
-      transactionId: payment.transactionId,
+      tmnCode: payment.tmnCode,
       payDate: payment.payDate,
-      paymentStatus: statusDescription,
+      responseCode: responseCode,
+      transactionStatus: transactionStatus,
+      transactionReferenceNumber: payment.transactionReferenceNumber,
+      orderInfo: payment.orderInfo,
+      transactionNo: payment.transactionNo,
     })
   }
 
-  async create(
-    createPaymentHistoryDto: CreatePaymentHistoryDto,
+  async createForBooking(
+    checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,
   ): Promise<PaymentDocument> {
-    const payment = await this.paymentRepository.create(
-      createPaymentHistoryDto,
-      userId,
-    )
+    const paymentData: CreatePaymentHistoryDto = {
+      tmnCode: checkVnPayPayment.vnp_TmnCode,
+      amount: checkVnPayPayment.vnp_Amount,
+      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
+      responseCode: checkVnPayPayment.vnp_ResponseCode,
+      payDate: checkVnPayPayment.vnp_PayDate,
+      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
+      orderInfo: checkVnPayPayment.vnp_OrderInfo,
+      transactionNo: checkVnPayPayment.vnp_TransactionNo,
+      isForBooking: true,
+    }
+    const existingPayment =
+      await this.paymentRepository.findWithTransactionReferenceNumber(
+        paymentData.transactionReferenceNumber,
+      )
+    if (existingPayment) {
+      throw new ForbiddenException(
+        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
+      )
+    }
+    const payment = await this.paymentRepository.create(paymentData, userId)
+    return payment.save()
+  }
+
+  async createForCase(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+  ): Promise<PaymentDocument> {
+    const paymentData: CreatePaymentHistoryDto = {
+      tmnCode: checkVnPayPayment.vnp_TmnCode,
+      amount: checkVnPayPayment.vnp_Amount,
+      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
+      responseCode: checkVnPayPayment.vnp_ResponseCode,
+      payDate: checkVnPayPayment.vnp_PayDate,
+      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
+      orderInfo: checkVnPayPayment.vnp_OrderInfo,
+      transactionNo: checkVnPayPayment.vnp_TransactionNo,
+      isForBooking: false,
+    }
+    const existingPayment =
+      await this.paymentRepository.findWithTransactionReferenceNumber(
+        paymentData.transactionReferenceNumber,
+      )
+    if (existingPayment) {
+      throw new ForbiddenException(
+        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
+      )
+    }
+    const payment = await this.paymentRepository.create(paymentData, userId)
     return payment.save()
   }
 

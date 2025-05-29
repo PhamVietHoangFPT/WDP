@@ -1,4 +1,4 @@
-export enum paymentStatusEnum {
+export enum transactionStatusEnum {
   /**
    * Giao dịch thành công
    * English: Transaction successful

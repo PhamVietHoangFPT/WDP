@@ -24,13 +24,4 @@ export class PaymentDataDto {
   @IsNotEmpty({ message: 'Thông tin đơn hàng không được để trống' })
   @IsString({ message: 'Thông tin đơn hàng phải là một chuỗi' })
   vnp_OrderInfo: string
-
-  @ApiProperty({
-    example: 'YOUR_UNIQUE_TXN_REF_1685123456', // Nên là duy nhất cho mỗi giao dịch
-    description: 'Mã tham chiếu của giao dịch trên hệ thống của bạn',
-    required: true,
-  })
-  @IsNotEmpty({ message: 'Mã tham chiếu giao dịch không được để trống' })
-  @IsString({ message: 'Mã tham chiếu giao dịch phải là một chuỗi' })
-  vnp_TxnRef: string
 }
