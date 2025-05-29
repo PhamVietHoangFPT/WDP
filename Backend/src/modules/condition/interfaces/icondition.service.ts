@@ -3,6 +3,7 @@ import { CreateConditionDto } from '../dto/create-condition.dto'
 export interface IConditionService {
   // Tạo điều kiện mới
   createCondition(
+    userId: string,
     createConditionDto: CreateConditionDto,
   ): Promise<CreateConditionDto>
 
