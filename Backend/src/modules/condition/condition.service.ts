@@ -13,7 +13,7 @@ import { ConditionResponseDto } from './dto/condition-response.dto'
 export class ConditionService implements IConditionService {
   constructor(
     @InjectModel(Condition.name) private conditionModel: Model<Condition>,
-  ) {}
+  ) { }
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -21,16 +21,17 @@ export class ConditionService implements IConditionService {
       name: condition.name,
       conditionFee: condition.conditionFee,
       created_at: condition.created_at,
+      created_by: condition.created_by,
     })
   }
 
   async createCondition(
+    userId: string,
     createConditionDto: CreateConditionDto,
   ): Promise<ConditionResponseDto> {
     const existingCondition = await this.conditionModel.findOne({
       name: createConditionDto.name,
     })
-
     if (existingCondition) {
       throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
     }
@@ -40,6 +41,7 @@ export class ConditionService implements IConditionService {
         name: createConditionDto.name,
         conditionFee: createConditionDto.conditionFee,
         created_at: new Date(),
+        created_by: userId
       })
       return this.mapToResponseDto(newCondition)
     } catch (error) {

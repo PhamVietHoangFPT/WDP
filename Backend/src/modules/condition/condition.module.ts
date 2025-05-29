@@ -4,12 +4,14 @@ import { Condition, ConditionSchema } from './schemas/condition.schema'
 import { ConditionController } from './condition.controller'
 import { ConditionService } from './condition.service'
 import { IConditionService } from './interfaces/icondition.service'
+import { AuthModule } from '../auth/auth.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Condition.name, schema: ConditionSchema },
     ]),
+    AuthModule
   ],
   controllers: [ConditionController],
   providers: [
@@ -20,4 +22,4 @@ import { IConditionService } from './interfaces/icondition.service'
   ],
   exports: [MongooseModule],
 })
-export class ConditionModule {}
+export class ConditionModule { }
