@@ -4,6 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { TestTaker, TestTakerSchema } from './schemas/testTaker.schema'
 import { TestTakerRelationshipModule } from '../testTakerRelationship/testTakerRelationship.module'
 import { AccountModule } from '../account/account.module'
+import { TestTakerController } from './testTaker.controller'
+import { ITestTakerService } from './interfaces/itestTaker.service'
+import { TestTakerRepository } from './testTaker.repository'
+import { TestTakerService } from './testTaker.service'
+import { ITestTakerRepository } from './interfaces/itestTaker.repository'
+import { AuthModule } from '../auth/auth.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -11,8 +17,17 @@ import { AccountModule } from '../account/account.module'
     ]),
     TestTakerRelationshipModule,
     AccountModule,
+    AuthModule,
   ],
+  controllers: [TestTakerController],
 
-  exports: [MongooseModule],
+  providers: [
+    { provide: ITestTakerRepository, useClass: TestTakerRepository },
+    {
+      provide: ITestTakerService,
+      useClass: TestTakerService,
+    },
+  ],
+  exports: [ITestTakerRepository, ITestTakerService],
 })
 export class TestTakerModule {}

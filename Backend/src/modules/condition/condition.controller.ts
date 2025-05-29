@@ -1,33 +1,43 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Inject,
-  HttpStatus,
-  HttpCode,
+  UseGuards,
+  Req,
+  Get,
 } from '@nestjs/common'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger'
-import { ApiResponseDto } from 'src/common/dto/api-response.dto'
-import { ConditionResponseDto } from './dto/condition-response.dto'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { AuthGuard } from 'src/common/guard/auth.guard'
+import { Roles } from 'src/common/decorators/roles.decorator'
+import { RoleEnum } from 'src/common/enums/role.enum'
 
 @Controller('conditions')
 export class ConditionController {
   constructor(
     @Inject(IConditionService)
     private readonly conditionService: IConditionService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
+  @UseGuards(AuthGuard)
+  @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth('bearer')
   @Post()
   @ApiBody({ type: CreateConditionDto })
-  @ApiOperation({ summary: 'Tạo tình trạng mẫu thử mới thành công' })
-  create(@Body() createConditionDto: CreateConditionDto) {
-    return this.conditionService.createCondition(createConditionDto)
+  @ApiOperation({ summary: 'Tạo tình trạng mẫu thử mới' })
+  create(
+    @Body() createConditionDto: CreateConditionDto,
+    @Req() req: any) {
+    const user = req.user.id // Lấy thông tin người dùng từ request
+    return this.conditionService.createCondition(user, createConditionDto)
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Xem tất cả tình trạng của mẫu thử' })
+  findAllConditions() {
+    return this.conditionService.findAllConditions()
   }
 
   // @Post()
