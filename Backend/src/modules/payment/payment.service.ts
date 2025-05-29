@@ -6,7 +6,7 @@ import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import { Payment, PaymentDocument } from './schemas/payment.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
-
+import { paymentStatusEnum } from 'src/common/enums/paymentStatus.enum'
 @Injectable()
 export class PaymentService implements IPaymentService {
   constructor(
@@ -19,7 +19,7 @@ export class PaymentService implements IPaymentService {
       _id: payment._id,
       transactionId: payment.transactionId,
       payDate: payment.payDate,
-      paymentStatus: payment.paymentStatus,
+      paymentStatus: payment.paymentStatus ,
     })
   }
 

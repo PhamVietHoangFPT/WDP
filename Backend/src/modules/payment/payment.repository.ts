@@ -21,8 +21,13 @@ export class PaymentRepository implements IPaymentRepository {
     return await newPayment.save()
   }
 
-  async findById(id: string): Promise<PaymentDocument> {
-    return this.paymentModel.findById(id).exec()
+  async findById(id: string, userId?: string): Promise<PaymentDocument> {
+    return this.paymentModel
+      .findById({
+        _id: id, // Điều kiện: _id của payment phải khớp
+        created_by: userId, // Điều kiện: created_by phải khớp với userId
+      })
+      .exec()
   }
 
   async findAll(): Promise<PaymentDocument[]> {
@@ -33,10 +38,17 @@ export class PaymentRepository implements IPaymentRepository {
     userId?: string,
     filter?: Record<string, unknown>,
   ): mongoose.Query<PaymentDocument[], PaymentDocument> {
-    const query = this.paymentModel.find(filter || {})
-    if (userId) {
-      query.where('created_by').equals(new mongoose.Types.ObjectId(userId))
+    if (!userId) {
+      const query = this.paymentModel.find({
+        ...filter, // Thêm các điều kiện lọc khác nếu cần
+      })
+      return query
     }
+    const query = this.paymentModel.find({
+      ...filter, // Thêm các điều kiện lọc khác nếu cần
+      created_by: new mongoose.Types.ObjectId(userId) as any, // Lọc theo userId
+    })
+
     return query
   }
 
