@@ -19,7 +19,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
-@ApiTags('Admin - Slot Generation')
+@ApiTags('admin - Slot Generation')
 @ApiBearerAuth('bearer') // Sử dụng tên security scheme của bạn
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('admin/slot-generation')

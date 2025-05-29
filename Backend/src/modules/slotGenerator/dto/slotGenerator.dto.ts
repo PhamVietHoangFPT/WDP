@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { IsOptional, IsInt, Min, IsDateString, Matches } from 'class-validator'
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  IsDateString,
+  Matches,
+  Max,
+} from 'class-validator'
 
 export class SlotGeneratorDto {
   @ApiPropertyOptional({
@@ -8,7 +15,8 @@ export class SlotGeneratorDto {
   })
   @IsOptional()
   @IsInt()
-  @Min(1)
+  @Min(1, { message: 'daysToGenerate phải nằm trong khoảng 1 đến 365' })
+  @Max(365, { message: 'daysToGenerate phải nằm trong khoảng 1 đến 365' })
   daysToGenerate?: number
 
   @ApiPropertyOptional({

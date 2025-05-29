@@ -7,10 +7,10 @@ class PaginationDto {
   @ApiProperty({ example: 10 })
   totalPages: number
 
-  @ApiProperty({ example: -1 })
+  @ApiProperty({ example: 1 })
   currentPage: number
 
-  @ApiProperty({ example: -1 })
+  @ApiProperty({ example: 10 })
   pageSize: number
 }
 

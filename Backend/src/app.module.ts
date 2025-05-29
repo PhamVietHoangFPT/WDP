@@ -11,6 +11,8 @@ import { SlotGenerationModule } from './modules/slotGenerator/slotGenerator.modu
 import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
 import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
+import { ConditionModule } from './modules/condition/condition.module'
+
 @Module({
   imports: [
     databaseConfig,
@@ -25,6 +27,7 @@ import { TestTakerRelationshipModule } from './modules/testTakerRelationship/tes
     TestTakerModule,
     TestTakerRelationshipModule,
     ScheduleModule.forRoot(),
+    ConditionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
