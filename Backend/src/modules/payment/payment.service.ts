@@ -15,11 +15,15 @@ export class PaymentService implements IPaymentService {
   ) {}
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
+    const statusDescription =
+      paymentStatusEnum[
+        payment.paymentStatus as unknown as keyof typeof paymentStatusEnum
+      ]
     return new PaymentHistoryResponseDto({
       _id: payment._id,
       transactionId: payment.transactionId,
       payDate: payment.payDate,
-      paymentStatus: payment.paymentStatus ,
+      paymentStatus: statusDescription,
     })
   }
 

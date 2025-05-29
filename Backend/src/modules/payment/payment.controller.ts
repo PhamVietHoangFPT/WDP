@@ -11,8 +11,6 @@ import {
   HttpStatus,
   ValidationPipe,
 } from '@nestjs/common'
-
-// import { IPaymentService } from './interfaces/ipayment.service'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import {
   ApiTags,
