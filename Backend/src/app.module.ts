@@ -12,7 +12,8 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
 import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
 import { ConditionModule } from './modules/condition/condition.module'
-
+import { AddressModule } from './modules/address/address.module'
+import { LocationModule } from './modules/location/location.module'
 @Module({
   imports: [
     databaseConfig,
@@ -26,6 +27,8 @@ import { ConditionModule } from './modules/condition/condition.module'
     SlotGenerationModule,
     TestTakerModule,
     TestTakerRelationshipModule,
+    AddressModule,
+    LocationModule,
     ScheduleModule.forRoot(),
     ConditionModule,
   ],
