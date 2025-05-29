@@ -58,6 +58,20 @@ export class ConditionService implements IConditionService {
 
   }
 
+  // this function returns all conditions
+  // if there are no conditions, it throws an ConflictException
+  async findAllConditions(): Promise<ConditionResponseDto[]> {
+    try {
+      const conditions = await this.conditionRepository.findAll()
+      if (!conditions || conditions.length === 0) {
+        throw new ConflictException('Không tìm thấy tình trạng mẫu thử nào.')
+      }
+      return conditions.map((condition) => this.mapToResponseDto(condition))
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi khi lấy danh sách tình trạng mẫu thử.')
+    }
+  }
+
   //  async findAllAccounts(
   //     pageNumber: number,
   //     pageSize: number,

@@ -5,6 +5,7 @@ import {
   Inject,
   UseGuards,
   Req,
+  Get,
 } from '@nestjs/common'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
@@ -31,6 +32,12 @@ export class ConditionController {
     @Req() req: any) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     return this.conditionService.createCondition(user, createConditionDto)
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Xem tất cả tình trạng của mẫu thử' })
+  findAllConditions() {
+    return this.conditionService.findAllConditions()
   }
 
   // @Post()

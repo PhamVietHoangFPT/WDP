@@ -25,5 +25,12 @@ export class ConditionRepository implements IConditionRepository {
     async findOneByName(name: string): Promise<ConditionDocument | null> {
         return this.conditionModel.findOne({ name }).exec();
     }
-    
+
+    async findAll(): Promise<ConditionDocument[] | null> {
+        return this.conditionModel
+            .find()
+            .populate({ path: 'created_by', select: 'name -_id' })
+            .exec();
+    }
+
 }
