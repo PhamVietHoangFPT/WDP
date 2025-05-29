@@ -5,8 +5,6 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
 import { Condition } from './schemas/condition.schema'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
@@ -31,16 +29,20 @@ export class ConditionService implements IConditionService {
     })
   }
 
+  //this function create a new condition by checking if the condition already exists
+  // if it exists, it throws a ConflictException
+  // if it does not exist, it creates a new condition and returns the created condition
   async createCondition(
     userId: string,
     createConditionDto: CreateConditionDto,
   ): Promise<ConditionResponseDto> {
-    // const existingCondition = await this.conditionRepository.findOne({
-    //   name: createConditionDto.name,
-    // })
-    // if (existingCondition) {
-    //   throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
-    // }
+
+    //this variable is used to check if the condition already exists
+    const existingCondition = await this.conditionRepository.findOneByName(createConditionDto.name)
+
+    if (existingCondition) {
+      throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
+    }
 
     try {
       let newCondition = await this.conditionRepository.create(
@@ -53,6 +55,7 @@ export class ConditionService implements IConditionService {
         'Lỗi khi tạo tình trạng của mẫu thử.',
       )
     }
+
   }
 
   //  async findAllAccounts(
