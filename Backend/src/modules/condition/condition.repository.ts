@@ -21,4 +21,9 @@ export class ConditionRepository implements IConditionRepository {
         })
         return await newSlot.save()
     }
+
+    async findOneByName(name: string): Promise<ConditionDocument | null> {
+        return this.conditionModel.findOne({ name }).exec();
+    }
+    
 }
