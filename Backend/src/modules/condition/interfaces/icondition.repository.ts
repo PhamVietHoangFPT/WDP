@@ -5,7 +5,7 @@ export interface IConditionRepository {
     create(userId: string, createConditionDto: CreateConditionDto,): Promise<ConditionDocument>;
     findOneByName(name: string): Promise<ConditionDocument | null>;
     // findById(id: string): Promise<ConditionDocument | null>;
-    // findAll(): Promise<ConditionDocument[]>;
+    findAll(): Promise<ConditionDocument[]>;
     // update(id: string, updateConditionDto: Partial<Condition>): Promise<ConditionDocument | null>;
     // delete(id: string, userId: string): Promise<ConditionDocument | null>;
 }

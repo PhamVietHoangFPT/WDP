@@ -1,3 +1,4 @@
+import { ConditionResponseDto } from '../dto/condition-response.dto';
 import { CreateConditionDto } from '../dto/create-condition.dto'
 
 export interface IConditionService {
@@ -7,8 +8,7 @@ export interface IConditionService {
     createConditionDto: CreateConditionDto,
   ): Promise<CreateConditionDto>
 
-  //   // Lấy tất cả các điều kiện với phân trang
-  //   findAllConditions(pageNumber: number, pageSize: number): Promise<any>;
+  findAllConditions(): Promise<ConditionResponseDto[]>;
 
   //   // Lấy điều kiện theo ID
   //   findConditionById(id: string): Promise<any>;
