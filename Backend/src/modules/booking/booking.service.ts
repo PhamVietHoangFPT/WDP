@@ -47,16 +47,18 @@ export class BookingService implements IBookingService {
       throw new BadRequestException(`Slot đã được đặt trước`)
     }
 
+    const bookingDate = slot.slotDate
+
     const newBooking = await this.bookingRepository.create(
       createBookingDto,
+      bookingDate,
       userId,
-      slot.slotDate,
     )
     return this.mapToResponseDto(newBooking)
   }
 
-  async findById(id: string): Promise<BookingResponseDto> {
-    const booking = await this.bookingRepository.findById(id)
+  async findById(id: string, userId: string): Promise<BookingResponseDto> {
+    const booking = await this.bookingRepository.findById(id, userId)
     if (!booking) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
@@ -66,13 +68,14 @@ export class BookingService implements IBookingService {
   async findAll(
     pageNumber: number = 1,
     pageSize: number = 10,
+    userId: string,
   ): Promise<PaginatedResponse<BookingResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
     const filter = {}
 
     const [bookings, totalItems] = await Promise.all([
       this.bookingRepository
-        .findWithQuery(filter) // Returns a query object
+        .findWithQuery(filter, userId) // Returns a query object
         .skip(skip)
         .limit(pageSize)
         .exec(), // Execute the query
@@ -99,7 +102,7 @@ export class BookingService implements IBookingService {
     updateBookingDto: UpdateBookingDto,
     userId: string,
   ): Promise<BookingResponseDto> {
-    const updateBookingCheck = await this.bookingRepository.findById(id)
+    const updateBookingCheck = await this.bookingRepository.findById(id, userId)
     if (!updateBookingCheck) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
@@ -108,15 +111,20 @@ export class BookingService implements IBookingService {
     //     `Lịch hẹn đã bị hủy. Không thể cập nhật lại.`,
     //   )
     // }
-    const updateByUser = new mongoose.Schema.Types.ObjectId(userId)
-    if (updateBookingCheck.updated_by === updateByUser) {
+    const updateByUser = new mongoose.Types.ObjectId(userId)
+    if (
+      updateBookingCheck.updated_by &&
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      updateBookingCheck.updated_by.toString() === updateByUser.toString()
+    ) {
       throw new BadRequestException(
-        `Lịch hẹn đã được cập nhật. Không thể cập nhật lại.`,
+        `Lịch hẹn chỉ được cập nhật 1 lần. Không thể cập nhật lại.`,
       )
     }
     const updatedBooking = await this.bookingRepository.update(
       id,
       updateBookingDto,
+      userId,
     )
     if (!updatedBooking) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
@@ -124,11 +132,11 @@ export class BookingService implements IBookingService {
     return this.mapToResponseDto(updatedBooking)
   }
 
-  async delete(id: string, userId: string): Promise<BookingResponseDto> {
-    const deletedBooking = await this.bookingRepository.delete(id, userId)
-    if (!deletedBooking) {
+  async cancel(id: string, userId: string): Promise<BookingResponseDto> {
+    const cancelBooking = await this.bookingRepository.cancel(id, userId)
+    if (!cancelBooking) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
-    return this.mapToResponseDto(deletedBooking)
+    return this.mapToResponseDto(cancelBooking)
   }
 }

@@ -5,12 +5,13 @@ import {
   Get,
   Post,
   UseInterceptors,
+  Req,
 } from '@nestjs/common'
+import { Request } from 'express'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { VnpayService } from './vnpay.service'
 import { PaymentDataDto } from './dto/PaymentData.dto'
 import { PaymentBookingDto } from './dto/paymentBooking.dto'
-
 @ApiTags('vnpay')
 @Controller('vnpay')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -56,7 +57,11 @@ export class VnpayController {
     status: 200,
     description: 'URL thanh toán được xây dựng thành công',
   })
-  async getPaymentUrlForBooking(@Body() PaymentBookingDto: PaymentBookingDto) {
+  async getPaymentUrlForBooking(
+    @Body() PaymentBookingDto: PaymentBookingDto,
+    @Req() req: Request,
+  ) {
+    req.session.currentBookingPayment = PaymentBookingDto.bookingId
     const paymentUrl =
       await this.vnpayService.getPaymentUrlForBooking(PaymentBookingDto)
     return paymentUrl

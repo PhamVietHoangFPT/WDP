@@ -6,6 +6,7 @@ export interface IPaymentRepository {
   create(
     createPaymentHistory: CreatePaymentHistoryDto,
     userId: string,
+    bookingId?: string,
   ): Promise<PaymentDocument>
 
   findById(id: string, userId?: string): Promise<PaymentDocument>

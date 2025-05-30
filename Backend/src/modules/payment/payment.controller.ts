@@ -52,8 +52,12 @@ export class PaymentController {
     @Req() req: any, // Assuming you might need the request object for user info
   ) {
     const userId = req.user.id
-
-    return this.paymentService.createForBooking(CheckVnPayPaymentDto, userId)
+    const currentBookingPayment = req.session.currentBookingPayment
+    return this.paymentService.createForBooking(
+      CheckVnPayPaymentDto,
+      userId,
+      currentBookingPayment,
+    )
   }
 
   @Post('case')

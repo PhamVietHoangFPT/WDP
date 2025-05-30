@@ -7,21 +7,28 @@ import { SlotDocument } from 'src/modules/slot/schemas/slot.schema'
 export interface IBookingRepository {
   create(
     createBookingDto: CreateBookingDto,
+    bookingDate: Date,
     userId: string,
-    bookingDate: any,
   ): Promise<BookingDocument>
-  findById(id: string): Promise<BookingDocument | null>
-  findAll(): Promise<BookingDocument[]>
+  findById(id: string, userId: string): Promise<BookingDocument | null>
+  findAll(userId: string): Promise<BookingDocument[]>
   update(
     id: string,
     updateBookingDto: UpdateBookingDto,
+    userId: string,
   ): Promise<BookingDocument | null>
-  delete(id: string, userId: string): Promise<BookingDocument | null>
+  cancel(id: string, userId: string): Promise<BookingDocument | null>
   findWithQuery(
     filter: Record<string, unknown>,
+    userId: string,
   ): mongoose.Query<BookingDocument[], BookingDocument>
   countDocuments(filter: Record<string, unknown>): Promise<number>
   findBySlotId(slotId: string): Promise<SlotDocument | null>
+  updatePayment(
+    id: string,
+    bookingStatus: string,
+    payment: string,
+  ): Promise<BookingDocument | null>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')

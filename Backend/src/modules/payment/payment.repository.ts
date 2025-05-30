@@ -1,23 +1,54 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
 import { Payment, PaymentDocument } from './schemas/payment.schema'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
+import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
+import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
     @InjectModel(Payment.name)
     private paymentModel: Model<PaymentDocument>,
+    @Inject(IBookingRepository)
+    private bookingRepository: IBookingRepository,
+    @Inject(IBookingStatusRepository)
+    private bookingStatusRepository: IBookingStatusRepository,
   ) {}
 
   async create(
     createPaymentHistoryDto: CreatePaymentHistoryDto,
     userId: string,
+    bookingId?: string,
+    // serviceCaseId?: string,
   ): Promise<PaymentDocument> {
     const newPayment = new this.paymentModel(createPaymentHistoryDto)
     newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
+    let bookingStatus: any = null
+    if (
+      createPaymentHistoryDto.transactionStatus !== '00' &&
+      createPaymentHistoryDto.responseCode !== '00'
+    ) {
+      bookingStatus = await this.bookingStatusRepository.findByBookingStatus(
+        'Thanh toán thất bại',
+      )
+    } else if (
+      createPaymentHistoryDto.transactionStatus === '00' &&
+      createPaymentHistoryDto.responseCode === '00'
+    ) {
+      bookingStatus =
+        await this.bookingStatusRepository.findByBookingStatus('Thành công')
+    }
+    if (bookingId) {
+      await this.bookingRepository.updatePayment(
+        bookingId,
+        bookingStatus,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        newPayment._id.toString(),
+      )
+    }
     return await newPayment.save()
   }
 

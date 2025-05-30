@@ -7,6 +7,7 @@ export interface IPaymentService {
   createForBooking(
     checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,
+    bookingId?: string,
   ): Promise<PaymentDocument>
   createForCase(
     checkVnPayPayment: CheckVnPayPaymentDto,
