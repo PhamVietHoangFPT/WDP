@@ -3,6 +3,7 @@ import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common' // Nên có để validate DTOs
 import { ConfigService } from '@nestjs/config'
+import * as session from 'express-session'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const configService = app.get(ConfigService)
@@ -12,6 +13,21 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // Loại bỏ các thuộc tính không được định nghĩa trong DTO
       transform: true, // Tự động chuyển đổi kiểu dữ liệu (ví dụ: string sang number)
+    }),
+  )
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'your-very-strong-secret-key', // Rất QUAN TRỌNG: dùng biến môi trường cho secret key ở production
+      resave: false, // Không lưu lại session nếu không có thay đổi
+      saveUninitialized: false, // Không tạo session cho đến khi có gì đó được lưu
+      cookie: {
+        // secure: process.env.NODE_ENV === 'production', // Chỉ gửi cookie qua HTTPS ở production
+        httpOnly: true, // Ngăn JavaScript phía client truy cập cookie
+        maxAge: 24 * 60 * 60 * 1000, // Thời gian sống của cookie (ví dụ: 1 ngày)
+      },
+      // store: new RedisStore({ client: redisClient }), // Dùng session store khác cho production (ví dụ Redis, MongoDB)
+      // MemoryStore mặc định không phù hợp cho production
     }),
   )
 

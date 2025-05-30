@@ -36,7 +36,7 @@ export class VnpayService {
     const vnp_ReturnUrl = this.vnp_ReturnUrl
     const dataSend = {
       vnp_Amount: 100000,
-      vnp_OrderInfo: 'Thanh toan dat cho' + PaymentData.bookingId,
+      vnp_OrderInfo: 'Thanh toán đặt chỗ ' + PaymentData.bookingId,
       vnp_TxnRef: randomUUID(),
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),

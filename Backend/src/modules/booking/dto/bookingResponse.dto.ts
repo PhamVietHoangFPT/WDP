@@ -34,6 +34,10 @@ export class BookingResponseDto {
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   payment: mongoose.Schema.Types.ObjectId
 
+  @Expose()
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
+  bookingStatus: mongoose.Schema.Types.ObjectId
+
   constructor(partial: Partial<Booking>) {
     Object.assign(this, partial)
   }

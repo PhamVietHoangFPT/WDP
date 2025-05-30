@@ -8,15 +8,18 @@ export interface IBookingService {
     createBookingDto: CreateBookingDto,
     userId: string,
   ): Promise<BookingResponseDto>
-  findById(id: string): Promise<BookingResponseDto | null>
+  findById(id: string, userId: string): Promise<BookingResponseDto | null>
   findAll(
     pageNumber: number,
     pageSize: number,
+    userId: string,
   ): Promise<PaginatedResponse<BookingResponseDto>>
   update(
     id: string,
     updateBookingDto: Partial<UpdateBookingDto>,
     userId: string,
   ): Promise<BookingResponseDto | null>
-  delete(id: string, userId: string): Promise<BookingResponseDto | null>
+  cancel(id: string, userId: string): Promise<BookingResponseDto | null>
 }
+
+export const IBookingService = Symbol('IBookingService')

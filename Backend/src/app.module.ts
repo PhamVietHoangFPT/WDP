@@ -16,6 +16,8 @@ import { VnPayModule } from './modules/vnpay/vnpay.module'
 import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
 import { LocationModule } from './modules/location/location.module'
+import { BookingModule } from './modules/booking/booking.module'
+import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 @Module({
   imports: [
     databaseConfig,
@@ -35,6 +37,8 @@ import { LocationModule } from './modules/location/location.module'
     ConditionModule,
     VnPayModule,
     PaymentModule,
+    BookingModule,
+    BookingStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],

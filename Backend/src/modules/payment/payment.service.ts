@@ -39,6 +39,7 @@ export class PaymentService implements IPaymentService {
   async createForBooking(
     checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,
+    bookingId?: string,
   ): Promise<PaymentDocument> {
     const paymentData: CreatePaymentHistoryDto = {
       tmnCode: checkVnPayPayment.vnp_TmnCode,
@@ -60,7 +61,11 @@ export class PaymentService implements IPaymentService {
         'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
       )
     }
-    const payment = await this.paymentRepository.create(paymentData, userId)
+    const payment = await this.paymentRepository.create(
+      paymentData,
+      userId,
+      bookingId,
+    )
     return payment.save()
   }
 
