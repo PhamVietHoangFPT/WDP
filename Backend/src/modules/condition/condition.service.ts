@@ -11,15 +11,13 @@ import { IConditionService } from './interfaces/icondition.service'
 import { ConditionResponseDto } from './dto/condition-response.dto'
 import { IConditionRepository } from './interfaces/icondition.repository'
 import { UpdateConditionDto } from './dto/update-condition.dto'
-import { isNumber } from 'class-validator'
 @Injectable()
 export class ConditionService implements IConditionService {
   private readonly logger = new Logger(ConditionService.name)
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
-  ) { }
-
+  ) {}
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -36,9 +34,10 @@ export class ConditionService implements IConditionService {
     userId: string,
     createConditionDto: CreateConditionDto,
   ): Promise<ConditionResponseDto> {
-
     //this variable is used to check if the condition already exists
-    const existingCondition = await this.conditionRepository.findOneByName(createConditionDto.name)
+    const existingCondition = await this.conditionRepository.findOneByName(
+      createConditionDto.name,
+    )
 
     if (existingCondition) {
       throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
@@ -47,7 +46,7 @@ export class ConditionService implements IConditionService {
     try {
       let newCondition = await this.conditionRepository.create(
         userId,
-        createConditionDto
+        createConditionDto,
       )
       return this.mapToResponseDto(newCondition)
     } catch (error) {
@@ -55,7 +54,6 @@ export class ConditionService implements IConditionService {
         'Lỗi khi tạo tình trạng của mẫu thử.',
       )
     }
-
   }
 
   // this function returns all conditions
@@ -68,12 +66,17 @@ export class ConditionService implements IConditionService {
       }
       return conditions.map((condition) => this.mapToResponseDto(condition))
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách tình trạng mẫu thử.')
+      throw new InternalServerErrorException(
+        'Lỗi khi lấy danh sách tình trạng mẫu thử.',
+      )
     }
   }
 
-
-  async updateCondition(id: string, userId: string, updateConditionDto: UpdateConditionDto): Promise<ConditionResponseDto> {
+  async updateCondition(
+    id: string,
+    userId: string,
+    updateConditionDto: UpdateConditionDto,
+  ): Promise<ConditionResponseDto> {
     //this variable is used to check if the condition already exists
     const existingCondition = await this.conditionRepository.findOneById(id)
 
@@ -81,30 +84,41 @@ export class ConditionService implements IConditionService {
       throw new ConflictException('Mẫu thử không tồn tại')
     }
 
-    if (existingCondition.name === updateConditionDto.name && existingCondition.conditionFee === updateConditionDto.conditionFee) {
+    if (
+      existingCondition.name === updateConditionDto.name &&
+      existingCondition.conditionFee === updateConditionDto.conditionFee
+    ) {
       throw new ConflictException('Không có thay đổi nào để cập nhật.')
     }
 
     const updateName = updateConditionDto.name
-    if (updateName == "" || updateName == null) {
+    if (updateName == '' || updateName == null) {
       updateConditionDto.name = existingCondition.name // <-- Use the existing name if not provided
     }
     try {
       const updated = await this.conditionRepository.updateConditionById(
         id,
         userId,
-        { name: updateConditionDto.name, conditionFee: updateConditionDto.conditionFee } // <-- Use the DTO directly
-      );
+        {
+          name: updateConditionDto.name,
+          conditionFee: updateConditionDto.conditionFee,
+        }, // <-- Use the DTO directly
+      )
       if (!updated) {
         throw new ConflictException('Không thể cập nhật tình trạng mẫu thử.')
       }
       return this.mapToResponseDto(updated)
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi thay đổi tình trạng mẫu thử.')
+      throw new InternalServerErrorException(
+        'Lỗi khi thay đổi tình trạng mẫu thử.',
+      )
     }
   }
 
-  async deleteCondition(id: string, userId: string): Promise<ConditionResponseDto> {
+  async deleteCondition(
+    id: string,
+    userId: string,
+  ): Promise<ConditionResponseDto> {
     //this variable is used to check if the condition already exists
     const existingCondition = await this.conditionRepository.findOneById(id)
 
@@ -115,8 +129,8 @@ export class ConditionService implements IConditionService {
     try {
       const updated = await this.conditionRepository.deleteConditionById(
         id,
-        userId
-      );
+        userId,
+      )
       if (!updated) {
         throw new ConflictException('Không thể xóa tình trạng mẫu thử.')
       }

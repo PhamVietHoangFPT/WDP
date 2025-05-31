@@ -13,7 +13,12 @@ import {
 } from '@nestjs/common'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
@@ -25,7 +30,7 @@ export class ConditionController {
   constructor(
     @Inject(IConditionService)
     private readonly conditionService: IConditionService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -33,9 +38,7 @@ export class ConditionController {
   @Post()
   @ApiBody({ type: CreateConditionDto })
   @ApiOperation({ summary: 'Tạo tình trạng mẫu thử mới' })
-  create(
-    @Body() createConditionDto: CreateConditionDto,
-    @Req() req: any) {
+  create(@Body() createConditionDto: CreateConditionDto, @Req() req: any) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     return this.conditionService.createCondition(user, createConditionDto)
   }
@@ -55,7 +58,8 @@ export class ConditionController {
   update(
     @Param('id') id: string,
     @Body() updateConditionDto: UpdateConditionDto,
-    @Req() req: any) {
+    @Req() req: any,
+  ) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     return this.conditionService.updateCondition(id, user, updateConditionDto)
   }
@@ -65,9 +69,7 @@ export class ConditionController {
   @ApiBearerAuth('bearer')
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa tình trạng mẫu mới' })
-  async deleteCondition(
-    @Param('id') id: string,
-    @Req() req: any) {
+  async deleteCondition(@Param('id') id: string, @Req() req: any) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     await this.conditionService.deleteCondition(id, user)
     return new ApiResponseDto<null>({
