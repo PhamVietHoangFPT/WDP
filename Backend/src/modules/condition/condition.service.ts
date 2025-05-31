@@ -126,10 +126,10 @@ export class ConditionService implements IConditionService {
     userId: string,
   ): Promise<ConditionResponseDto> {
     //this variable is used to check if the condition already exists
-    const existingCondition = await this.conditionRepository.findOneById(id)
+    const existingCondition = await this.findConditionById(id)
 
-    if (!existingCondition) {
-      throw new ConflictException('Tình trạng mẫu thử không tồn tại')
+    if (existingCondition.deleted_at !== null || existingCondition.deleted_by !== null) {
+      throw new ConflictException('Tình trạng mẫu thử đã bị xóa trước đó.')
     }
 
     try {
