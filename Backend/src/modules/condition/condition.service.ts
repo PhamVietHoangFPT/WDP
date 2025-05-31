@@ -10,6 +10,8 @@ import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
 import { ConditionResponseDto } from './dto/condition-response.dto'
 import { IConditionRepository } from './interfaces/icondition.repository'
+import { UpdateConditionDto } from './dto/update-condition.dto'
+import { isNumber } from 'class-validator'
 @Injectable()
 export class ConditionService implements IConditionService {
   private readonly logger = new Logger(ConditionService.name)
@@ -24,8 +26,6 @@ export class ConditionService implements IConditionService {
       _id: condition._id,
       name: condition.name,
       conditionFee: condition.conditionFee,
-      created_at: condition.created_at,
-      created_by: condition.created_by,
     })
   }
 
@@ -72,32 +72,57 @@ export class ConditionService implements IConditionService {
     }
   }
 
-  //  async findAllAccounts(
-  //     pageNumber: number,
-  //     pageSize: number,
-  //   ): Promise<PaginatedResponse<ConditionResponseDto>> {
-  //     const skip = (pageNumber - 1) * pageSize
-  //     const filter = {}
-  //     // Fetch users and total count in parallel
-  //     const [users, totalItems] = await Promise.all([
-  //       this.conditionModel
-  //         .findWithQuery(filter) // Returns a query object
-  //         .skip(skip)
-  //         .limit(pageSize)
-  //         .exec(), // Execute the query
-  //       this.accountsRepository.countDocuments(filter), // Use repository for count
-  //     ])
 
-  //     const totalPages = Math.ceil(totalItems / pageSize)
-  //     const data = users.map((user: Account) => this.mapToResponseDto(user)) // Explicitly type `user`
-  //     return {
-  //       data,
-  //       pagination: {
-  //         totalItems,
-  //         totalPages,
-  //         currentPage: pageNumber,
-  //         pageSize,
-  //       },
-  //     }
-  //   }
+  async updateCondition(id: string, userId: string, updateConditionDto: UpdateConditionDto): Promise<ConditionResponseDto> {
+    //this variable is used to check if the condition already exists
+    const existingCondition = await this.conditionRepository.findOneById(id)
+
+    if (!existingCondition) {
+      throw new ConflictException('Mẫu thử không tồn tại')
+    }
+
+    if (existingCondition.name === updateConditionDto.name && existingCondition.conditionFee === updateConditionDto.conditionFee) {
+      throw new ConflictException('Không có thay đổi nào để cập nhật.')
+    }
+
+    const updateName = updateConditionDto.name
+    if (updateName == "" || updateName == null) {
+      updateConditionDto.name = existingCondition.name // <-- Use the existing name if not provided
+    }
+    try {
+      const updated = await this.conditionRepository.updateConditionById(
+        id,
+        userId,
+        { name: updateConditionDto.name, conditionFee: updateConditionDto.conditionFee } // <-- Use the DTO directly
+      );
+      if (!updated) {
+        throw new ConflictException('Không thể cập nhật tình trạng mẫu thử.')
+      }
+      return this.mapToResponseDto(updated)
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi khi thay đổi tình trạng mẫu thử.')
+    }
+  }
+
+  async deleteCondition(id: string, userId: string): Promise<ConditionResponseDto> {
+    //this variable is used to check if the condition already exists
+    const existingCondition = await this.conditionRepository.findOneById(id)
+
+    if (!existingCondition) {
+      throw new ConflictException('Tình trạng mẫu thử không tồn tại')
+    }
+
+    try {
+      const updated = await this.conditionRepository.deleteConditionById(
+        id,
+        userId
+      );
+      if (!updated) {
+        throw new ConflictException('Không thể xóa tình trạng mẫu thử.')
+      }
+      return this.mapToResponseDto(updated)
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi khi xóa tình trạng mẫu thử.')
+    }
+  }
 }

@@ -8,7 +8,7 @@ export class CreateConditionDto {
   name: string
 
   @ApiProperty({ example: 100000 })
-  @IsNumber({}, { message: 'Phí điều kiện phải là một số' })
+  @IsNumber({}, { message: 'Phí tình trạng mẫu thử phải là một số' })
   conditionFee?: number
 
   constructor(partial: Partial<CreateConditionDto>) {
