@@ -8,6 +8,8 @@ import {
   Get,
   Put,
   Param,
+  Delete,
+  HttpStatus,
 } from '@nestjs/common'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { IConditionService } from './interfaces/icondition.service'
@@ -16,7 +18,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
 import { UpdateConditionDto } from './dto/update-condition.dto'
-import { Condition } from './schemas/condition.schema'
+import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
 @Controller('conditions')
 export class ConditionController {
@@ -58,44 +60,20 @@ export class ConditionController {
     return this.conditionService.updateCondition(id, user, updateConditionDto)
   }
 
-  // @Post()
-  //  @ApiOperation({ summary: 'Tạo người dùng mới' })
-  //  @ApiBody({ type: CreateAccountDto })
-  //  @ApiResponse({
-  //    status: HttpStatus.CREATED,
-  //    type: ApiResponseDto<AccountResponseDto>,
-  //  })
-  //  @HttpCode(HttpStatus.CREATED)
-  //  async createAccount(
-  //    @Body() createAccountDto: CreateAccountDto,
-  //  ): Promise<ApiResponseDto<AccountResponseDto>> {
-  //    const newAccountData: AccountResponseDto =
-  //      await this.accountsService.createAccount(createAccountDto)
-  //    return new ApiResponseDto<AccountResponseDto>({
-  //      data: [newAccountData],
-  //      success: true,
-  //      message: 'Tài khoản được tạo thành công',
-  //      statusCode: HttpStatus.CREATED,
-  //    })
-  //  }
-
-  // @Get()
-  // findAll() {
-  //   return this.ConditionService.findAll();
-  // }
-
-  //   @Get(':id')
-  //   findOne(@Param('id') id: string) {
-  //     return this.ConditionService.findOne(id);
-  //   }
-
-  //   @Patch(':id')
-  //   update(@Param('id') id: string, @Body() updateUserDto: UpdateConditionDto) {
-  //     return this.ConditionService.update(+id, updateUserDto);
-  //   }
-
-  //   @Delete(':id')
-  //   remove(@Param('id') id: string) {
-  //     return this.ConditionService.remove(+id);
-  //   }
+  @UseGuards(AuthGuard)
+  @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth('bearer')
+  @Delete(':id')
+  @ApiOperation({ summary: 'Xóa tình trạng mẫu mới' })
+  async deleteCondition(
+    @Param('id') id: string,
+    @Req() req: any) {
+    const user = req.user.id // Lấy thông tin người dùng từ request
+    await this.conditionService.deleteCondition(id, user)
+    return new ApiResponseDto<null>({
+      success: true,
+      message: 'Xóa tình trạng mẫu thử thành công',
+      statusCode: HttpStatus.OK,
+    })
+  }
 }

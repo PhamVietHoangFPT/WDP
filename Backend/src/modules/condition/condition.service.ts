@@ -26,10 +26,6 @@ export class ConditionService implements IConditionService {
       _id: condition._id,
       name: condition.name,
       conditionFee: condition.conditionFee,
-      created_at: condition.created_at,
-      created_by: condition.created_by,
-      updated_at: condition.updated_at,
-      updated_by: condition.updated_by,
     })
   }
 
@@ -93,17 +89,6 @@ export class ConditionService implements IConditionService {
     if (updateName == "" || updateName == null) {
       updateConditionDto.name = existingCondition.name // <-- Use the existing name if not provided
     }
-
-    // if (!isNumber(updateConditionDto.conditionFee) || updateConditionDto.conditionFee < 0) {
-    //   const updateFee = updateConditionDto.conditionFee
-    //   if (updateFee == null) {
-    //     updateConditionDto.conditionFee = existingCondition.conditionFee // <-- Use the existing name if not provided
-    //   }
-    //   throw new ConflictException('Phí tình trạng mẫu thử phải là một số .')
-
-    // }
-
-
     try {
       const updated = await this.conditionRepository.updateConditionById(
         id,
@@ -115,7 +100,29 @@ export class ConditionService implements IConditionService {
       }
       return this.mapToResponseDto(updated)
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy tình trạng mẫu thử.')
+      throw new InternalServerErrorException('Lỗi khi thay đổi tình trạng mẫu thử.')
+    }
+  }
+
+  async deleteCondition(id: string, userId: string): Promise<ConditionResponseDto> {
+    //this variable is used to check if the condition already exists
+    const existingCondition = await this.conditionRepository.findOneById(id)
+
+    if (!existingCondition) {
+      throw new ConflictException('Tình trạng mẫu thử không tồn tại')
+    }
+
+    try {
+      const updated = await this.conditionRepository.deleteConditionById(
+        id,
+        userId
+      );
+      if (!updated) {
+        throw new ConflictException('Không thể xóa tình trạng mẫu thử.')
+      }
+      return this.mapToResponseDto(updated)
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi khi xóa tình trạng mẫu thử.')
     }
   }
 }

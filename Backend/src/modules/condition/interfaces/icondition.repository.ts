@@ -9,6 +9,6 @@ export interface IConditionRepository {
     // findById(id: string): Promise<ConditionDocument | null>;
     findAll(): Promise<ConditionDocument[]>;
     updateConditionById(id: string, userId: string, updateConditionDto: Partial<UpdateConditionDto>): Promise<ConditionDocument | null>;
-    // delete(id: string, userId: string): Promise<ConditionDocument | null>;
+    deleteConditionById(id: string, userId: string): Promise<ConditionDocument | null>;
 }
 export const IConditionRepository = Symbol('IConditionRepository')

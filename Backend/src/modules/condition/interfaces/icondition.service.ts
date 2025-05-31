@@ -15,7 +15,7 @@ export interface IConditionService {
   updateCondition(id: string, userId: string, updateConditionDto: UpdateConditionDto): Promise<any>;
 
   //   // Xóa điều kiện
-  //   deleteCondition(id: string): Promise<void>;
+  deleteCondition(id: string, userId: string): Promise<any>;
 }
 
 export const IConditionService = Symbol('IConditionService')

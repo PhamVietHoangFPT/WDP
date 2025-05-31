@@ -33,8 +33,7 @@ export class ConditionRepository implements IConditionRepository {
 
     async findAll(): Promise<ConditionDocument[] | null> {
         return this.conditionModel
-            .find()
-            .populate({ path: 'created_by', select: 'name -_id' })
+            .find({ deleted_at: null })
             .exec();
     }
 
@@ -42,6 +41,14 @@ export class ConditionRepository implements IConditionRepository {
         return this.conditionModel
             .findByIdAndUpdate(id,
                 { ...updateConditionDto, updated_by: userId, updated_at: new Date() },
+                { new: true })
+            .exec()
+    }
+
+    async deleteConditionById(id: string, userId: string): Promise<ConditionDocument> {
+        return this.conditionModel
+            .findByIdAndUpdate(id,
+                { deleted_by: userId, deleted_at: new Date() },
                 { new: true })
             .exec()
     }
