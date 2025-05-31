@@ -15,7 +15,7 @@ export class Condition extends BaseEntity {
   @Prop({ type: String, required: true, unique: true })
   name: string
 
-  @Prop({ type: Number, required: true, min: 1 })
+  @Prop({ type: Number, required: true, min: 0 })
   conditionFee: number
 }
 

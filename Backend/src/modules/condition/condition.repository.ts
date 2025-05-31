@@ -5,6 +5,7 @@ import { Condition, ConditionDocument } from "./schemas/condition.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateConditionDto } from "./dto/create-condition.dto";
+import { UpdateConditionDto } from "./dto/update-condition.dto";
 @Injectable()
 export class ConditionRepository implements IConditionRepository {
     private readonly logger = new Logger(ConditionRepository.name)
@@ -26,6 +27,10 @@ export class ConditionRepository implements IConditionRepository {
         return this.conditionModel.findOne({ name }).exec();
     }
 
+    async findOneById(id: string): Promise<ConditionDocument | null> {
+        return this.conditionModel.findById(id).exec();
+    }
+
     async findAll(): Promise<ConditionDocument[] | null> {
         return this.conditionModel
             .find()
@@ -33,4 +38,11 @@ export class ConditionRepository implements IConditionRepository {
             .exec();
     }
 
+    async updateConditionById(id: string, userId: string, updateConditionDto: UpdateConditionDto): Promise<ConditionDocument> {
+        return this.conditionModel
+            .findByIdAndUpdate(id,
+                { ...updateConditionDto, updated_by: userId, updated_at: new Date() },
+                { new: true })
+            .exec()
+    }
 }

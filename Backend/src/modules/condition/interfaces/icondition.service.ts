@@ -1,5 +1,6 @@
 import { ConditionResponseDto } from '../dto/condition-response.dto';
 import { CreateConditionDto } from '../dto/create-condition.dto'
+import { UpdateConditionDto } from '../dto/update-condition.dto';
 
 export interface IConditionService {
   // Tạo điều kiện mới
@@ -10,11 +11,8 @@ export interface IConditionService {
 
   findAllConditions(): Promise<ConditionResponseDto[]>;
 
-  //   // Lấy điều kiện theo ID
-  //   findConditionById(id: string): Promise<any>;
-
   //   // Cập nhật điều kiện
-  //   updateCondition(id: string, updateConditionDto: any): Promise<any>;
+  updateCondition(id: string, userId: string, updateConditionDto: UpdateConditionDto): Promise<any>;
 
   //   // Xóa điều kiện
   //   deleteCondition(id: string): Promise<void>;
