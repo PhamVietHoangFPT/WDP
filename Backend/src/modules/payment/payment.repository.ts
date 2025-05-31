@@ -6,6 +6,7 @@ import { IPaymentRepository } from './interfaces/ipayment.repository'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
+import { IPaymentTypeRepository } from '../paymentType/interfaces/ipaymentType.repository'
 
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
@@ -16,16 +17,20 @@ export class PaymentRepository implements IPaymentRepository {
     private bookingRepository: IBookingRepository,
     @Inject(IBookingStatusRepository)
     private bookingStatusRepository: IBookingStatusRepository,
+    @Inject(IPaymentTypeRepository)
+    private paymentTypeRepository: IPaymentTypeRepository,
   ) {}
 
-  async create(
+  async createForBooking(
     createPaymentHistoryDto: CreatePaymentHistoryDto,
     userId: string,
-    bookingId?: string,
-    // serviceCaseId?: string,
+    bookingId: string,
   ): Promise<PaymentDocument> {
     const newPayment = new this.paymentModel(createPaymentHistoryDto)
+    const paymentType =
+      await this.paymentTypeRepository.findByPaymentType('Đặt chỗ')
     newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
+    newPayment.paymentType = paymentType._id
     let bookingStatus: any = null
     if (
       createPaymentHistoryDto.transactionStatus !== '00' &&
@@ -58,6 +63,7 @@ export class PaymentRepository implements IPaymentRepository {
         _id: id, // Điều kiện: _id của payment phải khớp
         created_by: userId, // Điều kiện: created_by phải khớp với userId
       })
+      .populate({ path: 'paymentType', select: '-_id paymentType' })
       .exec()
   }
 
@@ -75,10 +81,12 @@ export class PaymentRepository implements IPaymentRepository {
       })
       return query
     }
-    const query = this.paymentModel.find({
-      ...filter, // Thêm các điều kiện lọc khác nếu cần
-      created_by: new mongoose.Types.ObjectId(userId) as any, // Lọc theo userId
-    })
+    const query = this.paymentModel
+      .find({
+        ...filter, // Thêm các điều kiện lọc khác nếu cần
+        created_by: new mongoose.Types.ObjectId(userId) as any, // Lọc theo userId
+      })
+      .populate({ path: 'paymentType', select: 'paymentType' })
 
     return query
   }

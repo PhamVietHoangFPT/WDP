@@ -39,8 +39,12 @@ export class Payment extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   transactionNo: string
 
-  @Prop({ type: Boolean, default: false })
-  isForBooking: boolean
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PaymentType',
+    default: false,
+  })
+  paymentType: mongoose.Schema.Types.ObjectId
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment)

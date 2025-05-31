@@ -60,23 +60,23 @@ export class PaymentController {
     )
   }
 
-  @Post('case')
-  @ApiOperation({
-    summary: 'Tạo lịch sử thanh toán cho trường hợp xét nghiệm',
-  })
-  @ApiBody({ type: CheckVnPayPaymentDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Lịch sử thanh toán được tạo thành công',
-  })
-  createPaymentHistoryForCase(
-    @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
-    @Req() req: any, // Assuming you might need the request object for user info
-  ) {
-    const userId = req.user.id
+  // @Post('case')
+  // @ApiOperation({
+  //   summary: 'Tạo lịch sử thanh toán cho trường hợp xét nghiệm',
+  // })
+  // @ApiBody({ type: CheckVnPayPaymentDto })
+  // @ApiResponse({
+  //   status: HttpStatus.CREATED,
+  //   description: 'Lịch sử thanh toán được tạo thành công',
+  // })
+  // createPaymentHistoryForCase(
+  //   @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
+  //   @Req() req: any, // Assuming you might need the request object for user info
+  // ) {
+  //   const userId = req.user.id
 
-    return this.paymentService.createForCase(CheckVnPayPaymentDto, userId)
-  }
+  //   return this.paymentService.createForCase(CheckVnPayPaymentDto, userId)
+  // }
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách lịch sử thanh toán' })

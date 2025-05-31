@@ -41,8 +41,4 @@ export class CreatePaymentHistoryDto {
   @IsString()
   @IsNotEmpty()
   tmnCode: string
-
-  @ApiProperty()
-  @IsNotEmpty()
-  isForBooking: boolean
 }

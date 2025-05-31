@@ -3,10 +3,10 @@ import { CreatePaymentHistoryDto } from '../dto/createPaymentHistory.dto'
 import mongoose from 'mongoose'
 
 export interface IPaymentRepository {
-  create(
+  createForBooking(
     createPaymentHistory: CreatePaymentHistoryDto,
     userId: string,
-    bookingId?: string,
+    bookingId: string,
   ): Promise<PaymentDocument>
 
   findById(id: string, userId?: string): Promise<PaymentDocument>
