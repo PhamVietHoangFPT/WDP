@@ -13,7 +13,7 @@ import { IConditionRepository } from './interfaces/icondition.repository'
     MongooseModule.forFeature([
       { name: Condition.name, schema: ConditionSchema },
     ]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [ConditionController],
   providers: [
@@ -24,8 +24,8 @@ import { IConditionRepository } from './interfaces/icondition.repository'
     {
       provide: IConditionRepository,
       useClass: ConditionRepository,
-    }
+    },
   ],
   exports: [IConditionService, IConditionRepository],
 })
-export class ConditionModule { }
+export class ConditionModule {}
