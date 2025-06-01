@@ -51,10 +51,21 @@
 // import Blog from '../Pages/Blogs/Blog'
 // import ForgotPassword from '../Pages/Profile/ForgotPassword'
 
+import LoginRegisterLayout from "../components/layout/LoginRegisterLayout"
+import Login from "../pages/Login/Login"
 import type { LayoutRoute } from "../types/routes"
 
 const routes: LayoutRoute[] = [
-    
+    {
+        layout: LoginRegisterLayout,
+        data: [
+            {
+
+                path: '/login',
+                component: Login,
+            }
+        ]
+    }
 ]
 
 export default routes
