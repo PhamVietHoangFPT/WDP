@@ -36,7 +36,6 @@ export class ConditionResponseDto {
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   updated_by: mongoose.Schema.Types.ObjectId
 
-
   @Expose()
   @ApiProperty({ example: '2021-03-01T12:00:00Z' })
   deleted_at: Date
@@ -45,7 +44,7 @@ export class ConditionResponseDto {
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   deleted_by: mongoose.Schema.Types.ObjectId
-  
+
   constructor(partial: Partial<Condition>) {
     Object.assign(this, partial)
   }

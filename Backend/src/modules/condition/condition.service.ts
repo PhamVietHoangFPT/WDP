@@ -17,7 +17,7 @@ export class ConditionService implements IConditionService {
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
-  ) { }
+  ) {}
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -27,17 +27,14 @@ export class ConditionService implements IConditionService {
     })
   }
 
-  async findConditionById(
-    id: string,
-  ): Promise<ConditionResponseDto> {
-    //this variable is used to check if the condition already exists    
+  async findConditionById(id: string): Promise<ConditionResponseDto> {
+    //this variable is used to check if the condition already exists
     const existingCondition = await this.conditionRepository.findOneById(id)
     if (!existingCondition) {
       throw new ConflictException('Tình trạng mẫu thử không tồn tại')
     }
     return this.mapToResponseDto(existingCondition)
   }
-
 
   //this function create a new condition by checking if the condition already exists
   // if it exists, it throws a ConflictException
@@ -128,7 +125,10 @@ export class ConditionService implements IConditionService {
     //this variable is used to check if the condition already exists
     const existingCondition = await this.findConditionById(id)
 
-    if (existingCondition.deleted_at !== null || existingCondition.deleted_by !== null) {
+    if (
+      existingCondition.deleted_at !== null ||
+      existingCondition.deleted_by !== null
+    ) {
       throw new ConflictException('Tình trạng mẫu thử đã bị xóa trước đó.')
     }
 

@@ -10,7 +10,7 @@ export const useAutoLogout = () => {
   useEffect(() => {
     if (userExpireTime) {
       const currentTime = Math.floor(Date.now() / 1000) // Thời gian hiện tại (seconds)
-      const timeLeft = userExpireTime - currentTime // Thời gian còn lại (seconds)
+      const timeLeft = Number(userExpireTime) - currentTime // Thời gian còn lại (seconds)
       if (timeLeft > 0) {
         const timer = setTimeout(() => {
           dispatch(logout()) // Hết hạn thì logout

@@ -1,16 +1,16 @@
 export interface UserToken {
-  token: string
+  accessToken: string
 }
 
 export interface UserData {
-  Email: string
-  Id: string
-  Address: string
-  Role: string
-  Name: string
-  PhoneNumber: string
-  exp: number
-  Facility: string
+  email: string
+  id: string
+  facility: string
+  role: string
+  name: string
+  phoneNumber: string
+  exp: boolean
+  gender: string
 }
 
 export interface AuthState {
