@@ -24,13 +24,19 @@ export class SamplingKitInventory extends BaseEntity {
   expDate: Date
 
   @Prop({ type: Number, default: null })
-  amount: number
+  kitAmount: number
 
   @Prop({ type: Number, default: null })
   inventory: number
 
+  @Prop({ type: Number, required: true, trim: true })
+  price: number
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Type' })
+  type: mongoose.Schema.Types.ObjectId
 }
 
 export const SamplingKitInventorySchema =
