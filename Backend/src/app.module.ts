@@ -18,6 +18,7 @@ import { AddressModule } from './modules/address/address.module'
 import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
+import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 @Module({
   imports: [
     databaseConfig,
@@ -39,6 +40,7 @@ import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.modul
     PaymentModule,
     BookingModule,
     BookingStatusModule,
+    PaymentTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

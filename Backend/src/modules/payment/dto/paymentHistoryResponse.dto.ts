@@ -45,6 +45,10 @@ export class PaymentHistoryResponseDto {
   @ApiProperty({ example: 'transactionNo' })
   transactionNo: string
 
+  @Expose()
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
+  paymentType: mongoose.Schema.Types.ObjectId
+
   constructor(partial: Partial<Payment>) {
     Object.assign(this, partial)
   }

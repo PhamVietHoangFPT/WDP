@@ -7,12 +7,12 @@ export interface IPaymentService {
   createForBooking(
     checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,
-    bookingId?: string,
+    bookingId: string,
   ): Promise<PaymentDocument>
-  createForCase(
-    checkVnPayPayment: CheckVnPayPaymentDto,
-    userId: string,
-  ): Promise<PaymentDocument>
+  // createForCase(
+  //   checkVnPayPayment: CheckVnPayPaymentDto,
+  //   userId: string,
+  // ): Promise<PaymentDocument>
   findById(
     id: string,
     userId?: string,

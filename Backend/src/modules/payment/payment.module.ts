@@ -10,12 +10,14 @@ import { PaymentService } from './payment.service'
 import { PaymentRepository } from './payment.repository'
 import { BookingModule } from '../booking/booking.module'
 import { BookingStatusModule } from '../bookingStatus/bookingStatus.module'
+import { PaymentTypeModule } from '../paymentType/paymentType.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
     AuthModule,
     BookingModule,
-    BookingStatusModule, // Assuming BookingStatusModule is needed for payment operations
+    BookingStatusModule,
+    PaymentTypeModule,
   ],
 
   controllers: [PaymentController],

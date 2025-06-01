@@ -27,9 +27,6 @@ export class Slot extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SlotTemplate' })
   slotTemplate: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
-  facility: mongoose.Schema.Types.ObjectId
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)

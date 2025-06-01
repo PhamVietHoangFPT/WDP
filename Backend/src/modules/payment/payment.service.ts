@@ -33,6 +33,7 @@ export class PaymentService implements IPaymentService {
       transactionReferenceNumber: payment.transactionReferenceNumber,
       orderInfo: payment.orderInfo,
       transactionNo: payment.transactionNo,
+      paymentType: payment.paymentType,
     })
   }
 
@@ -50,7 +51,6 @@ export class PaymentService implements IPaymentService {
       transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
       orderInfo: checkVnPayPayment.vnp_OrderInfo,
       transactionNo: checkVnPayPayment.vnp_TransactionNo,
-      isForBooking: true,
     }
     const existingPayment =
       await this.paymentRepository.findWithTransactionReferenceNumber(
@@ -61,7 +61,7 @@ export class PaymentService implements IPaymentService {
         'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
       )
     }
-    const payment = await this.paymentRepository.create(
+    const payment = await this.paymentRepository.createForBooking(
       paymentData,
       userId,
       bookingId,
@@ -69,33 +69,33 @@ export class PaymentService implements IPaymentService {
     return payment.save()
   }
 
-  async createForCase(
-    checkVnPayPayment: CheckVnPayPaymentDto,
-    userId: string,
-  ): Promise<PaymentDocument> {
-    const paymentData: CreatePaymentHistoryDto = {
-      tmnCode: checkVnPayPayment.vnp_TmnCode,
-      amount: checkVnPayPayment.vnp_Amount,
-      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
-      responseCode: checkVnPayPayment.vnp_ResponseCode,
-      payDate: checkVnPayPayment.vnp_PayDate,
-      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
-      orderInfo: checkVnPayPayment.vnp_OrderInfo,
-      transactionNo: checkVnPayPayment.vnp_TransactionNo,
-      isForBooking: false,
-    }
-    const existingPayment =
-      await this.paymentRepository.findWithTransactionReferenceNumber(
-        paymentData.transactionReferenceNumber,
-      )
-    if (existingPayment) {
-      throw new ForbiddenException(
-        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
-      )
-    }
-    const payment = await this.paymentRepository.create(paymentData, userId)
-    return payment.save()
-  }
+  // async createForCase(
+  //   checkVnPayPayment: CheckVnPayPaymentDto,
+  //   userId: string,
+  // ): Promise<PaymentDocument> {
+  //   const paymentData: CreatePaymentHistoryDto = {
+  //     tmnCode: checkVnPayPayment.vnp_TmnCode,
+  //     amount: checkVnPayPayment.vnp_Amount,
+  //     transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
+  //     responseCode: checkVnPayPayment.vnp_ResponseCode,
+  //     payDate: checkVnPayPayment.vnp_PayDate,
+  //     transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
+  //     orderInfo: checkVnPayPayment.vnp_OrderInfo,
+  //     transactionNo: checkVnPayPayment.vnp_TransactionNo,
+  //     isForBooking: false,
+  //   }
+  //   const existingPayment =
+  //     await this.paymentRepository.findWithTransactionReferenceNumber(
+  //       paymentData.transactionReferenceNumber,
+  //     )
+  //   if (existingPayment) {
+  //     throw new ForbiddenException(
+  //       'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
+  //     )
+  //   }
+  //   const payment = await this.paymentRepository.create(paymentData, userId)
+  //   return payment.save()
+  // }
 
   async findAll(
     pageNumber: number,
