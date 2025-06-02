@@ -10,6 +10,7 @@ import { SlotModule } from './modules/slot/slot.module'
 import { SlotGenerationModule } from './modules/slotGenerator/slotGenerator.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { ConditionModule } from './modules/condition/condition.module'
+import { TypeModule } from './modules/type/type.module'
 @Module({
   imports: [
     databaseConfig,
@@ -23,8 +24,9 @@ import { ConditionModule } from './modules/condition/condition.module'
     SlotGenerationModule,
     ScheduleModule.forRoot(),
     ConditionModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
