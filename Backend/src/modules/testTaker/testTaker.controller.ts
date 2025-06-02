@@ -25,12 +25,12 @@ import {
 } from '@nestjs/swagger'
 
 import { ITestTakerService } from './interfaces/itestTaker.service'
-import { CreateTestTakerDto } from './dto/create-testtaker.dto'
-import { TestTakerResponseDto } from './dto/testtaker-response.dto'
+import { CreateTestTakerDto } from './dto/createTestTaker.dto'
+import { TestTakerResponseDto } from './dto/testTakerResponse.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
-import { QueryTestTakerDto } from './dto/query-testtaker.dto'
+import { QueryTestTakerDto } from './dto/queryTestTaker.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 
 @ApiTags('test-takers')

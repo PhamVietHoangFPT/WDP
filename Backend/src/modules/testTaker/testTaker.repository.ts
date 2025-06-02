@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { TestTaker, TestTakerDocument } from './schemas/testTaker.schema'
 import { ITestTakerRepository } from './interfaces/itestTaker.repository'
-import { CreateTestTakerDto } from './dto/create-testtaker.dto'
-import { QueryTestTakerDto } from './dto/query-testtaker.dto'
+import { CreateTestTakerDto } from './dto/createTestTaker.dto'
+import { QueryTestTakerDto } from './dto/queryTestTaker.dto'
 
 @Injectable()
 export class TestTakerRepository implements ITestTakerRepository {
