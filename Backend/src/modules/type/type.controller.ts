@@ -1,1 +1,1 @@
-export class TypeController { }
+export class TypeController {}

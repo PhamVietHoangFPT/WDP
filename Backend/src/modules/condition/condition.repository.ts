@@ -11,7 +11,7 @@ export class ConditionRepository implements IConditionRepository {
   constructor(
     @InjectModel(Condition.name)
     private conditionModel: Model<ConditionDocument>,
-  ) { }
+  ) {}
 
   async create(
     userId: string,
@@ -26,9 +26,11 @@ export class ConditionRepository implements IConditionRepository {
   }
 
   async findOneByName(name: string): Promise<ConditionDocument | null> {
-    return this.conditionModel.findOne({
-      name
-    }).exec()
+    return this.conditionModel
+      .findOne({
+        name,
+      })
+      .exec()
   }
 
   async findOneById(id: string): Promise<ConditionDocument | null> {
@@ -66,16 +68,23 @@ export class ConditionRepository implements IConditionRepository {
       .exec()
   }
 
-  async restore(id: string,
+  async restore(
+    id: string,
     userId: string,
-    updateConditionDto: UpdateConditionDto,): Promise<ConditionDocument> {
+    updateConditionDto: UpdateConditionDto,
+  ): Promise<ConditionDocument> {
     return this.conditionModel
-      .findByIdAndUpdate(id, {
-        ...updateConditionDto, updated_by: userId, updated_at: new Date(),
-        deleted_at: null,
-        deleted_by: null
-      }, { new: true })
-      .exec();
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateConditionDto,
+          updated_by: userId,
+          updated_at: new Date(),
+          deleted_at: null,
+          deleted_by: null,
+        },
+        { new: true },
+      )
+      .exec()
   }
-
 }

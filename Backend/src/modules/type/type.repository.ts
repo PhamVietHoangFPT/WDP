@@ -1,3 +1,3 @@
-import { ITypeRepository } from "./interfaces/itype.repository";
+import { ITypeRepository } from './interfaces/itype.repository'
 
-export class TypeRepository implements ITypeRepository { }
+export class TypeRepository implements ITypeRepository {}
