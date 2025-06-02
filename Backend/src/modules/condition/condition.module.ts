@@ -7,6 +7,7 @@ import { IConditionService } from './interfaces/icondition.service'
 import { AuthModule } from '../auth/auth.module'
 import { ConditionRepository } from './condition.repository'
 import { IConditionRepository } from './interfaces/icondition.repository'
+import { AccountModule } from '../account/account.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { IConditionRepository } from './interfaces/icondition.repository'
       { name: Condition.name, schema: ConditionSchema },
     ]),
     AuthModule,
+    AccountModule
   ],
   controllers: [ConditionController],
   providers: [
@@ -28,4 +30,4 @@ import { IConditionRepository } from './interfaces/icondition.repository'
   ],
   exports: [IConditionService, IConditionRepository],
 })
-export class ConditionModule {}
+export class ConditionModule { }

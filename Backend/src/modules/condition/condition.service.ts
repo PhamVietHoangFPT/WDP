@@ -17,7 +17,7 @@ export class ConditionService implements IConditionService {
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
-  ) {}
+  ) { }
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -49,9 +49,17 @@ export class ConditionService implements IConditionService {
     )
 
     if (existingCondition) {
-      throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
+      if (existingCondition.deleted_at === null ||
+        existingCondition.deleted_by === null) {
+        throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
+      } else {
+        let restoreCondition = await this.conditionRepository.restore(existingCondition.id,
+          userId,
+          { conditionFee: createConditionDto.conditionFee },
+        )
+        return this.mapToResponseDto(restoreCondition)
+      }
     }
-
     try {
       let newCondition = await this.conditionRepository.create(
         userId,

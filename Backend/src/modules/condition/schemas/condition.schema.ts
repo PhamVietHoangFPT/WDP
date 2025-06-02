@@ -17,6 +17,12 @@ export class Condition extends BaseEntity {
 
   @Prop({ type: Number, required: true, min: 0 })
   conditionFee: number
+
+  @Prop({ type: Date, default: null })
+  deleted_at: Date
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, default: null })
+  deleted_by: mongoose.Schema.Types.ObjectId
 }
 
 export const ConditionSchema = SchemaFactory.createForClass(Condition)
