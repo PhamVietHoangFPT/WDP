@@ -1,6 +1,6 @@
-import { CreateTestTakerDto } from '../dto/create-testtaker.dto'
-import { TestTakerResponseDto } from '../dto/testtaker-response.dto'
-import { QueryTestTakerDto } from '../dto/query-testtaker.dto'
+import { CreateTestTakerDto } from '../dto/createTestTaker.dto'
+import { TestTakerResponseDto } from '../dto/testTakerResponse.dto'
+import { QueryTestTakerDto } from '../dto/queryTestTaker.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 
 export interface ITestTakerService {

@@ -1,6 +1,6 @@
 import { TestTaker } from '../schemas/testTaker.schema'
-import { CreateTestTakerDto } from '../dto/create-testtaker.dto'
-import { QueryTestTakerDto } from '../dto/query-testtaker.dto'
+import { CreateTestTakerDto } from '../dto/createTestTaker.dto'
+import { QueryTestTakerDto } from '../dto/queryTestTaker.dto'
 
 export interface ITestTakerRepository {
   create(testTaker: CreateTestTakerDto): Promise<TestTaker>

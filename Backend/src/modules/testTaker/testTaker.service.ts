@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common'
 import { ITestTakerService } from './interfaces/itestTaker.service'
 import { ITestTakerRepository } from './interfaces/itestTaker.repository'
-import { CreateTestTakerDto } from './dto/create-testtaker.dto'
-import { QueryTestTakerDto } from './dto/query-testtaker.dto'
-import { TestTakerResponseDto } from './dto/testtaker-response.dto'
+import { CreateTestTakerDto } from './dto/createTestTaker.dto'
+import { QueryTestTakerDto } from './dto/queryTestTaker.dto'
+import { TestTakerResponseDto } from './dto/testTakerResponse.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { TestTaker } from './schemas/testTaker.schema'
 
