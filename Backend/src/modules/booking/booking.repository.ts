@@ -83,10 +83,16 @@ export class BookingRepository implements IBookingRepository {
   }
 
   async cancel(id: string, userId: string): Promise<BookingDocument | null> {
+    const bookingStatus =
+      await this.bookingStatusRepository.findByBookingStatus('Đã hủy')
     return this.bookingModel
       .findOneAndUpdate(
         { _id: id, created_by: userId },
-        { updated_by: userId, updated_at: new Date() },
+        {
+          updated_by: userId,
+          updated_at: new Date(),
+          bookingStatus: bookingStatus,
+        },
         { new: true },
       )
       .exec()

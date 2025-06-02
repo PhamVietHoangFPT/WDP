@@ -1,24 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-  Inject,
-  Query,
-  Req,
-  UseGuards,
-  HttpStatus,
-} from '@nestjs/common'
+import { Controller, Get, Param, Inject, Query } from '@nestjs/common'
 import { ISlotService } from './interfaces/islot.service'
-import { CreateSlotDto } from './dto/createSlot.dto'
 import { QuerySlotDto } from './dto/querySlot.dto'
-import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger'
-import { Slot } from './schemas/slot.schema'
-import { AuthGuard } from 'src/common/guard/auth.guard'
-import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger'
 
 @ApiTags('slots')
 @Controller('slots')
@@ -27,12 +10,6 @@ export class SlotController {
     @Inject(ISlotService)
     private readonly slotService: ISlotService,
   ) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Tạo một slot mới' })
-  create(@Body() createSlotDto: CreateSlotDto) {
-    return this.slotService.create(createSlotDto)
-  }
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách các slots theo cơ sở' })
@@ -64,27 +41,5 @@ export class SlotController {
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một slot theo ID' })
   findOne(@Param('id') id: string) {
     return this.slotService.findOne(id)
-  }
-
-  @Put(':id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'Cập nhật thông tin một slot' })
-  update(@Param('id') id: string, @Body() updateSlotDto: Partial<Slot>) {
-    return this.slotService.update(id, updateSlotDto)
-  }
-
-  @Delete(':id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'Xóa một slot' })
-  async remove(@Param('id') id: string, @Req() req: any) {
-    const userId = req.user.id
-    await this.slotService.remove(id, userId)
-    return new ApiResponseDto<null>({
-      success: true,
-      message: 'Xóa slot thành công',
-      statusCode: HttpStatus.OK,
-    })
   }
 }

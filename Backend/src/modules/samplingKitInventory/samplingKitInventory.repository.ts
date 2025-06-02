@@ -72,7 +72,7 @@ export class SamplingKitInventoryRepository
   ): Promise<SamplingKitInventoryDocument | null> {
     return this.samplingKitInventoryModel
       .findOneAndUpdate(
-        { _id: id, facility: facilityId },
+        { _id: id, facility: facilityId, deleted_at: null },
         { deleted_at: new Date(), deleted_by: userId },
         { new: true },
       )

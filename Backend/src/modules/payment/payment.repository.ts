@@ -76,9 +76,11 @@ export class PaymentRepository implements IPaymentRepository {
     filter?: Record<string, unknown>,
   ): mongoose.Query<PaymentDocument[], PaymentDocument> {
     if (!userId) {
-      const query = this.paymentModel.find({
-        ...filter, // Thêm các điều kiện lọc khác nếu cần
-      })
+      const query = this.paymentModel
+        .find({
+          ...filter, // Thêm các điều kiện lọc khác nếu cần
+        })
+        .populate({ path: 'paymentType', select: 'paymentType' })
       return query
     }
     const query = this.paymentModel

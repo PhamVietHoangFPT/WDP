@@ -29,10 +29,10 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
 import { CheckVnPayPaymentDto } from './dto/checkVnPayPayment.dto'
-
+import { RolesGuard } from 'src/common/guard/roles.guard'
 @ApiTags('payments')
 @Controller('payments')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class PaymentController {
   constructor(
@@ -78,6 +78,39 @@ export class PaymentController {
   //   return this.paymentService.createForCase(CheckVnPayPaymentDto, userId)
   // }
 
+  @Get('staff')
+  @Roles(RoleEnum.STAFF)
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+    description: 'Số trang',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách lịch sử thanh toán được lấy thành công',
+    type: ApiResponseDto<PaginatedResponse<PaymentHistoryResponseDto>>,
+  })
+  getPaymentHistoriesStaff(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        forbidNonWhitelisted: true,
+      }),
+    )
+    paginationQuery: PaginationQueryDto,
+  ) {
+    const { pageNumber, pageSize } = paginationQuery
+    return this.paymentService.findAll(pageNumber || 1, pageSize || 10)
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách lịch sử thanh toán' })
   @ApiQuery({
@@ -111,39 +144,6 @@ export class PaymentController {
     const { pageNumber, pageSize } = paginationQuery
     const userId = req.user.id
     return this.paymentService.findAll(pageNumber || 1, pageSize || 10, userId)
-  }
-
-  @Get('staff')
-  @Roles(RoleEnum.STAFF)
-  @ApiQuery({
-    name: 'pageNumber',
-    required: false,
-    type: Number,
-    description: 'Số trang',
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    required: false,
-    type: Number,
-    description: 'Số lượng mục trên mỗi trang',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Danh sách lịch sử thanh toán được lấy thành công',
-    type: ApiResponseDto<PaginatedResponse<PaymentHistoryResponseDto>>,
-  })
-  getPaymentHistoriesStaff(
-    @Query(
-      new ValidationPipe({
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-        forbidNonWhitelisted: true,
-      }),
-    )
-    paginationQuery: PaginationQueryDto,
-  ) {
-    const { pageNumber, pageSize } = paginationQuery
-    return this.paymentService.findAll(pageNumber || 1, pageSize || 10)
   }
 
   @Get(':id')

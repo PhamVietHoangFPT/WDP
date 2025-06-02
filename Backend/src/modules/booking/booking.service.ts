@@ -14,6 +14,7 @@ import { Booking } from './schemas/booking.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import mongoose from 'mongoose'
+import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -22,6 +23,8 @@ export class BookingService implements IBookingService {
     private readonly bookingRepository: IBookingRepository,
     @Inject(ISlotRepository)
     private readonly slotRepository: ISlotRepository,
+    @Inject(IBookingStatusRepository)
+    private readonly bookingStatusRepository: IBookingStatusRepository,
   ) {}
 
   private mapToResponseDto(booking: Booking): BookingResponseDto {
@@ -106,11 +109,18 @@ export class BookingService implements IBookingService {
     if (!updateBookingCheck) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
-    // if (updateBookingCheck.bookingStatus === false) {
-    //   throw new BadRequestException(
-    //     `Lịch hẹn đã bị hủy. Không thể cập nhật lại.`,
-    //   )
-    // }
+    const currentBookingStatus =
+      await this.bookingStatusRepository.findByBookingStatus('Đã hủy')
+    if (
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      updateBookingCheck.bookingStatus.toString() ===
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      currentBookingStatus.toString()
+    ) {
+      throw new BadRequestException(
+        `Lịch hẹn đã bị hủy. Không thể cập nhật lại.`,
+      )
+    }
     const updateByUser = new mongoose.Types.ObjectId(userId)
     if (
       updateBookingCheck.updated_by &&
