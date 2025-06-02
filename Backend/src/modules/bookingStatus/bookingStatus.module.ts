@@ -1,17 +1,32 @@
-// src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import {
-  bookingStatus,
-  bookingStatusSchema,
+  BookingStatus,
+  BookingStatusSchema,
 } from './schemas/bookingStatus.schema'
+import { BookingStatusRepository } from './bookingStatus.repository'
+import { IBookingStatusRepository } from './interfaces/ibookingStatus.repository'
+import { BookingStatusService } from './bookingStatus.service'
+import { IBookingStatusService } from './interfaces/ibookingStatus.service'
+import { BookingStatusController } from './bookingStatus.controller'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: bookingStatus.name, schema: bookingStatusSchema },
+      { name: BookingStatus.name, schema: BookingStatusSchema },
     ]),
   ],
-  exports: [MongooseModule],
+  controllers: [BookingStatusController],
+  providers: [
+    {
+      provide: IBookingStatusRepository,
+      useClass: BookingStatusRepository,
+    },
+    {
+      provide: IBookingStatusService,
+      useClass: BookingStatusService,
+    },
+  ],
+  exports: [IBookingStatusRepository, IBookingStatusService],
 })
 export class BookingStatusModule {}

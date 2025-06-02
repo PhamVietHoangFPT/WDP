@@ -129,7 +129,6 @@ export class SlotService implements ISlotService {
       workTimeEnd,
       slotDuration,
       _id: slotTemplateId,
-      facility,
     } = template
 
     if (!workTimeStart || !workTimeEnd || !slotDuration || slotDuration <= 0) {
@@ -175,7 +174,6 @@ export class SlotService implements ISlotService {
         updated_at: null,
         deleted_at: undefined,
         deleted_by: null,
-        facility: facility,
       })
 
       currentSlotStartMinutes = currentSlotEndMinutes

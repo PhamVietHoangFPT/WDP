@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Slot, SlotDocument } from './schemas/slot.schema'
@@ -10,7 +10,6 @@ import { ISlotTemplateRepository } from '../slotTemplate/interfaces/islotTemplat
 
 @Injectable()
 export class SlotRepository implements ISlotRepository {
-  private readonly logger = new Logger(SlotRepository.name)
   constructor(
     @InjectModel(Slot.name)
     private slotModel: Model<SlotDocument>,
@@ -85,8 +84,8 @@ export class SlotRepository implements ISlotRepository {
 
   async delete(id: string, userId: string): Promise<SlotDocument | null> {
     return this.slotModel
-      .findByIdAndUpdate(
-        id,
+      .findOneAndUpdate(
+        { _id: id, deleted_at: null },
         { deleted_at: new Date(), deleted_by: userId },
         { new: true },
       )
