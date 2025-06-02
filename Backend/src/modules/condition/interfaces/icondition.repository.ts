@@ -16,6 +16,11 @@ export interface IConditionRepository {
     userId: string,
     updateConditionDto: Partial<UpdateConditionDto>,
   ): Promise<ConditionDocument | null>
+  restore(
+    id: string,
+    userId: string,
+    updateConditionDto: Partial<UpdateConditionDto>,
+  ): Promise<ConditionDocument | null>
   deleteConditionById(
     id: string,
     userId: string,
