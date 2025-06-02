@@ -11,6 +11,7 @@ export class Type extends BaseEntity {
     default: () => new mongoose.Types.ObjectId(),
   })
   _id: mongoose.Schema.Types.ObjectId
+
   @Prop({ type: String, required: true })
   name: string
 
@@ -29,6 +30,9 @@ export class Type extends BaseEntity {
 
   @Prop({ type: String })
   description: string
+
+  @Prop({ type: Boolean, default: true })
+  isAdminstration: boolean
 }
 
 export const TypeSchema = SchemaFactory.createForClass(Type)

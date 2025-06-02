@@ -17,6 +17,14 @@ export class UpdateConditionDto {
   @IsNumber({ allowNaN: true }, { message: 'Condition fee must be a number' })
   conditionFee?: number
 
+  @ApiProperty({ example: '2021-03-01T12:00:00Z' })
+  @IsEmpty()
+  deleted_at?: Date
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
+
+  @IsEmpty()
+  deleted_by?: string
+
   constructor(partial: Partial<CreateConditionDto>) {
     Object.assign(this, partial)
   }
