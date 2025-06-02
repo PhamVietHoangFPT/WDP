@@ -84,8 +84,8 @@ export class SlotRepository implements ISlotRepository {
 
   async delete(id: string, userId: string): Promise<SlotDocument | null> {
     return this.slotModel
-      .findByIdAndUpdate(
-        id,
+      .findOneAndUpdate(
+        { _id: id, deleted_at: null },
         { deleted_at: new Date(), deleted_by: userId },
         { new: true },
       )
