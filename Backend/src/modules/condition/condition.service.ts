@@ -47,7 +47,7 @@ export class ConditionService implements IConditionService {
     const existingCondition = await this.conditionRepository.findOneByName(
       createConditionDto.name,
     )
-    console.log(existingCondition)
+
     if (existingCondition) {
       if (existingCondition.deleted_at === null ||
         existingCondition.deleted_by === null) {
@@ -67,7 +67,6 @@ export class ConditionService implements IConditionService {
       )
       return this.mapToResponseDto(newCondition)
     } catch (error) {
-      console.log(error)
       throw new InternalServerErrorException(
         'Lỗi khi tạo tình trạng của mẫu thử.',
       )
