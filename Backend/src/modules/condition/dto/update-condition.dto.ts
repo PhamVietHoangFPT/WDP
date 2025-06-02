@@ -21,7 +21,6 @@ export class UpdateConditionDto {
   @IsEmpty()
   deleted_at?: Date
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
-
   @IsEmpty()
   deleted_by?: string
 

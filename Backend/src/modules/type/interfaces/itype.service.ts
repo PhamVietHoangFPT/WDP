@@ -1,3 +1,3 @@
-export interface ITypeService { }
+export interface ITypeService {}
 
 export const ITypeService = Symbol('ITypeService')

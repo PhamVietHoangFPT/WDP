@@ -15,7 +15,7 @@ import { AccountModule } from '../account/account.module'
       { name: Condition.name, schema: ConditionSchema },
     ]),
     AuthModule,
-    AccountModule
+    AccountModule,
   ],
   controllers: [ConditionController],
   providers: [
@@ -30,4 +30,4 @@ import { AccountModule } from '../account/account.module'
   ],
   exports: [IConditionService, IConditionRepository],
 })
-export class ConditionModule { }
+export class ConditionModule {}
