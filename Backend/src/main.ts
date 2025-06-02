@@ -32,7 +32,7 @@ async function bootstrap() {
   )
 
   // --- Bắt đầu cấu hình Swagger ---
-
+  app.enableCors() // Bật CORS nếu cần thiết, giúp frontend có thể gọi API từ backend
   // Tạo một đối tượng cấu hình cơ bản cho Swagger document
   const config = new DocumentBuilder()
     .setTitle('ADN-Testing-Management') // Tiêu đề hiển thị trên Swagger UI

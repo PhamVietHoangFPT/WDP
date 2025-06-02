@@ -12,7 +12,7 @@ const userToken = Cookies.get('userToken')
 
 const initialState: AuthState = {
   userData,
-  userToken: userToken ? { token: userToken } : null,
+  userToken: userToken ? { accessToken: userToken } : null,
   isAuthenticated: !!userData,
   isLoading: false,
 }
@@ -30,30 +30,30 @@ const authSlice = createSlice({
       const decodedToken: any = jwtDecode(token)
 
       state.userData = {
-        Email: decodedToken.Email,
-        Id: decodedToken.Id,
-        Role: decodedToken.Role,
-        Name: decodedToken.Name,
-        PhoneNumber: decodedToken.PhoneNumber,
-        Address: decodedToken.Address,
+        email: decodedToken.email,
+        id: decodedToken.id,
+        role: decodedToken.role,
+        name: decodedToken.name,
+        phoneNumber: decodedToken.phoneNumber,
         exp: decodedToken.exp,
-        Facility: decodedToken.FacilityId,
+        facility: decodedToken.facilityId,
+        gender: decodedToken.gender
       }
 
-      state.userToken = { token: token }
+      state.userToken = { accessToken: token }
       state.isAuthenticated = true
 
-      const expirationDate = new Date(state.userData.exp * 1000)
+      const expirationDate = new Date(Number(state.userData.exp) * 1000)
       Cookies.set('userData', JSON.stringify(state.userData), {
         expires: expirationDate,
       })
       Cookies.set('userToken', token, { expires: expirationDate })
-      if (state.userData.Role === 'Customer') {
+      if (state.userData.role === 'Customer') {
         window.location.href = '/'
-      } else if (state.userData.Role === 'Staff') {
+      } else if (state.userData.role === 'Staff') {
         window.location.href = '/staff/customer-account'
       } else {
-        window.location.href = `/${state.userData.Role.toLowerCase()}`
+        window.location.href = `/${state.userData.role.toLowerCase()}`
       }
     },
     logout: (state) => {
