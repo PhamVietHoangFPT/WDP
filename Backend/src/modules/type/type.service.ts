@@ -15,7 +15,7 @@ export class TypeService implements ITypeService {
   constructor(
     @Inject(ITypeRepository)
     private readonly typeRepository: ITypeRepository, // <-- Inject the repository
-  ) {}
+  ) { }
 
   private mapToResponseDto(type: Type): TypeResponseDto {
     return new TypeResponseDto({
@@ -86,16 +86,17 @@ export class TypeService implements ITypeService {
   // this function returns all types
   // if there are no conditions, it throws an ConflictException
   async findAllTypes(): Promise<TypeResponseDto[]> {
-    try {
-      const types = await this.typeRepository.findAll()
-      if (!types || types.length === 0) {
-        throw new ConflictException('Không tìm thấy loại mẫu thử nào.')
+    const types = await this.typeRepository.findAll()
+    if (!types || types.length == 0) {
+      throw new ConflictException('Không tìm thấy loại mẫu thử nào.')
+    } else {
+      try {
+        return types.map((type) => this.mapToResponseDto(type))
+      } catch (error) {
+        throw new InternalServerErrorException(
+          'Lỗi khi lấy danh sách loại mẫu thử.',
+        )
       }
-      return types.map((type) => this.mapToResponseDto(type))
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách loại mẫu thử.',
-      )
     }
   }
 

@@ -54,18 +54,20 @@ export class TimeReturnService implements ITimeReturnService {
   }
 
   async findAllTimeReturn(): Promise<TimeReturnResponseDto[]> {
-    try {
-      const timeReturns = await this.timeReturnRepository.findAll()
-      if (!timeReturns || timeReturns.length === 0) {
-        throw new ConflictException('Không tìm thấy ngày trả mẫu thử nào.')
+    const timeReturns = await this.timeReturnRepository.findAll()
+    if (!timeReturns || timeReturns.length === 0) {
+      throw new ConflictException('Không tìm thấy ngày trả mẫu thử nào.')
+    } else {
+      try {
+        return timeReturns.map((timeReturn) => this.mapToResponseDto(timeReturn))
+      } catch (error) {
+        throw new InternalServerErrorException(
+          'Lỗi khi lấy danh sách ngày trả mẫu thử.',
+        )
       }
-      return timeReturns.map((timeReturn) => this.mapToResponseDto(timeReturn))
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách ngày trả mẫu thử.',
-      )
     }
   }
+  
   async updateTimeReturn(
     id: string,
     userId: string,
