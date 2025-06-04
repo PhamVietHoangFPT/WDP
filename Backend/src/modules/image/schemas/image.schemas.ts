@@ -15,6 +15,9 @@ export class Image extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   url: string
 
+  @Prop({ type: Boolean, default: false })
+  isDeleted: boolean
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TestRequestStatus',
