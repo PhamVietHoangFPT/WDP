@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common' // Nên có để validate DTOs
 import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'
+import * as dotenv from 'dotenv'
+import { join } from 'node:path'
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
   const configService = app.get(ConfigService)
   // (Tùy chọn nhưng khuyến khích) Bật Global Validation Pipe
   // Giúp Swagger hoạt động tốt với các validation decorator trong DTO
@@ -30,6 +34,9 @@ async function bootstrap() {
       // MemoryStore mặc định không phù hợp cho production
     }),
   )
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  })
 
   // --- Bắt đầu cấu hình Swagger ---
   app.enableCors() // Bật CORS nếu cần thiết, giúp frontend có thể gọi API từ backend
@@ -40,6 +47,8 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build()
+
+  dotenv.config()
 
   // Tạo Swagger document dựa trên cấu hình và ứng dụng NestJS
   // NestJS sẽ tự động quét các controller và DTO có decorator của @nestjs/swagger

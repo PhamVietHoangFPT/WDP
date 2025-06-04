@@ -19,6 +19,7 @@ import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
+import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 @Module({
   imports: [
@@ -38,6 +39,8 @@ import { TypeModule } from './modules/type/type.module'
     ScheduleModule.forRoot(),
     ConditionModule,
     PaymentModule,
+    ImageModule,
+    BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
     VnPayModule,
