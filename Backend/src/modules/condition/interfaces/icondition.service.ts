@@ -1,3 +1,4 @@
+// import { TypeResponseDto } from 'src/modules/type/dto/type-response.dto'
 import { ConditionResponseDto } from '../dto/condition-response.dto'
 import { CreateConditionDto } from '../dto/create-condition.dto'
 import { UpdateConditionDto } from '../dto/update-condition.dto'

@@ -20,6 +20,7 @@ import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
+import { TypeModule } from './modules/type/type.module'
 @Module({
   imports: [
     databaseConfig,
@@ -37,12 +38,14 @@ import { ImageModule } from './modules/image/image.module'
     LocationModule,
     ScheduleModule.forRoot(),
     ConditionModule,
-    VnPayModule,
     PaymentModule,
     ImageModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
+    VnPayModule,
+    BookingModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
