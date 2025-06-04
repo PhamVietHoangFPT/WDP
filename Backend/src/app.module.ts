@@ -19,6 +19,7 @@ import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
+import { ImageModule } from './modules/image/image.module'
 @Module({
   imports: [
     databaseConfig,
@@ -38,6 +39,7 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
     ConditionModule,
     VnPayModule,
     PaymentModule,
+    ImageModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
