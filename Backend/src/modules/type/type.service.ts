@@ -42,7 +42,7 @@ export class TypeService implements ITypeService {
 
   //this function create a new condition by checking if the type already exists
   // if it exists, it throws a ConflictException
-  // if it does not exist, it creates a new condition and returns the created condition
+  // if it does not exist, it creates a new type and returns the created type
   async createType(
     userId: string,
     createTypeDto: CreateTypeDto,
@@ -51,8 +51,8 @@ export class TypeService implements ITypeService {
     const existingType = await this.typeRepository.findOneByName(
       createTypeDto.name,
     )
-    //check if the condition is solf deleted
-    //if it is, restore it and return the restored condition
+    //check if the type is solf deleted
+    //if it is, restore it and return the restored type
     if (existingType) {
       if (
         existingType.deleted_at === null ||
@@ -133,7 +133,7 @@ export class TypeService implements ITypeService {
     }
   }
   async deleteType(id: string, userId: string): Promise<TypeResponseDto> {
-    //this variable is used to check if the condition already exists
+    //this variable is used to check if the type already exists
     const existingType = await this.findTypeById(id)
 
     if (existingType.deleted_at !== null || existingType.deleted_by !== null) {
