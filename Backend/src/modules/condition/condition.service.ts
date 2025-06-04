@@ -24,6 +24,8 @@ export class ConditionService implements IConditionService {
       _id: condition._id,
       name: condition.name,
       conditionFee: condition.conditionFee,
+      deleted_at: condition.deleted_at,
+      deleted_by: condition.deleted_by,
     })
   }
 

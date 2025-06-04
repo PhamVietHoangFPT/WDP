@@ -8,12 +8,14 @@ import { AuthModule } from '../auth/auth.module'
 import { TypeController } from './type.controller'
 import { TypeService } from './type.service'
 import { TypeRepository } from './type.repository'
+import { AccountModule } from '../account/account.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Type.name, schema: TypeSchema }]),
     ConditionModule,
     AuthModule,
+    AccountModule,
   ],
   controllers: [TypeController],
   providers: [
@@ -26,6 +28,6 @@ import { TypeRepository } from './type.repository'
       useClass: TypeRepository,
     },
   ],
-  exports: [MongooseModule],
+  exports: [ITypeService, ITypeRepository],
 })
 export class TypeModule {}
