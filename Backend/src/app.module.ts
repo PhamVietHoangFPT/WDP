@@ -12,7 +12,6 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
 import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
 import { ConditionModule } from './modules/condition/condition.module'
-import { TypeModule } from './modules/type/type.module'
 import { VnPayModule } from './modules/vnpay/vnpay.module'
 import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
@@ -20,6 +19,7 @@ import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
+import { TypeModule } from './modules/type/type.module'
 @Module({
   imports: [
     databaseConfig,
@@ -37,12 +37,14 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
     LocationModule,
     ScheduleModule.forRoot(),
     ConditionModule,
-    TypeModule,
     PaymentModule,
     BookingStatusModule,
     PaymentTypeModule,
     VnPayModule,
+    BookingModule,
+    TypeModule,
   ],
   controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

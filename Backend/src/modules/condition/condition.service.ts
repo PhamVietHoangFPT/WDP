@@ -17,13 +17,15 @@ export class ConditionService implements IConditionService {
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
-  ) { }
+  ) {}
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
       _id: condition._id,
       name: condition.name,
       conditionFee: condition.conditionFee,
+      deleted_at: condition.deleted_at,
+      deleted_by: condition.deleted_by,
     })
   }
 
@@ -50,11 +52,14 @@ export class ConditionService implements IConditionService {
     //check if the condition is solf deleted
     //if it is, restore it and return the restored condition
     if (existingCondition) {
-      if (existingCondition.deleted_at === null ||
-        existingCondition.deleted_by === null) {
+      if (
+        existingCondition.deleted_at === null ||
+        existingCondition.deleted_by === null
+      ) {
         throw new ConflictException('Tình trạng của mẫu thử đã tồn tại.')
       } else {
-        let restoreCondition = await this.conditionRepository.restore(existingCondition.id,
+        let restoreCondition = await this.conditionRepository.restore(
+          existingCondition.id,
           userId,
           { conditionFee: createConditionDto.conditionFee },
         )

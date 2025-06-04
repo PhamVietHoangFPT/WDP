@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Transform } from 'class-transformer'
 import mongoose from 'mongoose'
+import { IsNotEmpty } from 'class-validator'
 import { Type } from '../schemas/type.schema'
+
 @Exclude()
 export class TypeResponseDto {
   @Expose()
@@ -21,8 +23,12 @@ export class TypeResponseDto {
   @ApiProperty({ example: true })
   isSpecial: boolean
 
-  @Expose()
-  @ApiProperty({ example: '6837d1f5286eb52dfd0579c6', required: true })
+  @ApiProperty({
+    example: '67f697151bfaa0e9cf14ec92',
+    required: true,
+    type: String,
+  })
+  @IsNotEmpty({ message: 'ID tình trạng không được để trống' })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   condition: mongoose.Schema.Types.ObjectId
 

@@ -33,6 +33,12 @@ export class Type extends BaseEntity {
 
   @Prop({ type: Boolean, default: true })
   isAdminstration: boolean
+
+  @Prop({ type: Date, default: null })
+  deleted_at: Date
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, default: null })
+  deleted_by: mongoose.Schema.Types.ObjectId
 }
 
 export const TypeSchema = SchemaFactory.createForClass(Type)

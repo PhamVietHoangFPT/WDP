@@ -30,4 +30,4 @@ import { AccountModule } from '../account/account.module'
   ],
   exports: [ITypeService, ITypeRepository],
 })
-export class TypeModule { }
+export class TypeModule {}
