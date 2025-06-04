@@ -21,6 +21,7 @@ import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.modul
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
+import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 @Module({
   imports: [
     databaseConfig,
@@ -46,6 +47,7 @@ import { TypeModule } from './modules/type/type.module'
     VnPayModule,
     BookingModule,
     TypeModule,
+    TimeReturnModule,
   ],
   controllers: [AppController],
   providers: [AppService],
