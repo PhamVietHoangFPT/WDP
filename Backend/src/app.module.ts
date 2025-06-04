@@ -25,6 +25,7 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AccountModule,
     AuthModule,
     SlotTemplateModule,
@@ -34,7 +35,6 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
     TestTakerRelationshipModule,
     AddressModule,
     LocationModule,
-    ScheduleModule.forRoot(),
     ConditionModule,
     VnPayModule,
     PaymentModule,
