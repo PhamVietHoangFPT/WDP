@@ -21,6 +21,7 @@ import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.modul
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
+import { BlogModule } from './modules/blog/blog.module'
 @Module({
   imports: [
     databaseConfig,
@@ -40,6 +41,7 @@ import { TypeModule } from './modules/type/type.module'
     ConditionModule,
     PaymentModule,
     ImageModule,
+    BlogModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
