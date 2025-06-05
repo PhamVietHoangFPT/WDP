@@ -23,6 +23,7 @@ import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
+import { RelationshipModule } from './modules/relationship/relationship.module'
 @Module({
   imports: [
     databaseConfig,
@@ -50,6 +51,7 @@ import { SamplingKitInventoryModule } from './modules/samplingKitInventory/sampl
     TypeModule,
     TimeReturnModule,
     SamplingKitInventoryModule,
+    RelationshipModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -10,7 +10,7 @@ export class TypeRepository implements ITypeRepository {
   constructor(
     @InjectModel(Type.name)
     private typeModel: Model<TypeDocument>,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -37,7 +37,8 @@ export class TypeRepository implements ITypeRepository {
   }
 
   async findAll(): Promise<TypeDocument[] | null> {
-    return this.typeModel.find({ deleted_at: null }).exec()
+    return this.typeModel.find({ deleted_at: null }).populate({ path: "condition", select: "name" })
+      .exec()
   }
 
   async updateTypeById(

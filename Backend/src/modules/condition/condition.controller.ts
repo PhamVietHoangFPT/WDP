@@ -54,7 +54,7 @@ export class ConditionController {
   @ApiBearerAuth('bearer')
   @Put(':id')
   @ApiBody({ type: UpdateConditionDto })
-  @ApiOperation({ summary: 'Thay đổi tình trạng mẫu mới' })
+  @ApiOperation({ summary: 'Thay đổi tình trạng mẫu' })
   update(
     @Param('id') id: string,
     @Body() updateConditionDto: UpdateConditionDto,
@@ -68,7 +68,7 @@ export class ConditionController {
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth('bearer')
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa tình trạng mẫu mới' })
+  @ApiOperation({ summary: 'Xóa tình trạng mẫu' })
   async deleteCondition(@Param('id') id: string, @Req() req: any) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     await this.conditionService.deleteCondition(id, user)
