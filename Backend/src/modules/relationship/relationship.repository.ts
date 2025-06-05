@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { IRelationshipRepository } from './interfaces/irelationship1.repository'
+import { IRelationshipRepository } from './interfaces/irelationship.repository'
 import {
   Relationship,
   RelationshipDocument,
-} from './schemas/relationship1.schema'
+} from './schemas/relationship.schema'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { CreateRelationshipDto } from './dto/createRelationship.dto'
