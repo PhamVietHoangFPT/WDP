@@ -4,7 +4,6 @@ import { CreateConditionDto } from '../dto/create-condition.dto'
 import { UpdateConditionDto } from '../dto/update-condition.dto'
 
 export interface IConditionService {
-
   createCondition(
     userId: string,
     createConditionDto: CreateConditionDto,

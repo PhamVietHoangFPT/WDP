@@ -17,8 +17,8 @@ export class TypeService implements ITypeService {
     @Inject(ITypeRepository)
     private readonly typeRepository: ITypeRepository,
     @Inject(IConditionRepository)
-    private readonly conditionRepository: IConditionRepository // <-- Inject the repository
-  ) { }
+    private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
+  ) {}
 
   private mapToResponseDto(type: Type): TypeResponseDto {
     return new TypeResponseDto({
@@ -63,7 +63,6 @@ export class TypeService implements ITypeService {
       ) {
         throw new ConflictException('Loại mẫu thử đã tồn tại.')
       } else {
-
         let restoreCondition = await this.typeRepository.restore(
           existingType.id,
           userId,
@@ -79,21 +78,22 @@ export class TypeService implements ITypeService {
       }
     }
 
-    const existingCondition = await this.conditionRepository.findOneById(createTypeDto.condition.toString())
+    const existingCondition = await this.conditionRepository.findOneById(
+      createTypeDto.condition.toString(),
+    )
     if (!existingCondition) {
       throw new ConflictException('Tình trạng mẫu thử không tồn tại.')
     }
 
     try {
-      let newCondition = await this.typeRepository.create(userId,
-        {
-          name: createTypeDto.name,
-          typeFee: createTypeDto.typeFee,
-          isSpecial: createTypeDto.isSpecial,
-          condition:  existingCondition._id,
-          description: createTypeDto.description,
-          isAdminstration: createTypeDto.isAdminstration,
-        })
+      let newCondition = await this.typeRepository.create(userId, {
+        name: createTypeDto.name,
+        typeFee: createTypeDto.typeFee,
+        isSpecial: createTypeDto.isSpecial,
+        condition: existingCondition._id,
+        description: createTypeDto.description,
+        isAdminstration: createTypeDto.isAdminstration,
+      })
       return this.mapToResponseDto(newCondition)
     } catch (error) {
       throw new InternalServerErrorException(

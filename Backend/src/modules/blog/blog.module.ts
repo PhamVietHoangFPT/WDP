@@ -8,14 +8,12 @@ import { IBlogService } from './interfaces/iblog.service'
 import { IBlogRepository } from './interfaces/iblog.repository'
 import { BlogController } from './blog.controller'
 import { AccountModule } from '../account/account.module'
-import { ImageModule } from '../image/image.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     AuthModule,
     AccountModule,
-    ImageModule,
   ],
   controllers: [BlogController],
   providers: [

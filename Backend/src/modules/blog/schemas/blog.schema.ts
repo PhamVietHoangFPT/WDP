@@ -41,9 +41,6 @@ export class Blog extends BaseEntity {
     required: false,
   })
   image: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: Boolean, default: false })
-  isDeleted: boolean
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog)

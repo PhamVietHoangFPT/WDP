@@ -1,12 +1,24 @@
-import { Body, Controller, Delete, Get, HttpStatus, Inject, Param, Post, Put, Req, UseGuards } from "@nestjs/common";
-import { IRelationshipService } from "./interfaces/irelationship.service";
-import { AuthGuard } from "src/common/guard/auth.guard";
-import { Roles } from "src/common/decorators/roles.decorator";
-import { RoleEnum } from "src/common/enums/role.enum";
-import { ApiBearerAuth, ApiBody, ApiOperation } from "@nestjs/swagger";
-import { ApiResponseDto } from "src/common/dto/api-response.dto";
-import { CreateRelationshipDto } from "./dto/createRelationship.dto";
-import { UpdateRelationshipDto } from "./dto/updateRelationship.dto";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
+import { IRelationshipService } from './interfaces/irelationship.service'
+import { AuthGuard } from 'src/common/guard/auth.guard'
+import { Roles } from 'src/common/decorators/roles.decorator'
+import { RoleEnum } from 'src/common/enums/role.enum'
+import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger'
+import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { CreateRelationshipDto } from './dto/createRelationship.dto'
+import { UpdateRelationshipDto } from './dto/updateRelationship.dto'
 
 @Controller('relationships')
 @UseGuards(AuthGuard)
@@ -15,15 +27,21 @@ import { UpdateRelationshipDto } from "./dto/updateRelationship.dto";
 export class RelationshipController {
   constructor(
     @Inject(IRelationshipService)
-    private readonly relationshipService: IRelationshipService
-  ) { }
+    private readonly relationshipService: IRelationshipService,
+  ) {}
 
   @Post()
   @ApiBody({ type: CreateRelationshipDto })
   @ApiOperation({ summary: 'Tạo mối quan hệ mới' })
-  create(@Body() createRelationshipDto: CreateRelationshipDto, @Req() req: any) {
+  create(
+    @Body() createRelationshipDto: CreateRelationshipDto,
+    @Req() req: any,
+  ) {
     const user = req.user.id // Lấy thông tin người dùng từ request
-    return this.relationshipService.createRelationship(user, createRelationshipDto)
+    return this.relationshipService.createRelationship(
+      user,
+      createRelationshipDto,
+    )
   }
 
   @Get()
@@ -41,7 +59,11 @@ export class RelationshipController {
     @Req() req: any,
   ) {
     const user = req.user.id // Lấy thông tin người dùng từ request
-    return this.relationshipService.updateRelationship(id, user, updateRelationshipDto)
+    return this.relationshipService.updateRelationship(
+      id,
+      user,
+      updateRelationshipDto,
+    )
   }
 
   @Delete(':id')

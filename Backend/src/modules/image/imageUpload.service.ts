@@ -1,20 +1,24 @@
-import { Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject } from '@nestjs/common'
 import { Image, ImageDocument } from './schemas/image.schemas'
-import { Express } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import * as fs from 'fs'
 import * as path from 'path'
+import { IImageUploadService } from './interfaces/iImageUpload.service'
+import { CreateBlogImageDto } from './dto/createImage.dto'
+import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 
 @Injectable()
-export class ImageUploadService {
+export class ImageUploadService implements IImageUploadService {
   constructor(
-    @InjectModel(Image.name) private imageModel: Model<ImageDocument>,
+    @Inject(IImageUploadRepository)
+    private readonly imageModel: IImageUploadRepository,
   ) {}
 
-  async uploadFile(
+  async uploadFileForBlog(
     file: Express.Multer.File,
+    createBlogImageDto: CreateBlogImageDto,
+    userId: string,
   ): Promise<{ url: string; _id: string }> {
     const uploadDir = path.join(process.cwd(), 'uploads')
     if (!fs.existsSync(uploadDir)) {
@@ -27,12 +31,11 @@ export class ImageUploadService {
 
     const url = `/uploads/${fileName}`
 
-    const saved: ImageDocument = await this.imageModel.create({
+    const saved: ImageDocument = await this.imageModel.createForBlog(
       url,
-      originalName: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-    })
+      createBlogImageDto,
+      userId,
+    )
 
     return {
       url: saved.url,
@@ -40,24 +43,24 @@ export class ImageUploadService {
     }
   }
 
-  async findAll(): Promise<Image[]> {
-    return this.imageModel.find({ isDeleted: false }).lean().exec()
+  async findAllForBlog(blogId: string): Promise<Image[]> {
+    return this.imageModel.findAllImageForBlog(blogId)
   }
 
   async findById(id: string): Promise<Image | null> {
-    return this.imageModel.findOne({ _id: id, isDeleted: false }).lean().exec()
+    const data = await this.imageModel.findById(id)
+    if (!data) {
+      throw new NotFoundException('Ảnh không tồn tại')
+    }
+    return data
   }
 
-  async deleteById(id: string): Promise<boolean> {
-    const image = await this.imageModel.findById(id)
-    if (!image || image.isDeleted) return false
-
-    image.isDeleted = true
-    await image.save()
+  async deleteById(id: string, userId: string): Promise<boolean> {
+    const deletedImage = await this.imageModel.findById(id)
+    if (!deletedImage) {
+      throw new NotFoundException('Ảnh không tồn tại hoặc đã bị xóa')
+    }
+    await this.imageModel.deleteById(id, userId)
     return true
-  }
-
-  async findDeleted(): Promise<Image[]> {
-    return this.imageModel.find({ isDeleted: true }).lean().exec()
   }
 }

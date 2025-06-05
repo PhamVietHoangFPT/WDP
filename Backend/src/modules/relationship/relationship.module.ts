@@ -18,14 +18,13 @@ import { AuthModule } from '../auth/auth.module'
   providers: [
     {
       provide: IRelationshipRepository,
-      useClass: RelationshipRepository
+      useClass: RelationshipRepository,
     },
     {
       provide: IRelationshipService,
-      useClass: RelationshipService
+      useClass: RelationshipService,
     },
-
   ],
   exports: [MongooseModule],
 })
-export class RelationshipModule { }
+export class RelationshipModule {}

@@ -23,6 +23,7 @@ import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
+import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 import { RelationshipModule } from './modules/relationship/relationship.module'
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AccountModule,
     AuthModule,
     SlotTemplateModule,
@@ -39,7 +41,6 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     TestTakerRelationshipModule,
     AddressModule,
     LocationModule,
-    ScheduleModule.forRoot(),
     ConditionModule,
     PaymentModule,
     ImageModule,
@@ -51,6 +52,7 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     BookingModule,
     TypeModule,
     TimeReturnModule,
+    SamplingKitInventoryModule,
     RelationshipModule,
   ],
   controllers: [AppController],

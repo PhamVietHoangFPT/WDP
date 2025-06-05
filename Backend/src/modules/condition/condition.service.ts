@@ -17,7 +17,7 @@ export class ConditionService implements IConditionService {
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
-  ) { }
+  ) {}
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
