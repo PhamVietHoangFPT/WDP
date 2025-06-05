@@ -15,53 +15,8 @@ export class Image extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   url: string
 
-  @Prop({ type: Boolean, default: false })
-  isDeleted: boolean
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'TestRequestStatus',
-    default: null,
-  })
-  testRequestHistoryTestRequestStatus: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'TestRequest',
-    default: null,
-  })
-  testRequestHistoryTestRequest: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'KitShipment',
-    default: null,
-  })
-  kitShipment: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ShipmentStatus',
-    default: null,
-  })
-  testRequestShipmentHistoryShipmentStatus: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'TestRequestShipment',
-    default: null,
-  })
-  testRequestShipmentHistoryTestRequestShipment: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Blog', default: null })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true, trim: true })
   blog: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdministrationDocument',
-    default: null,
-  })
-  administrationDocument: mongoose.Schema.Types.ObjectId
 }
 
 export const ImageSchema = SchemaFactory.createForClass(Image)
