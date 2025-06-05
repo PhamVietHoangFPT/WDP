@@ -21,6 +21,7 @@ import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.modul
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
+import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 import { RelationshipModule } from './modules/relationship/relationship.module'
@@ -43,6 +44,7 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     ConditionModule,
     PaymentModule,
     ImageModule,
+    BlogModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
