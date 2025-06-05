@@ -11,7 +11,7 @@ export class ConditionRepository implements IConditionRepository {
   constructor(
     @InjectModel(Condition.name)
     private conditionModel: Model<ConditionDocument>,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -26,19 +26,19 @@ export class ConditionRepository implements IConditionRepository {
   }
 
   async findOneByName(name: string): Promise<ConditionDocument | null> {
-    return this.conditionModel
+    return await this.conditionModel
       .findOne({
         name,
       })
       .exec()
   }
 
-  async findOneById(id: string): Promise<ConditionDocument | null> {
-    return this.conditionModel.findById(id).exec()
+  async findOneById(id: string): Promise<ConditionDocument> {
+    return await this.conditionModel.findById(id).exec()
   }
 
   async findAll(): Promise<ConditionDocument[] | null> {
-    return this.conditionModel.find({ deleted_at: null }).exec()
+    return await this.conditionModel.find({ deleted_at: null }).exec()
   }
 
   async updateConditionById(
@@ -46,7 +46,7 @@ export class ConditionRepository implements IConditionRepository {
     userId: string,
     updateConditionDto: UpdateConditionDto,
   ): Promise<ConditionDocument> {
-    return this.conditionModel
+    return await this.conditionModel
       .findByIdAndUpdate(
         id,
         { ...updateConditionDto, updated_by: userId, updated_at: new Date() },
@@ -59,7 +59,7 @@ export class ConditionRepository implements IConditionRepository {
     id: string,
     userId: string,
   ): Promise<ConditionDocument> {
-    return this.conditionModel
+    return await this.conditionModel
       .findByIdAndUpdate(
         id,
         { deleted_by: userId, deleted_at: new Date() },
@@ -73,7 +73,7 @@ export class ConditionRepository implements IConditionRepository {
     userId: string,
     updateConditionDto: UpdateConditionDto,
   ): Promise<ConditionDocument> {
-    return this.conditionModel
+    return await this.conditionModel
       .findByIdAndUpdate(
         id,
         {

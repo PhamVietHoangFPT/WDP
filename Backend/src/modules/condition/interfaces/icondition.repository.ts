@@ -8,8 +8,7 @@ export interface IConditionRepository {
     createConditionDto: CreateConditionDto,
   ): Promise<ConditionDocument>
   findOneByName(name: string): Promise<ConditionDocument | null>
-  findOneById(id: string): Promise<ConditionDocument | null>
-  // findById(id: string): Promise<ConditionDocument | null>;
+  findOneById(id: string): Promise<ConditionDocument>
   findAll(): Promise<ConditionDocument[]>
   updateConditionById(
     id: string,

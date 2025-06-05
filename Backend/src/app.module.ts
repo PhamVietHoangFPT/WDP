@@ -22,6 +22,8 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 import { BlogModule } from './modules/blog/blog.module'
+import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
+import { RelationshipModule } from './modules/relationship/relationship.module'
 @Module({
   imports: [
     databaseConfig,
@@ -48,6 +50,8 @@ import { BlogModule } from './modules/blog/blog.module'
     VnPayModule,
     BookingModule,
     TypeModule,
+    TimeReturnModule,
+    RelationshipModule,
   ],
   controllers: [AppController],
   providers: [AppService],

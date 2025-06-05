@@ -28,6 +28,6 @@ import { AccountModule } from '../account/account.module'
       useClass: ConditionRepository,
     },
   ],
-  exports: [IConditionService, IConditionRepository],
+  exports: [IConditionRepository, IConditionService],
 })
-export class ConditionModule {}
+export class ConditionModule { }

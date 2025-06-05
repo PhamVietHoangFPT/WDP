@@ -10,12 +10,15 @@ import { ITypeRepository } from './interfaces/itype.repository'
 import { Type } from './schemas/type.schema'
 import { TypeResponseDto } from './dto/type-response.dto'
 import { CreateTypeDto } from './dto/create-type.dto'
+import { IConditionRepository } from '../condition/interfaces/icondition.repository'
 @Injectable()
 export class TypeService implements ITypeService {
   constructor(
     @Inject(ITypeRepository)
-    private readonly typeRepository: ITypeRepository, // <-- Inject the repository
-  ) {}
+    private readonly typeRepository: ITypeRepository,
+    @Inject(IConditionRepository)
+    private readonly conditionRepository: IConditionRepository // <-- Inject the repository
+  ) { }
 
   private mapToResponseDto(type: Type): TypeResponseDto {
     return new TypeResponseDto({
@@ -42,7 +45,7 @@ export class TypeService implements ITypeService {
 
   //this function create a new condition by checking if the type already exists
   // if it exists, it throws a ConflictException
-  // if it does not exist, it creates a new condition and returns the created condition
+  // if it does not exist, it creates a new type and returns the created type
   async createType(
     userId: string,
     createTypeDto: CreateTypeDto,
@@ -51,8 +54,8 @@ export class TypeService implements ITypeService {
     const existingType = await this.typeRepository.findOneByName(
       createTypeDto.name,
     )
-    //check if the condition is solf deleted
-    //if it is, restore it and return the restored condition
+    //check if the type is solf deleted
+    //if it is, restore it and return the restored type
     if (existingType) {
       if (
         existingType.deleted_at === null ||
@@ -60,6 +63,7 @@ export class TypeService implements ITypeService {
       ) {
         throw new ConflictException('Loại mẫu thử đã tồn tại.')
       } else {
+
         let restoreCondition = await this.typeRepository.restore(
           existingType.id,
           userId,
@@ -74,8 +78,22 @@ export class TypeService implements ITypeService {
         return this.mapToResponseDto(restoreCondition)
       }
     }
+
+    const existingCondition = await this.conditionRepository.findOneById(createTypeDto.condition.toString())
+    if (!existingCondition) {
+      throw new ConflictException('Tình trạng mẫu thử không tồn tại.')
+    }
+
     try {
-      let newCondition = await this.typeRepository.create(userId, createTypeDto)
+      let newCondition = await this.typeRepository.create(userId,
+        {
+          name: createTypeDto.name,
+          typeFee: createTypeDto.typeFee,
+          isSpecial: createTypeDto.isSpecial,
+          condition:  existingCondition._id,
+          description: createTypeDto.description,
+          isAdminstration: createTypeDto.isAdminstration,
+        })
       return this.mapToResponseDto(newCondition)
     } catch (error) {
       throw new InternalServerErrorException(
@@ -83,19 +101,21 @@ export class TypeService implements ITypeService {
       )
     }
   }
+
   // this function returns all types
   // if there are no conditions, it throws an ConflictException
   async findAllTypes(): Promise<TypeResponseDto[]> {
-    try {
-      const types = await this.typeRepository.findAll()
-      if (!types || types.length === 0) {
-        throw new ConflictException('Không tìm thấy loại mẫu thử nào.')
+    const types = await this.typeRepository.findAll()
+    if (!types || types.length == 0) {
+      throw new ConflictException('Không tìm thấy loại mẫu thử nào.')
+    } else {
+      try {
+        return types.map((type) => this.mapToResponseDto(type))
+      } catch (error) {
+        throw new InternalServerErrorException(
+          'Lỗi khi lấy danh sách loại mẫu thử.',
+        )
       }
-      return types.map((type) => this.mapToResponseDto(type))
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách loại mẫu thử.',
-      )
     }
   }
 
@@ -133,7 +153,7 @@ export class TypeService implements ITypeService {
     }
   }
   async deleteType(id: string, userId: string): Promise<TypeResponseDto> {
-    //this variable is used to check if the condition already exists
+    //this variable is used to check if the type already exists
     const existingType = await this.findTypeById(id)
 
     if (existingType.deleted_at !== null || existingType.deleted_by !== null) {
