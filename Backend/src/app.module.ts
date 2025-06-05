@@ -22,6 +22,7 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
+import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 @Module({
   imports: [
     databaseConfig,
@@ -48,6 +49,7 @@ import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
     BookingModule,
     TypeModule,
     TimeReturnModule,
+    SamplingKitInventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
