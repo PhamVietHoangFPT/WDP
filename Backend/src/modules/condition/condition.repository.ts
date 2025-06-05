@@ -11,7 +11,7 @@ export class ConditionRepository implements IConditionRepository {
   constructor(
     @InjectModel(Condition.name)
     private conditionModel: Model<ConditionDocument>,
-  ) { }
+  ) {}
 
   async create(
     userId: string,

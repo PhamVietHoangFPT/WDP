@@ -9,12 +9,14 @@ import { AddressService } from './address.service'
 import { IAddressRepository } from './interfaces/iaddress.repository'
 import { AddressRepository } from './address.repository'
 import { AddressController } from './address.controller'
+import { AuthModule } from '../auth/auth.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
     AccountModule,
     TestTakerModule,
+    AuthModule,
   ],
   controllers: [AddressController],
   providers: [

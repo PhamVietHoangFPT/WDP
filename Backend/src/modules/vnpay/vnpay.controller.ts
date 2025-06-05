@@ -1,12 +1,4 @@
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Post,
-  UseInterceptors,
-  Req,
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Req } from '@nestjs/common'
 import { Request } from 'express'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { VnpayService } from './vnpay.service'
@@ -14,7 +6,6 @@ import { PaymentDataDto } from './dto/PaymentData.dto'
 import { PaymentBookingDto } from './dto/paymentBooking.dto'
 @ApiTags('vnpay')
 @Controller('vnpay')
-@UseInterceptors(ClassSerializerInterceptor)
 export class VnpayController {
   constructor(private readonly vnpayService: VnpayService) {}
   @Get('banks')

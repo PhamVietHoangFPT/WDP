@@ -8,8 +8,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Req,
   Query,
 } from '@nestjs/common'
@@ -30,7 +28,6 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 
 @ApiTags('test-taker-relationships')
 @Controller('test-taker-relationships')
-@UseInterceptors(ClassSerializerInterceptor)
 export class TestTakerRelationshipController {
   constructor(
     @Inject(ITestTakerRelationshipService)

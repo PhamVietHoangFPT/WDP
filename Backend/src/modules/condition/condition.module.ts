@@ -30,4 +30,4 @@ import { AccountModule } from '../account/account.module'
   ],
   exports: [IConditionRepository, IConditionService],
 })
-export class ConditionModule { }
+export class ConditionModule {}

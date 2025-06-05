@@ -12,13 +12,34 @@ export class AddressService implements IAddressService {
     private readonly addressRepo: IAddressRepository,
   ) {}
 
-  async create(dto: CreateAddressDto): Promise<AddressResponseDto> {
-    const result = await this.addressRepo.create(dto)
-    return new AddressResponseDto(result)
+  private mapToResponseDto(address: AddressResponseDto): AddressResponseDto {
+    return new AddressResponseDto({
+      _id: address._id,
+      fullAddress: address.fullAddress,
+      isKitShippingAddress: address.isKitShippingAddress,
+      account: address.account,
+      testTaker: address.testTaker,
+    })
+  }
+
+  async create(
+    dto: CreateAddressDto,
+    userId: string,
+  ): Promise<AddressResponseDto> {
+    const result = await this.addressRepo.create(dto, userId)
+    return this.mapToResponseDto(result)
   }
 
   async findAll(): Promise<AddressResponseDto[]> {
     const data = await this.addressRepo.findAll()
-    return data.map((item) => new AddressResponseDto(item))
+    return data.map((item) => this.mapToResponseDto(item))
+  }
+
+  async createForFacility(
+    dto: CreateAddressDto,
+    userId: string,
+  ): Promise<AddressResponseDto> {
+    const result = await this.addressRepo.createForFacility(dto, userId)
+    return this.mapToResponseDto(result)
   }
 }

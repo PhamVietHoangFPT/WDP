@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { Blog, BlogDocument } from './schemas/blog.schema'
 import { CreateBlogDto } from './dto/createBlog.dto'
 import { UpdateBlogDto } from './dto/updateBlog.dto'
@@ -9,45 +9,61 @@ import { IBlogRepository } from './interfaces/iblog.repository'
 @Injectable()
 export class BlogRepository implements IBlogRepository {
   constructor(
-    @InjectModel(Blog.name) private readonly model: Model<BlogDocument>,
+    @InjectModel(Blog.name)
+    private readonly model: Model<BlogDocument>,
   ) {}
 
-  async create(data: CreateBlogDto): Promise<Blog> {
-    return this.model.create(data)
+  async create(data: CreateBlogDto, userId: string): Promise<BlogDocument> {
+    const createdBlog = await this.model.create({
+      ...data,
+      created_by: userId,
+    })
+    return createdBlog
   }
 
-  async findAll(): Promise<Blog[]> {
+  findAll(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<BlogDocument[], BlogDocument> {
     return this.model
-      .find({ isDeleted: false })
-      .populate('account', 'name email')
-      .populate('image', 'url')
+      .find({ ...filter, deleted_at: null })
+      .populate({ path: 'account', select: 'name email -_id' })
+      .populate({ path: 'image', select: 'url -_id' })
       .lean()
-      .exec()
   }
 
-  async findById(id: string): Promise<Blog | null> {
+  async findById(id: string): Promise<BlogDocument | null> {
     return this.model
       .findById(id)
-      .populate({ path: 'account', select: 'name email' })
-      .populate({ path: 'image', select: 'url' })
+      .populate({ path: 'account', select: 'name email -_id' })
+      .populate({ path: 'image', select: 'url -_id' })
       .lean()
       .exec()
   }
 
-  async update(id: string, dto: UpdateBlogDto): Promise<Blog | null> {
+  async update(
+    id: string,
+    dto: UpdateBlogDto,
+    userId: string,
+  ): Promise<BlogDocument | null> {
     return this.model
-      .findByIdAndUpdate(id, dto, { new: true })
-      .populate({ path: 'account', select: 'name email' })
-      .populate({ path: 'image', select: 'url' })
+      .findByIdAndUpdate(
+        id,
+        { ...dto, updated_by: userId, updated_at: Date.now() },
+        { new: true },
+      )
+      .populate({ path: 'account', select: 'name email -_id' })
+      .populate({ path: 'image', select: 'url -_id' })
       .lean()
       .exec()
   }
 
-  async save(blog: BlogDocument): Promise<Blog> {
-    return blog.save()
+  async delete(id: string, userId: string): Promise<BlogDocument | null> {
+    return this.model
+      .findByIdAndUpdate(id, { deleted_at: Date.now(), deleted_by: userId })
+      .exec()
   }
 
-  async findDeleted(): Promise<Blog[]> {
-    return this.model.find({ isDeleted: true }).exec()
+  async countDocuments(filter: Record<string, unknown>): Promise<number> {
+    return this.model.countDocuments({ deleted_at: null, ...filter }).exec()
   }
 }

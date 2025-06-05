@@ -8,8 +8,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   ValidationPipe,
   UseGuards,
@@ -35,7 +33,6 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 
 @ApiTags('test-takers')
 @Controller('test-takers')
-@UseInterceptors(ClassSerializerInterceptor)
 export class TestTakerController {
   constructor(
     @Inject(ITestTakerService)
