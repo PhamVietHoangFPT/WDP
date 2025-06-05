@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Transform } from 'class-transformer'
 import mongoose from 'mongoose'
-import { Relationship } from '../schemas/relationship.schema'
+import { Relationship } from '../schemas/relationship1.schema'
 
 @Exclude()
 export class RelationshipResponseDto {
