@@ -19,10 +19,16 @@ export class Relationship extends BaseEntity {
   relationshipFee: number
 
   @Prop({ type: String })
-  description: string
+  description?: string
 
   @Prop({ type: Number, required: true, min: 1 })
   relationshipGap: number
+
+  @Prop({ type: Date, default: null })
+  deleted_at: Date
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, default: null })
+  deleted_by: mongoose.Schema.Types.ObjectId
 }
 
 export const RelationshipSchema = SchemaFactory.createForClass(Relationship)

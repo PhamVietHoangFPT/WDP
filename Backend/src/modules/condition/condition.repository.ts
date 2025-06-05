@@ -11,7 +11,7 @@ export class ConditionRepository implements IConditionRepository {
   constructor(
     @InjectModel(Condition.name)
     private conditionModel: Model<ConditionDocument>,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -33,7 +33,7 @@ export class ConditionRepository implements IConditionRepository {
       .exec()
   }
 
-  async findOneById(id: string): Promise<ConditionDocument | null> {
+  async findOneById(id: string): Promise<ConditionDocument> {
     return await this.conditionModel.findById(id).exec()
   }
 
