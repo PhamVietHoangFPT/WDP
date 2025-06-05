@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose' // Import MongooseModule
 import { Service, ServiceSchema } from './schemas/service.schema'
 import { RelationshipModule } from '../relationship/relationship.module'
 import { TimeReturnModule } from '../timeReturn/timeReturn.module'
-import { TypeModule } from '../type/type.module'
+import { TypeModule } from '../sample/sample.module'
 
 @Module({
   imports: [

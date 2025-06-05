@@ -3,9 +3,9 @@ import { HydratedDocument } from 'mongoose'
 import mongoose from 'mongoose'
 import { BaseEntity } from 'src/common/schema/baseEntity.schema'
 
-export type TypeDocument = HydratedDocument<Type>
+export type SampleDocument = HydratedDocument<Sample>
 @Schema()
-export class Type extends BaseEntity {
+export class Sample extends BaseEntity {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
@@ -33,12 +33,6 @@ export class Type extends BaseEntity {
 
   @Prop({ type: Boolean, default: true })
   isAdminstration: boolean
-
-  @Prop({ type: Date, default: null })
-  deleted_at: Date
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, default: null })
-  deleted_by: mongoose.Schema.Types.ObjectId
 }
 
-export const TypeSchema = SchemaFactory.createForClass(Type)
+export const SampleSchema = SchemaFactory.createForClass(Sample)
