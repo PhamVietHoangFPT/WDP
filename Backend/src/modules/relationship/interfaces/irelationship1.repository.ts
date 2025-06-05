@@ -1,6 +1,6 @@
-import { UpdateRelationshipDto } from './../dto/updateRelationship.dto'
+import { UpdateRelationshipDto } from '../dto/updateRelationship.dto'
 import { CreateRelationshipDto } from '../dto/createRelationship.dto'
-import { RelationshipDocument } from '../schemas/relationship.schema'
+import { RelationshipDocument } from '../schemas/relationship1.schema'
 
 export interface IRelationshipRepository {
   create(

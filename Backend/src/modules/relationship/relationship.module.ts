@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Relationship, RelationshipSchema } from './schemas/relationship.schema'
+import {
+  Relationship,
+  RelationshipSchema,
+} from './schemas/relationship1.schema'
 import { RelationshipController } from './relationship.controller'
 import { IRelationshipService } from './interfaces/irelationship.service'
 import { RelationshipService } from './relationship.service'
-import { IRelationshipRepository } from './interfaces/iRelationship.repository'
+import { IRelationshipRepository } from './interfaces/irelationship1.repository'
 import { RelationshipRepository } from './relationship.repository'
 import { AuthModule } from '../auth/auth.module'
 @Module({

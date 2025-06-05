@@ -5,8 +5,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { IRelationshipService } from './interfaces/irelationship.service'
-import { IRelationshipRepository } from './interfaces/iRelationship.repository'
-import { Relationship } from './schemas/relationship.schema'
+import { IRelationshipRepository } from './interfaces/irelationship1.repository'
+import { Relationship } from './schemas/relationship1.schema'
 import { RelationshipResponseDto } from './dto/relationshipResponse.dto'
 import { CreateRelationshipDto } from './dto/createRelationship.dto'
 import { UpdateRelationshipDto } from './dto/updateRelationship.dto'
