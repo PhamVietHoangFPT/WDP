@@ -5,8 +5,8 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common'
-import { IBlogService } from './interfaces/iblog1.service'
-import { IBlogRepository } from './interfaces/iblog1.repository'
+import { IBlogService } from './interfaces/iblog.service'
+import { IBlogRepository } from './interfaces/iblog.repository'
 import { CreateBlogDto } from './dto/createBlog.dto'
 import { UpdateBlogDto } from './dto/updateBlog.dto'
 import { BlogResponseDto } from './dto/blogResponse.dto'

@@ -4,7 +4,7 @@ import mongoose, { Model } from 'mongoose'
 import { Blog, BlogDocument } from './schemas/blog.schema'
 import { CreateBlogDto } from './dto/createBlog.dto'
 import { UpdateBlogDto } from './dto/updateBlog.dto'
-import { IBlogRepository } from './interfaces/iblog1.repository'
+import { IBlogRepository } from './interfaces/iblog.repository'
 
 @Injectable()
 export class BlogRepository implements IBlogRepository {
