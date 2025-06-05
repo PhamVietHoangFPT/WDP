@@ -10,11 +10,14 @@ import { ITypeRepository } from './interfaces/itype.repository'
 import { Type } from './schemas/type.schema'
 import { TypeResponseDto } from './dto/type-response.dto'
 import { CreateTypeDto } from './dto/create-type.dto'
+import { IConditionRepository } from '../condition/interfaces/icondition.repository'
 @Injectable()
 export class TypeService implements ITypeService {
   constructor(
     @Inject(ITypeRepository)
-    private readonly typeRepository: ITypeRepository, // <-- Inject the repository
+    private readonly typeRepository: ITypeRepository,
+    @Inject(IConditionRepository)
+    private readonly conditionRepository: IConditionRepository // <-- Inject the repository
   ) { }
 
   private mapToResponseDto(type: Type): TypeResponseDto {
@@ -60,6 +63,7 @@ export class TypeService implements ITypeService {
       ) {
         throw new ConflictException('Loại mẫu thử đã tồn tại.')
       } else {
+
         let restoreCondition = await this.typeRepository.restore(
           existingType.id,
           userId,
@@ -74,8 +78,22 @@ export class TypeService implements ITypeService {
         return this.mapToResponseDto(restoreCondition)
       }
     }
+
+    const existingCondition = await this.conditionRepository.findOneById(createTypeDto.condition.toString())
+    if (!existingCondition) {
+      throw new ConflictException('Tình trạng mẫu thử không tồn tại.')
+    }
+
     try {
-      let newCondition = await this.typeRepository.create(userId, createTypeDto)
+      let newCondition = await this.typeRepository.create(userId,
+        {
+          name: createTypeDto.name,
+          typeFee: createTypeDto.typeFee,
+          isSpecial: createTypeDto.isSpecial,
+          condition:  existingCondition._id,
+          description: createTypeDto.description,
+          isAdminstration: createTypeDto.isAdminstration,
+        })
       return this.mapToResponseDto(newCondition)
     } catch (error) {
       throw new InternalServerErrorException(
@@ -83,6 +101,7 @@ export class TypeService implements ITypeService {
       )
     }
   }
+
   // this function returns all types
   // if there are no conditions, it throws an ConflictException
   async findAllTypes(): Promise<TypeResponseDto[]> {
