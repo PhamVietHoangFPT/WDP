@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 import { Transform } from 'class-transformer'
-import { CreateTypeDto } from './create-type.dto'
+import { CreateSampleDto } from './create-sample.dto'
 import mongoose from 'mongoose'
 
-export class UpdateTypeDto {
+export class UpdateSampleDto {
   @ApiProperty({ example: 'Blood', required: true })
   @IsString()
   @IsNotEmpty({ message: 'Tên không được để trống' })
@@ -35,7 +38,7 @@ export class UpdateTypeDto {
   @IsBoolean({ message: 'isAdminstration phải là một giá trị boolean' })
   isAdminstration: boolean
 
-  constructor(partial: Partial<CreateTypeDto>) {
+  constructor(partial: Partial<CreateSampleDto>) {
     Object.assign(this, partial)
   }
 }
