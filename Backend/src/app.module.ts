@@ -20,7 +20,7 @@ import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
-import { TypeModule } from './modules/sample/sample.module'
+import { SampleModule } from './modules/sample/sample.module'
 import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
@@ -50,7 +50,7 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     PaymentTypeModule,
     VnPayModule,
     BookingModule,
-    TypeModule,
+    SampleModule,
     TimeReturnModule,
     SamplingKitInventoryModule,
     RelationshipModule,
