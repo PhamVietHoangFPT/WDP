@@ -43,13 +43,11 @@ export class FacilityController {
     private readonly facilityService: IFacilityService,
   ) {}
 
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @Roles(RoleEnum.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Tạo mới cơ sở' })
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
   create(
     @Body() createFacilityDto: CreateFacilityDto,
     @Req() req: any,

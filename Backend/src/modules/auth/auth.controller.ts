@@ -5,8 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   ValidationPipe,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Inject,
 } from '@nestjs/common'
 
@@ -20,7 +18,6 @@ import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
 @ApiTags('auth')
 @Controller('auth')
-@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(
     @Inject(IAuthService) // Ensure the correct token is used

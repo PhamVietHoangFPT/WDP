@@ -38,3 +38,7 @@ export interface ISamplingKitInventoryService {
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto | null>
 }
+
+export const ISamplingKitInventoryService = Symbol(
+  'ISamplingKitInventoryService',
+)

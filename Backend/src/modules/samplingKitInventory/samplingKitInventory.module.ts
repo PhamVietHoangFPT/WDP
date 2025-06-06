@@ -6,14 +6,31 @@ import {
   SamplingKitInventorySchema,
 } from './schemas/samplingKitInventory.schema'
 import { FacilityModule } from '../facility/facility.module'
+import { AuthModule } from '../auth/auth.module'
+import { SamplingKitInventoryController } from './samplingKitInventory.controller'
+import { ISamplingKitInventoryService } from './interfaces/isamplingKitInventory.service'
+import { SamplingKitInventoryService } from './samplingKitInventory.service'
+import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
+import { SamplingKitInventoryRepository } from './samplingKitInventory.repository'
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: SamplingKitInventory.name, schema: SamplingKitInventorySchema },
     ]),
     FacilityModule,
+    AuthModule,
   ],
-
+  controllers: [SamplingKitInventoryController],
+  providers: [
+    {
+      provide: ISamplingKitInventoryService,
+      useClass: SamplingKitInventoryService,
+    },
+    {
+      provide: ISamplingKitInventoryRepository,
+      useClass: SamplingKitInventoryRepository,
+    },
+  ],
   exports: [MongooseModule],
 })
 export class SamplingKitInventoryModule {}

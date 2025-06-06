@@ -4,6 +4,7 @@ import { Model } from 'mongoose'
 import { Address, AddressDocument } from './schemas/address.schema'
 import { IAddressRepository } from './interfaces/iaddress.repository'
 import { CreateAddressDto } from './dto/create-address.dto'
+import { CreateAddressFacilityDto } from './dto/createAddressFacility.dto'
 
 @Injectable()
 export class AddressRepository implements IAddressRepository {
@@ -12,12 +13,34 @@ export class AddressRepository implements IAddressRepository {
     private readonly addressModel: Model<AddressDocument>,
   ) {}
 
-  async create(data: CreateAddressDto): Promise<Address> {
-    const address = new this.addressModel(data)
+  async create(
+    data: CreateAddressDto,
+    userId: string,
+  ): Promise<AddressDocument> {
+    const address = new this.addressModel({
+      ...data,
+      created_by: userId,
+    })
     return address.save()
   }
 
-  async findAll(): Promise<Address[]> {
-    return this.addressModel.find({ deleted_at: null }).exec()
+  async createForFacility(
+    data: CreateAddressFacilityDto,
+    userId: string,
+  ): Promise<AddressDocument> {
+    const address = new this.addressModel({
+      ...data,
+      created_by: userId,
+    })
+    return address.save()
+  }
+
+  async findAll(): Promise<AddressDocument[]> {
+    return this.addressModel
+      .find({ deleted_at: null })
+      .populate({ path: 'account', select: 'name email -_id' })
+      .populate({ path: 'testTaker', select: 'name email -_id' })
+      .lean()
+      .exec()
   }
 }

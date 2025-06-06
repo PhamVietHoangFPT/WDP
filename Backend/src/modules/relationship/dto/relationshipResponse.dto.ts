@@ -1,37 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
+import { Exclude, Expose, Transform } from 'class-transformer'
 import mongoose from 'mongoose'
-@Expose()
-export class TypeResponseDto {
+import { Relationship } from '../schemas/relationship.schema'
+
+@Exclude()
+export class RelationshipResponseDto {
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   _id: mongoose.Schema.Types.ObjectId
 
   @Expose()
-  @ApiProperty({ example: 'Blood' })
+  @ApiProperty({ example: 'Ba - Con' })
   name: string
 
   @Expose()
   @ApiProperty({ example: 10000 })
-  typeFee: number
+  relationshipFee: number
 
   @Expose()
-  @ApiProperty({ example: true })
-  isSpecial: boolean
-
-  @Expose()
-  @ApiProperty({ example: '6837d1f5286eb52dfd0579c6', required: true })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  condition: mongoose.Schema.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({ example: 'Mẫu máu', required: false })
+  @ApiProperty({ example: 'string' })
   description?: string
 
   @Expose()
-  @ApiProperty({ example: true, required: true })
-  isAdminstration: boolean
+  @ApiProperty({ example: 2 })
+  relationshipGap: number
 
   @Expose()
   @ApiProperty({ example: '2021-03-01T12:00:00Z' })
@@ -42,7 +35,7 @@ export class TypeResponseDto {
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   deleted_by: mongoose.Schema.Types.ObjectId
 
-  constructor(partial: Partial<TypeResponseDto>) {
+  constructor(partial: Partial<Relationship>) {
     Object.assign(this, partial)
   }
 }

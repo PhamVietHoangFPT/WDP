@@ -19,12 +19,19 @@ import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
+import { ImageModule } from './modules/image/image.module'
+import { SampleModule } from './modules/sample/sample.module'
+import { BlogModule } from './modules/blog/blog.module'
+import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
+import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
+import { RelationshipModule } from './modules/relationship/relationship.module'
 @Module({
   imports: [
     databaseConfig,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AccountModule,
     AuthModule,
     SlotTemplateModule,
@@ -34,13 +41,19 @@ import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
     TestTakerRelationshipModule,
     AddressModule,
     LocationModule,
-    ScheduleModule.forRoot(),
     ConditionModule,
-    VnPayModule,
     PaymentModule,
+    ImageModule,
+    BlogModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
+    VnPayModule,
+    BookingModule,
+    SampleModule,
+    TimeReturnModule,
+    SamplingKitInventoryModule,
+    RelationshipModule,
   ],
   controllers: [AppController],
   providers: [AppService],
