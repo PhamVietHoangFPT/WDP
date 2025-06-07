@@ -50,7 +50,7 @@ export class TypeService implements ITypeService {
     const type = await this.typeRepository.findById(id)
     if (!type) {
       throw new NotFoundException(
-        `Không tìm thấy loại xét nghiệm với ID ${id}.`,
+        `Không tìm thấy loại xét nghiệm với ID ${id} hoặc đã bị xóa.`,
       )
     }
     return this.mapToResponseDto(type)
