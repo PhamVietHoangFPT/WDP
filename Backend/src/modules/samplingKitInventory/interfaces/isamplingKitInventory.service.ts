@@ -7,12 +7,10 @@ export interface ISamplingKitInventoryService {
   create(
     createSamplingKitInventoryDto: CreateSamplingKitInventoryDto,
     facilityId: string,
+    userId: string,
   ): Promise<SamplingKitInventoryResponseDto>
 
-  findById(
-    id: string,
-    facilityId: string,
-  ): Promise<SamplingKitInventoryResponseDto>
+  findById(id: string): Promise<SamplingKitInventoryResponseDto>
 
   update(
     id: string,
@@ -34,7 +32,6 @@ export interface ISamplingKitInventoryService {
 
   delete(
     id: string,
-    facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto | null>
 }

@@ -6,6 +6,7 @@ import { CreateSamplingKitInventoryDto } from './dto/createSamplingKitInventory.
 import { SamplingKitInventoryResponseDto } from './dto/samplingKitInventoryResponse.dto'
 import { SamplingKitInventory } from './schemas/samplingKitInventory.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { ITypeRepository } from '../type/interfaces/itype.repository'
 
 @Injectable()
 export class SamplingKitInventoryService
@@ -14,32 +15,48 @@ export class SamplingKitInventoryService
   constructor(
     @Inject(ISamplingKitInventoryRepository)
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
+    @Inject(ITypeRepository)
+    private readonly typeRepository: ITypeRepository,
   ) {}
 
   private mapToResponseDto(
     samplingKitInventory: SamplingKitInventory,
   ): SamplingKitInventoryResponseDto {
-    return new SamplingKitInventoryResponseDto(samplingKitInventory)
+    return new SamplingKitInventoryResponseDto({
+      _id: samplingKitInventory._id,
+      lotNumber: samplingKitInventory.lotNumber,
+      importDate: samplingKitInventory.importDate,
+      expDate: samplingKitInventory.expDate,
+      kitAmount: samplingKitInventory.kitAmount,
+      inventory: samplingKitInventory.inventory,
+      facility: samplingKitInventory.facility,
+      type: samplingKitInventory.type,
+    })
   }
 
   async create(
     createSamplingKitInventoryDto: CreateSamplingKitInventoryDto,
     facilityId: string,
+    userId: string,
   ): Promise<SamplingKitInventoryResponseDto> {
+    const type = await this.typeRepository.findById(
+      createSamplingKitInventoryDto.type,
+    )
+    if (!type) {
+      throw new NotFoundException(`Loại mẫu kit không tồn tại`)
+    }
     const newSamplingKitInventory =
       await this.samplingKitInventoryRepository.create(
         createSamplingKitInventoryDto,
         facilityId,
+        userId,
       )
     return this.mapToResponseDto(newSamplingKitInventory)
   }
 
-  async findById(
-    id: string,
-    facilityId: string,
-  ): Promise<SamplingKitInventoryResponseDto> {
+  async findById(id: string): Promise<SamplingKitInventoryResponseDto> {
     const samplingKitInventory =
-      await this.samplingKitInventoryRepository.findById(id, facilityId)
+      await this.samplingKitInventoryRepository.findById(id)
     if (!samplingKitInventory) {
       throw new NotFoundException(`Mẫu kit không tồn tại`)
     }
@@ -114,11 +131,10 @@ export class SamplingKitInventoryService
 
   async delete(
     id: string,
-    facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto | null> {
     const deletedSamplingKitInventory =
-      await this.samplingKitInventoryRepository.delete(id, facilityId, userId)
+      await this.samplingKitInventoryRepository.delete(id, userId)
     if (!deletedSamplingKitInventory) {
       return null
     }
