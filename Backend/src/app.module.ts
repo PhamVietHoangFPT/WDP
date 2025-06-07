@@ -25,6 +25,7 @@ import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 import { RelationshipModule } from './modules/relationship/relationship.module'
+import { TypeModule } from './modules/type/type.module'
 @Module({
   imports: [
     databaseConfig,
@@ -54,6 +55,7 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     TimeReturnModule,
     SamplingKitInventoryModule,
     RelationshipModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

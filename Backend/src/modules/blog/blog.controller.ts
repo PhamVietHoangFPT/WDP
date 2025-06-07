@@ -43,8 +43,8 @@ export class BlogController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tạo blog mới' })
-  async create(@Body() createBlogDto: CreateBlogDto, @Req() user: any) {
-    const userId = user?.id || user?._id
+  async create(@Body() createBlogDto: CreateBlogDto, @Req() req: any) {
+    const userId = req.user.id
     const blog = await this.blogService.create(createBlogDto, userId)
     return new BlogResponseDto(blog)
   }
@@ -120,9 +120,9 @@ export class BlogController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateBlogDto,
-    @Req() user: any,
+    @Req() req: any,
   ) {
-    const userId = user?.id || user?._id
+    const userId = req.user.id
     const blog = await this.blogService.update(id, dto, userId)
     return new BlogResponseDto(blog)
   }

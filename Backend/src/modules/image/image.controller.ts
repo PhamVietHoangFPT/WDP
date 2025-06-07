@@ -73,7 +73,7 @@ export class ImageController {
     return image
   }
 
-  @Get(':blogId')
+  @Get('findForBlog/:blogId')
   async findAllForBlog(@Param('blogId') blogId: string) {
     return this.uploadService.findAllForBlog(blogId)
   }

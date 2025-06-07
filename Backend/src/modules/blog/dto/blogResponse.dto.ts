@@ -28,22 +28,17 @@ export class BlogResponseDto {
   @Expose()
   @ApiProperty({ example: '665b4f2a2ef540b5c6d6be3e', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  service: mongoose.Schema.Types.ObjectId
+  service?: mongoose.Schema.Types.ObjectId
 
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  account: mongoose.Schema.Types.ObjectId
+  created_by: mongoose.Schema.Types.ObjectId
 
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  image?: mongoose.Schema.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({ example: false })
-  isDeleted: boolean
-
+  image?: mongoose.Schema.Types.ObjectId[]
   constructor(partial: Partial<Blog>) {
     Object.assign(this, partial)
   }

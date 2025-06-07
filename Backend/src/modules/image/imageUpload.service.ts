@@ -7,12 +7,15 @@ import * as path from 'path'
 import { IImageUploadService } from './interfaces/iImageUpload.service'
 import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
+import { IBlogRepository } from '../blog/interfaces/iblog.repository'
 
 @Injectable()
 export class ImageUploadService implements IImageUploadService {
   constructor(
     @Inject(IImageUploadRepository)
     private readonly imageModel: IImageUploadRepository,
+    @Inject(IBlogRepository)
+    private readonly blogRepository: IBlogRepository,
   ) {}
 
   async uploadFileForBlog(
@@ -20,6 +23,10 @@ export class ImageUploadService implements IImageUploadService {
     createBlogImageDto: CreateBlogImageDto,
     userId: string,
   ): Promise<{ url: string; _id: string }> {
+    const blog = await this.blogRepository.findById(createBlogImageDto.blog)
+    if (!blog) {
+      throw new NotFoundException('Blog không tồn tại')
+    }
     const uploadDir = path.join(process.cwd(), 'uploads')
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir)
