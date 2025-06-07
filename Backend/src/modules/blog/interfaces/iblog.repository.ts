@@ -16,5 +16,6 @@ export interface IBlogRepository {
   ): Promise<BlogDocument | null>
   delete(id: string, userId: string): Promise<BlogDocument | null>
   countDocuments(filter: Record<string, unknown>): Promise<number>
+  addImage(blogId: string, imageId: string): Promise<BlogDocument | null>
 }
 export const IBlogRepository = Symbol('IBlogRepository')
