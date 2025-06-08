@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger'
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { CreateSampleDto } from './create-sample.dto'
 import mongoose from 'mongoose'
@@ -12,10 +12,6 @@ export class UpdateSampleDto {
   @IsString()
   @IsNotEmpty({ message: 'Tên không được để trống' })
   name: string
-
-  @ApiProperty({ example: 100000 })
-  @IsNumber({}, { message: 'Phí loại mẫu thử phải là một số' })
-  typeFee: number
 
   @ApiProperty({ example: true })
   @IsBoolean({ message: 'isSpecial phải là một giá trị boolean' })

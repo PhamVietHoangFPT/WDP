@@ -25,7 +25,6 @@ export class SampleService implements ISampleService {
     return new SampleResponseDto({
       _id: sample._id,
       name: sample.name,
-      typeFee: sample.typeFee,
       isSpecial: sample.isSpecial,
       condition: sample.condition,
       description: sample.description,
@@ -68,7 +67,6 @@ export class SampleService implements ISampleService {
           existingSample.id,
           userId,
           {
-            typeFee: createSampleDto.typeFee,
             isSpecial: createSampleDto.isSpecial,
             condition: createSampleDto.condition,
             description: createSampleDto.description,
@@ -84,13 +82,12 @@ export class SampleService implements ISampleService {
       createSampleDto.condition.toString(),
     )
     if (!existingCondition) {
-      throw new ConflictException('Tình trạng mẫu thử không tồn tại.')
+      throw new ConflictException('Tình trạng của mẫu thử không tồn tại.')
     }
 
     try {
       const newCondition = await this.sampleRepository.create(userId, {
         name: createSampleDto.name,
-        typeFee: createSampleDto.typeFee,
         isSpecial: createSampleDto.isSpecial,
         condition: existingCondition._id,
         description: createSampleDto.description,
@@ -127,7 +124,6 @@ export class SampleService implements ISampleService {
     const existingSample = await this.findSampleById(id)
     if (
       existingSample.name === updateSampleDto.name &&
-      existingSample.typeFee === updateSampleDto.typeFee &&
       existingSample.isSpecial === updateSampleDto.isSpecial &&
       existingSample.condition === updateSampleDto.condition &&
       existingSample.description === updateSampleDto.description &&

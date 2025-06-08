@@ -27,6 +27,7 @@ export class RelationshipService implements IRelationshipService {
       relationshipFee: relationship.relationshipFee,
       relationshipGap: relationship.relationshipGap,
       description: relationship.description,
+      isAgnate: relationship.isAgnate,
       deleted_at: relationship.deleted_at,
       deleted_by: relationship.deleted_by,
     })
@@ -60,20 +61,21 @@ export class RelationshipService implements IRelationshipService {
       ) {
         throw new ConflictException('Mối quan hệ đã tồn tại.')
       } else {
-        let restoreRelationship = await this.relationshipRepository.restore(
+        const restoreRelationship = await this.relationshipRepository.restore(
           existingRelationship.id,
           userId,
           {
             relationshipFee: createRelationshipDto.relationshipFee,
             relationshipGap: createRelationshipDto.relationshipGap,
             description: createRelationshipDto.description,
+            isAgnate: createRelationshipDto.isAgnate,
           },
         )
         return this.mapToResponseDto(restoreRelationship)
       }
     }
     try {
-      let newRelationship = await this.relationshipRepository.create(
+      const newRelationship = await this.relationshipRepository.create(
         userId,
         createRelationshipDto,
       )

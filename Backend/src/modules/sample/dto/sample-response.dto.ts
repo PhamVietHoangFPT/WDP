@@ -19,10 +19,6 @@ export class SampleResponseDto {
   name: string
 
   @Expose()
-  @ApiProperty({ example: 10000 })
-  typeFee: number
-
-  @Expose()
   @ApiProperty({ example: true })
   isSpecial: boolean
 

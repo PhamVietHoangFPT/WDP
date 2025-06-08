@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Transform } from 'class-transformer'
 import mongoose from 'mongoose'
@@ -25,6 +28,10 @@ export class RelationshipResponseDto {
   @Expose()
   @ApiProperty({ example: 2 })
   relationshipGap: number
+
+  @Expose()
+  @ApiProperty({ example: true })
+  isAgnate: boolean
 
   @Expose()
   @ApiProperty({ example: '2021-03-01T12:00:00Z' })

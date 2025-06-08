@@ -15,9 +15,6 @@ export class Sample extends BaseEntity {
   @Prop({ type: String, required: true, unique: true })
   name: string
 
-  @Prop({ type: Number, required: true, min: 1 })
-  typeFee: number
-
   @Prop({ type: Boolean, required: true })
   isSpecial: boolean
 

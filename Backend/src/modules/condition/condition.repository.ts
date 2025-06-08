@@ -34,7 +34,9 @@ export class ConditionRepository implements IConditionRepository {
   }
 
   async findOneById(id: string): Promise<ConditionDocument> {
-    return await this.conditionModel.findById(id).exec()
+    return await this.conditionModel
+      .findOne({ _id: id, deleted_at: null })
+      .exec()
   }
 
   async findAll(): Promise<ConditionDocument[] | null> {

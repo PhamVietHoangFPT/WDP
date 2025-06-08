@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmpty, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 export class CreateRelationshipDto {
   @ApiProperty({ example: 'Ba - Con', required: true })
@@ -19,6 +19,10 @@ export class CreateRelationshipDto {
   @IsNumber({}, { message: 'Khoảng cách thế hệ phải là một số' })
   @IsNotEmpty({ message: 'Khoảng cách thế hệ không được để trống' })
   relationshipGap: number
+
+  @ApiProperty({ example: true })
+  @IsNotEmpty({ message: 'Cần xác định quan hệ huyết thống' })
+  isAgnate: boolean
 
   constructor(partial: Partial<CreateRelationshipDto>) {
     Object.assign(this, partial)
