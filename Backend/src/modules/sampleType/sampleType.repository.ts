@@ -30,7 +30,7 @@ export class SampleTypeRepository implements ISampleTypeRepository {
   }
 
   async findById(id: string): Promise<SampleTypeDocument | null> {
-    return this.sampleTypeModel.findOne({ _id: id, deleted_at: null }).exec()
+    return this.sampleTypeModel.findOne({ id: id, deleted_at: null }).exec()
   }
 
   async update(

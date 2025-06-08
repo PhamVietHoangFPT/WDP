@@ -65,11 +65,12 @@ export class SamplingKitInventoryController {
       facilityId,
       userId,
     )
-    return new ApiResponseDto<SamplingKitInventoryResponseDto>({
+    return {
       data: [result],
       message: 'Tạo mẫu kit thành công',
       statusCode: 201,
-    })
+      success: true,
+    }
   }
 
   @Get()
@@ -179,6 +180,24 @@ export class SamplingKitInventoryController {
       message: 'Cập nhật mẫu kit thành công',
       statusCode: 200,
     })
+  }
+
+  @Delete('expired')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Xóa các mẫu kit đã hết hạn (chỉ dành cho admin)' })
+  @ApiResponse({
+    status: 204,
+    description: 'Xóa các mẫu kit đã hết hạn thành công',
+  })
+  async deleteExpiredSamplingKits() {
+    await this.samplingKitInventoryService.deleteExpiredSamplingKits()
+    return {
+      message: 'Xóa các mẫu kit đã hết hạn thành công',
+      statusCode: 204,
+      success: true,
+    }
   }
 
   @Delete(':id')

@@ -34,6 +34,8 @@ export interface ISamplingKitInventoryService {
     id: string,
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto | null>
+
+  deleteExpiredSamplingKits(): Promise<void>
 }
 
 export const ISamplingKitInventoryService = Symbol(

@@ -12,7 +12,7 @@ import { ISamplingKitInventoryService } from './interfaces/isamplingKitInventory
 import { SamplingKitInventoryService } from './samplingKitInventory.service'
 import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
 import { SamplingKitInventoryRepository } from './samplingKitInventory.repository'
-import { SampleTypeModule } from '../sampleType/sampleType.module'
+import { SampleModule } from '../sample/sample.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,7 +20,8 @@ import { SampleTypeModule } from '../sampleType/sampleType.module'
     ]),
     FacilityModule,
     AuthModule,
-    SampleTypeModule,
+
+    SampleModule,
   ],
   controllers: [SamplingKitInventoryController],
   providers: [

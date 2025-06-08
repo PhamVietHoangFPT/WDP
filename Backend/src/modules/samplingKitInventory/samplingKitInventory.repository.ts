@@ -117,6 +117,19 @@ export class SamplingKitInventoryRepository
   }
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
-    return this.samplingKitInventoryModel.countDocuments(filter).exec()
+    return await this.samplingKitInventoryModel.countDocuments(filter).exec()
+  }
+
+  async deleteByExpiredDate(date: Date): Promise<number> {
+    const data = await this.samplingKitInventoryModel
+      .countDocuments({ expDate: { $lt: date }, deleted_at: null })
+      .exec()
+    await this.samplingKitInventoryModel
+      .updateMany(
+        { expDate: { $lt: date }, deleted_at: null },
+        { deleted_at: new Date() },
+      )
+      .exec()
+    return data
   }
 }
