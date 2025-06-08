@@ -54,15 +54,6 @@ export class TestTakerRepository implements ITestTakerRepository {
       filter.accountId = new Types.ObjectId(queryDto.accountId)
     }
 
-    if (
-      queryDto.testTakerRelationshipId &&
-      Types.ObjectId.isValid(queryDto.testTakerRelationshipId)
-    ) {
-      filter.testTakerRelationshipId = new Types.ObjectId(
-        queryDto.testTakerRelationshipId,
-      )
-    }
-
     return this.testTakerModel
       .find(filter)
       .skip(skip)
@@ -95,15 +86,6 @@ export class TestTakerRepository implements ITestTakerRepository {
 
     if (queryDto.accountId && Types.ObjectId.isValid(queryDto.accountId)) {
       filter.accountId = new Types.ObjectId(queryDto.accountId)
-    }
-
-    if (
-      queryDto.testTakerRelationshipId &&
-      Types.ObjectId.isValid(queryDto.testTakerRelationshipId)
-    ) {
-      filter.testTakerRelationshipId = new Types.ObjectId(
-        queryDto.testTakerRelationshipId,
-      )
     }
 
     return this.testTakerModel.countDocuments(filter).exec()

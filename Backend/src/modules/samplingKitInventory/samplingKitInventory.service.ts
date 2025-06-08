@@ -6,7 +6,7 @@ import { CreateSamplingKitInventoryDto } from './dto/createSamplingKitInventory.
 import { SamplingKitInventoryResponseDto } from './dto/samplingKitInventoryResponse.dto'
 import { SamplingKitInventory } from './schemas/samplingKitInventory.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
-import { ITypeRepository } from '../type/interfaces/itype.repository'
+import { ISampleTypeRepository } from '../sampleType/interfaces/isampleType.repository'
 
 @Injectable()
 export class SamplingKitInventoryService
@@ -15,8 +15,8 @@ export class SamplingKitInventoryService
   constructor(
     @Inject(ISamplingKitInventoryRepository)
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
-    @Inject(ITypeRepository)
-    private readonly typeRepository: ITypeRepository,
+    @Inject(ISampleTypeRepository)
+    private readonly sampleTypeRepository: ISampleTypeRepository,
   ) {}
 
   private mapToResponseDto(
@@ -30,7 +30,7 @@ export class SamplingKitInventoryService
       kitAmount: samplingKitInventory.kitAmount,
       inventory: samplingKitInventory.inventory,
       facility: samplingKitInventory.facility,
-      type: samplingKitInventory.type,
+      sample: samplingKitInventory.sample,
     })
   }
 
@@ -39,10 +39,10 @@ export class SamplingKitInventoryService
     facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto> {
-    const type = await this.typeRepository.findById(
-      createSamplingKitInventoryDto.type,
+    const sample = await this.sampleTypeRepository.findById(
+      createSamplingKitInventoryDto.sample,
     )
-    if (!type) {
+    if (!sample) {
       throw new NotFoundException(`Loại mẫu kit không tồn tại`)
     }
     const newSamplingKitInventory =

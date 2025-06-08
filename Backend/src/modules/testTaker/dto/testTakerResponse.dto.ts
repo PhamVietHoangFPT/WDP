@@ -38,15 +38,6 @@ export class TestTakerResponseDto {
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   accountId: mongoose.Schema.Types.ObjectId
 
-  @Expose()
-  @ApiProperty({
-    example: '605e3f5f4f3e8c1d4c9f1e1c',
-    type: String,
-    required: false,
-  })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  testTakerRelationshipId?: mongoose.Schema.Types.ObjectId
-
   constructor(partial: Partial<TestTaker>) {
     Object.assign(this, partial)
   }

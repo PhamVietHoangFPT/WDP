@@ -22,5 +22,5 @@ export class CreateSamplingKitInventoryDto {
   @ApiProperty({ description: 'ID loại mẫu kit', type: String })
   @IsNotEmpty()
   @IsMongoId()
-  type: string
+  sample: string
 }

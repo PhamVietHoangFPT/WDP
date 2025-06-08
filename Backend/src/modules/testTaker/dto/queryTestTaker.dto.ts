@@ -57,12 +57,4 @@ export class QueryTestTakerDto {
   @IsOptional()
   @IsString()
   accountId?: string
-
-  @ApiPropertyOptional({
-    example: 'rel456',
-    description: 'Lọc theo TestTakerRelationship',
-  })
-  @IsOptional()
-  @IsString()
-  testTakerRelationshipId?: string
 }

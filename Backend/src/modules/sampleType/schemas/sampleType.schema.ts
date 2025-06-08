@@ -3,10 +3,10 @@ import { HydratedDocument } from 'mongoose'
 import mongoose from 'mongoose'
 import { BaseEntity } from 'src/common/schema/baseEntity.schema'
 
-export type TypeDocument = HydratedDocument<Type>
+export type SampleTypeDocument = HydratedDocument<SampleType>
 
 @Schema()
-export class Type extends BaseEntity {
+export class SampleType extends BaseEntity {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
@@ -17,7 +17,7 @@ export class Type extends BaseEntity {
   name: string
 
   @Prop({ type: Number, required: true })
-  price: number
+  sampleTypeFee: number
 }
 
-export const TypeSchema = SchemaFactory.createForClass(Type)
+export const SampleTypeSchema = SchemaFactory.createForClass(SampleType)

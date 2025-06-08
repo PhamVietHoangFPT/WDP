@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 
-export class CreateTypeDto {
+export class CreateSampleTypeDto {
   @ApiProperty({
-    example: 'Loại dịch vụ A',
-    description: 'Tên loại dịch vụ',
+    example: 'Mẫu loại chuẩn',
+    description: 'Tên loại mẫu',
   })
   @IsNotEmpty()
   @IsString()
@@ -15,5 +15,5 @@ export class CreateTypeDto {
     description: 'Giá của loại dịch vụ',
   })
   @IsNotEmpty()
-  price: number
+  sampleTypeFee: number
 }

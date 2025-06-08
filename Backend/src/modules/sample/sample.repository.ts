@@ -1,4 +1,4 @@
-import { UpdateSampleDto } from './dto/update-response.dto'
+import { UpdateSampleDto } from './dto/update-sample.dto'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -33,13 +33,16 @@ export class SampleRepository implements ISampleRepository {
   }
 
   async findOneById(id: string): Promise<SampleDocument | null> {
-    return this.sampleModel.findById(id).exec()
+    return this.sampleModel
+      .findOne({ _id: id, deleted_at: null })
+      .populate({ path: 'sampleType', select: 'name' })
+      .exec()
   }
 
   async findAll(): Promise<SampleDocument[] | null> {
-    return this.sampleModel
+    return await this.sampleModel
       .find({ deleted_at: null })
-      .populate({ path: 'condition', select: 'name' })
+      .populate({ path: 'sampleType', select: 'name' })
       .exec()
   }
 
