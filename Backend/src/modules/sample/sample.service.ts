@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { UpdateSampleDto } from './dto/update-response.dto'
+import { UpdateSampleDto } from './dto/update-sample.dto'
 import {
   ConflictException,
   Inject,
@@ -11,25 +11,21 @@ import { ISampleRepository } from './interfaces/isample.repository'
 import { Sample } from './schemas/sample.schema'
 import { SampleResponseDto } from './dto/sample-response.dto'
 import { CreateSampleDto } from './dto/create-sample.dto'
-import { IConditionRepository } from '../condition/interfaces/icondition.repository'
+import { ISampleTypeRepository } from '../sampleType/interfaces/isampleType.repository'
 @Injectable()
 export class SampleService implements ISampleService {
   constructor(
     @Inject(ISampleRepository)
     private readonly sampleRepository: ISampleRepository,
-    @Inject(IConditionRepository)
-    private readonly conditionRepository: IConditionRepository, // <-- Inject the repository
+    @Inject(ISampleTypeRepository)
+    private readonly sampleTypeRepository: ISampleTypeRepository,
   ) {}
 
   private mapToResponseDto(sample: Sample): SampleResponseDto {
     return new SampleResponseDto({
       _id: sample._id,
       name: sample.name,
-      typeFee: sample.typeFee,
-      isSpecial: sample.isSpecial,
-      condition: sample.condition,
-      description: sample.description,
-      isAdminstration: sample.isAdminstration,
+      sampleType: sample.sampleType,
       deleted_at: sample.deleted_at,
       deleted_by: sample.deleted_by,
     })
@@ -68,39 +64,31 @@ export class SampleService implements ISampleService {
           existingSample.id,
           userId,
           {
-            typeFee: createSampleDto.typeFee,
-            isSpecial: createSampleDto.isSpecial,
-            condition: createSampleDto.condition,
-            description: createSampleDto.description,
-            isAdminstration: createSampleDto.isAdminstration,
+            sampleType: createSampleDto.sampleType,
+            price: createSampleDto.price,
           },
         )
         return this.mapToResponseDto(restoreSample)
       }
     }
 
-    const existingCondition = await this.conditionRepository.findOneById(
+    const existingSampleType = await this.sampleTypeRepository.findById(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      createSampleDto.condition.toString(),
+      createSampleDto.sampleType.toString(),
     )
-    if (!existingCondition) {
-      throw new ConflictException('Tình trạng mẫu thử không tồn tại.')
+    if (!existingSampleType) {
+      throw new ConflictException('Loại mẫu thử không tồn tại.')
     }
 
     try {
-      const newCondition = await this.sampleRepository.create(userId, {
+      const newSample = await this.sampleRepository.create(userId, {
         name: createSampleDto.name,
-        typeFee: createSampleDto.typeFee,
-        isSpecial: createSampleDto.isSpecial,
-        condition: existingCondition._id,
-        description: createSampleDto.description,
-        isAdminstration: createSampleDto.isAdminstration,
+        sampleType: createSampleDto.sampleType,
+        price: createSampleDto.price,
       })
-      return this.mapToResponseDto(newCondition)
+      return this.mapToResponseDto(newSample)
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi tạo tình trạng của mẫu thử.',
-      )
+      throw new InternalServerErrorException('Lỗi khi tạo mẫu thử.')
     }
   }
 
@@ -127,11 +115,8 @@ export class SampleService implements ISampleService {
     const existingSample = await this.findSampleById(id)
     if (
       existingSample.name === updateSampleDto.name &&
-      existingSample.typeFee === updateSampleDto.typeFee &&
-      existingSample.isSpecial === updateSampleDto.isSpecial &&
-      existingSample.condition === updateSampleDto.condition &&
-      existingSample.description === updateSampleDto.description &&
-      existingSample.isAdminstration === updateSampleDto.isAdminstration
+      existingSample.sampleType === updateSampleDto.sampleType &&
+      existingSample.price === updateSampleDto.price
     ) {
       throw new ConflictException('Không có thay đổi nào để cập nhật.')
     }
@@ -156,10 +141,7 @@ export class SampleService implements ISampleService {
     //this variable is used to check if the sample already exists
     const existingSample = await this.findSampleById(id)
 
-    if (
-      existingSample.deleted_at !== null ||
-      existingSample.deleted_by !== null
-    ) {
+    if (existingSample.deleted_at !== null) {
       throw new ConflictException('Mẫu thử đã bị xóa trước đó.')
     }
     try {

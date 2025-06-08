@@ -49,6 +49,8 @@ export interface ISamplingKitInventoryRepository {
     filter: Record<string, unknown>,
     facilityId: string,
   ): Promise<number>
+
+  deleteByExpiredDate(date: Date): Promise<number>
 }
 export const ISamplingKitInventoryRepository = Symbol(
   'ISamplingKitInventoryRepository',

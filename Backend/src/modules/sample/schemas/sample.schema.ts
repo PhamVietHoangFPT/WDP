@@ -15,24 +15,15 @@ export class Sample extends BaseEntity {
   @Prop({ type: String, required: true, unique: true })
   name: string
 
-  @Prop({ type: Number, required: true, min: 1 })
-  typeFee: number
-
-  @Prop({ type: Boolean, required: true })
-  isSpecial: boolean
+  @Prop({ type: Number, required: true })
+  price: number
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Condition',
     required: true,
+    ref: 'SampleType',
   })
-  condition: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: String })
-  description: string
-
-  @Prop({ type: Boolean, default: true })
-  isAdminstration: boolean
+  sampleType: mongoose.Schema.Types.ObjectId
 }
 
 export const SampleSchema = SchemaFactory.createForClass(Sample)

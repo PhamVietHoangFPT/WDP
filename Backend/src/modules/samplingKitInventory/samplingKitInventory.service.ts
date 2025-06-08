@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  Logger,
+  ConflictException,
+} from '@nestjs/common'
 
 import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
 import { ISamplingKitInventoryService } from './interfaces/isamplingKitInventory.service'
@@ -6,17 +12,18 @@ import { CreateSamplingKitInventoryDto } from './dto/createSamplingKitInventory.
 import { SamplingKitInventoryResponseDto } from './dto/samplingKitInventoryResponse.dto'
 import { SamplingKitInventory } from './schemas/samplingKitInventory.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
-import { ITypeRepository } from '../type/interfaces/itype.repository'
-
+import { ISampleRepository } from '../sample/interfaces/isample.repository'
+import { Cron, CronExpression } from '@nestjs/schedule'
 @Injectable()
 export class SamplingKitInventoryService
   implements ISamplingKitInventoryService
 {
+  private readonly logger = new Logger(SamplingKitInventoryService.name)
   constructor(
     @Inject(ISamplingKitInventoryRepository)
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
-    @Inject(ITypeRepository)
-    private readonly typeRepository: ITypeRepository,
+    @Inject(ISampleRepository)
+    private readonly sampleRepository: ISampleRepository,
   ) {}
 
   private mapToResponseDto(
@@ -30,8 +37,20 @@ export class SamplingKitInventoryService
       kitAmount: samplingKitInventory.kitAmount,
       inventory: samplingKitInventory.inventory,
       facility: samplingKitInventory.facility,
-      type: samplingKitInventory.type,
+      sample: samplingKitInventory.sample,
     })
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
+    name: 'cleanupExpiredSamplingKits',
+    timeZone: 'Asia/Ho_Chi_Minh',
+  })
+  async deleteExpiredSamplingKits(): Promise<void> {
+    this.logger.log('Bắt đầu thực hiện tác vụ xóa các mẫu kit đã hết hạn')
+    const currentDate = new Date()
+    const result =
+      await this.samplingKitInventoryRepository.deleteByExpiredDate(currentDate)
+    this.logger.log(`Đã xóa ${result} mẫu kit đã hết hạn`)
   }
 
   async create(
@@ -39,12 +58,32 @@ export class SamplingKitInventoryService
     facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryResponseDto> {
-    const type = await this.typeRepository.findById(
-      createSamplingKitInventoryDto.type,
+    const sample = await this.sampleRepository.findOneById(
+      createSamplingKitInventoryDto.sample,
     )
-    if (!type) {
-      throw new NotFoundException(`Loại mẫu kit không tồn tại`)
+    if (!sample) {
+      throw new NotFoundException(`Loại mẫu không tồn tại`)
     }
+
+    if (createSamplingKitInventoryDto.kitAmount <= 0) {
+      throw new ConflictException(`Số lượng mẫu kit phải lớn hơn 0.`)
+    }
+
+    if (createSamplingKitInventoryDto.expDate <= new Date()) {
+      throw new ConflictException(`Ngày hết hạn phải lớn hơn ngày hiện tại.`)
+    }
+
+    if (createSamplingKitInventoryDto.importDate > new Date()) {
+      throw new ConflictException(`Ngày nhập khẩu phải nhỏ hơn ngày hiện tại.`)
+    }
+
+    if (
+      createSamplingKitInventoryDto.importDate >
+      createSamplingKitInventoryDto.expDate
+    ) {
+      throw new ConflictException(`Ngày nhập khẩu phải nhỏ hơn ngày hết hạn.`)
+    }
+
     const newSamplingKitInventory =
       await this.samplingKitInventoryRepository.create(
         createSamplingKitInventoryDto,

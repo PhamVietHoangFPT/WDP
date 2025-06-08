@@ -32,8 +32,8 @@ export class SamplingKitInventory extends BaseEntity {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Type' })
-  type: mongoose.Schema.Types.ObjectId
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Sample' })
+  sample: mongoose.Schema.Types.ObjectId
 }
 
 export const SamplingKitInventorySchema =

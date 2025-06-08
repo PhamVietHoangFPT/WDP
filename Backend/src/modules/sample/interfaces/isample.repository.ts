@@ -1,5 +1,5 @@
 import { CreateSampleDto } from '../dto/create-sample.dto'
-import { UpdateSampleDto } from '../dto/update-response.dto'
+import { UpdateSampleDto } from '../dto/update-sample.dto'
 import { SampleDocument } from '../schemas/sample.schema'
 
 export interface ISampleRepository {

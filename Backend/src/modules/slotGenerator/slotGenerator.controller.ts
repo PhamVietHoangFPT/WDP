@@ -20,7 +20,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
 @ApiTags('admin - Slot Generation')
-@ApiBearerAuth('bearer') // Sử dụng tên security scheme của bạn
+@ApiBearerAuth() // Sử dụng tên security scheme của bạn
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('admin/slot-generation')
 export class SlotGenerationController {

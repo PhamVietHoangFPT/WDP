@@ -2,7 +2,6 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { TestTaker, TestTakerSchema } from './schemas/testTaker.schema'
-import { TestTakerRelationshipModule } from '../testTakerRelationship/testTakerRelationship.module'
 import { AccountModule } from '../account/account.module'
 import { TestTakerController } from './testTaker.controller'
 import { ITestTakerService } from './interfaces/itestTaker.service'
@@ -15,7 +14,6 @@ import { AuthModule } from '../auth/auth.module'
     MongooseModule.forFeature([
       { name: TestTaker.name, schema: TestTakerSchema },
     ]),
-    TestTakerRelationshipModule,
     AccountModule,
     AuthModule,
   ],
