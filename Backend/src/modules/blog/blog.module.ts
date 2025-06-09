@@ -20,6 +20,6 @@ import { AccountModule } from '../account/account.module'
     { provide: IBlogRepository, useClass: BlogRepository },
     { provide: IBlogService, useClass: BlogService },
   ],
-  exports: [IBlogService, IBlogRepository],
+  exports: [IBlogService, IBlogRepository, MongooseModule],
 })
 export class BlogModule {}
