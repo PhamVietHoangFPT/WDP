@@ -16,43 +16,35 @@ export class CaseMember extends BaseEntity {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'testTaker',
     required: true,
+    default: [],
   })
-  testTakerId: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'serviceCase',
-    required: true,
-  })
-  caseId: mongoose.Schema.Types.ObjectId
+  testTaker: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'samplingKitInventory',
-    required: true,
   })
-  samplingKitInventoryId: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'kitShipment',
-    required: true,
-  })
-  kitShipmentId: mongoose.Schema.Types.ObjectId
+  samplingKitInventory: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'booking',
     required: true,
   })
-  bookingId: mongoose.Schema.Types.ObjectId
+  booking: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'service',
     required: true,
   })
-  serviceId: mongoose.Schema.Types.ObjectId
+  service: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: String,
+    trim: true,
+  })
+  note: string
 }
 
 export const CaseMemberSchema = SchemaFactory.createForClass(CaseMember)

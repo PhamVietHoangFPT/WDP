@@ -23,6 +23,7 @@ import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 import { SampleTypeModule } from './modules/sampleType/sampleType.module'
+import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 @Module({
   imports: [
     databaseConfig,
@@ -50,6 +51,7 @@ import { SampleTypeModule } from './modules/sampleType/sampleType.module'
     TimeReturnModule,
     SamplingKitInventoryModule,
     SampleTypeModule,
+    CaseMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],
