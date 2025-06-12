@@ -17,10 +17,10 @@ export class Service extends BaseEntity {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Relationship',
+    ref: 'Sample',
     required: true,
   })
-  relationship: mongoose.Schema.Types.ObjectId
+  sample: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -29,8 +29,12 @@ export class Service extends BaseEntity {
   })
   timeReturn: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Type', required: true })
-  type: mongoose.Schema.Types.ObjectId
+  @Prop({ type: Boolean, required: true, default: true })
+  isAgnate: boolean
+
+  @Prop({ type: Boolean, required: true, default: true })
+  isAdministration: boolean
+
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service)
