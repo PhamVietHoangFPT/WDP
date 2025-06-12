@@ -24,6 +24,7 @@ import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
 import { SampleTypeModule } from './modules/sampleType/sampleType.module'
 import { CaseMemberModule } from './modules/caseMember/caseMember.module'
+import { ServiceModule } from './modules/service/service.module'
 @Module({
   imports: [
     databaseConfig,
@@ -52,6 +53,7 @@ import { CaseMemberModule } from './modules/caseMember/caseMember.module'
     SamplingKitInventoryModule,
     SampleTypeModule,
     CaseMemberModule,
+    ServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],
