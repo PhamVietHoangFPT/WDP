@@ -29,7 +29,7 @@ export class AccountsRepository implements IAccountsRepository {
 
   async findByPhoneNumber(phone_number: string): Promise<Account | null> {
     return this.accountModel
-      .findOne({ phone_number: phone_number.toLowerCase() })
+      .findOne({ phoneNumber: phone_number.toLowerCase() })
       .exec()
   }
 
