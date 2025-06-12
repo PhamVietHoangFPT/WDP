@@ -8,6 +8,7 @@ import { UpdateBookingDto } from './dto/updateBooking.dto'
 import { SlotDocument } from '../slot/schemas/slot.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
+import { BookingStatusDocument } from '../bookingStatus/schemas/bookingStatus.schema'
 
 @Injectable()
 export class BookingRepository implements IBookingRepository {
@@ -40,16 +41,27 @@ export class BookingRepository implements IBookingRepository {
 
   async findById(id: string, userId: string): Promise<BookingDocument | null> {
     return this.bookingModel
-      .findOne({ _id: id, created_by: userId })
+      .findOne({ _id: id, account: userId })
       .populate({ path: 'account', select: 'name email phoneNumber' })
       .populate({ path: 'slot', select: 'startTime endTime' })
       .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
       .exec()
   }
 
+  async getBookingStatusById(
+    id: string,
+  ): Promise<BookingStatusDocument | null> {
+    const booking = await this.bookingModel.findById(id).select('bookingStatus')
+    const bookingStatus = await this.bookingStatusRepository.findById(
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      booking.bookingStatus.toString(),
+    )
+    return bookingStatus
+  }
+
   async findAll(userId: string): Promise<BookingDocument[]> {
     return this.bookingModel
-      .find({ created_by: userId })
+      .find({ account: userId })
       .populate({ path: 'account', select: 'name email phoneNumber' })
       .populate({ path: 'slot', select: 'startTime endTime' })
       .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })

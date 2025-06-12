@@ -13,8 +13,7 @@ export class CaseMember extends BaseEntity {
   _id: mongoose.Schema.Types.ObjectId
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'testTaker',
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TestTaker' }],
     required: true,
     default: [],
   })
@@ -22,20 +21,20 @@ export class CaseMember extends BaseEntity {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'samplingKitInventory',
+    ref: 'SamplingKitInventory',
   })
   samplingKitInventory: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'booking',
+    ref: 'Booking',
     required: true,
   })
   booking: mongoose.Schema.Types.ObjectId
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'service',
+    ref: 'Service',
     required: true,
   })
   service: mongoose.Schema.Types.ObjectId

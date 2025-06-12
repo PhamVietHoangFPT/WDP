@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  ConflictException,
+} from '@nestjs/common'
 import { CaseMember, CaseMemberDocument } from './schemas/caseMember.schema'
 import { ICaseMemberRepository } from './interfaces/icaseMember.repository'
 import { ICaseMemberService } from './interfaces/icaseMember.service'
@@ -6,6 +11,8 @@ import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
 import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
 import { CaseMemberResponseDto } from './dto/caseMemberResponse.dto'
 import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
+import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
+import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 
 @Injectable()
 export class CaseMemberService implements ICaseMemberService {
@@ -14,6 +21,10 @@ export class CaseMemberService implements ICaseMemberService {
     private readonly caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private readonly testTakerRepository: ITestTakerRepository,
+    @Inject(IBookingStatusRepository)
+    private readonly bookingStatusRepository: IBookingStatusRepository,
+    @Inject(IBookingRepository)
+    private readonly bookingRepository: IBookingRepository,
   ) {}
 
   private mapToResponseDto(caseMember: CaseMember): CaseMemberResponseDto {
@@ -24,6 +35,18 @@ export class CaseMemberService implements ICaseMemberService {
     dto: CreateCaseMemberDto,
     userId: string,
   ): Promise<CaseMemberResponseDto> {
+    const bookingStatus = await this.bookingRepository.getBookingStatusById(
+      dto.booking,
+    )
+    if (!bookingStatus) {
+      throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
+    }
+    if (bookingStatus.bookingStatus !== 'Thành công') {
+      throw new ConflictException(
+        'Hồ sơ đặt lịch hẹn ' +
+          bookingStatus.bookingStatus.toString().toLocaleLowerCase(),
+      )
+    }
     const caseMember = await this.caseMemberRepository.create(dto, userId)
     return this.mapToResponseDto(caseMember)
   }
@@ -35,18 +58,26 @@ export class CaseMemberService implements ICaseMemberService {
   ): Promise<CaseMemberResponseDto> {
     const caseMember = await this.caseMemberRepository.update(id, dto, userId)
     if (!caseMember) {
-      throw new NotFoundException('Case member not found')
-    }
-    return this.mapToResponseDto(caseMember)
-  }
-  async findById(id: string): Promise<CaseMemberResponseDto | null> {
-    const caseMember = await this.caseMemberRepository.findById(id)
-    if (!caseMember) {
       throw new NotFoundException(
-        `Không tìm thấy hồ sơ nhóm người cần xét nghiệm với ID ${id}`,
+        'Không tìm thấy hồ sơ nhóm người cần xét nghiệm',
       )
     }
     return this.mapToResponseDto(caseMember)
+  }
+
+  async findById(id: string): Promise<CaseMemberResponseDto | null> {
+    try {
+      const caseMember = await this.caseMemberRepository.findById(id)
+      if (!caseMember) {
+        return null
+      }
+      return this.mapToResponseDto(caseMember)
+    } catch (error) {
+      if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+        throw new NotFoundException('ID không hợp lệ')
+      }
+      console.error('Error finding case member:', error)
+    }
   }
 
   async addMember(
