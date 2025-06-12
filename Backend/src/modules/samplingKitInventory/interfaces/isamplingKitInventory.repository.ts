@@ -9,12 +9,10 @@ export interface ISamplingKitInventoryRepository {
   create(
     createSamplingKitInventoryDto: CreateSamplingKitInventoryDto,
     facilityId: string,
+    userId: string,
   ): Promise<SamplingKitInventoryDocument>
 
-  findById(
-    id: string,
-    facilityId: string,
-  ): Promise<SamplingKitInventoryDocument | null>
+  findById(id: string): Promise<SamplingKitInventoryDocument | null>
 
   update(
     id: string,
@@ -36,7 +34,6 @@ export interface ISamplingKitInventoryRepository {
 
   delete(
     id: string,
-    facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryDocument | null>
 
@@ -52,6 +49,8 @@ export interface ISamplingKitInventoryRepository {
     filter: Record<string, unknown>,
     facilityId: string,
   ): Promise<number>
+
+  deleteByExpiredDate(date: Date): Promise<number>
 }
 export const ISamplingKitInventoryRepository = Symbol(
   'ISamplingKitInventoryRepository',

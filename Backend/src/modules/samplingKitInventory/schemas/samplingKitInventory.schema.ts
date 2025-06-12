@@ -17,7 +17,7 @@ export class SamplingKitInventory extends BaseEntity {
   @Prop({ type: String, required: true, trim: true })
   lotNumber: string
 
-  @Prop({ type: Date, default: null, unique: true })
+  @Prop({ type: Date, default: null })
   importDate: Date
 
   @Prop({ type: Date, required: true, trim: true })
@@ -29,14 +29,11 @@ export class SamplingKitInventory extends BaseEntity {
   @Prop({ type: Number, default: null })
   inventory: number
 
-  @Prop({ type: Number, required: true, trim: true })
-  price: number
-
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Facility' })
   facility: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Type' })
-  type: mongoose.Schema.Types.ObjectId
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Sample' })
+  sample: mongoose.Schema.Types.ObjectId
 }
 
 export const SamplingKitInventorySchema =

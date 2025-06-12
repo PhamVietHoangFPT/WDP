@@ -8,11 +8,10 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   ValidationPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -35,7 +34,6 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 
 @ApiTags('test-takers')
 @Controller('test-takers')
-@UseInterceptors(ClassSerializerInterceptor)
 export class TestTakerController {
   constructor(
     @Inject(ITestTakerService)
@@ -52,8 +50,10 @@ export class TestTakerController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createDto: CreateTestTakerDto,
+    @Req() req: any, // Lấy thông tin người dùng từ request
   ): Promise<ApiResponseDto<TestTakerResponseDto>> {
-    const newData = await this.testTakerService.create(createDto)
+    const userId = req.user.id // Giả sử bạn đã xác thực người dùng và có ID trong req.user
+    const newData = await this.testTakerService.create(createDto, userId)
     return new ApiResponseDto<TestTakerResponseDto>({
       data: [newData],
       success: true,

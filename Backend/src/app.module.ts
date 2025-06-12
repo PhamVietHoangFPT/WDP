@@ -10,8 +10,6 @@ import { SlotModule } from './modules/slot/slot.module'
 import { SlotGenerationModule } from './modules/slotGenerator/slotGenerator.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
-import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
-import { ConditionModule } from './modules/condition/condition.module'
 import { VnPayModule } from './modules/vnpay/vnpay.module'
 import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
@@ -20,36 +18,40 @@ import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
-import { TypeModule } from './modules/type/type.module'
+import { SampleModule } from './modules/sample/sample.module'
+import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
-import { RelationshipModule } from './modules/relationship/relationship.module'
+import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
+import { SampleTypeModule } from './modules/sampleType/sampleType.module'
+import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 @Module({
   imports: [
     databaseConfig,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AccountModule,
     AuthModule,
     SlotTemplateModule,
     SlotModule,
     SlotGenerationModule,
     TestTakerModule,
-    TestTakerRelationshipModule,
     AddressModule,
     LocationModule,
-    ScheduleModule.forRoot(),
-    ConditionModule,
     PaymentModule,
     ImageModule,
+    BlogModule,
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
     VnPayModule,
     BookingModule,
-    TypeModule,
+    SampleModule,
     TimeReturnModule,
-    RelationshipModule
+    SamplingKitInventoryModule,
+    SampleTypeModule,
+    CaseMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

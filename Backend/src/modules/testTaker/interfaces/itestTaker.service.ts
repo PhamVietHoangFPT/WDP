@@ -4,7 +4,7 @@ import { QueryTestTakerDto } from '../dto/queryTestTaker.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 
 export interface ITestTakerService {
-  create(dto: CreateTestTakerDto): Promise<TestTakerResponseDto>
+  create(dto: CreateTestTakerDto, userId: string): Promise<TestTakerResponseDto>
   findAll(
     query: QueryTestTakerDto,
     pageNumber: number,

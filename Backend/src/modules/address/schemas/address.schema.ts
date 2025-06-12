@@ -14,9 +14,6 @@ export class Address extends BaseEntity {
   _id: mongoose.Schema.Types.ObjectId
 
   @Prop({ type: String, required: true, trim: true })
-  fullName: string
-
-  @Prop({ type: String, required: true, trim: true })
   fullAddress: string
 
   @Prop({ type: Boolean, trim: true })

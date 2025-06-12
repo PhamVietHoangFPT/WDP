@@ -24,5 +24,5 @@ export class CreateFacilityDto {
   })
   @IsNotEmpty()
   @IsString()
-  contactNumber: string
+  phoneNumber: string
 }

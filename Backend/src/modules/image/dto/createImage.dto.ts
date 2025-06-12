@@ -1,39 +1,9 @@
-import { IsOptional, IsString } from 'class-validator'
+import { IsMongoId, IsOptional } from 'class-validator'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 
-export class CreateImageDto {
+export class CreateBlogImageDto {
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  testRequestHistoryTestRequestStatus?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  testRequestHistoryTestRequest?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  kitShipment?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  testRequestShipmentHistoryShipmentStatus?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  testRequestShipmentHistoryTestRequestShipment?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
+  @IsMongoId()
   blog?: string
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  administrationDocument?: string
 }
