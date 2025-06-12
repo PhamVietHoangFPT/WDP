@@ -33,6 +33,6 @@ export class CreateTestTakerDto {
     required: true,
   })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  @IsNotEmpty({ message: 'AccountId không được để trống' })
-  accountId: mongoose.Schema.Types.ObjectId
+  @IsNotEmpty({ message: 'Account không được để trống' })
+  account: mongoose.Schema.Types.ObjectId
 }

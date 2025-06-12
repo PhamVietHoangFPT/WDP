@@ -27,9 +27,6 @@ export class TestTaker extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TestTakerRelationShip' })
-  testTakerRelationShip: mongoose.Schema.Types.ObjectId
 }
 
 export const TestTakerSchema = SchemaFactory.createForClass(TestTaker)

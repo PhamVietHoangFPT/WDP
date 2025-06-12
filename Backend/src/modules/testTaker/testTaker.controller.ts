@@ -31,6 +31,9 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { QueryTestTakerDto } from './dto/queryTestTaker.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
+import { RolesGuard } from 'src/common/guard/roles.guard'
+import { Roles } from 'src/common/decorators/roles.decorator'
+import { RoleEnum } from 'src/common/enums/role.enum'
 
 @ApiTags('test-takers')
 @Controller('test-takers')
@@ -41,6 +44,9 @@ export class TestTakerController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.CUSTOMER)
+  @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Tạo test taker mới' })
   @ApiBody({ type: CreateTestTakerDto })
   @ApiResponse({
@@ -63,6 +69,8 @@ export class TestTakerController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Lấy danh sách test takers' })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiQuery({ name: 'pageNumber', required: false, type: Number })
