@@ -22,7 +22,6 @@ export class TestTakerRepository implements ITestTakerRepository {
     return this.testTakerModel
       .findById(id)
       .populate({ path: 'account', select: 'name email' }) // Populate account info if needed
-      .populate({ path: 'testTakerRelationShip' }) // Populate relationship
       .lean()
       .exec()
   }
@@ -60,7 +59,6 @@ export class TestTakerRepository implements ITestTakerRepository {
       .limit(limit)
       .sort({ name: 1 })
       .populate({ path: 'account', select: 'name email' })
-      .populate({ path: 'testTakerRelationShip' })
       .lean()
       .exec()
   }

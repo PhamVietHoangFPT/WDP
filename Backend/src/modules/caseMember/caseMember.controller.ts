@@ -54,7 +54,7 @@ export class CaseMemberController {
       createCaseMemberDto,
       userId,
     )
-    return new CaseMemberResponseDto(caseMember)
+    return caseMember
   }
 
   @Get(':id')
@@ -117,38 +117,38 @@ export class CaseMemberController {
     })
   }
 
-  @Put(':id/add-member')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
-  })
-  @ApiOperation({
-    summary: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Thành viên đã được thêm vào hồ sơ nhóm người cần xét nghiệm',
-    type: ApiResponseDto<CaseMemberResponseDto>,
-  })
-  async addMember(
-    @Param('id') caseMemberId: string,
-    @Body('testTakerId') testTakerId: string,
-    @Req() req: any,
-  ): Promise<ApiResponseDto<CaseMemberResponseDto>> {
-    const userId = req.user.id
-    const caseMember = await this.caseMemberService.addMember(
-      caseMemberId,
-      testTakerId,
-      userId,
-    )
-    return {
-      data: [caseMember],
-      message: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm thành công',
-      statusCode: HttpStatus.OK,
-      success: true,
-    }
-  }
+  // @Put(':id/add-member')
+  // @ApiBearerAuth()
+  // @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
+  // @ApiParam({
+  //   name: 'id',
+  //   required: true,
+  //   description: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
+  // })
+  // @ApiOperation({
+  //   summary: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Thành viên đã được thêm vào hồ sơ nhóm người cần xét nghiệm',
+  //   type: ApiResponseDto<CaseMemberResponseDto>,
+  // })
+  // async addMember(
+  //   @Param('id') caseMemberId: string,
+  //   @Body('testTakerId') testTakerId: string,
+  //   @Req() req: any,
+  // ): Promise<ApiResponseDto<CaseMemberResponseDto>> {
+  //   const userId = req.user.id
+  //   const caseMember = await this.caseMemberService.addMember(
+  //     caseMemberId,
+  //     testTakerId,
+  //     userId,
+  //   )
+  //   return {
+  //     data: [caseMember],
+  //     message: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm thành công',
+  //     statusCode: HttpStatus.OK,
+  //     success: true,
+  //   }
+  // }
 }

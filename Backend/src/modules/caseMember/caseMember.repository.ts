@@ -35,7 +35,8 @@ export class CaseMemberRepository implements ICaseMemberRepository {
         { ...dto, updated_by: userId, updated_at: Date.now() },
         { new: true },
       )
-      .populate({ path: 'testTaker', select: 'name email -_id' })
+      .populate({ path: 'testTaker', select: 'name -_id' })
+      .populate({ path: 'booking' })
       .lean()
       .exec()
   }
@@ -62,10 +63,23 @@ export class CaseMemberRepository implements ICaseMemberRepository {
   }
 
   async findById(id: string): Promise<CaseMemberDocument | null> {
-    return this.model
+    const result = await this.model
       .findById(id)
-      .populate({ path: 'testTaker', select: 'name email -_id' })
+      .select(
+        '-__v -deleted_at -deleted_by -created_by -updated_by -created_at -updated_at',
+      )
+      .populate({ path: 'testTaker', select: 'name -_id' })
+      .populate({
+        path: 'booking',
+        populate: [
+          { path: 'slot', select: 'startTime endTime -_id' },
+          { path: 'bookingStatus', select: 'bookingStatus -_id' },
+        ],
+        select: 'slot bookingStatus',
+      })
+
       .lean()
       .exec()
+    return result
   }
 }

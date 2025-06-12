@@ -22,7 +22,7 @@ export class CreateBlogDto {
     example: 'Hướng dẫn chăm sóc sức khỏe mùa hè hiệu quả',
     description: 'Mô tả ngắn của bài viết',
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Mô tả không được để trống' })
   @IsString()
   description: string
 

@@ -8,6 +8,8 @@ import { ICaseMemberService } from './interfaces/icaseMember.service'
 import { ICaseMemberRepository } from './interfaces/icaseMember.repository'
 import { CaseMemberController } from './caseMember.controller'
 import { TestTakerModule } from '../testTaker/testTaker.module'
+import { BookingModule } from '../booking/booking.module'
+import { BookingStatusModule } from '../bookingStatus/bookingStatus.module'
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
     ]),
     AuthModule,
     TestTakerModule,
+    BookingModule,
+    BookingStatusModule,
   ],
   controllers: [CaseMemberController],
   providers: [
