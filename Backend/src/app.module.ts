@@ -19,6 +19,7 @@ import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
 import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
+import { ImageModule } from './modules/image/image.module'
 import { TypeModule } from './modules/type/type.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { RelationshipModule } from './modules/relationship/relationship.module'
@@ -40,6 +41,8 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     ScheduleModule.forRoot(),
     ConditionModule,
     PaymentModule,
+    ImageModule,
+    BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
     VnPayModule,
