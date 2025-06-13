@@ -34,7 +34,6 @@ export class Service extends BaseEntity {
 
   @Prop({ type: Boolean, required: true, default: true })
   isAdministration: boolean
-
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service)
