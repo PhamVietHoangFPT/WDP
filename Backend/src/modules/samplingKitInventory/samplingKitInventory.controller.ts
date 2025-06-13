@@ -23,7 +23,6 @@ import {
 } from '@nestjs/swagger'
 import { CreateSamplingKitInventoryDto } from './dto/createSamplingKitInventory.dto'
 import { SamplingKitInventoryResponseDto } from './dto/samplingKitInventoryResponse.dto'
-import { SamplingKitInventory } from './schemas/samplingKitInventory.schema'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { FacilityAccessGuard } from 'src/common/guard/facility.guard'
@@ -32,6 +31,7 @@ import { Roles } from 'src/common/decorators/roles.decorator'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
+import { UpdateInventoryDto } from './dto/updateInventory.dto'
 
 @ApiTags('sampling-kit-inventory')
 @Controller('sampling-kit-inventory')
@@ -164,7 +164,7 @@ export class SamplingKitInventoryController {
   })
   async update(
     @Param('id') id: string,
-    @Body() updateDto: Partial<SamplingKitInventory>,
+    @Body() updateInventoryDto: UpdateInventoryDto,
     @Req() req: any,
   ): Promise<ApiResponseDto<SamplingKitInventoryResponseDto>> {
     const facilityId = req.user.facility._id
@@ -173,7 +173,7 @@ export class SamplingKitInventoryController {
       id,
       facilityId,
       userId,
-      updateDto,
+      updateInventoryDto,
     )
     return new ApiResponseDto<SamplingKitInventoryResponseDto>({
       data: [result],

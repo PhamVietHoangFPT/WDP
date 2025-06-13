@@ -20,7 +20,6 @@ import { SampleModule } from '../sample/sample.module'
     ]),
     FacilityModule,
     AuthModule,
-
     SampleModule,
   ],
   controllers: [SamplingKitInventoryController],
@@ -34,6 +33,10 @@ import { SampleModule } from '../sample/sample.module'
       useClass: SamplingKitInventoryRepository,
     },
   ],
-  exports: [MongooseModule],
+  exports: [
+    MongooseModule,
+    ISamplingKitInventoryService,
+    ISamplingKitInventoryRepository,
+  ],
 })
 export class SamplingKitInventoryModule {}

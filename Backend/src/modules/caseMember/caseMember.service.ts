@@ -11,8 +11,9 @@ import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
 import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
 import { CaseMemberResponseDto } from './dto/caseMemberResponse.dto'
 import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
-import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
+import { ISamplingKitInventoryRepository } from '../samplingKitInventory/interfaces/isamplingKitInventory.repository'
+import { IServiceRepository } from '../service/interfaces/iservice.repository'
 
 @Injectable()
 export class CaseMemberService implements ICaseMemberService {
@@ -21,10 +22,12 @@ export class CaseMemberService implements ICaseMemberService {
     private readonly caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private readonly testTakerRepository: ITestTakerRepository,
-    @Inject(IBookingStatusRepository)
-    private readonly bookingStatusRepository: IBookingStatusRepository,
     @Inject(IBookingRepository)
     private readonly bookingRepository: IBookingRepository,
+    @Inject(ISamplingKitInventoryRepository)
+    private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
+    @Inject(IServiceRepository)
+    private readonly serviceRepository: IServiceRepository,
   ) {}
 
   private mapToResponseDto(caseMember: CaseMember): CaseMemberResponseDto {
@@ -35,6 +38,40 @@ export class CaseMemberService implements ICaseMemberService {
     dto: CreateCaseMemberDto,
     userId: string,
   ): Promise<CaseMemberResponseDto> {
+    // Kiểm tra số lượng thành viên trong nhóm người cần xét nghiệm
+    if (dto.testTaker.length <= 1) {
+      throw new ConflictException(
+        'Hồ sơ nhóm người cần xét nghiệm cần ít nhất 2 thành viên',
+      )
+    }
+
+    if (dto.testTaker.length > 3) {
+      throw new ConflictException(
+        'Một hồ sơ nhóm người cần xét nghiệm chỉ có tối đa 3 thành viên',
+      )
+    }
+
+    // Kiểm tra lịch hẹn có tồn tại không
+    const bookingExist = await this.bookingRepository.checkExistById(
+      dto.booking,
+    )
+
+    if (!bookingExist) {
+      throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
+    }
+
+    // Kiểm tra lịch hẹn đã được sử dụng chưa
+    const isBookingUsed = await this.caseMemberRepository.checkBookingUsed(
+      dto.booking,
+    )
+
+    if (isBookingUsed) {
+      throw new ConflictException(
+        'Lịch hẹn này đã được sử dụng cho một hồ sơ nhóm người cần xét nghiệm khác',
+      )
+    }
+
+    // Kiểm tra trạng thái của lịch hẹn
     const bookingStatus = await this.bookingRepository.getBookingStatusById(
       dto.booking,
     )
@@ -47,7 +84,55 @@ export class CaseMemberService implements ICaseMemberService {
           bookingStatus.bookingStatus.toString().toLocaleLowerCase(),
       )
     }
-    const caseMember = await this.caseMemberRepository.create(dto, userId)
+
+    // Kiểm tra ngày giờ của lịch hẹn
+    const bookingExistDate = await this.bookingRepository.getBookingDateById(
+      dto.booking,
+    )
+    if (new Date(bookingExistDate) < new Date()) {
+      throw new ConflictException('Lịch hẹn đã qua thời gian sử dụng')
+    }
+
+    // Lấy cơ sở từ lịch hẹn
+    const facilityId = await this.bookingRepository.getFacilityIdByBookingId(
+      dto.booking,
+    )
+
+    // Kiểm tra xem dịch vụ có tồn tại không
+    const service = await this.serviceRepository.findById(dto.service)
+
+    if (!service) {
+      throw new NotFoundException('Không tìm thấy dịch vụ')
+    }
+
+    // Lấy sample để tìm sampling kit
+    const sampleId = await this.serviceRepository.getSampleId(dto.service)
+
+    // Lấy kho mẫu kit xét nghiệm theo sampleId và số lượng trong facility
+    const findSamplingKitInventory =
+      await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
+        sampleId.toString(),
+        dto.testTaker.length,
+        facilityId,
+      )
+
+    if (!findSamplingKitInventory) {
+      throw new NotFoundException('Mẫu kit xét nghiệm hiện không đủ trong kho')
+    }
+
+    // Cập nhật số lượng mẫu kit trong kho
+    await this.samplingKitInventoryRepository.updateInventory(
+      findSamplingKitInventory,
+      facilityId,
+      dto.testTaker.length,
+    )
+
+    // Tạo hồ sơ nhóm người cần xét nghiệm
+    const dataSend = {
+      ...dto,
+      samplingKitInventory: findSamplingKitInventory,
+    }
+    const caseMember = await this.caseMemberRepository.create(dataSend, userId)
     return this.mapToResponseDto(caseMember)
   }
 

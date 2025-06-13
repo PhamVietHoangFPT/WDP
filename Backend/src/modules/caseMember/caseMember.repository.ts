@@ -82,4 +82,9 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       .exec()
     return result
   }
+
+  async checkBookingUsed(bookingId: string): Promise<boolean> {
+    const caseMember = await this.model.findOne({ booking: bookingId })
+    return !!caseMember
+  }
 }

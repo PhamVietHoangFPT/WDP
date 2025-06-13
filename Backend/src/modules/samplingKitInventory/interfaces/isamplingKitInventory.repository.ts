@@ -1,9 +1,7 @@
-import {
-  SamplingKitInventory,
-  SamplingKitInventoryDocument,
-} from '../schemas/samplingKitInventory.schema'
+import { SamplingKitInventoryDocument } from '../schemas/samplingKitInventory.schema'
 import { CreateSamplingKitInventoryDto } from '../dto/createSamplingKitInventory.dto'
 import mongoose from 'mongoose'
+import { UpdateInventoryDto } from '../dto/updateInventory.dto'
 
 export interface ISamplingKitInventoryRepository {
   create(
@@ -18,7 +16,7 @@ export interface ISamplingKitInventoryRepository {
     id: string,
     facilityId: string,
     userId: string,
-    updateSamplingKitInventoryDto: Partial<SamplingKitInventory>,
+    updateInventoryDto: UpdateInventoryDto,
   ): Promise<SamplingKitInventoryDocument | null>
 
   updateInventory(
@@ -51,6 +49,12 @@ export interface ISamplingKitInventoryRepository {
   ): Promise<number>
 
   deleteByExpiredDate(date: Date): Promise<number>
+
+  findBySampleIdAndQuantityInFacility(
+    sampleId: string,
+    quantity: number,
+    facilityId: string,
+  ): Promise<string | null>
 }
 export const ISamplingKitInventoryRepository = Symbol(
   'ISamplingKitInventoryRepository',

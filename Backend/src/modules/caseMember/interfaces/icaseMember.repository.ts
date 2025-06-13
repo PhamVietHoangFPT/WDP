@@ -16,6 +16,7 @@ export interface ICaseMemberRepository {
     userId: string,
   ): Promise<CaseMemberDocument | null>
   findById(id: string): Promise<CaseMemberDocument | null>
+  checkBookingUsed(bookingId: string): Promise<boolean>
 }
 
 export const ICaseMemberRepository = Symbol('ICaseMemberRepository')

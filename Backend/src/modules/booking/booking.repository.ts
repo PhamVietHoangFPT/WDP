@@ -143,4 +143,41 @@ export class BookingRepository implements IBookingRepository {
       )
       .exec()
   }
+
+  async checkExistById(id: string): Promise<boolean> {
+    const count = await this.bookingModel.countDocuments({ _id: id }).exec()
+    return count > 0
+  }
+
+  async getFacilityIdByBookingId(id: string): Promise<string | null> {
+    const booking = await this.bookingModel
+      .findById(id)
+      .populate<{
+        slot: {
+          slotTemplate: {
+            facility: any
+          }
+        }
+      }>({
+        path: 'slot',
+        populate: {
+          path: 'slotTemplate',
+          select: 'facility',
+        },
+      })
+      .lean()
+      .exec()
+
+    const facilityId = booking?.slot?.slotTemplate?.facility
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return facilityId ? facilityId.toString() : null
+  }
+
+  async getBookingDateById(id: string): Promise<Date | null> {
+    const booking = await this.bookingModel
+      .findById(id)
+      .select('bookingDate')
+      .exec()
+    return booking ? booking.bookingDate : null
+  }
 }
