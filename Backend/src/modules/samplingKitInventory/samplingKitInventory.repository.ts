@@ -33,9 +33,7 @@ export class SamplingKitInventoryRepository
   }
 
   async findById(id: string): Promise<SamplingKitInventoryDocument | null> {
-    return this.samplingKitInventoryModel
-      .findOne({ _id: id, deleted_at: null })
-      .exec()
+    return this.samplingKitInventoryModel.findOne({ _id: id }).exec()
   }
 
   async update(
@@ -100,13 +98,12 @@ export class SamplingKitInventoryRepository
     facilityId: string,
     quantity: number,
   ): Promise<SamplingKitInventoryDocument | null> {
-    return this.samplingKitInventoryModel
+    return await this.samplingKitInventoryModel
       .findOneAndUpdate(
         {
           _id: id,
           facility: facilityId,
           deleted_at: null,
-          inventory: { $gte: quantity },
         },
         {
           $inc: { inventory: -quantity },

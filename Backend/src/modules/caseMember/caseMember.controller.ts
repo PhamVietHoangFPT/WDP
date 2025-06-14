@@ -7,8 +7,10 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -16,6 +18,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger'
 import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
 import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
@@ -26,6 +29,8 @@ import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
+import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 
 @ApiTags('case-members')
 @Controller('case-members')
@@ -35,6 +40,52 @@ export class CaseMemberController {
     @Inject(ICaseMemberService)
     private readonly caseMemberService: ICaseMemberService,
   ) {}
+
+  @Get()
+  @ApiBearerAuth()
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
+  @ApiOperation({ summary: 'Lấy danh sách hồ sơ nhóm người cần xét nghiệm' })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+    description: 'Số trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách tài khoản.',
+    type: PaginatedResponseDto<CaseMemberResponseDto>,
+  })
+  async findAll(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        forbidNonWhitelisted: true,
+      }),
+    )
+    paginationQuery: PaginationQueryDto,
+    @Req() req: any,
+  ) {
+    const { pageNumber, pageSize } = paginationQuery
+    const userId = req.user.id
+    const userRole = req.user.role
+    if (userRole === RoleEnum.STAFF) {
+      // Nếu là STAFF, không cần truyền userId
+      return this.caseMemberService.findAllCaseMembers(pageNumber, pageSize)
+    }
+    return this.caseMemberService.findAllCaseMembers(
+      pageNumber,
+      pageSize,
+      userId,
+    )
+  }
 
   @Post()
   @ApiBearerAuth()
