@@ -53,7 +53,7 @@ import { ServiceModule } from './modules/service/service.module'
     SamplingKitInventoryModule,
     SampleTypeModule,
     CaseMemberModule,
-    ServiceModule
+    ServiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

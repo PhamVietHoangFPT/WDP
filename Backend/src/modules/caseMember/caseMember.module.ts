@@ -9,7 +9,8 @@ import { ICaseMemberRepository } from './interfaces/icaseMember.repository'
 import { CaseMemberController } from './caseMember.controller'
 import { TestTakerModule } from '../testTaker/testTaker.module'
 import { BookingModule } from '../booking/booking.module'
-import { BookingStatusModule } from '../bookingStatus/bookingStatus.module'
+import { SamplingKitInventoryModule } from '../samplingKitInventory/samplingKitInventory.module'
+import { ServiceModule } from '../service/service.module'
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { BookingStatusModule } from '../bookingStatus/bookingStatus.module'
     AuthModule,
     TestTakerModule,
     BookingModule,
-    BookingStatusModule,
+    SamplingKitInventoryModule,
+    ServiceModule,
   ],
   controllers: [CaseMemberController],
   providers: [

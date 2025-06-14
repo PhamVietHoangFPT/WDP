@@ -1,7 +1,7 @@
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { CreateSamplingKitInventoryDto } from '../dto/createSamplingKitInventory.dto'
 import { SamplingKitInventoryResponseDto } from '../dto/samplingKitInventoryResponse.dto'
-import { SamplingKitInventory } from '../schemas/samplingKitInventory.schema'
+import { UpdateInventoryDto } from '../dto/updateInventory.dto'
 
 export interface ISamplingKitInventoryService {
   create(
@@ -16,7 +16,7 @@ export interface ISamplingKitInventoryService {
     id: string,
     facilityId: string,
     userId: string,
-    updateSamplingKitInventoryDto: Partial<SamplingKitInventory>,
+    updateInventoryDto: UpdateInventoryDto,
   ): Promise<SamplingKitInventoryResponseDto>
 
   findByLotNumberAndFacility(

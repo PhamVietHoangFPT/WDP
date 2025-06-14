@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { CaseMember, CaseMemberDocument } from './schemas/caseMember.schema'
 import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
 import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
@@ -81,5 +81,47 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       .lean()
       .exec()
     return result
+  }
+
+  async getBookingIdByCaseMemberId(caseMemberId: string): Promise<string> {
+    const caseMember = await this.model.findById(caseMemberId).select('booking')
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return caseMember ? caseMember.booking.toString() : null
+  }
+
+  async getSamplingKitInventoryIdByCaseMemberId(
+    caseMemberId: string,
+  ): Promise<string> {
+    const caseMember = await this.model
+      .findById(caseMemberId)
+      .select('samplingKitInventory')
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return caseMember ? caseMember.samplingKitInventory.toString() : null
+  }
+
+  async checkBookingUsed(bookingId: string): Promise<boolean> {
+    const caseMember = await this.model.findOne({ booking: bookingId })
+    return !!caseMember
+  }
+
+  findWithQuery(
+    filter: Record<string, any>,
+  ): mongoose.Query<CaseMemberDocument[], CaseMemberDocument> {
+    return this.model
+      .find(filter)
+      .populate({ path: 'testTaker', select: 'name gender dateOfBirth -_id' })
+      .populate({
+        path: 'booking',
+        populate: [
+          { path: 'slot', select: 'startTime endTime -_id' },
+          { path: 'bookingStatus', select: 'bookingStatus -_id' },
+        ],
+        select: 'slot bookingStatus bookingDate -_id',
+      })
+      .lean()
+  }
+
+  async countDocuments(filter: Record<string, unknown>): Promise<number> {
+    return this.model.countDocuments(filter).exec()
   }
 }

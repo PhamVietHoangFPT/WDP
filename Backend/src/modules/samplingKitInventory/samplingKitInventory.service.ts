@@ -14,6 +14,7 @@ import { SamplingKitInventory } from './schemas/samplingKitInventory.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { ISampleRepository } from '../sample/interfaces/isample.repository'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { UpdateInventoryDto } from './dto/updateInventory.dto'
 @Injectable()
 export class SamplingKitInventoryService
   implements ISamplingKitInventoryService
@@ -106,14 +107,14 @@ export class SamplingKitInventoryService
     id: string,
     facilityId: string,
     userId: string,
-    updateSamplingKitInventoryDto: Partial<SamplingKitInventory>,
+    updateInventoryDto: UpdateInventoryDto,
   ): Promise<SamplingKitInventoryResponseDto> {
     const updatedSamplingKitInventory =
       await this.samplingKitInventoryRepository.update(
         id,
         facilityId,
         userId,
-        updateSamplingKitInventoryDto,
+        updateInventoryDto,
       )
     if (!updatedSamplingKitInventory) {
       throw new NotFoundException(`Mẫu kit không tồn tại`)

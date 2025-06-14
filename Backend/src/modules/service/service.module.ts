@@ -19,17 +19,17 @@ import { ServiceService } from './service.service'
     TimeReturnModule,
     SampleModule,
   ],
-    controllers: [ServiceController],
-    providers: [
-      {
-        provide: IServiceRepository,
-        useClass: ServiceRepository,
-      },
-      {
-        provide: IServiceService,
-        useClass: ServiceService,
-      },
-    ],
-    exports: [IServiceRepository,IServiceService],
+  controllers: [ServiceController],
+  providers: [
+    {
+      provide: IServiceRepository,
+      useClass: ServiceRepository,
+    },
+    {
+      provide: IServiceService,
+      useClass: ServiceService,
+    },
+  ],
+  exports: [IServiceRepository, IServiceService],
 })
-export class ServiceModule { }
+export class ServiceModule {}
