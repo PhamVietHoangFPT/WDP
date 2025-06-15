@@ -22,5 +22,6 @@ export interface IServiceRepository {
   deleteServiceById(id: string, userId: string): Promise<ServiceDocument | null>
   findById(id: string): Promise<ServiceDocument | null>
   getSampleId(id: string): Promise<string | null>
+  checkIsAdministration(id: string): Promise<boolean>
 }
 export const IServiceRepository = Symbol('IServiceRepository')

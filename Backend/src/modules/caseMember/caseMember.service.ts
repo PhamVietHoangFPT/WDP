@@ -152,6 +152,15 @@ export class CaseMemberService implements ICaseMemberService {
       throw new NotFoundException('Không tìm thấy dịch vụ')
     }
 
+    // Kiểm tra xem dịch vụ này có được sử dụng tại nhà không
+    const isServiceAtHome = await this.serviceRepository.checkIsAdministration(
+      dto.service,
+    )
+
+    if (isServiceAtHome === true && dto.isAtHome === true) {
+      throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
+    }
+
     // Lấy sample để tìm sampling kit
     const sampleId = await this.serviceRepository.getSampleId(dto.service)
 
@@ -256,6 +265,18 @@ export class CaseMemberService implements ICaseMemberService {
 
     if (!service) {
       throw new NotFoundException('Không tìm thấy dịch vụ')
+    }
+
+    // Kiểm tra xem dịch vụ này có được sử dụng tại nhà không
+    const isServiceAtHome = await this.serviceRepository.checkIsAdministration(
+      dto.service,
+    )
+
+    const oldCaseMemberIsAtHome =
+      await this.caseMemberRepository.getIsAtHome(id)
+
+    if (isServiceAtHome && oldCaseMemberIsAtHome === true) {
+      throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
 
     // Lấy số lượng nhóm người cần xét nghiệm

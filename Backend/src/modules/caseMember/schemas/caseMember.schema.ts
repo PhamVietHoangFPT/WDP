@@ -44,6 +44,9 @@ export class CaseMember extends BaseEntity {
     trim: true,
   })
   note: string
+
+  @Prop({ type: Boolean, required: true })
+  isAtHome: boolean
 }
 
 export const CaseMemberSchema = SchemaFactory.createForClass(CaseMember)

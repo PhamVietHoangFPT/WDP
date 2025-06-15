@@ -103,4 +103,12 @@ export class ServiceRepository implements IServiceRepository {
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return service?.sample.toString() || null
   }
+
+  async checkIsAdministration(id: string): Promise<boolean> {
+    const service = await this.serviceModel
+      .findOne({ _id: id, deleted_at: null })
+      .select('isAdministration')
+      .exec()
+    return !!(service && service.isAdministration)
+  }
 }
