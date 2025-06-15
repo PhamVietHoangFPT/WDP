@@ -1,16 +1,22 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { IServiceRepository } from './interfaces/iservice.repository'
 import { InjectModel } from '@nestjs/mongoose'
 import { Service, ServiceDocument } from './schemas/service.schema'
 import { Model } from 'mongoose'
 import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
+import { ITimeReturnRepository } from '../timeReturn/interfaces/itimeReturn.repository'
+import { ISampleRepository } from '../sample/interfaces/isample.repository'
 
 @Injectable()
 export class ServiceRepository implements IServiceRepository {
   constructor(
     @InjectModel(Service.name)
     private serviceModel: Model<ServiceDocument>,
+    @Inject(ITimeReturnRepository)
+    private readonly timeReturnRepository: ITimeReturnRepository,
+    @Inject(ISampleRepository)
+    private readonly sampleRepository: ISampleRepository,
   ) {}
 
   async create(
@@ -36,7 +42,11 @@ export class ServiceRepository implements IServiceRepository {
     return await this.serviceModel
       .find({ deleted_at: null })
       .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
-      .populate({ path: 'sample', select: '-_id name' })
+      .populate({
+        path: 'sample',
+        select: '-_id name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+      })
       .exec()
   }
 
@@ -91,7 +101,11 @@ export class ServiceRepository implements IServiceRepository {
     return this.serviceModel
       .findOne({ _id: id, deleted_at: null })
       .populate({ path: 'timeReturn', select: '_id timeReturn timeReturnFee' })
-      .populate({ path: 'sample', select: '_id name' })
+      .populate({
+        path: 'sample',
+        select: '_id name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+      })
       .exec()
   }
 
@@ -110,5 +124,38 @@ export class ServiceRepository implements IServiceRepository {
       .select('isAdministration')
       .exec()
     return !!(service && service.isAdministration)
+  }
+
+  async getTotalFeeService(
+    id: string,
+    timeReturnId: string,
+  ): Promise<number | null> {
+    const serviceFee = await this.serviceModel
+      .findOne({ _id: id, deleted_at: null })
+      .select('fee')
+      .exec()
+
+    const timeReturnFee =
+      await this.timeReturnRepository.getTimeReturnFeeById(timeReturnId)
+
+    const sampleId = await this.getSampleId(id)
+    const sampleTypeId =
+      await this.sampleRepository.getSampleTypeIdBySampleId(sampleId)
+
+    const sampleAndSampleTypeFee =
+      await this.sampleRepository.getSampleTotalPrice(sampleId, sampleTypeId)
+    const totalFee = serviceFee
+      ? serviceFee.fee + timeReturnFee + sampleAndSampleTypeFee
+      : null
+    return totalFee
+  }
+
+  async getTimeReturnId(id: string): Promise<string | null> {
+    const service = await this.serviceModel
+      .findOne({ _id: id })
+      .select('timeReturn')
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return service?.timeReturn ? service.timeReturn.toString() : null
   }
 }

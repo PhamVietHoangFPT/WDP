@@ -26,6 +26,7 @@ import { SampleTypeModule } from './modules/sampleType/sampleType.module'
 import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 import { ServiceModule } from './modules/service/service.module'
 import { TestRequestStatusModule } from './modules/testRequestStatus/testRequestStatus.module'
+import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 @Module({
   imports: [
     databaseConfig,
@@ -56,6 +57,7 @@ import { TestRequestStatusModule } from './modules/testRequestStatus/testRequest
     CaseMemberModule,
     ServiceModule,
     TestRequestStatusModule,
+    ServiceCaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

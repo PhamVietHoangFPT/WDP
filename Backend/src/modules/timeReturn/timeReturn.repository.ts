@@ -78,4 +78,12 @@ export class TimeReturnRepository implements ITimeReturnRepository {
       )
       .exec()
   }
+
+  async getTimeReturnFeeById(id: string): Promise<number | null> {
+    const timeReturn = await this.timeReturnModel
+      .findOne({ _id: id })
+      .select('timeReturnFee')
+      .exec()
+    return timeReturn ? timeReturn.timeReturnFee : null
+  }
 }
