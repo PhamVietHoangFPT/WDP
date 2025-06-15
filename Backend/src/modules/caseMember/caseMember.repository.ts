@@ -124,4 +124,17 @@ export class CaseMemberRepository implements ICaseMemberRepository {
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.model.countDocuments(filter).exec()
   }
+
+  async getIsAtHome(caseMemberId: string): Promise<boolean | null> {
+    const caseMember = await this.model
+      .findById(caseMemberId)
+      .select('isAtHome')
+    return caseMember ? caseMember.isAtHome : null
+  }
+
+  async getServiceIdByCaseMemberId(caseMemberId: string): Promise<string> {
+    const caseMember = await this.model.findById(caseMemberId).select('service')
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return caseMember ? caseMember.service.toString() : null
+  }
 }

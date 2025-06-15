@@ -13,5 +13,6 @@ export interface ISampleTypeRepository {
   ): Promise<SampleTypeDocument | null>
   delete(id: string, userId: string): Promise<boolean>
   findTypeByName(name: string): Promise<SampleTypeDocument | null>
+  getSampleTypeFeeById(id: string): Promise<number | null>
 }
 export const ISampleTypeRepository = Symbol('ISampleTypeRepository')

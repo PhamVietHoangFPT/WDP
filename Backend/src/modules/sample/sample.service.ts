@@ -65,7 +65,7 @@ export class SampleService implements ISampleService {
           userId,
           {
             sampleType: createSampleDto.sampleType,
-            price: createSampleDto.price,
+            fee: createSampleDto.fee,
           },
         )
         return this.mapToResponseDto(restoreSample)
@@ -84,7 +84,7 @@ export class SampleService implements ISampleService {
       const newSample = await this.sampleRepository.create(userId, {
         name: createSampleDto.name,
         sampleType: createSampleDto.sampleType,
-        price: createSampleDto.price,
+        fee: createSampleDto.fee,
       })
       return this.mapToResponseDto(newSample)
     } catch (error) {
@@ -116,7 +116,7 @@ export class SampleService implements ISampleService {
     if (
       existingSample.name === updateSampleDto.name &&
       existingSample.sampleType === updateSampleDto.sampleType &&
-      existingSample.price === updateSampleDto.price
+      existingSample.fee === updateSampleDto.fee
     ) {
       throw new ConflictException('Không có thay đổi nào để cập nhật.')
     }

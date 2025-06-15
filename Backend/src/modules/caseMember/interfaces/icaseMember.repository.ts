@@ -24,6 +24,8 @@ export interface ICaseMemberRepository {
   countDocuments(filter: Record<string, unknown>): Promise<number>
   getBookingIdByCaseMemberId(caseMemberId: string): Promise<string>
   getSamplingKitInventoryIdByCaseMemberId(caseMemberId: string): Promise<string>
+  getIsAtHome(caseMemberId: string): Promise<boolean | null>
+  getServiceIdByCaseMemberId(caseMemberId: string): Promise<string>
 }
 
 export const ICaseMemberRepository = Symbol('ICaseMemberRepository')

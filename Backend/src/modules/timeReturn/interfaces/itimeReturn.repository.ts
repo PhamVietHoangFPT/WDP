@@ -23,5 +23,6 @@ export interface ITimeReturnRepository {
     id: string,
     userId: string,
   ): Promise<TimeReturnDocument | null>
+  getTimeReturnFeeById(id: string): Promise<number | null>
 }
 export const ITimeReturnRepository = Symbol('ITimeReturnRepository')

@@ -16,7 +16,7 @@ export class Sample extends BaseEntity {
   name: string
 
   @Prop({ type: Number, required: true })
-  price: number
+  fee: number
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

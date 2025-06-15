@@ -15,7 +15,7 @@ export class CreateSampleDto {
   @ApiProperty({ example: 100000, required: true })
   @IsNumber()
   @IsNotEmpty({ message: 'Giá không được để trống' })
-  price: number
+  fee: number
 
   @ApiProperty({
     example: '67f697151bfaa0e9cf14ec92',

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsMongoId, IsArray } from 'class-validator'
+import { IsString, IsMongoId, IsArray, IsBoolean } from 'class-validator'
 
 export class CreateCaseMemberDto {
   @ApiProperty({
@@ -38,4 +38,8 @@ export class CreateCaseMemberDto {
   })
   @IsString()
   note: string
+
+  @ApiProperty({ example: true, description: 'Trạng thái có mặt tại nhà' })
+  @IsBoolean()
+  isAtHome: boolean
 }

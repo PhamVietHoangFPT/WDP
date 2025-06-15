@@ -30,7 +30,7 @@ export class SampleTypeRepository implements ISampleTypeRepository {
   }
 
   async findById(id: string): Promise<SampleTypeDocument | null> {
-    return this.sampleTypeModel.findOne({ id: id, deleted_at: null }).exec()
+    return this.sampleTypeModel.findOne({ _id: id, deleted_at: null }).exec()
   }
 
   async update(
@@ -60,5 +60,13 @@ export class SampleTypeRepository implements ISampleTypeRepository {
 
   async findTypeByName(name: string): Promise<SampleTypeDocument | null> {
     return this.sampleTypeModel.findOne({ name, deleted_at: null }).exec()
+  }
+
+  async getSampleTypeFeeById(id: string): Promise<number | null> {
+    const sampleType = await this.sampleTypeModel
+      .findOne({ _id: id })
+      .select('sampleTypeFee')
+      .exec()
+    return sampleType ? sampleType.sampleTypeFee : null
   }
 }

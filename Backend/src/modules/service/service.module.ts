@@ -18,6 +18,7 @@ import { ServiceService } from './service.service'
     AccountModule,
     TimeReturnModule,
     SampleModule,
+    TimeReturnModule,
   ],
   controllers: [ServiceController],
   providers: [
