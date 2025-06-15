@@ -25,6 +25,7 @@ import { SamplingKitInventoryModule } from './modules/samplingKitInventory/sampl
 import { SampleTypeModule } from './modules/sampleType/sampleType.module'
 import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 import { ServiceModule } from './modules/service/service.module'
+import { TestRequestStatusModule } from './modules/testRequestStatus/testRequestStatus.module'
 @Module({
   imports: [
     databaseConfig,
@@ -54,6 +55,7 @@ import { ServiceModule } from './modules/service/service.module'
     SampleTypeModule,
     CaseMemberModule,
     ServiceModule,
+    TestRequestStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
