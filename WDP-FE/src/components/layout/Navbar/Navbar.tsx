@@ -35,20 +35,21 @@ const Navbar: React.FC = () => {
     return [
       {
         key: 'home',
-        icon: <HomeFilled style={{ fontSize: "16px" }} />,
+        icon: <HomeFilled style={{ fontSize: '16px' }} />,
         label: 'Trang chủ',
         style: { fontSize: '16px', color: '#616161' },
         url: '/',
       },
       {
         key: 'services',
-        icon: <SmileOutlined style={{ fontSize: "16px" }} />,
-        label: 'Dịch vụ', style: { fontSize: '16px', color: '#616161' },
+        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
+        label: 'Dịch vụ',
+        style: { fontSize: '16px', color: '#616161' },
         url: '/vaccines?pageNumber=1',
       },
       {
         key: 'blogs',
-        icon: <FontAwesomeIcon icon={faBlog} style={{ fontSize: "16px" }} />,
+        icon: <FontAwesomeIcon icon={faBlog} style={{ fontSize: '16px' }} />,
         label: 'Cẩm nang',
         style: { fontSize: '16px', color: '#616161' },
         url: '/blogs',
@@ -60,32 +61,36 @@ const Navbar: React.FC = () => {
     return [
       {
         key: 'kit',
-        icon: <CalendarOutlined style={{ fontSize: "16px" }} />,
+        icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
         label: 'Lấy mẫu tại nhà',
         style: { fontSize: '16px', color: '#616161' },
         url: '/vaccine-registration',
       },
       {
         key: userData ? 'profile' : 'login',
-        icon: userData ? <UserOutlined style={{ fontSize: "16px" }} /> : <LoginOutlined style={{ fontSize: "16px" }} />,
+        icon: userData ? (
+          <UserOutlined style={{ fontSize: '16px' }} />
+        ) : (
+          <LoginOutlined style={{ fontSize: '16px' }} />
+        ),
         label: userData ? 'Hồ sơ' : 'Đăng nhập / Đăng ký',
         style: { fontSize: '16px', color: '#616161' },
         url: userData ? '/profile' : '/login',
       },
       ...(userData
         ? [
-          {
-            key: 'logout',
-            icon: <LogoutOutlined style={{ fontSize: "16px" }} />,
-            label: 'Đăng xuất',
-            style: { fontSize: '16px', color: 'red' },
-            onClick: () => {
-              Cookies.remove('userData')
-              Cookies.remove('userToken')
-              navigate('/login')
+            {
+              key: 'logout',
+              icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
+              label: 'Đăng xuất',
+              style: { fontSize: '16px', color: 'red' },
+              onClick: () => {
+                Cookies.remove('userData')
+                Cookies.remove('userToken')
+                navigate('/login')
+              },
             },
-          },
-        ]
+          ]
         : []),
     ]
   }, [userData, navigate])
@@ -126,14 +131,14 @@ const Navbar: React.FC = () => {
         <Menu
           onClick={onClick}
           selectedKeys={[current]}
-          mode="horizontal"
+          mode='horizontal'
           items={items}
           style={{ flex: '7', borderBottom: 'none' }}
         />
         <Menu
           onClick={onClick}
           selectedKeys={[current]}
-          mode="horizontal"
+          mode='horizontal'
           items={userItems}
           style={{ flex: '3', borderBottom: 'none' }}
         />

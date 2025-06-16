@@ -5,7 +5,7 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { ConfigProvider } from 'antd'
 import store from './services/store.ts'
-import './index.css'  // 👈 This line is required
+import './index.css' // 👈 This line is required
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

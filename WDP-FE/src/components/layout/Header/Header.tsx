@@ -1,5 +1,5 @@
 import { Layout } from 'antd'
-import Logo from "../../../assets/Logo.png"
+import Logo from '../../../assets/Logo.png'
 const { Header } = Layout
 
 const CustomHeader = () => {
@@ -15,7 +15,6 @@ const CustomHeader = () => {
         height: 'auto',
       }}
     >
-
       {/* Logo */}
       <div
         style={{

@@ -3,5 +3,3 @@ export interface Slots {
   daysToGenerate: number
   startDate: Date
 }
-
-
