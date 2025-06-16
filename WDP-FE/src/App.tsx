@@ -1,10 +1,12 @@
 import { Route, Routes } from 'react-router-dom'
-import routes from './routes/routes.ts'
-import PermissionCheck from './components/Permission/PermissionCheck.tsx'
-import NotFound from './components/NotFound/NotFound.tsx'
-import { useAutoLogout } from './hooks/useAutoLogout.ts'
+import routes from './routes/routes'
+import PermissionCheck from './components/Permission/PermissionCheck'
+import NotFound from './components/NotFound/NotFound'
+import { useAutoLogout } from './hooks/useAutoLogout'
+
 function App() {
   useAutoLogout()
+
   return (
     <Routes>
       {routes.map((route, i) => {
@@ -28,6 +30,8 @@ function App() {
           </Route>
         )
       })}
+
+      {/* Trang fallback */}
       <Route path='*' element={<NotFound />} />
     </Routes>
   )
