@@ -9,7 +9,6 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
-  
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -66,7 +65,6 @@ export const SideBar = () => {
       label: 'Slot',
       onClick: () => navigate('admin/slotAdmin'),
     },
-    
   ]
 
   return (

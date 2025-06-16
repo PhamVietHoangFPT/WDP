@@ -37,7 +37,7 @@ function MainLayout() {
       <Content
         style={{
           padding: '50px',
-          paddingTop: '30px'
+          paddingTop: '30px',
         }}
       >
         <Outlet />

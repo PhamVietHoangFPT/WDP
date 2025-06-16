@@ -19,7 +19,7 @@ export default function Login() {
       navigate('/')
     }
   }, [navigate])
-  
+
   return (
     <Layout
       style={{

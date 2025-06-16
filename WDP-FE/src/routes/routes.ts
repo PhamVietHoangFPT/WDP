@@ -48,7 +48,6 @@ const routes: LayoutRoute[] = [
         component: CreateSlot,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -59,7 +58,6 @@ const routes: LayoutRoute[] = [
         component: ManagerHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -70,7 +68,6 @@ const routes: LayoutRoute[] = [
         component: DeliveryStaffHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -81,7 +78,6 @@ const routes: LayoutRoute[] = [
         component: DoctorHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -92,7 +88,6 @@ const routes: LayoutRoute[] = [
         component: StaffHomePage,
         // role: ['admin'],
       },
-
     ],
   },
 ]

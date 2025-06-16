@@ -1,5 +1,5 @@
-import { apiSlice } from '../../apis/apiSlice';
-import { login } from './authSlice';
+import { apiSlice } from '../../apis/apiSlice'
+import { login } from './authSlice'
 
 export const authAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -14,14 +14,14 @@ export const authAPI = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          dispatch(login({ token: data.data[0].accessToken })); // Lấy token từ data.data[0].accessToken
+          const { data } = await queryFulfilled
+          dispatch(login({ token: data.data[0].accessToken })) // Lấy token từ data.data[0].accessToken
         } catch (error) {
-          console.log(error);
+          console.log(error)
         }
       },
     }),
   }),
-});
+})
 
-export const { useLoginMutation } = authAPI;
+export const { useLoginMutation } = authAPI

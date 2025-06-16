@@ -9,7 +9,6 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
-  
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -60,7 +59,6 @@ export const SideBar = () => {
       label: 'Dashboard Doctor',
       onClick: () => navigate('doctor'),
     },
-    
   ]
 
   return (
