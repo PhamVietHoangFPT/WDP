@@ -33,13 +33,11 @@ function MainLayout() {
       }}
     >
       <Navbar />
-       <AppHeader />
+      <AppHeader />
       <Content
         style={{
           padding: '50px',
-          paddingTop: '30px',
-          overflow: 'initial',
-          width: '100vw',
+          paddingTop: '30px'
         }}
       >
         <Outlet />
