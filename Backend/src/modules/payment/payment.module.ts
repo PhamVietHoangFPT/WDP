@@ -11,6 +11,8 @@ import { PaymentRepository } from './payment.repository'
 import { BookingModule } from '../booking/booking.module'
 import { BookingStatusModule } from '../bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from '../paymentType/paymentType.module'
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
@@ -18,6 +20,8 @@ import { PaymentTypeModule } from '../paymentType/paymentType.module'
     BookingModule,
     BookingStatusModule,
     PaymentTypeModule,
+    ServiceCaseModule,
+    TestRequestStatusModule,
   ],
 
   controllers: [PaymentController],
