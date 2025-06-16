@@ -10,13 +10,14 @@ import { ServiceResponseDto } from './dto/serviceResponse.dto'
 import { Service } from './schemas/service.schema'
 import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 
 @Injectable()
 export class ServiceService implements IServiceService {
   constructor(
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -59,13 +60,33 @@ export class ServiceService implements IServiceService {
 
   // this function returns all Services
   // if there are no Services, it throws an ConflictException
-  async findAllService(): Promise<ServiceResponseDto[]> {
-    const services = await this.serviceRepository.findAll()
+  async findAllService(pageNumber: number,
+    pageSize: number): Promise<PaginatedResponse<ServiceResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+    const filter = {}
+    const [services, totalItems] = await Promise.all([
+      this.serviceRepository
+        .findWithQuery(filter) // Returns a query object
+        .skip(skip)
+        .limit(pageSize)
+        .exec(), // Execute the query
+      this.serviceRepository.countDocuments(filter), // Use repository for count
+    ])
     if (!services || services.length == 0) {
       throw new ConflictException('Không tìm thấy dịch vụ nào.')
     } else {
       try {
-        return services.map((service) => this.mapToResponseDto(service))
+        const totalPages = Math.ceil(totalItems / pageSize)
+        const data = services.map((service: Service) => this.mapToResponseDto(service)) // Explicitly type `user`
+        return {
+          data,
+          pagination: {
+            totalItems,
+            totalPages,
+            currentPage: pageNumber,
+            pageSize,
+          },
+        }
       } catch (error) {
         throw new InternalServerErrorException('Lỗi khi lấy danh sách dịch vụ.')
       }

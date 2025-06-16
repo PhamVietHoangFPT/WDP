@@ -1,3 +1,4 @@
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { CreateServiceDto } from '../dto/createService.dto'
 import { ServiceResponseDto } from '../dto/serviceResponse.dto'
 import { UpdateServiceDto } from '../dto/updateService.dto'
@@ -8,7 +9,8 @@ export interface IServiceService {
     createServiceDto: CreateServiceDto,
   ): Promise<CreateServiceDto>
 
-  findAllService(): Promise<ServiceResponseDto[]>
+  findAllService(pageNumber: number,
+    pageSize: number): Promise<PaginatedResponse<ServiceResponseDto>>
   findServiceById(id: string): Promise<ServiceResponseDto>
 
   updateService(

@@ -1,6 +1,7 @@
+import mongoose from 'mongoose'
 import { CreateServiceDto } from '../dto/createService.dto'
 import { UpdateServiceDto } from '../dto/updateService.dto'
-import { ServiceDocument } from '../schemas/service.schema'
+import { Service, ServiceDocument } from '../schemas/service.schema'
 
 export interface IServiceRepository {
   create(
@@ -25,5 +26,10 @@ export interface IServiceRepository {
   checkIsAdministration(id: string): Promise<boolean>
   getTotalFeeService(id: string, timeReturnId: string): Promise<number | null>
   getTimeReturnId(id: string): Promise<string | null>
+  findWithQuery(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<Service[], Service>
+  countDocuments(filter: Record<string, unknown>): Promise<number>
+
 }
 export const IServiceRepository = Symbol('IServiceRepository')

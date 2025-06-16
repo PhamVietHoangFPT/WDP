@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { IServiceRepository } from './interfaces/iservice.repository'
 import { InjectModel } from '@nestjs/mongoose'
 import { Service, ServiceDocument } from './schemas/service.schema'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
 import { ITimeReturnRepository } from '../timeReturn/interfaces/itimeReturn.repository'
@@ -17,8 +17,11 @@ export class ServiceRepository implements IServiceRepository {
     private readonly timeReturnRepository: ITimeReturnRepository,
     @Inject(ISampleRepository)
     private readonly sampleRepository: ISampleRepository,
-  ) {}
+  ) { }
 
+  async countDocuments(filter: Record<string, unknown>): Promise<number> {
+    return this.serviceModel.countDocuments(filter).exec()
+  }
   async create(
     userId: string,
     createServiceDto: CreateServiceDto,
@@ -157,5 +160,18 @@ export class ServiceRepository implements IServiceRepository {
       .exec()
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return service?.timeReturn ? service.timeReturn.toString() : null
+  }
+  findWithQuery(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<ServiceDocument[], ServiceDocument> {
+    return this.serviceModel
+      .find(filter)
+      .lean()
+      .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
+      .populate({
+        path: 'sample',
+        select: '-_id name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+      })
   }
 }
