@@ -3,6 +3,7 @@ import { Typography, Button, Row, Col, Space } from 'antd'
 import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import Logo from "../../assets/Logo.png"
+import Content from '../Content/content'
 
 const { Title, Paragraph } = Typography
 
@@ -66,30 +67,16 @@ const Homepage: React.FC = () => {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
             />
-
-            <Button
-              type='primary'
-              size='large'
-              icon={<CalendarOutlined />}
-              onClick={() => {
-                navigate('login')
-              }}
-            >
-              Login
-            </Button>
-
           </Col>
         </Row>
 
         {/* Danh sach vaccine */}
         <div style={{ marginBottom: '48px' }}>
-          <Title
-            level={2}
-            style={{ textAlign: 'center', marginBottom: '32px' }}
-          >
-            Một số loại vaccine
-          </Title>
-
+          <Content
+            title="CÁC DỊCH VỤ"
+            btnContent="Xem tất cả dịch vụ"
+            linkURL="/sessions"
+          />
           <LoadingOutlined
             style={{
               fontSize: '50px',
@@ -99,17 +86,15 @@ const Homepage: React.FC = () => {
               height: '30vh',
             }}
           />
-
         </div>
 
         {/* Danh sach blog */}
         <div style={{ marginBottom: '48px' }}>
-          <Title
-            level={2}
-            style={{ textAlign: 'center', marginBottom: '32px' }}
-          >
-            Các bài viết mới
-          </Title>
+          <Content
+            title="CÁC BÀI VIẾT MỚI"
+            btnContent="Xem tất cả bài viết"
+            linkURL="/sessions"
+          />
 
           <LoadingOutlined
             style={{
