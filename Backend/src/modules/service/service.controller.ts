@@ -8,13 +8,16 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger'
@@ -26,6 +29,8 @@ import { CreateServiceDto } from './dto/createService.dto'
 import { ServiceResponseDto } from './dto/serviceResponse.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 
 @ApiTags('Services')
 @Controller('services')
@@ -33,7 +38,7 @@ export class ServiceController {
   constructor(
     @Inject(IServiceService)
     private readonly serviceService: IServiceService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -55,16 +60,31 @@ export class ServiceController {
 
   @Get()
   @ApiOperation({ summary: 'Xem tất cả loại của mẫu thử' })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+    description: 'Số trang',
+  })
   @ApiResponse({ status: HttpStatus.OK, type: [ServiceResponseDto] })
-  async findAll(): Promise<ApiResponseDto<ServiceResponseDto>> {
-    const result = await this.serviceService.findAllService()
-    return new ApiResponseDto<ServiceResponseDto>({
-      statusCode: HttpStatus.OK,
-      message: 'Lấy danh sách dịch vụ thành công',
-      data: result,
-    })
+  async findAll(@Query(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      forbidNonWhitelisted: true,
+    }),
+  ) paginationQuery: PaginationQueryDto) {
+    const { pageNumber, pageSize } = paginationQuery
+    const result = await this.serviceService.findAllService(pageNumber || 1,
+      pageSize || 10,)
+    return result
   }
-
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth('bearer')
