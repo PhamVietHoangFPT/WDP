@@ -13,7 +13,7 @@ const PermissionCheck = ({ children, protectedRole }: PermissionCheckProps) => {
   if (!protectedRole) return children
   if (
     user.userData &&
-    protectedRole.some((role) => user.userData?.Role === role)
+    protectedRole.some((role) => user.userData?.role === role)
   ) {
     return children
   }

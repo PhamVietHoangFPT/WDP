@@ -4,16 +4,10 @@ import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
 import Logo from '../../assets/Logo.png'
 import { useNavigate } from 'react-router-dom'
 
-
 const { Title, Paragraph } = Typography
 
 const Homepage: React.FC = () => {
   const navigate = useNavigate()
-  
-
-  
-
- 
 
   return (
     <div
@@ -75,16 +69,15 @@ const Homepage: React.FC = () => {
             />
 
             <Button
-                  type='primary'
-                  size='large'
-                  icon={<CalendarOutlined />}
-                  onClick={() => {
-                    navigate('login')
-                  }}
-                >
-                  Login
-                </Button>
-            
+              type='primary'
+              size='large'
+              icon={<CalendarOutlined />}
+              onClick={() => {
+                navigate('login')
+              }}
+            >
+              Login
+            </Button>
           </Col>
         </Row>
 
@@ -96,17 +89,16 @@ const Homepage: React.FC = () => {
           >
             Một số loại vaccine
           </Title>
-          
-            <LoadingOutlined
-              style={{
-                fontSize: '50px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '30vh',
-              }}
-            />
-          
+
+          <LoadingOutlined
+            style={{
+              fontSize: '50px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '30vh',
+            }}
+          />
         </div>
 
         {/* Danh sach blog */}
@@ -117,17 +109,16 @@ const Homepage: React.FC = () => {
           >
             Các bài viết mới
           </Title>
-          
-            <LoadingOutlined
-              style={{
-                fontSize: '50px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '30vh',
-              }}
-            />
-          
+
+          <LoadingOutlined
+            style={{
+              fontSize: '50px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '30vh',
+            }}
+          />
         </div>
       </div>
     </div>

@@ -3,16 +3,20 @@ import { apiSlice } from '../../apis/apiSlice'
 const slotApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSlotsList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
+      query: ({ pageNumber, pageSize, facilityId, startDate, endDate, isAvailable }) => ({
         url: '/slots',
         method: 'GET',
         params: {
           pageNumber,
           pageSize,
+          facilityId,    // Thêm tham số lọc cơ sở
+          startDate,     // Thêm tham số ngày bắt đầu
+          endDate,       // Thêm tham số ngày kết thúc
+          isAvailable, 
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['blogs'],
+      providesTags: ['slots'],
     }),
     getBlogsMinimalList: builder.query({
       query: ({ pageNumber, pageSize }) => ({

@@ -4,4 +4,8 @@ export interface Slots {
   startDate: Date
 }
 
-
+export interface Slot {
+  _id: string;
+  slotDate: string; 
+  endTime: string;   
+}

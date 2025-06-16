@@ -65,6 +65,7 @@ import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
 import Login from '../pages/Login/Login'
 import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
 import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
+import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
 
@@ -94,14 +95,18 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin',
         component: AdminHomePage,
-        // role: ['admin'],
+        role: ['Admin'],
       },
       {
         path: '/admin/slotAdmin',
         component: CreateSlot,
-        // role: ['admin'],
+        role: ['Admin'],
       },
-
+      {
+        path: '/admin/slotsFacilitiesAdmin',
+        component: SlotsFacilitiesList,
+        role: ['Admin'],
+      },
     ],
   },
   {
@@ -112,7 +117,6 @@ const routes: LayoutRoute[] = [
         component: ManagerHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -123,7 +127,6 @@ const routes: LayoutRoute[] = [
         component: DeliveryStaffHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -134,7 +137,6 @@ const routes: LayoutRoute[] = [
         component: DoctorHomePage,
         // role: ['admin'],
       },
-
     ],
   },
   {
@@ -145,7 +147,6 @@ const routes: LayoutRoute[] = [
         component: StaffHomePage,
         // role: ['admin'],
       },
-
     ],
   },
 ]
