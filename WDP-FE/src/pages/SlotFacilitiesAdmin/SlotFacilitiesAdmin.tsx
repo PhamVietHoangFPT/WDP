@@ -3,12 +3,14 @@ import { DatePicker, Select, Typography, Spin, Switch, Empty, Card, ConfigProvid
 import dayjs from "dayjs"
 import "dayjs/locale/vi"
 import viVN from "antd/locale/vi_VN"
+import isoWeek from "dayjs/plugin/isoWeek"
 import { useGetSlotsListQuery } from "../../features/admin/slotAPI"
 import { useGetFacilitiesListQuery } from "../../features/admin/facilitiesAPI"
 import type { Facility } from "../../types/facilities"
 import type { Slot } from "../../types/slot"
 
-dayjs.locale("vi") // Set dayjs locale to Vietnamese
+dayjs.locale("vi")
+dayjs.extend(isoWeek) // ✅ Enable ISO week (Monday-first)
 
 const { Title } = Typography
 const { Option } = Select
@@ -21,13 +23,13 @@ export interface FacilityListResponse {
 
 export type SlotListResponse = Slot[]
 
-// Time slots of 1.5 hours
 const TIME_SLOTS = [
   { label: "9:00 - 10:30", start: "09:00", end: "10:30" },
   { label: "10:30 - 12:00", start: "10:30", end: "12:00" },
-  { label: "13:00 - 14:30", start: "13:00", end: "14:30" },
-  { label: "14:30 - 16:00", start: "14:30", end: "16:00" },
-  { label: "16:00 - 17:30", start: "16:00", end: "17:30" },
+  { label: "12:00 - 13:30", start: "12:00", end: "13:30" },
+  { label: "13:30 - 15:00", start: "13:30", end: "15:00" },
+  { label: "15:00 - 16:30", start: "15:00", end: "16:30" },
+  { label: "16:30 - 18:00", start: "16:30", end: "18:00" },
 ]
 
 const DAYS_OF_WEEK = [
@@ -44,8 +46,8 @@ const SlotsFacilitiesCalendar: React.FC = () => {
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
   const [isAvailable, setIsAvailable] = useState<boolean>(true)
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([
-    dayjs().startOf("week").add(1, "day"),
-    dayjs().endOf("week"),
+    dayjs().startOf("isoWeek"),
+    dayjs().endOf("isoWeek"),
   ])
 
   const { data: facilitiesData, isLoading: facilitiesLoading } = useGetFacilitiesListQuery<FacilityListResponse>({
@@ -79,7 +81,7 @@ const SlotsFacilitiesCalendar: React.FC = () => {
 
   const getWeekDates = () => {
     if (!dateRange[0]) return []
-    const startOfWeek = dateRange[0].startOf("week").add(1, "day")
+    const startOfWeek = dateRange[0].startOf("isoWeek") // ✅ Use ISO week
     return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"))
   }
 
@@ -105,13 +107,39 @@ const SlotsFacilitiesCalendar: React.FC = () => {
             ))}
           </Select>
 
-          <RangePicker
-            value={dateRange}
-            onChange={(val) => setDateRange(val as [dayjs.Dayjs | null, dayjs.Dayjs | null])}
-            picker="week"
-            format="DD/MM/YYYY"
-            style={{ width: 200 }}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={() =>
+                setDateRange(([start, end]) => [
+                  start?.subtract(1, "week") ?? null,
+                  end?.subtract(1, "week") ?? null,
+                ])
+              }
+              style={{ fontSize: 18, border: "none", background: "none", cursor: "pointer" }}
+            >
+              ←
+            </button>
+
+            <RangePicker
+              value={dateRange}
+              onChange={(val) => setDateRange(val as [dayjs.Dayjs | null, dayjs.Dayjs | null])}
+              picker="week"
+              format="DD/MM/YYYY"
+              style={{ width: 220 }}
+            />
+
+            <button
+              onClick={() =>
+                setDateRange(([start, end]) => [
+                  start?.add(1, "week") ?? null,
+                  end?.add(1, "week") ?? null,
+                ])
+              }
+              style={{ fontSize: 18, border: "none", background: "none", cursor: "pointer" }}
+            >
+              →
+            </button>
+          </div>
 
           <div>
             <span style={{ marginRight: 8 }}>Chỉ hiển thị slot trống</span>
@@ -139,7 +167,6 @@ const SlotsFacilitiesCalendar: React.FC = () => {
                 minWidth: "800px",
               }}
             >
-              {/* Header Row */}
               <div
                 style={{
                   backgroundColor: "#fafafa",
