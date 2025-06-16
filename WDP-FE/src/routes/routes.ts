@@ -60,6 +60,7 @@ import MainLayout from '../components/layout/MainLayout'
 import { ManagerLayout } from '../components/layout/ManagerLayout'
 import { StaffLayout } from '../components/layout/StaffLayout'
 import AdminHomePage from '../pages/AdminHomePage/AdminHomePage'
+import CreateFacilityAdmin from '../pages/CreateFacilityAdmin/CreateFacilityAdmin'
 import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffHomePage'
 import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
 import Login from '../pages/Login/Login'
@@ -105,6 +106,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/slotsFacilitiesAdmin',
         component: SlotsFacilitiesList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/createFacility',
+        component: CreateFacilityAdmin,
         role: ['Admin'],
       },
     ],

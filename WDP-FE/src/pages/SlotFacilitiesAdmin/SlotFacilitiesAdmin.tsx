@@ -2,7 +2,6 @@ import type React from "react"
 import { useState } from "react"
 import { DatePicker, Select, Table, Typography, Spin, Switch, Empty } from "antd"
 import dayjs from "dayjs"
-// Giữ nguyên các import ts của mày
 import { useGetSlotsListQuery } from "../../features/admin/slotAPI" 
 import { useGetFacilitiesListQuery } from "../../features/admin/facilitiesAPI"
 import type { Facility } from "../../types/facilities"
@@ -12,18 +11,15 @@ const { Title } = Typography
 const { Option } = Select
 const { RangePicker } = DatePicker
 
-// Giữ nguyên các interface mày đã cung cấp
+
 export interface FacilityListResponse {
   data: Facility[];
-  isLoading: boolean;
+  isLoading: boolean; 
 }
 
-export interface SlotListResponse {
-  data: {
-    items: Slot[]
-  }
-  isLoading: boolean
-}
+
+export type SlotListResponse = Slot[]; 
+
 
 const SlotsFacilitiesList: React.FC = () => {
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
@@ -38,25 +34,22 @@ const SlotsFacilitiesList: React.FC = () => {
     isLoading: facilitiesLoading,
   } = useGetFacilitiesListQuery<FacilityListResponse>({
     pageNumber: 1, 
-    pageSize: 5, // Thường lấy đủ các cơ sở để đổ vào Select
+    pageSize: 5, 
   })
 
-  // --- Chỗ sửa chính đây này ---
-  // Truyền trực tiếp các tham số filter vào useGetSlotsListQuery
   const {
-    data: slotsData,
+    data: slotsData, 
     isLoading: slotsLoading,
   } = useGetSlotsListQuery<SlotListResponse>(
     {
-      pageNumber: 1, // Mặc định pageNumber cho request này, mày có thể thêm state nếu cần phân trang
-      pageSize: 100, // Mặc định pageSize, mày có thể điều chỉnh
-      facilityId, // Tham số facilityId sẽ được gửi qua query params
-      startDate: dateRange[0]?.format("YYYY-MM-DD"), // Tham số startDate
-      endDate: dateRange[1]?.format("YYYY-MM-DD"),   // Tham số endDate
-      isAvailable, // Tham số isAvailable
+      pageNumber: 1,
+      pageSize: 5,
+      facilityId,
+      startDate: dateRange[0]?.format("YYYY-MM-DD"),
+      endDate: dateRange[1]?.format("YYYY-MM-DD"),
+      isAvailable,
     },
     {
-      // skip query nếu facilityId chưa được chọn
       skip: !facilityId, 
     }
   )
@@ -117,8 +110,8 @@ const SlotsFacilitiesList: React.FC = () => {
         <Spin />
       ) : (
         <Table
-          // Đảm bảo lấy đúng mảng `items` từ trong `data` của `slotsData`
-          dataSource={slotsData?.data?.items || []} 
+
+          dataSource={slotsData || []} 
           columns={columns}
           rowKey="_id"
           locale={{ emptyText: "Không có slot nào được tìm thấy" }}

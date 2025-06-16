@@ -71,6 +71,12 @@ export const SideBar = () => {
       label: 'Slot Facilities',
       onClick: () => navigate('admin/slotsFacilitiesAdmin'),
     },
+    {
+      key: 'admin/createFacility',
+      icon: <BarChartOutlined />,
+      label: 'Create Facility',
+      onClick: () => navigate('admin/createFacility'),
+    },
   ]
 
   return (

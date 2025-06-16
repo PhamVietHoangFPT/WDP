@@ -7,5 +7,6 @@ export interface Slots {
 export interface Slot {
   _id: string;
   slotDate: string; 
+  startTime: string;
   endTime: string;   
 }
