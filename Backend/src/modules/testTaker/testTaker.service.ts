@@ -24,7 +24,11 @@ export class TestTakerService implements ITestTakerService {
 
   private mapToResponseDto(testTaker: TestTaker): TestTakerResponseDto {
     return new TestTakerResponseDto({
-      ...testTaker,
+      _id: testTaker._id,
+      name: testTaker.name,
+      personalId: testTaker.personalId,
+      account: testTaker.account,
+      gender: testTaker.gender,
     })
   }
 

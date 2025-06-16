@@ -1,5 +1,5 @@
 import { CreateSampleDto } from '../dto/create-sample.dto'
-import { UpdateSampleDto } from '../dto/update-response.dto'
+import { UpdateSampleDto } from '../dto/update-sample.dto'
 import { SampleDocument } from '../schemas/sample.schema'
 
 export interface ISampleRepository {
@@ -21,5 +21,8 @@ export interface ISampleRepository {
     updateSampleDto: Partial<UpdateSampleDto>,
   ): Promise<SampleDocument | null>
   deleteSampleById(id: string, userId: string): Promise<SampleDocument | null>
+  getSampleTypeById(id: string): Promise<string | null>
+  getSampleTotalPrice(id: string, sampleTypeId: string): Promise<number>
+  getSampleTypeIdBySampleId(sampleId: string): Promise<string | null>
 }
 export const ISampleRepository = Symbol('ISampleRepository')

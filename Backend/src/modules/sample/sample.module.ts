@@ -3,19 +3,19 @@ import { ISampleService } from './interfaces/isample.service'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Sample, SampleSchema } from './schemas/sample.schema'
-import { ConditionModule } from '../condition/condition.module'
 import { AuthModule } from '../auth/auth.module'
 import { SampleController } from './sample.controller'
 import { SampleService } from './sample.service'
 import { SampleRepository } from './sample.repository'
 import { AccountModule } from '../account/account.module'
+import { SampleTypeModule } from '../sampleType/sampleType.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }]),
     AuthModule,
-    ConditionModule,
     AccountModule,
+    SampleTypeModule,
   ],
   controllers: [SampleController],
   providers: [

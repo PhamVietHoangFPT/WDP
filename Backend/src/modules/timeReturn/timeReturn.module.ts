@@ -26,6 +26,6 @@ import { AuthModule } from '../auth/auth.module'
       useClass: TimeReturnRepository,
     },
   ],
-  exports: [MongooseModule],
+  exports: [MongooseModule, ITimeReturnService, ITimeReturnRepository],
 })
 export class TimeReturnModule {}

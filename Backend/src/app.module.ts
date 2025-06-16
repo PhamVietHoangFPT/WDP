@@ -10,8 +10,6 @@ import { SlotModule } from './modules/slot/slot.module'
 import { SlotGenerationModule } from './modules/slotGenerator/slotGenerator.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { TestTakerModule } from './modules/testTaker/testTaker.module'
-import { TestTakerRelationshipModule } from './modules/testTakerRelationship/testTakerRelationship.module'
-import { ConditionModule } from './modules/condition/condition.module'
 import { VnPayModule } from './modules/vnpay/vnpay.module'
 import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
@@ -24,7 +22,11 @@ import { SampleModule } from './modules/sample/sample.module'
 import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
-import { RelationshipModule } from './modules/relationship/relationship.module'
+import { SampleTypeModule } from './modules/sampleType/sampleType.module'
+import { CaseMemberModule } from './modules/caseMember/caseMember.module'
+import { ServiceModule } from './modules/service/service.module'
+import { TestRequestStatusModule } from './modules/testRequestStatus/testRequestStatus.module'
+import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 @Module({
   imports: [
     databaseConfig,
@@ -38,10 +40,8 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     SlotModule,
     SlotGenerationModule,
     TestTakerModule,
-    TestTakerRelationshipModule,
     AddressModule,
     LocationModule,
-    ConditionModule,
     PaymentModule,
     ImageModule,
     BlogModule,
@@ -53,7 +53,11 @@ import { RelationshipModule } from './modules/relationship/relationship.module'
     SampleModule,
     TimeReturnModule,
     SamplingKitInventoryModule,
-    RelationshipModule,
+    SampleTypeModule,
+    CaseMemberModule,
+    ServiceModule,
+    TestRequestStatusModule,
+    ServiceCaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

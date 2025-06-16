@@ -22,7 +22,7 @@ export class CreateBlogDto {
     example: 'Hướng dẫn chăm sóc sức khỏe mùa hè hiệu quả',
     description: 'Mô tả ngắn của bài viết',
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Mô tả không được để trống' })
   @IsString()
   description: string
 
@@ -30,24 +30,7 @@ export class CreateBlogDto {
     example: '665b4f2a2ef540b5c6d6be3e',
     description: 'ID của dịch vụ liên kết',
   })
-  @IsNotEmpty()
   @IsMongoId()
-  service: string
-
-  @ApiProperty({
-    example: '6837fa7abf2bd8ae86d42d64',
-    description: 'ID tài khoản người viết bài',
-  })
-  @IsNotEmpty()
-  @IsMongoId()
-  account: string
-
-  @ApiProperty({
-    example: '684017721c34d46241470208',
-    description: 'ID của ảnh thumbnail (nếu có)',
-    required: false,
-  })
   @IsOptional()
-  @IsMongoId()
-  image?: string
+  service?: string
 }

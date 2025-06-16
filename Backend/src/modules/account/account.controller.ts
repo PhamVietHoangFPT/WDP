@@ -9,8 +9,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject, // <-- Thêm Inject
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   ValidationPipe,
 } from '@nestjs/common'

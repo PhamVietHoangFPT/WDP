@@ -27,8 +27,10 @@ export class BlogService implements IBlogService {
       _id: blog._id,
       title: blog.title,
       content: blog.content,
+      description: blog.description,
       image: blog.image,
-      account: blog.account,
+      service: blog.service,
+      created_by: blog.created_by,
     })
   }
 
@@ -38,7 +40,7 @@ export class BlogService implements IBlogService {
       return this.mapToResponseDto(created)
     } catch (error) {
       this.logger.error('Error creating blog:', error)
-      throw new InternalServerErrorException('Không thể tạo blog.')
+      throw new InternalServerErrorException('Không thể tạo blog mới.', error)
     }
   }
 

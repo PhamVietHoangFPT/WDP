@@ -26,16 +26,16 @@ export class BlogRepository implements IBlogRepository {
   ): mongoose.Query<BlogDocument[], BlogDocument> {
     return this.model
       .find({ ...filter, deleted_at: null })
-      .populate({ path: 'account', select: 'name email -_id' })
-      .populate({ path: 'image', select: 'url -_id' })
+      .populate({ path: 'created_by', select: 'name email -_id' })
+      .populate({ path: 'image', select: 'url deleted_at -_id' })
       .lean()
   }
 
   async findById(id: string): Promise<BlogDocument | null> {
     return this.model
       .findById(id)
-      .populate({ path: 'account', select: 'name email -_id' })
-      .populate({ path: 'image', select: 'url -_id' })
+      .populate({ path: 'created_by', select: 'name email -_id' })
+      .populate({ path: 'image', select: 'url deleted_at -_id' })
       .lean()
       .exec()
   }
@@ -51,7 +51,7 @@ export class BlogRepository implements IBlogRepository {
         { ...dto, updated_by: userId, updated_at: Date.now() },
         { new: true },
       )
-      .populate({ path: 'account', select: 'name email -_id' })
+      .populate({ path: 'created_by', select: 'name email -_id' })
       .populate({ path: 'image', select: 'url -_id' })
       .lean()
       .exec()
@@ -65,5 +65,19 @@ export class BlogRepository implements IBlogRepository {
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.model.countDocuments({ deleted_at: null, ...filter }).exec()
+  }
+
+  async addImage(
+    blogId: string,
+    imageId: string,
+  ): Promise<BlogDocument | null> {
+    return this.model
+      .findByIdAndUpdate(
+        blogId,
+        { $addToSet: { image: imageId } },
+        { new: true },
+      )
+      .lean()
+      .exec()
   }
 }
