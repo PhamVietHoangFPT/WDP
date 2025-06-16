@@ -106,7 +106,7 @@ export class TestTakerRepository implements ITestTakerRepository {
       )
     }
 
-    return this.testTakerModel.countDocuments(filter).exec()
+    return this.testTakerModel.countDocuments(filter).lean().exec()
   }
 
   async update(
@@ -119,7 +119,10 @@ export class TestTakerRepository implements ITestTakerRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.testTakerModel.deleteOne({ _id: id }).exec()
+    const result = await this.testTakerModel
+      .deleteOne({ _id: id })
+      .lean()
+      .exec()
     return result.deletedCount > 0
   }
 }

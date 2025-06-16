@@ -22,10 +22,6 @@ export class TestTakerResponseDto {
   personalId: string
 
   @Expose()
-  @ApiProperty({ example: '01234567890123456789' })
-  phoneNumber: string
-
-  @Expose()
   @ApiProperty({ example: true })
   gender: boolean
 
