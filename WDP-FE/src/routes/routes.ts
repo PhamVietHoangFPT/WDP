@@ -11,6 +11,9 @@ import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffH
 import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
 import Login from '../pages/Login/Login'
 import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
+import CreateTesteeForm from '../pages/ProfileUser/CreateTestTaker'
+import ProfileUser from '../pages/ProfileUser/ProfileUser'
+import Register from '../pages/Register/Register'
 import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
@@ -23,6 +26,10 @@ const routes: LayoutRoute[] = [
         path: '/login',
         component: Login,
       },
+      {
+        path: '/register',
+        component: Register,
+      },
     ],
   },
   {
@@ -32,6 +39,16 @@ const routes: LayoutRoute[] = [
         path: '/',
         component: Homepage,
         exact: true,
+      },
+      {
+        path: '/profile',
+        component: ProfileUser,
+        role: ['Customer'],
+      },
+      {
+        path: '/create-testee',
+        component: CreateTesteeForm,
+        role: ['Customer'],
       },
     ],
   },
