@@ -1,0 +1,78 @@
+import {
+  Injectable,
+  Inject,
+  // NotFoundException,
+  // BadRequestException,
+} from '@nestjs/common'
+
+import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
+import { IServiceCaseService } from './interfaces/iserviceCase.service'
+import { CreateServiceCaseDto } from './dto/createServiceCase.dto'
+import { ServiceCaseResponseDto } from './dto/serviceCaseResponse.dto'
+import { ServiceCase } from './schemas/serviceCase.schema'
+// import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+// import mongoose from 'mongoose'
+import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
+import { IServiceRepository } from '../service/interfaces/iservice.repository'
+import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
+
+@Injectable()
+export class ServiceCaseService implements IServiceCaseService {
+  constructor(
+    @Inject(IServiceCaseRepository)
+    private serviceCaseRepository: IServiceCaseRepository,
+    @Inject(ITestRequestStatusRepository)
+    private testRequestStatusRepository: ITestRequestStatusRepository,
+    @Inject(IServiceRepository)
+    private serviceRepository: IServiceRepository,
+    @Inject(ICaseMemberRepository)
+    private caseMemberRepository: ICaseMemberRepository,
+  ) {}
+
+  private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
+    return new ServiceCaseResponseDto({
+      _id: serviceCase._id,
+      totalFee: serviceCase.totalFee,
+      account: serviceCase.account,
+      currentStatus: serviceCase.currentStatus,
+    })
+  }
+
+  async createServiceCase(
+    createServiceCaseDto: CreateServiceCaseDto,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto> {
+    const caseMember = await this.caseMemberRepository.findById(
+      createServiceCaseDto.caseMember,
+    )
+    if (!caseMember) {
+      throw new Error('Hồ sơ nhóm thành viên xét nghiệm không tồn tại')
+    }
+    const serviceId =
+      await this.caseMemberRepository.getServiceIdByCaseMemberId(
+        createServiceCaseDto.caseMember,
+      )
+    const timeReturnId = await this.serviceRepository.getTimeReturnId(serviceId)
+    const serviceTotalFee = await this.serviceRepository.getTotalFeeService(
+      serviceId,
+      timeReturnId,
+    )
+
+    const data = {
+      ...createServiceCaseDto,
+      userId,
+      serviceTotalFee,
+    }
+
+    console.log(data)
+
+    return null
+
+    const serviceCase = await this.serviceCaseRepository.createServiceCase(
+      createServiceCaseDto,
+      userId,
+      serviceTotalFee,
+    )
+    return this.mapToResponseDto(serviceCase)
+  }
+}

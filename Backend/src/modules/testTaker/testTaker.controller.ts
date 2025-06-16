@@ -8,11 +8,10 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   ValidationPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -32,10 +31,12 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { QueryTestTakerDto } from './dto/queryTestTaker.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
+import { RolesGuard } from 'src/common/guard/roles.guard'
+import { Roles } from 'src/common/decorators/roles.decorator'
+import { RoleEnum } from 'src/common/enums/role.enum'
 
 @ApiTags('test-takers')
 @Controller('test-takers')
-@UseInterceptors(ClassSerializerInterceptor)
 export class TestTakerController {
   constructor(
     @Inject(ITestTakerService)
@@ -43,6 +44,9 @@ export class TestTakerController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.CUSTOMER)
+  @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Tạo test taker mới' })
   @ApiBody({ type: CreateTestTakerDto })
   @ApiResponse({
@@ -52,8 +56,10 @@ export class TestTakerController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createDto: CreateTestTakerDto,
+    @Req() req: any, // Lấy thông tin người dùng từ request
   ): Promise<ApiResponseDto<TestTakerResponseDto>> {
-    const newData = await this.testTakerService.create(createDto)
+    const userId = req.user.id // Giả sử bạn đã xác thực người dùng và có ID trong req.user
+    const newData = await this.testTakerService.create(createDto, userId)
     return new ApiResponseDto<TestTakerResponseDto>({
       data: [newData],
       success: true,
@@ -63,6 +69,8 @@ export class TestTakerController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Lấy danh sách test takers' })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiQuery({ name: 'pageNumber', required: false, type: Number })

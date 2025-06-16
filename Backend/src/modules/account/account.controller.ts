@@ -9,8 +9,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject, // <-- Thêm Inject
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   ValidationPipe,
 } from '@nestjs/common'
@@ -31,7 +29,6 @@ import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 @ApiTags('accounts')
 @Controller('accounts')
-@UseInterceptors(ClassSerializerInterceptor)
 export class AccountsController {
   // Inject Service bằng Interface Token
   constructor(

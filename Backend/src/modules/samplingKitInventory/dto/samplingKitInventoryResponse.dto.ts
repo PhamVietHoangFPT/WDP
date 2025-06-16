@@ -34,13 +34,14 @@ export class SamplingKitInventoryResponseDto {
   inventory: number
 
   @Expose()
-  @ApiProperty({ example: 2000, type: Number })
-  price: number
-
-  @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   facility: mongoose.Schema.Types.ObjectId
+
+  @Expose()
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
+  @Transform(({ value }) => value.toString(), { toPlainOnly: true })
+  sample: mongoose.Schema.Types.ObjectId
 
   constructor(partial: Partial<SamplingKitInventory>) {
     Object.assign(this, partial)

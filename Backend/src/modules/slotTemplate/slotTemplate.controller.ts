@@ -9,9 +9,7 @@ import {
   // Put,
   HttpCode,
   HttpStatus,
-  Inject, // <-- Thêm Inject
-  UseInterceptors,
-  ClassSerializerInterceptor,
+  Inject,
   Query,
   ValidationPipe,
   Param,
@@ -40,7 +38,6 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 
 @ApiTags('slotTemplates')
 @Controller('slotTemplates')
-@UseInterceptors(ClassSerializerInterceptor)
 export class SlotTemplateController {
   constructor(
     @Inject(ISlotTemplateService)

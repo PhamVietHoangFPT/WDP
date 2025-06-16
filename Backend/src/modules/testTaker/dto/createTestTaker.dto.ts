@@ -33,14 +33,6 @@ export class CreateTestTakerDto {
     required: true,
   })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  @IsNotEmpty({ message: 'AccountId không được để trống' })
-  accountId: mongoose.Schema.Types.ObjectId
-
-  @ApiProperty({
-    example: '682dbf1e3ecf256c0683b4d8',
-    type: String,
-    required: false,
-  })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  testTakerRelationshipId?: mongoose.Schema.Types.ObjectId
+  @IsNotEmpty({ message: 'Account không được để trống' })
+  account: mongoose.Schema.Types.ObjectId
 }

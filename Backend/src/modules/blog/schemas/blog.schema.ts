@@ -23,27 +23,16 @@ export class Blog extends BaseEntity {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
     ref: 'Service',
   })
   service: mongoose.Schema.Types.ObjectId
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'Account',
-  })
-  account: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Image',
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }],
     required: false,
+    default: [],
   })
-  image: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: Boolean, default: false })
-  isDeleted: boolean
+  image: mongoose.Schema.Types.ObjectId[]
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog)

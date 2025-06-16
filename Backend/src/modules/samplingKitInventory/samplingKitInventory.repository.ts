@@ -7,7 +7,7 @@ import {
 } from './schemas/samplingKitInventory.schema'
 import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
 import { CreateSamplingKitInventoryDto } from './dto/createSamplingKitInventory.dto'
-
+import { UpdateInventoryDto } from './dto/updateInventory.dto'
 @Injectable()
 export class SamplingKitInventoryRepository
   implements ISamplingKitInventoryRepository
@@ -20,34 +20,33 @@ export class SamplingKitInventoryRepository
   async create(
     createSamplingKitInventoryDto: CreateSamplingKitInventoryDto,
     facilityId: string,
+    userId: string,
   ): Promise<SamplingKitInventoryDocument> {
     const newSamplingKitInventory = new this.samplingKitInventoryModel({
       ...createSamplingKitInventoryDto,
       facility: facilityId,
+      create_at: new Date(),
+      create_by: userId,
+      inventory: createSamplingKitInventoryDto.kitAmount,
     })
     return await newSamplingKitInventory.save()
   }
 
-  async findById(
-    id: string,
-    facilityId: string,
-  ): Promise<SamplingKitInventoryDocument | null> {
-    return this.samplingKitInventoryModel
-      .findOne({ _id: id, facility: facilityId, deleted_at: null })
-      .exec()
+  async findById(id: string): Promise<SamplingKitInventoryDocument | null> {
+    return this.samplingKitInventoryModel.findOne({ _id: id }).exec()
   }
 
   async update(
     id: string,
     facilityId: string,
     userId: string,
-    updateSamplingKitInventoryDto: Partial<SamplingKitInventory>,
+    updateInventoryDto: UpdateInventoryDto,
   ): Promise<SamplingKitInventoryDocument | null> {
     return this.samplingKitInventoryModel
       .findOneAndUpdate(
         { _id: id, facility: facilityId, deleted_at: null },
         {
-          ...updateSamplingKitInventoryDto,
+          ...updateInventoryDto,
           update_at: new Date(),
           update_by: userId,
         },
@@ -67,12 +66,11 @@ export class SamplingKitInventoryRepository
 
   async delete(
     id: string,
-    facilityId: string,
     userId: string,
   ): Promise<SamplingKitInventoryDocument | null> {
     return this.samplingKitInventoryModel
       .findOneAndUpdate(
-        { _id: id, facility: facilityId, deleted_at: null },
+        { _id: id, deleted_at: null },
         { deleted_at: new Date(), deleted_by: userId },
         { new: true },
       )
@@ -100,16 +98,16 @@ export class SamplingKitInventoryRepository
     facilityId: string,
     quantity: number,
   ): Promise<SamplingKitInventoryDocument | null> {
-    const samplingKitInventory = await this.samplingKitInventoryModel
-      .findById(id)
-      .exec()
-    const currentInventory = samplingKitInventory?.inventory || 0
-    return this.samplingKitInventoryModel
+    return await this.samplingKitInventoryModel
       .findOneAndUpdate(
-        { _id: id, facility: facilityId, deleted_at: null },
         {
-          $inc: { inventory: currentInventory - quantity },
-          update_at: new Date(),
+          _id: id,
+          facility: facilityId,
+          deleted_at: null,
+        },
+        {
+          $inc: { inventory: -quantity },
+          $set: { updated_at: new Date() },
         },
         { new: true },
       )
@@ -117,6 +115,36 @@ export class SamplingKitInventoryRepository
   }
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
-    return this.samplingKitInventoryModel.countDocuments(filter).exec()
+    return await this.samplingKitInventoryModel.countDocuments(filter).exec()
+  }
+
+  async deleteByExpiredDate(date: Date): Promise<number> {
+    const data = await this.samplingKitInventoryModel
+      .countDocuments({ expDate: { $lt: date }, deleted_at: null })
+      .exec()
+    await this.samplingKitInventoryModel
+      .updateMany(
+        { expDate: { $lt: date }, deleted_at: null },
+        { deleted_at: new Date() },
+      )
+      .exec()
+    return data
+  }
+
+  async findBySampleIdAndQuantityInFacility(
+    sampleId: string,
+    quantity: number,
+    facilityId: string,
+  ): Promise<string | null> {
+    const samplingKitInventory = await this.samplingKitInventoryModel
+      .findOne({
+        sample: sampleId,
+        deleted_at: null,
+        inventory: { $gte: quantity },
+        facility: facilityId,
+      })
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return samplingKitInventory ? samplingKitInventory._id.toString() : null
   }
 }

@@ -22,7 +22,6 @@ export class TestTakerRepository implements ITestTakerRepository {
     return this.testTakerModel
       .findById(id)
       .populate({ path: 'account', select: 'name email' }) // Populate account info if needed
-      .populate({ path: 'testTakerRelationShip' }) // Populate relationship
       .lean()
       .exec()
   }
@@ -54,22 +53,12 @@ export class TestTakerRepository implements ITestTakerRepository {
       filter.accountId = new Types.ObjectId(queryDto.accountId)
     }
 
-    if (
-      queryDto.testTakerRelationshipId &&
-      Types.ObjectId.isValid(queryDto.testTakerRelationshipId)
-    ) {
-      filter.testTakerRelationshipId = new Types.ObjectId(
-        queryDto.testTakerRelationshipId,
-      )
-    }
-
     return this.testTakerModel
       .find(filter)
       .skip(skip)
       .limit(limit)
       .sort({ name: 1 })
       .populate({ path: 'account', select: 'name email' })
-      .populate({ path: 'testTakerRelationShip' })
       .lean()
       .exec()
   }
@@ -97,16 +86,7 @@ export class TestTakerRepository implements ITestTakerRepository {
       filter.accountId = new Types.ObjectId(queryDto.accountId)
     }
 
-    if (
-      queryDto.testTakerRelationshipId &&
-      Types.ObjectId.isValid(queryDto.testTakerRelationshipId)
-    ) {
-      filter.testTakerRelationshipId = new Types.ObjectId(
-        queryDto.testTakerRelationshipId,
-      )
-    }
-
-    return this.testTakerModel.countDocuments(filter).lean().exec()
+    return this.testTakerModel.countDocuments(filter).exec()
   }
 
   async update(

@@ -1,7 +1,11 @@
-import { Express } from 'express'
+import { CreateBlogImageDto } from '../dto/createImage.dto'
 
 export interface IImageUploadService {
-  uploadFile(file: Express.Multer.File): Promise<{ url: string; id: string }>
+  uploadFileForBlog(
+    file: Express.Multer.File,
+    createBlogImageDto: CreateBlogImageDto,
+    userId: string,
+  ): Promise<{ url: string; _id: string }>
 }
 
 export const IImageUploadService = Symbol('IImageUploadService')

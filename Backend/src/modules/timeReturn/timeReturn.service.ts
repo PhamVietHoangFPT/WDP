@@ -16,7 +16,7 @@ export class TimeReturnService implements ITimeReturnService {
   constructor(
     @Inject(ITimeReturnRepository)
     private readonly timeReturnRepository: ITimeReturnRepository,
-  ) { }
+  ) {}
   private mapToResponseDto(timeReturn: TimeReturn): TimeReturnResponseDto {
     return new TimeReturnResponseDto({
       _id: timeReturn._id,
@@ -36,7 +36,6 @@ export class TimeReturnService implements ITimeReturnService {
     }
     return this.mapToResponseDto(existingTimeReturn)
   }
-
 
   async createTimeReturn(
     userId: string,
@@ -59,7 +58,9 @@ export class TimeReturnService implements ITimeReturnService {
       throw new ConflictException('Không tìm thấy ngày trả mẫu thử nào.')
     } else {
       try {
-        return timeReturns.map((timeReturn) => this.mapToResponseDto(timeReturn))
+        return timeReturns.map((timeReturn) =>
+          this.mapToResponseDto(timeReturn),
+        )
       } catch (error) {
         throw new InternalServerErrorException(
           'Lỗi khi lấy danh sách ngày trả mẫu thử.',
@@ -67,7 +68,7 @@ export class TimeReturnService implements ITimeReturnService {
       }
     }
   }
-  
+
   async updateTimeReturn(
     id: string,
     userId: string,
@@ -86,10 +87,12 @@ export class TimeReturnService implements ITimeReturnService {
       const updated = await this.timeReturnRepository.updateTimeReturnById(
         id,
         userId,
-        { ...updateTimeReturnDto }
+        { ...updateTimeReturnDto },
       )
       if (!updated) {
-        throw new ConflictException('Không thể cập nhật thông tin ngày trả mẫu thử.')
+        throw new ConflictException(
+          'Không thể cập nhật thông tin ngày trả mẫu thử.',
+        )
       }
       return this.mapToResponseDto(updated)
     } catch (error) {

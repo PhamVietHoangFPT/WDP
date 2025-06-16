@@ -3,6 +3,7 @@ import { CreateBookingDto } from '../dto/createBooking.dto'
 import mongoose from 'mongoose'
 import { UpdateBookingDto } from '../dto/updateBooking.dto'
 import { SlotDocument } from 'src/modules/slot/schemas/slot.schema'
+import { BookingStatusDocument } from 'src/modules/bookingStatus/schemas/bookingStatus.schema'
 
 export interface IBookingRepository {
   create(
@@ -29,6 +30,10 @@ export interface IBookingRepository {
     bookingStatus: string,
     payment: string,
   ): Promise<BookingDocument | null>
+  getBookingStatusById(id: string): Promise<BookingStatusDocument | null>
+  checkExistById(id: string): Promise<boolean>
+  getFacilityIdByBookingId(id: string): Promise<string | null>
+  getBookingDateById(id: string): Promise<Date | null>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')

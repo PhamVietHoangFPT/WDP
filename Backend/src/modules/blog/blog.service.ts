@@ -11,6 +11,7 @@ import { CreateBlogDto } from './dto/createBlog.dto'
 import { UpdateBlogDto } from './dto/updateBlog.dto'
 import { BlogResponseDto } from './dto/blogResponse.dto'
 import { Blog } from './schemas/blog.schema'
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 
 @Injectable()
 export class BlogService implements IBlogService {
@@ -23,62 +24,78 @@ export class BlogService implements IBlogService {
 
   private mapToResponseDto(blog: Blog): BlogResponseDto {
     return new BlogResponseDto({
-      ...blog,
       _id: blog._id,
+      title: blog.title,
+      content: blog.content,
+      description: blog.description,
+      image: blog.image,
+      service: blog.service,
+      created_by: blog.created_by,
     })
   }
 
-  async create(dto: CreateBlogDto): Promise<BlogResponseDto> {
+  async create(dto: CreateBlogDto, userId: string): Promise<BlogResponseDto> {
     try {
-      const created = await this.blogRepository.create(dto)
+      const created = await this.blogRepository.create(dto, userId)
       return this.mapToResponseDto(created)
     } catch (error) {
       this.logger.error('Error creating blog:', error)
-      throw new InternalServerErrorException('Không thể tạo blog.')
+      throw new InternalServerErrorException('Không thể tạo blog mới.', error)
     }
   }
 
-  async findAll(): Promise<BlogResponseDto[]> {
-    try {
-      const blogs = await this.blogRepository.findAll()
-      return blogs.map((b) => this.mapToResponseDto(b))
-    } catch (error) {
-      this.logger.error('Error retrieving blogs:', error)
-      throw new InternalServerErrorException(
-        'Không thể truy vấn danh sách blog.',
-      )
+  async findAll(
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponse<BlogResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+    const filter = {}
+    // Fetch facilities and total count in parallel
+    const [blogs, totalItems] = await Promise.all([
+      this.blogRepository.findAll(filter).skip(skip).limit(pageSize).exec(),
+      this.blogRepository.countDocuments(filter), // Use repository for count
+    ])
+
+    const totalPages = Math.ceil(totalItems / pageSize)
+    const data = blogs.map((blog: Blog) => this.mapToResponseDto(blog))
+    return {
+      data,
+      pagination: {
+        totalItems,
+        pageSize,
+        totalPages,
+        currentPage: pageNumber,
+      },
     }
   }
 
   async findById(id: string): Promise<BlogResponseDto> {
     const blog = await this.blogRepository.findById(id)
-    if (!blog || blog.isDeleted) {
+    if (!blog) {
       throw new NotFoundException(`Không tìm thấy blog với ID ${id}`)
     }
     return this.mapToResponseDto(blog)
   }
 
-  async update(id: string, dto: UpdateBlogDto): Promise<BlogResponseDto> {
-    const blog = await this.blogRepository.update(id, dto)
-    if (!blog || blog.isDeleted) {
+  async update(
+    id: string,
+    dto: UpdateBlogDto,
+    userId: string,
+  ): Promise<BlogResponseDto> {
+    const blog = await this.blogRepository.update(id, dto, userId)
+    if (!blog) {
       throw new NotFoundException(`Không tìm thấy blog để cập nhật.`)
     }
     return this.mapToResponseDto(blog)
   }
 
-  async softDelete(id: string): Promise<void> {
-    const blog = await this.blogRepository.findById(id)
-    if (!blog || blog.isDeleted) {
-      throw new NotFoundException('Blog not found or already deleted')
-    }
-    blog.isDeleted = true
-    await this.blogRepository.save(blog)
-  }
-
-  async findDeleted(): Promise<BlogResponseDto[]> {
+  async deleted(id: string, userId: string): Promise<BlogResponseDto> {
     try {
-      const blogs = await this.blogRepository.findDeleted()
-      return blogs.map((b) => this.mapToResponseDto(b))
+      const blog = await this.blogRepository.delete(id, userId)
+      if (!blog) {
+        throw new NotFoundException(`Không tìm thấy blog để xóa.`)
+      }
+      return this.mapToResponseDto(blog)
     } catch (error) {
       this.logger.error('Error retrieving deleted blogs:', error)
       throw new InternalServerErrorException('Không thể truy vấn blog đã xóa.')
