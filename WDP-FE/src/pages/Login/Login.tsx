@@ -10,6 +10,7 @@ const { Title } = Typography
 
 export default function Login() {
   const navigate = useNavigate()
+
   useEffect(() => {
     const userData = Cookies.get('userData')
       ? JSON.parse(Cookies.get('userData') as string)
@@ -18,6 +19,7 @@ export default function Login() {
       navigate('/')
     }
   }, [navigate])
+  
   return (
     <Layout
       style={{
