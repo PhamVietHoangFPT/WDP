@@ -6,6 +6,7 @@ export interface ITestRequestStatusRepository {
   findByTestRequestStatus(
     name: string,
   ): Promise<TestRequestStatusDocument | null>
+  getTestRequestStatusIdByName(name: string): Promise<string | null>
 }
 
 export const ITestRequestStatusRepository = Symbol(

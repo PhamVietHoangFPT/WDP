@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { VnpayService } from './vnpay.service'
 import { PaymentDataDto } from './dto/PaymentData.dto'
 import { PaymentBookingDto } from './dto/paymentBooking.dto'
+import { PaymentServiceCaseDto } from './dto/serviceCase.dto'
 @ApiTags('vnpay')
 @Controller('vnpay')
 export class VnpayController {
@@ -55,6 +56,29 @@ export class VnpayController {
     req.session.currentBookingPayment = PaymentBookingDto.bookingId
     const paymentUrl =
       await this.vnpayService.getPaymentUrlForBooking(PaymentBookingDto)
+    return paymentUrl
+  }
+
+  @Post('payment-for-service-case')
+  @ApiOperation({ summary: 'Xây dựng URL thanh toán cho dịch vụ' })
+  @ApiBody({ type: PaymentServiceCaseDto })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Yêu cầu không hợp lệ, vui lòng cung cấp thông tin thanh toán đầy đủ',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'URL thanh toán được xây dựng thành công',
+  })
+  async getPaymentUrlForServiceCase(
+    @Body() PaymentServiceCaseDto: PaymentServiceCaseDto,
+    @Req() req: Request,
+  ) {
+    req.session.currentServiceCasePayment = PaymentServiceCaseDto.serviceCaseId
+    const paymentUrl = await this.vnpayService.getPaymentUrlForServiceCase(
+      PaymentServiceCaseDto,
+    )
     return paymentUrl
   }
 }

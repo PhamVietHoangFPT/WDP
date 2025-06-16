@@ -32,4 +32,13 @@ export class TestRequestStatusRepository
       .select('_id testRequestStatus')
       .exec()
   }
+
+  async getTestRequestStatusIdByName(name: string): Promise<string | null> {
+    const result = await this.model
+      .findOne({ testRequestStatus: name })
+      .select('_id')
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return result ? result._id.toString() : null
+  }
 }

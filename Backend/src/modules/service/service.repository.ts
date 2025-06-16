@@ -129,6 +129,7 @@ export class ServiceRepository implements IServiceRepository {
   async getTotalFeeService(
     id: string,
     timeReturnId: string,
+    numberOfTestTaker: number,
   ): Promise<number | null> {
     const serviceFee = await this.serviceModel
       .findOne({ _id: id, deleted_at: null })
@@ -144,9 +145,18 @@ export class ServiceRepository implements IServiceRepository {
 
     const sampleAndSampleTypeFee =
       await this.sampleRepository.getSampleTotalPrice(sampleId, sampleTypeId)
-    const totalFee = serviceFee
-      ? serviceFee.fee + timeReturnFee + sampleAndSampleTypeFee
-      : null
+    let totalFee: number
+    if (numberOfTestTaker === 2) {
+      totalFee = serviceFee
+        ? serviceFee.fee + timeReturnFee + sampleAndSampleTypeFee
+        : null
+    }
+    if (numberOfTestTaker === 3) {
+      totalFee = serviceFee
+        ? serviceFee.fee * 1.5 + timeReturnFee + sampleAndSampleTypeFee
+        : null
+    }
+
     return totalFee
   }
 

@@ -15,6 +15,7 @@ import { ServiceCase } from './schemas/serviceCase.schema'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { IServiceRepository } from '../service/interfaces/iservice.repository'
 import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 
 @Injectable()
 export class ServiceCaseService implements IServiceCaseService {
@@ -48,6 +49,7 @@ export class ServiceCaseService implements IServiceCaseService {
     if (!caseMember) {
       throw new Error('Hồ sơ nhóm thành viên xét nghiệm không tồn tại')
     }
+    const numberOfTestTaker = caseMember.testTaker.length
     const serviceId =
       await this.caseMemberRepository.getServiceIdByCaseMemberId(
         createServiceCaseDto.caseMember,
@@ -56,17 +58,8 @@ export class ServiceCaseService implements IServiceCaseService {
     const serviceTotalFee = await this.serviceRepository.getTotalFeeService(
       serviceId,
       timeReturnId,
+      numberOfTestTaker,
     )
-
-    const data = {
-      ...createServiceCaseDto,
-      userId,
-      serviceTotalFee,
-    }
-
-    console.log(data)
-
-    return null
 
     const serviceCase = await this.serviceCaseRepository.createServiceCase(
       createServiceCaseDto,
@@ -74,5 +67,35 @@ export class ServiceCaseService implements IServiceCaseService {
       serviceTotalFee,
     )
     return this.mapToResponseDto(serviceCase)
+  }
+
+  async findAllServiceCases(
+    pageNumber: number,
+    pageSize: number,
+    userId: string,
+  ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+    const filter = { created_by: userId }
+    const [totalItems, serviceCases] = await Promise.all([
+      this.serviceCaseRepository.countDocuments(filter),
+      this.serviceCaseRepository
+        .findAllServiceCases(filter)
+        .skip(skip)
+        .limit(pageSize),
+    ])
+
+    const totalPages = Math.ceil(totalItems / pageSize)
+    const data = serviceCases.map((serviceCase) =>
+      this.mapToResponseDto(serviceCase),
+    )
+    return {
+      data,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize,
+      },
+    }
   }
 }

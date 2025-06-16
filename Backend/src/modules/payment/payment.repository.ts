@@ -7,6 +7,8 @@ import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 import { IPaymentTypeRepository } from '../paymentType/interfaces/ipaymentType.repository'
+import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
+import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
@@ -19,6 +21,10 @@ export class PaymentRepository implements IPaymentRepository {
     private bookingStatusRepository: IBookingStatusRepository,
     @Inject(IPaymentTypeRepository)
     private paymentTypeRepository: IPaymentTypeRepository,
+    @Inject(ITestRequestStatusRepository)
+    private serviceCaseStatusRepository: ITestRequestStatusRepository,
+    @Inject(IServiceCaseRepository)
+    private serviceCaseRepository: IServiceCaseRepository,
   ) {}
 
   async createForBooking(
@@ -50,6 +56,46 @@ export class PaymentRepository implements IPaymentRepository {
       await this.bookingRepository.updatePayment(
         bookingId,
         bookingStatus,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        newPayment._id.toString(),
+      )
+    }
+    return await newPayment.save()
+  }
+
+  async createForServiceCase(
+    createPaymentHistoryDto: CreatePaymentHistoryDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument> {
+    const newPayment = new this.paymentModel(createPaymentHistoryDto)
+    const paymentType = await this.paymentTypeRepository.findByPaymentType(
+      'Trường hợp xét nghiệm',
+    )
+    newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
+    newPayment.paymentType = paymentType._id
+    let serviceCaseStatus: any = null
+    if (
+      createPaymentHistoryDto.transactionStatus !== '00' &&
+      createPaymentHistoryDto.responseCode !== '00'
+    ) {
+      serviceCaseStatus =
+        await this.serviceCaseStatusRepository.getTestRequestStatusIdByName(
+          'Thanh toán thất bại',
+        )
+    } else if (
+      createPaymentHistoryDto.transactionStatus === '00' &&
+      createPaymentHistoryDto.responseCode === '00'
+    ) {
+      serviceCaseStatus =
+        await this.serviceCaseStatusRepository.getTestRequestStatusIdByName(
+          'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)',
+        )
+    }
+    if (currentServiceCasePayment) {
+      await this.serviceCaseRepository.updatePayment(
+        currentServiceCasePayment,
+        serviceCaseStatus,
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         newPayment._id.toString(),
       )

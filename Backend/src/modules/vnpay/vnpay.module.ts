@@ -13,8 +13,8 @@ import { VnpayService } from './vnpay.service' // Giả sử bạn vẫn cần V
     VnPayModuleLocal.registerAsync({
       // imports: [ConfigModule], // Import ConfigModule nếu nó không global
       useFactory: (configService: ConfigService) => ({
-        tmnCode: configService.get<string>('VNP_TMNCODE'), // Sử dụng tên biến trong .env
-        secureSecret: configService.get<string>('VNP_HASHSECRET'), // Sử dụng tên biến trong .env
+        tmnCode: configService.get<string>('VNP_TMNCODE'),
+        secureSecret: configService.get<string>('VNP_HASHSECRET'),
         vnpayHost: configService.get<string>(
           'VNP_HOST',
           'https://sandbox.vnpayment.vn',
