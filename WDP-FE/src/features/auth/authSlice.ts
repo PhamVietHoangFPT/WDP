@@ -37,7 +37,7 @@ const authSlice = createSlice({
         phoneNumber: decodedToken.phoneNumber,
         exp: decodedToken.exp,
         facility: decodedToken.facilityId,
-        gender: decodedToken.gender
+        gender: decodedToken.gender,
       }
 
       state.userToken = { accessToken: token }

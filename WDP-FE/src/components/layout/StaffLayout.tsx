@@ -9,30 +9,30 @@ const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 export const StaffLayout = () => {
-//   const navigate = useNavigate()
+  //   const navigate = useNavigate()
 
-//   useEffect(() => {
-//     // Get userData from cookies and parse it
-//     const userDataString = Cookies.get('userData')
+  //   useEffect(() => {
+  //     // Get userData from cookies and parse it
+  //     const userDataString = Cookies.get('userData')
 
-//     if (!userDataString) {
-//       navigate('/')
-//       return
-//     }
+  //     if (!userDataString) {
+  //       navigate('/')
+  //       return
+  //     }
 
-//     let userData
-//     try {
-//       userData = JSON.parse(userDataString)
-//     } catch (error) {
-//       console.error('Failed to parse userData from cookies:', error)
-//       navigate('/')
-//       return
-//     }
+  //     let userData
+  //     try {
+  //       userData = JSON.parse(userDataString)
+  //     } catch (error) {
+  //       console.error('Failed to parse userData from cookies:', error)
+  //       navigate('/')
+  //       return
+  //     }
 
-//     if (userData.Role !== 'Manager') {
-//       navigate('/')
-//     }
-//   }, [navigate])
+  //     if (userData.Role !== 'Manager') {
+  //       navigate('/')
+  //     }
+  //   }, [navigate])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

@@ -32,10 +32,7 @@ export const LoginForm = () => {
     return Promise.reject('Email không hợp lệ!')
   }
 
-  const handleSubmit = async (values: {
-    email?: string
-    password: string
-  }) => {
+  const handleSubmit = async (values: { email?: string; password: string }) => {
     const response = await login({
       email: values.email || '',
       password: values.password,
@@ -81,10 +78,7 @@ export const LoginForm = () => {
           name='email' // Luôn giữ cố định là "contact"
           rules={[{ validator: (_, value) => validateInput(value) }]}
         >
-          <Input
-            placeholder='Nhập email '
-            onChange={handleInputChange}
-          />
+          <Input placeholder='Nhập email ' onChange={handleInputChange} />
         </Form.Item>
 
         {/* Trường mật khẩu */}

@@ -6,6 +6,7 @@ const { Content } = Layout
 import { useEffect } from 'react'
 import AppFooter from './Footer/Footer'
 import AppHeader from './Header/Header'
+import Navbar from './Navbar/Navbar'
 
 function MainLayout() {
   const navigate = useNavigate()
@@ -31,13 +32,12 @@ function MainLayout() {
         overflow: 'hidden',
       }}
     >
+      <Navbar />
       <AppHeader />
       <Content
         style={{
           padding: '50px',
           paddingTop: '30px',
-          overflow: 'initial',
-          width: '100vw',
         }}
       >
         <Outlet />
