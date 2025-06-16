@@ -1,5 +1,5 @@
 import React from 'react'
-import { Row, Col, Button } from 'antd'
+import { Row, Col, Button, Typography } from 'antd'
 import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
 import Logo from '../../assets/Logo.png'
 import { useNavigate } from 'react-router-dom'
