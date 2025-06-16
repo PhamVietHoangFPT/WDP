@@ -20,5 +20,16 @@ export interface IServiceCaseRepository {
     currentStatus: string,
     payment: string,
   ): Promise<ServiceCaseDocument | null>
+
+  updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+  ): Promise<ServiceCaseDocument | null>
+
+  findByCaseMemberId(caseMemberId: string): Promise<string | null>
+
+  getCurrentStatusId(id: string): Promise<string | null>
+
+  getTotalFeeById(id: string): Promise<number | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

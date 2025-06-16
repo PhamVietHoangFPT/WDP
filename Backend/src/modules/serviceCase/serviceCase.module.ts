@@ -1,4 +1,3 @@
-// src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ServiceCase, ServiceCaseSchema } from './schemas/serviceCase.schema'
@@ -11,6 +10,7 @@ import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.
 import { ServiceModule } from '../service/service.module'
 import { CaseMemberModule } from '../caseMember/caseMember.module'
 import { AuthModule } from '../auth/auth.module'
+import { TestRequestHistoryModule } from '../testRequestHistory/testRequestHistory.module'
 
 @Module({
   imports: [
@@ -20,6 +20,7 @@ import { AuthModule } from '../auth/auth.module'
     TestRequestStatusModule,
     ServiceModule,
     CaseMemberModule,
+    TestRequestHistoryModule,
     AuthModule,
   ],
   controllers: [ServiceCaseController],

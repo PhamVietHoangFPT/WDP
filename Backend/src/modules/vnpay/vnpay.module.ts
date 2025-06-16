@@ -5,6 +5,7 @@ import { VnpayModule as VnPayModuleLocal } from 'nestjs-vnpay'
 import { HashAlgorithm, ignoreLogger } from 'vnpay'
 import { VnpayController } from './vnpay.controller'
 import { VnpayService } from './vnpay.service' // Giả sử bạn vẫn cần VnpayService tùy chỉnh
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { VnpayService } from './vnpay.service' // Giả sử bạn vẫn cần V
       }),
       inject: [ConfigService],
     }),
+    ServiceCaseModule,
   ],
   controllers: [VnpayController],
   providers: [VnpayService], // Vẫn giữ VnpayService của bạn nếu nó làm các việc khác ngoài cấu hình client

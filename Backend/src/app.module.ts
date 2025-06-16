@@ -27,6 +27,7 @@ import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 import { ServiceModule } from './modules/service/service.module'
 import { TestRequestStatusModule } from './modules/testRequestStatus/testRequestStatus.module'
 import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
+import { TestRequestHistoryModule } from './modules/testRequestHistory/testRequestHistory.module'
 @Module({
   imports: [
     databaseConfig,
@@ -58,6 +59,7 @@ import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
     ServiceModule,
     TestRequestStatusModule,
     ServiceCaseModule,
+    TestRequestHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

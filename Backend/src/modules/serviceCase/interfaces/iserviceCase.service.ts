@@ -12,6 +12,11 @@ export interface IServiceCaseService {
     pageSize: number,
     userId: string,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>>
+
+  updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+  ): Promise<ServiceCaseResponseDto | null>
 }
 
 export const IServiceCaseService = Symbol('IServiceCaseService')

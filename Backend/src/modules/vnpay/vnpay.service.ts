@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { VnpayService as VnpayServiceLocal } from 'nestjs-vnpay'
 import { Bank, dateFormat } from 'vnpay'
 import { PaymentDataDto } from './dto/PaymentData.dto'
 import { PaymentBookingDto } from './dto/paymentBooking.dto'
 import { randomUUID } from 'crypto'
 import { PaymentServiceCaseDto } from './dto/serviceCase.dto'
+import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 @Injectable()
 export class VnpayService {
-  constructor(private readonly vnpayService: VnpayServiceLocal) {}
+  constructor(
+    private readonly vnpayService: VnpayServiceLocal,
+    @Inject(IServiceCaseRepository)
+    private readonly serviceCaseRepository: IServiceCaseRepository,
+  ) {}
   vnp_ReturnUrl = 'https://www.google.com/'
 
   async getBankList(): Promise<Bank[]> {
@@ -47,15 +52,18 @@ export class VnpayService {
     return Promise.resolve(this.vnpayService.buildPaymentUrl(dataSend))
   }
 
-  getPaymentUrlForServiceCase(
+  async getPaymentUrlForServiceCase(
     PaymentData: PaymentServiceCaseDto,
   ): Promise<string> {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
     const vnp_ReturnUrl = this.vnp_ReturnUrl
+    const totalFee = await this.serviceCaseRepository.getTotalFeeById(
+      PaymentData.serviceCaseId,
+    )
     const dataSend = {
-      vnp_Amount: PaymentData.totalFee,
+      vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
       vnp_TxnRef: randomUUID(),
       vnp_CreateDate: dateFormat(createDate),
