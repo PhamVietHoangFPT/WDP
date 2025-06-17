@@ -23,16 +23,16 @@ const facilitiesApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['facilities'],
     }),
-    // getBlogsMinimalList: builder.query({
-    //   query: ({ pageNumber, pageSize }) => ({
-    //     url: '/blogs/minimal',
-    //     method: 'GET',
-    //     params: {
-    //       pageNumber,
-    //       pageSize,
-    //     },
-    //   }),
-    //   transformResponse: (res) => res,
+    UpdateFacility: builder.mutation({
+      query: ({ data, id }) => ({
+        url: `/facilities/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['facilities'],
+    }),
+
     //   providesTags: ['blogs'],
     // }),
     // createSlots: builder.mutation({
@@ -74,7 +74,8 @@ const facilitiesApi = apiSlice.injectEndpoints({
 
 export const {
   useGetFacilitiesListQuery,
-//   useGetBlogsMinimalListQuery,
+  useGetFacilityDetailQuery,
+  useUpdateFacilityMutation,
 //   useCreateSlotsMutation,
 //   useGetBlogsDetailQuery,
 //   useUpdateBlogsMutation,

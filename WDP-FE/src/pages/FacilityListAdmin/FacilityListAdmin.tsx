@@ -109,7 +109,7 @@ const FacilityListAdmin: React.FC = () => {
           <Button
             icon={<EditOutlined />}
             style={{ backgroundColor: '#faad14', borderColor: '#faad14', color: '#fff' }}
-            onClick={() => navigate(`/admin/facility/edit/${record._id}`)}
+            onClick={() => navigate(`/admin/facility/${record._id}`)}
           />
           <Popconfirm
             title="Xác nhận xóa cơ sở này?"
