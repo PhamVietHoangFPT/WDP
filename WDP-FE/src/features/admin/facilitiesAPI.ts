@@ -14,6 +14,15 @@ const facilitiesApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['facilities'],
     }),
+
+    getFacilityDetail: builder.query({
+      query: (id) => ({
+        url: `/facilities/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['facilities'],
+    }),
     // getBlogsMinimalList: builder.query({
     //   query: ({ pageNumber, pageSize }) => ({
     //     url: '/blogs/minimal',
