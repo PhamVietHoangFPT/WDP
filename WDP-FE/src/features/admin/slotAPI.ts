@@ -18,6 +18,17 @@ const slotApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['slots'],
     }),
+
+    createSlotTemplate: builder.mutation({
+      query: (data) => ({
+        url: '/slotTemplates',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['slots'],
+    }),
+
     getBlogsMinimalList: builder.query({
       query: ({ pageNumber, pageSize }) => ({
         url: '/blogs/minimal',
