@@ -1,7 +1,7 @@
 import React from 'react'
 import { Row, Col, Button, Typography } from 'antd'
 import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
-import Logo from '../../assets/Logo.png'
+// import Logo from '../../assets/Logo.png'
 import { useNavigate } from 'react-router-dom'
 import Introduction from '../Introduction/introduction'
 
@@ -36,7 +36,7 @@ const Homepage: React.FC = () => {
           </Col>
           <Col xs={24} md={12}>
             <img
-              src={Logo || '/placeholder.svg'}
+              // src={Logo || '/placeholder.svg'}
               alt=''
               style={{
                 width: '100%',
