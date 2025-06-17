@@ -31,5 +31,10 @@ export interface IServiceCaseRepository {
   getCurrentStatusId(id: string): Promise<string | null>
 
   getTotalFeeById(id: string): Promise<number | null>
+
+  updateResultId(
+    id: string,
+    resultId: string,
+  ): Promise<ServiceCaseDocument | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')
