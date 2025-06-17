@@ -61,6 +61,9 @@ export class SlotRepository implements ISlotRepository {
     const slotTemplate = await this.slotTemplateRepository.findByFacilityId(
       queryDto.facilityId,
     )
+    if (!slotTemplate || slotTemplate.length === 0) {
+      return null
+    }
     mongoQuery.slotTemplate = slotTemplate[0]._id
 
     return (
