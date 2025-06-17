@@ -20,6 +20,11 @@ export interface IPaymentRepository {
   findWithTransactionReferenceNumber(
     transactionReferenceNumber: string,
   ): Promise<boolean>
+  createForServiceCase(
+    createPaymentHistoryDto: CreatePaymentHistoryDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument>
 }
 
 export const IPaymentRepository = Symbol('IPaymentRepository')

@@ -19,22 +19,18 @@ export const apiSlice = createApi({
   tagTypes: [
     'test',
     'account',
-    'countries',
-    'vaccines',
-    'categories',
-    'manufacturers',
     'facilities',
     'blogs',
-    'children',
     'customers',
     'packages',
-    'vaccinations',
     'staff',
     'dashboard',
     'slots',
     'provinces',
     'districts',
-    'wards'
+    'wards',
+    'testTakers',
+
   ],
   endpoints: () => ({}),
 })

@@ -24,7 +24,11 @@ export interface IServiceRepository {
   findById(id: string): Promise<ServiceDocument | null>
   getSampleId(id: string): Promise<string | null>
   checkIsAdministration(id: string): Promise<boolean>
-  getTotalFeeService(id: string, timeReturnId: string): Promise<number | null>
+  getTotalFeeService(
+    id: string,
+    timeReturnId: string,
+    numberOfTestTaker: number,
+  ): Promise<number | null>
   getTimeReturnId(id: string): Promise<string | null>
   findWithQuery(
     filter: Record<string, unknown>,

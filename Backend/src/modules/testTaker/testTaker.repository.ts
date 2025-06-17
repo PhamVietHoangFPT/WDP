@@ -99,7 +99,10 @@ export class TestTakerRepository implements ITestTakerRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.testTakerModel.deleteOne({ _id: id }).exec()
+    const result = await this.testTakerModel
+      .deleteOne({ _id: id })
+      .lean()
+      .exec()
     return result.deletedCount > 0
   }
 }

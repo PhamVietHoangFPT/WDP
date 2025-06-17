@@ -15,6 +15,9 @@ export class TestRequestStatus extends BaseEntity {
 
   @Prop({ type: String, required: true, trim: true })
   testRequestStatus: string
+
+  @Prop({ type: Number, required: true, trim: true })
+  order: number
 }
 
 export const TestRequestStatusSchema =
