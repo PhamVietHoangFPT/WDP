@@ -10,6 +10,7 @@ import AdminHomePage from '../pages/AdminHomePage/AdminHomePage'
 import CreateFacilityAdmin from '../pages/CreateFacilityAdmin/CreateFacilityAdmin'
 import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffHomePage'
 import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
+import FacilityListAdmin from '../pages/FacilityListAdmin/FacilityListAdmin'
 import Login from '../pages/Login/Login'
 import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
 import CreateTesteeForm from '../pages/ProfileUser/CreateTestTaker'
@@ -75,6 +76,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/createFacility',
         component: CreateFacilityAdmin,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/facility',
+        component: FacilityListAdmin,
         role: ['Admin'],
       },
     ],

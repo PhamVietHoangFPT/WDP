@@ -77,6 +77,12 @@ export const SideBar = () => {
       label: 'Create Facility',
       onClick: () => navigate('admin/createFacility'),
     },
+    {
+      key: 'admin/facility',
+      icon: <BarChartOutlined />,
+      label: 'Facility',
+      onClick: () => navigate('admin/facility'),
+    },
   ]
 
   return (
