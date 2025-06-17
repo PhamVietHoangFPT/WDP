@@ -98,7 +98,9 @@ const CreateFacilityForm: React.FC = () => {
       // Step 1: Create address
       const addressResponse = (await createFacilityAddress({
         data: { fullAddress },
-      }).unwrap()) as { data: { _id: string } }
+      }).unwrap()) 
+      const addressId = addressResponse._id
+
 
       console.log("Address created:", addressResponse)
 
@@ -106,13 +108,13 @@ const CreateFacilityForm: React.FC = () => {
       const facilityData: FacilityInfo = {
         facilityName: values.facilityName,
         phoneNumber: values.phoneNumber,
-        address: addressResponse.data._id,
+        address: addressId, // Use the address ID from the response
       }
 
       console.log("Creating facility with:", facilityData)
 
       const facilityResponse = (await createFacility({
-        data: facilityData,
+        data:  facilityData ,
       }).unwrap()) as { message: string }
 
       message.success(facilityResponse.message || "Tạo cơ sở thành công!")
@@ -120,7 +122,7 @@ const CreateFacilityForm: React.FC = () => {
       setSelectedProvince(null)
       setSelectedDistrict(null)
       setSelectedWard(null)
-      navigate("/admin/facilities")
+      navigate("/admin/createFacility")
     } catch (error: any) {
       console.error("Error creating facility:", error)
       message.error(error.message || "Có lỗi xảy ra khi tạo cơ sở")

@@ -57,7 +57,7 @@ const locationAPI = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['facilities'],
+      invalidatesTags: ['facilities', 'wards', 'districts', 'provinces', 'addresses', 'facility-addresses'],
     }),
 
 
