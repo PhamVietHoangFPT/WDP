@@ -81,6 +81,7 @@ const slotApi = apiSlice.injectEndpoints({
 export const {
   useGetSlotsListQuery,
   useGetBlogsMinimalListQuery,
+  useCreateSlotTemplateMutation,
   useCreateSlotsMutation,
   useGetBlogsDetailQuery,
   useUpdateBlogsMutation,

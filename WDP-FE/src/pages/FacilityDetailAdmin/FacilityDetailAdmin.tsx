@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Form,
@@ -12,6 +12,9 @@ import {
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
 } from '../../features/admin/facilitiesAPI'
+import {
+  useCreateSlotTemplateMutation,
+} from '../../features/admin/slotAPI'
 
 // Định nghĩa Interface cho Facility
 // Export lại để đảm bảo mọi nơi đều dùng đúng
@@ -30,24 +33,37 @@ const FacilityDetailAdmin: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [form] = Form.useForm()
+const [workingForm] = Form.useForm()
+const [showWorkingTimeForm, setShowWorkingTimeForm] = useState(false)
 
   // Lấy dữ liệu chi tiết cơ sở từ API
   const { data, isLoading } = useGetFacilityDetailQuery(id!)
   // Hook để cập nhật cơ sở
   const [updateFacility] = useUpdateFacilityMutation()
+  const [createSlotTemplate] = useCreateSlotTemplateMutation()
 
 
   useEffect(() => {
-    if (data) {
-      form.setFieldsValue({
-        facilityName: data.facilityName,
-        phoneNumber: data.phoneNumber,
-        address: {
-          fullAddress: data.address?.fullAddress,
-        },
+  if (data) {
+    form.setFieldsValue({
+      facilityName: data.facilityName,
+      phoneNumber: data.phoneNumber,
+      address: {
+        fullAddress: data.address?.fullAddress,
+      },
+    })
+
+    // If working time exists, set form and show it
+    if (data.workTimeStart && data.workTimeEnd && data.slotDuration) {
+      workingForm.setFieldsValue({
+        workTimeStart: data.workTimeStart,
+        workTimeEnd: data.workTimeEnd,
+        slotDuration: data.slotDuration,
       })
+      setShowWorkingTimeForm(true)
     }
-  }, [data, form]) // Dependencies bao gồm data và form instance
+  }
+}, [data, form, workingForm])
 
   // Hàm xử lý khi submit form
   const handleSave = async (values: any) => {
@@ -114,6 +130,78 @@ const FacilityDetailAdmin: React.FC = () => {
           <Button style={{ marginLeft: 8 }} onClick={() => navigate('/admin/facilities')}>Trở lại</Button>
         </Form.Item>
       </Form>
+
+
+      {showWorkingTimeForm ? (
+  <Form
+    form={workingForm}
+    layout="vertical"
+    onFinish={async (values) => {
+  try {
+    const formatTime = (time: string) => `${time}:00` // Convert HH:mm => HH:mm:ss
+
+    const payload = {
+      workTimeStart: formatTime(values.workTimeStart),
+      workTimeEnd: formatTime(values.workTimeEnd),
+      slotDuration: Number(values.slotDuration),
+    }
+
+    console.log("Sending payload:", payload)
+
+    await createSlotTemplate({
+      id,
+      data: payload,
+    }).unwrap()
+
+    message.success('Cập nhật giờ làm việc thành công!')
+  } catch (err: any) {
+    message.error(err.message || 'Lỗi khi cập nhật giờ làm việc!')
+  }
+}}
+
+
+    style={{ marginTop: 40 }}
+  >
+    <Title level={4}>Cập nhật giờ làm việc</Title>
+
+    <Form.Item
+      label="Giờ bắt đầu"
+      name="workTimeStart"
+      rules={[{ required: true, message: 'Chọn giờ bắt đầu' }]}
+    >
+      <Input type="time" />
+    </Form.Item>
+
+    <Form.Item
+      label="Giờ kết thúc"
+      name="workTimeEnd"
+      rules={[{ required: true, message: 'Chọn giờ kết thúc' }]}
+    >
+      <Input type="time" />
+    </Form.Item>
+
+    <Form.Item
+      label="Thời lượng mỗi slot (giờ)"
+      name="slotDuration"
+      rules={[{ required: true, message: 'Nhập thời lượng slot' }]}
+    >
+      <Input type="number" step="0.5" min={0.5} />
+    </Form.Item>
+
+    <Form.Item>
+      <Button type="primary" htmlType="submit">Lưu giờ làm việc</Button>
+    </Form.Item>
+  </Form>
+) : (
+  <Button
+    type="dashed"
+    style={{ marginTop: 40 }}
+    onClick={() => setShowWorkingTimeForm(true)}
+  >
+    Thêm giờ làm việc
+  </Button>
+)}
+
     </div>
   )
 }
