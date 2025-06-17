@@ -13,6 +13,8 @@ import {
   useUpdateFacilityMutation,
 } from '../../features/admin/facilitiesAPI'
 
+// Định nghĩa Interface cho Facility
+// Export lại để đảm bảo mọi nơi đều dùng đúng
 export interface Facility {
   _id: string
   facilityName: string
@@ -29,31 +31,43 @@ const FacilityDetailAdmin: React.FC = () => {
   const navigate = useNavigate()
   const [form] = Form.useForm()
 
+  // Lấy dữ liệu chi tiết cơ sở từ API
   const { data, isLoading } = useGetFacilityDetailQuery(id!)
+  // Hook để cập nhật cơ sở
   const [updateFacility] = useUpdateFacilityMutation()
 
+
   useEffect(() => {
-    if (data?.data) {
+    if (data) {
       form.setFieldsValue({
-        facilityName: data.data.facilityName,
-        phoneNumber: data.data.phoneNumber,
-        fullAddress: data.data.address?.fullAddress,
+        facilityName: data.facilityName,
+        phoneNumber: data.phoneNumber,
+        address: {
+          fullAddress: data.address?.fullAddress,
+        },
       })
     }
-  }, [data, form])
+  }, [data, form]) // Dependencies bao gồm data và form instance
 
+  // Hàm xử lý khi submit form
   const handleSave = async (values: any) => {
     try {
+      // Log values để kiểm tra dữ liệu trước khi gửi
+      console.log("Values từ form Ant Design:", values);
+
       const formData = new FormData()
       formData.append('facilityName', values.facilityName)
       formData.append('phoneNumber', values.phoneNumber)
-      formData.append('fullAddress', values.fullAddress)
+      formData.append('fullAddress', values.address.fullAddress)
 
+      // Gửi yêu cầu cập nhật lên API
       await updateFacility({ id, data: formData }).unwrap()
       message.success('Cập nhật cơ sở thành công!')
-      navigate('/admin/facilities')
+      navigate('/admin/facility') 
     } catch (err: any) {
-      message.error(err.message || 'Đã có lỗi xảy ra!')
+      // Xử lý lỗi từ API
+      message.error(err.message || 'Đã có lỗi xảy ra khi cập nhật!')
+      console.error("Lỗi khi cập nhật:", err);
     }
   }
 
@@ -67,13 +81,13 @@ const FacilityDetailAdmin: React.FC = () => {
     <div style={{ padding: 24 }}>
       <Title level={2}>Cập nhật thông tin cơ sở</Title>
       <Form
-        form={form}
+        form={form} // Gán instance của form
         layout="vertical"
-        onFinish={handleSave}
+        onFinish={handleSave} // Xử lý khi form được submit
       >
         <Form.Item
           label="Tên cơ sở"
-          name="facilityName"
+          name="facilityName" // Tên trường trực tiếp
           rules={[{ required: true, message: 'Nhập tên cơ sở' }]}
         >
           <Input />
@@ -81,7 +95,7 @@ const FacilityDetailAdmin: React.FC = () => {
 
         <Form.Item
           label="Số điện thoại"
-          name="phoneNumber"
+          name="phoneNumber" // Tên trường trực tiếp
           rules={[{ required: true, message: 'Nhập số điện thoại' }]}
         >
           <Input />
@@ -89,7 +103,7 @@ const FacilityDetailAdmin: React.FC = () => {
 
         <Form.Item
           label="Địa chỉ đầy đủ"
-          name="fullAddress"
+          name={['address', 'fullAddress']} // Ant Design sẽ tự động tạo cấu trúc { address: { fullAddress: value } }
           rules={[{ required: true, message: 'Nhập địa chỉ' }]}
         >
           <Input />

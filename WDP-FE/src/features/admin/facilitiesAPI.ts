@@ -23,6 +23,7 @@ const facilitiesApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['facilities'],
     }),
+
     UpdateFacility: builder.mutation({
       query: ({ data, id }) => ({
         url: `/facilities/${id}`,
