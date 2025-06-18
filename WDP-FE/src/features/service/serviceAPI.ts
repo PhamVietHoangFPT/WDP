@@ -14,6 +14,14 @@ export const serviceAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['services'],
     }),
+    getServiceDetail: builder.query({
+      query: (id) => ({
+        url: `/services/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['services'],
+    }),
   }),
 })
-export const { useGetServiceListQuery } = serviceAPI
+export const { useGetServiceListQuery, useGetServiceDetailQuery } = serviceAPI

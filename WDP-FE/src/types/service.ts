@@ -2,7 +2,7 @@ import type { Sample } from './sample'
 import type { TimeReturn } from './timeReturn'
 
 export interface Service {
-  id: string
+  _id: string
   fee: number
   timeReturn: TimeReturn
   sample: Sample
