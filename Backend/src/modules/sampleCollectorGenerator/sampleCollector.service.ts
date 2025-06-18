@@ -14,6 +14,7 @@ import {
   ServiceCaseDocument,
 } from '../serviceCase/schemas/serviceCase.schema'
 import { Role } from '../role/schemas/role.schema'
+import { TestRequestHistory } from '../testRequestHistory/schemas/testRequestHistory.schema'
 
 @Injectable()
 export class SampleCollectorService {
@@ -25,8 +26,11 @@ export class SampleCollectorService {
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
     @InjectModel(TestRequestStatus.name)
     private testRequestStatusModel: Model<TestRequestStatusDocument>,
+    @InjectModel(TestRequestHistory.name)
+    private testRequestHistoryModel: Model<TestRequestHistory>,
   ) {}
 
+  @Cron(CronExpression.EVERY_12_HOURS)
   async assignJob() {
     // ---- GIAI ĐOẠN 1: Lấy tất cả dữ liệu cần thiết một cách song song ----
 
@@ -82,7 +86,7 @@ export class SampleCollectorService {
       // Chỉ lấy những case chưa được gán nhân viên và đã thanh toán
       {
         $match: {
-          testRequestStatus: paidStatus._id,
+          currentStatus: paidStatus._id,
           sampleCollector: { $exists: false },
         },
       },
@@ -123,7 +127,7 @@ export class SampleCollectorService {
         $lookup: {
           from: 'slottemplates',
           localField: 'slotInfo.slotTemplate',
-          foreignField: '_id', // <-- ĐÃ SỬA LỖI Ở ĐÂY (xóa dấu chấm thừa)
+          foreignField: '_id',
           as: 'slotTemplateInfo',
         },
       },
@@ -133,6 +137,7 @@ export class SampleCollectorService {
         $project: {
           _id: 1,
           facilityId: '$slotTemplateInfo.facility',
+          userAccountId: '$bookingInfo.account',
         },
       },
     ])
@@ -169,7 +174,7 @@ export class SampleCollectorService {
             update: {
               $set: {
                 sampleCollector: assignedCollectorId,
-                bookingStatus: newBookingStatus._id, // Hoặc testRequestStatus
+                currentStatus: newBookingStatus._id,
                 updatedAt: new Date(),
               },
             },
@@ -187,11 +192,24 @@ export class SampleCollectorService {
     // ---- GIAI ĐOẠN 5: Thực thi cập nhật hàng loạt ----
     if (bulkUpdateOperations.length > 0) {
       await this.serviceCaseRepository.bulkWrite(bulkUpdateOperations)
-      console.log(`Đã gán thành công ${bulkUpdateOperations.length} công việc.`)
+      const historyToInsert = casesToAssign.map((caseInfo) => ({
+        serviceCase: caseInfo._id,
+        serviceCaseId: caseInfo._id,
+        testRequestStatus: newBookingStatus._id,
+        account: caseInfo.userAccountId, // <-- Lấy account của người dùng đã lấy ở pipeline
+        createdAt: new Date(),
+      }))
+      await this.testRequestHistoryModel.insertMany(historyToInsert)
+      return {
+        message: 'Đã gán công việc thành công cho nhân viên thu mẫu.',
+        assignedCasesCount: bulkUpdateOperations.length,
+      }
     } else {
-      console.log(
-        'Không có công việc nào được gán (có thể do không tìm thấy nhân viên phù hợp).',
-      )
+      return {
+        message:
+          'Không có công việc nào được gán (có thể do không tìm thấy nhân viên phù hợp).',
+        assignedCasesCount: 0,
+      }
     }
   }
 }
