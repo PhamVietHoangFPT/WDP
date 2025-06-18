@@ -45,7 +45,7 @@ const Homepage: React.FC = () => {
               }}
             />
 
-            <Button
+            {/* <Button
               type='primary'
               size='large'
               icon={<CalendarOutlined />}
@@ -54,7 +54,7 @@ const Homepage: React.FC = () => {
               }}
             >
               Login
-            </Button>
+            </Button> */}
           </Col>
         </Row>
 
