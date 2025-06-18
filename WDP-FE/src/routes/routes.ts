@@ -25,6 +25,9 @@ import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
 import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
+import BookingPage from '../pages/BookingPage/BookingPage'
+import PaymentPage from '../pages/Payment/PaymentPage'
+import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
 
 const routes: LayoutRoute[] = [
   {
@@ -75,6 +78,21 @@ const routes: LayoutRoute[] = [
       {
         path: '/blogs/:id',
         component: BlogDetail,
+      },
+      {
+        path: '/booking',
+        component: BookingPage,
+        role: ['Customer'],
+      },
+      {
+        path: '/payment',
+        component: PaymentPage,
+        role: ['Customer'],
+      },
+      {
+        path: '/payment-success',
+        component: PaymentSuccessPage,
+        role: ['Customer'],
       },
     ],
   },

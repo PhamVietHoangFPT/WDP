@@ -1,6 +1,6 @@
 import { Layout, Card, Typography, Row, Col, Button } from 'antd'
 import { LoginForm } from '../../components/Authentication/LoginForm'
-// import Logo from '../../assets/Logo.png'
+import Logo from '../../assets/Logo.png'
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
 import { useEffect } from 'react'
@@ -34,7 +34,7 @@ export default function Login() {
           {/* Hình ảnh minh họa */}
           <Col xs={24} md={12} style={{ textAlign: 'center' }}>
             <img
-              // src={Logo}
+              src={Logo}
               alt='Login'
               style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px' }}
             />

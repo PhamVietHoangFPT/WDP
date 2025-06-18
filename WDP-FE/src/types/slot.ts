@@ -9,4 +9,9 @@ export interface Slot {
   slotDate: string
   startTime: string
   endTime: string
+  isBooked: boolean
+  facility?: {
+    _id: string
+    facilityName: string
+  }
 }

@@ -13,7 +13,7 @@ export class VnpayService {
     @Inject(IServiceCaseRepository)
     private readonly serviceCaseRepository: IServiceCaseRepository,
   ) {}
-  vnp_ReturnUrl = 'https://www.google.com/'
+  vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
 
   async getBankList(): Promise<Bank[]> {
     return this.vnpayService.getBankList()

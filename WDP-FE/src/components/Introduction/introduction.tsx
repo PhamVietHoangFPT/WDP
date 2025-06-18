@@ -22,7 +22,7 @@ const Introduction: React.FC = () => {
           size='large'
           icon={<CalendarOutlined />}
           onClick={() => {
-            navigate('vaccine-registration')
+            navigate('booking')
           }}
         >
           Đặt lịch hẹn
