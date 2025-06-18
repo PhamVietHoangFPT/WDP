@@ -77,8 +77,8 @@ export const {
   useGetFacilitiesListQuery,
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
-//   useCreateSlotsMutation,
-//   useGetBlogsDetailQuery,
-//   useUpdateBlogsMutation,
-//   useDeleteBlogsMutation,
+  //   useCreateSlotsMutation,
+  //   useGetBlogsDetailQuery,
+  //   useUpdateBlogsMutation,
+  //   useDeleteBlogsMutation,
 } = facilitiesApi

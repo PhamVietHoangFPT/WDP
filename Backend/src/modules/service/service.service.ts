@@ -17,7 +17,7 @@ export class ServiceService implements IServiceService {
   constructor(
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -60,8 +60,10 @@ export class ServiceService implements IServiceService {
 
   // this function returns all Services
   // if there are no Services, it throws an ConflictException
-  async findAllService(pageNumber: number,
-    pageSize: number): Promise<PaginatedResponse<ServiceResponseDto>> {
+  async findAllService(
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponse<ServiceResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
     const filter = {}
     const [services, totalItems] = await Promise.all([
@@ -77,7 +79,9 @@ export class ServiceService implements IServiceService {
     } else {
       try {
         const totalPages = Math.ceil(totalItems / pageSize)
-        const data = services.map((service: Service) => this.mapToResponseDto(service)) // Explicitly type `user`
+        const data = services.map((service: Service) =>
+          this.mapToResponseDto(service),
+        ) // Explicitly type `user`
         return {
           data,
           pagination: {

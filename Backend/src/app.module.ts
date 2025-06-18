@@ -29,6 +29,7 @@ import { TestRequestStatusModule } from './modules/testRequestStatus/testRequest
 import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 import { TestRequestHistoryModule } from './modules/testRequestHistory/testRequestHistory.module'
 import { ResultModule } from './modules/result/result.module'
+import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector.module'
 @Module({
   imports: [
     databaseConfig,
@@ -62,7 +63,7 @@ import { ResultModule } from './modules/result/result.module'
     ServiceCaseModule,
     TestRequestHistoryModule,
     ResultModule,
-
+    SampleCollectorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
