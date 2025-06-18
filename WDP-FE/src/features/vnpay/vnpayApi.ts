@@ -23,7 +23,15 @@ export const paymentApi = apiSlice.injectEndpoints({
         responseHandler: (response) => response.text(),
       }),
     }),
-
+    // Tạo URL thanh toán dành cho service case
+    createServiceCasePayment: builder.mutation({
+      query: ({ serviceCaseId }) => ({
+        url: '/vnpay/payment-for-service-case',
+        method: 'POST',
+        body: { serviceCaseId }, // Gửi dưới dạng object
+      }),
+      transformResponse: (res) => res?.redirectUrl || res, // Điều chỉnh dựa trên phản hồi
+    }),
     // Tạo URL thanh toán dành cho đặt lịch
     createBookingPayment: builder.mutation({
       query: (data) => ({
@@ -37,11 +45,12 @@ export const paymentApi = apiSlice.injectEndpoints({
     // Tạo URL thanh toán cho dịch vụ
     createServicePayment: builder.mutation({
       query: (data) => ({
-        url: '/vnpay/payment-for-service-case',
+        url: '/payments-service-case',
         method: 'POST',
         body: data,
       }),
     }),
+
   }),
 })
 
@@ -50,4 +59,5 @@ export const {
   useCreatePaymentUrlMutation,
   useCreateBookingPaymentMutation,
   useCreateServicePaymentMutation,
+  useCreateServiceCasePaymentMutation
 } = paymentApi

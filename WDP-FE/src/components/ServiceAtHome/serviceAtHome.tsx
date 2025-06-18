@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useCreateCaseMemberMutation } from '../../features/caseMembers/caseMemebers';
 import { useCreateServiceCaseMutation } from '../../features/serviceCase/serviceCase';
-import { useCreateBookingPaymentMutation } from '../../features/vnpay/vnpayApi';
+import { useCreateServiceCasePaymentMutation } from '../../features/vnpay/vnpayApi';
 
 interface TestTakerListResponse {
     data: {
@@ -25,32 +25,29 @@ interface BookingListResponse {
 interface ServiceDetailResponse {
     data: Service;
 }
+
 const ServiceAtHomeForm: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Extract the 'id' parameter from the URL
+    const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-    const [testTakerCount, setTestTakerCount] = useState(2); // Start with 2 test takers
+    const [testTakerCount, setTestTakerCount] = useState(2);
     const { data, isLoading } = useGetTestTakersQuery<TestTakerListResponse>({
         pageNumber: 1,
         pageSize: 5,
     });
     const { data: bookingData, isBookingLoading } = useGetBookingStatusQuery<BookingListResponse>(false);
-    const { data: serviceDetail } = useGetServiceDetailQuery<ServiceDetailResponse>(id)
-    const [createCaseMember, { isLoading: isCreating }] = useCreateCaseMemberMutation()
-    const [createServiceCase] = useCreateServiceCaseMutation()
-    const [createPaymentUrl] = useCreateBookingPaymentMutation()
+    const { data: serviceDetail } = useGetServiceDetailQuery<ServiceDetailResponse>(id);
+    const [createCaseMember, { isLoading: isCreating }] = useCreateCaseMemberMutation();
+    const [createServiceCase] = useCreateServiceCaseMutation();
+    const [createPaymentUrl] = useCreateServiceCasePaymentMutation();
     const dataTestTaker = data?.data || [];
     const dataBookingList = bookingData || [];
-    // Watch form values to track selected test takers
+
     const selectedTestTakers = Form.useWatch([], form);
+
     if (isLoading || isBookingLoading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }} />;
     }
-
-    // const onFinish = (values: { [key: string]: string }) => {
-    //     console.log('Form Values:', values);
-    //     // Handle form submission (e.g., API call or further processing)
-    // };
 
     const handleSelectBooking = (bookingId: string) => {
         form.setFieldsValue({ booking: bookingId });
@@ -66,52 +63,62 @@ const ServiceAtHomeForm: React.FC = () => {
     const removeTestTaker = () => {
         if (testTakerCount === 3) {
             setTestTakerCount(2);
-            form.setFieldsValue({ testTaker3: undefined }); // Clear the third test taker field
+            form.setFieldsValue({ testTaker3: undefined });
         }
     };
 
-    // Function to filter out already selected test takers for a specific field
     const getAvailableTestTakers = (currentField: string) => {
         const selectedIds = Object.keys(selectedTestTakers || {})
             .filter((key) => key.startsWith('testTaker') && key !== currentField)
             .map((key) => selectedTestTakers[key])
-            .filter((id) => id); // Remove undefined values
+            .filter((id) => id);
         return dataTestTaker.filter((taker) => !selectedIds.includes(taker._id));
     };
+
     const onFinish = async (values: any) => {
-        // Collect test taker IDs into an array
-        const testTakers = [
-            values.testTaker1,
-            values.testTaker2,
-            values.testTaker3,
-        ].filter((id) => id); // Remove undefined values
+        const testTakers = [values.testTaker1, values.testTaker2, values.testTaker3].filter((id) => id);
+
         const data = {
             testTaker: testTakers,
             booking: values.booking,
             service: id,
             note: '',
             isAtHome: true,
-        }
-
-        console.log('Dữ liệu gửi đi:', { data })
+        };
+        console.log('Dữ liệu gửi đi cho createCaseMember:', { data });
 
         try {
-            const caseMember = await createCaseMember({ data }).unwrap()
-            const caseMemberId = caseMember?.data?._id || caseMember?._id
-            const serviceCase = await createServiceCase({ caseMemberId })
-            const serviceCaseId = serviceCase?.data?._id
-            if (!caseMemberId) throw new Error('Đăng ký thất bại')
-            const redirectUrl = await createPaymentUrl({
-                serviceCaseId,
-            }).unwrap()
-            window.open(redirectUrl, '_blank')
+            const caseMember = await createCaseMember({ data }).unwrap();
+            const caseMemberId = caseMember?.data?._id || caseMember?._id;
+            console.log('caseMemberId:', caseMemberId);
+
+            if (!caseMemberId) {
+                throw new Error('Không thể lấy caseMemberId');
+            }
+
+            const serviceCaseData = { caseMember: caseMemberId };
+            const serviceCase = await createServiceCase({ data: serviceCaseData }).unwrap();
+            const serviceCaseId = serviceCase?.data?._id || serviceCase?._id;
+            console.log('serviceCaseId:', serviceCaseId);
+
+            if (!serviceCaseId) {
+                throw new Error('Không thể lấy serviceCaseId');
+            }
+
+            // Gửi serviceCaseId đúng định dạng
+            const paymentResponse = await createPaymentUrl({ serviceCaseId }).unwrap();
+            const redirectUrl = paymentResponse; // Điều chỉnh nếu phản hồi là object
+            console.log('Redirect URL:', redirectUrl);
+            window.open(redirectUrl, '_blank');
+
+            message.success('Đăng ký thành công');
         } catch (err: any) {
-            console.error('Chi tiết lỗi từ API:', err.data)
+            console.error('Chi tiết lỗi từ API:', err.data);
             message.error(
                 err.data?.title || err.data?.message || 'Đăng ký thất bại'
-            )
+            );
         }
-    }
+    };
     return (
         <div
             style={{
@@ -122,13 +129,8 @@ const ServiceAtHomeForm: React.FC = () => {
                 alignItems: 'center',
             }}
         >
-            <div
-                style={{
-                    width: '100%',
-                    maxWidth: '80%',
-                }}
-            ><div
-                style={{ display: "flex", justifyContent: 'space-around' }}>
+            <div style={{ width: '100%', maxWidth: '80%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                     <p style={{ color: 'black' }}>
                         Xét nghiệm huyết thống bên{' '}
                         {serviceDetail?.isAgnate ? 'nội' : 'ngoại'}
@@ -153,7 +155,6 @@ const ServiceAtHomeForm: React.FC = () => {
                                         name={fieldName}
                                         label={`Test Taker ${index + 1}`}
                                         rules={[{ required: true, message: `Please select Test Taker ${index + 1}` }]}
-
                                     >
                                         <Select
                                             placeholder={`Select Test Taker ${index + 1}`}
@@ -169,21 +170,12 @@ const ServiceAtHomeForm: React.FC = () => {
                         <Col span={24}>
                             <Space style={{ width: '100%', marginBottom: 16 }}>
                                 {testTakerCount < 3 && (
-                                    <Button
-                                        type="dashed"
-                                        onClick={addTestTaker}
-                                        block
-                                    >
+                                    <Button type="dashed" onClick={addTestTaker} block>
                                         Add Another Test Taker
                                     </Button>
                                 )}
                                 {testTakerCount === 3 && (
-                                    <Button
-                                        type="dashed"
-                                        danger
-                                        onClick={removeTestTaker}
-                                        block
-                                    >
+                                    <Button type="dashed" danger onClick={removeTestTaker} block>
                                         Remove Test Taker 3
                                     </Button>
                                 )}
@@ -208,12 +200,11 @@ const ServiceAtHomeForm: React.FC = () => {
                                                 >
                                                     <p>Giờ bắt đầu: {booking.slot.startTime} A.M</p>
                                                     <p>Giờ kết thúc: {booking.slot.endTime} A.M</p>
-                                                    {/* Add more booking details as needed */}
                                                     <Button
                                                         type="primary"
                                                         onClick={() => handleSelectBooking(booking._id)}
                                                         block
-                                                        disabled={selectedBooking === booking._id}
+                                                        disabled={selectedBooking === booking?._id}
                                                     >
                                                         {selectedBooking === booking?._id ? 'Selected' : 'Select'}
                                                     </Button>
@@ -225,7 +216,9 @@ const ServiceAtHomeForm: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col span={24}>
-                            <p style={{ fontStyle: "italic", color: "gray" }}>* Các dịch vụ tại nhà chỉ có thể được sử dụng với mục đích dân sự</p>
+                            <p style={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Các dịch vụ tại nhà chỉ có thể được sử dụng với mục đích dân sự
+                            </p>
                         </Col>
                         <Col span={24}>
                             <Form.Item>
