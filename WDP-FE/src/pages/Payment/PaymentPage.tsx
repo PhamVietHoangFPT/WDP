@@ -5,7 +5,7 @@ import Cookies from 'js-cookie'
 import { jwtDecode } from 'jwt-decode'
 
 import { useCreateBookingMutation } from '../../features/customer/bookingApi'
-import { useCreatePaymentUrlMutation } from '../../features/vnpay/vnpayApi'
+import { useCreateBookingPaymentMutation } from '../../features/vnpay/vnpayApi'
 import { useGetFacilitiesListQuery } from '../../features/admin/facilitiesAPI'
 import dayjs from 'dayjs'
 
@@ -14,7 +14,7 @@ const { Title, Text } = Typography
 export default function PaymentPage() {
   const location = useLocation()
   const [createBooking] = useCreateBookingMutation()
-  const [createPaymentUrl] = useCreatePaymentUrlMutation()
+  const [createPaymentUrl] = useCreateBookingPaymentMutation()
 
   const { data: facilitiesData } = useGetFacilitiesListQuery({
     pageNumber: 1,
@@ -47,21 +47,17 @@ export default function PaymentPage() {
 
       const bookingId = bookingRes?.data?._id || bookingRes?._id
       if (!bookingId) throw new Error('Không thể tạo booking')
-
+      Cookies.set('currentBooking', bookingId)
       const redirectUrl = await createPaymentUrl({
-        vnp_Amount: 1000000,
-        vnp_TxnRef: bookingId,
-        vnp_OrderInfo: `Thanh toán đơn hàng #${bookingId}`,
-        // vnp_ReturnUrl: 'http://localhost:5173/payment-success/',
+        bookingId: bookingId,
       }).unwrap()
-      if (typeof redirectUrl === 'string' && redirectUrl.startsWith('http')) {
-        window.open(redirectUrl, '_blank')
-      } else {
-        throw new Error('Không nhận được URL thanh toán')
-      }
+      console.log('Redirect URL:', redirectUrl)
+      window.open(redirectUrl, '_blank')
     } catch (err: any) {
       console.error('❌ Lỗi:', err)
-      message.error('Thanh toán thất bại hoặc không thể đặt lịch')
+      message.error(
+        err.data?.message || 'Đặt lịch thất bại, vui lòng thử lại sau!'
+      )
     }
   }
 
