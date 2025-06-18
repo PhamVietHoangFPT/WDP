@@ -22,11 +22,17 @@ export class FacilityRepository implements IFacilityRepository {
   }
 
   async findById(id: string): Promise<FacilityDocument | null> {
-    return this.facilityModel.findById(id).exec()
+    return this.facilityModel
+      .findById(id)
+      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .exec()
   }
 
   async findAll(): Promise<FacilityDocument[]> {
-    return this.facilityModel.find().exec()
+    return this.facilityModel
+      .find()
+      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .exec()
   }
 
   async update(
