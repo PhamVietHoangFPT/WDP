@@ -1,0 +1,20 @@
+.ant-carousel .slick-slide {
+  padding: 0 8px;
+}
+
+.ant-card {
+  transition: transform 0.3s;
+}
+
+.ant-card:hover {
+  transform: translateY(-4px);
+}
+
+.ant-card-meta-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ant-card-meta-description {
+  color: #595959;
+}

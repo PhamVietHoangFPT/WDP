@@ -17,7 +17,7 @@ export class ServiceRepository implements IServiceRepository {
     private readonly timeReturnRepository: ITimeReturnRepository,
     @Inject(ISampleRepository)
     private readonly sampleRepository: ISampleRepository,
-  ) { }
+  ) {}
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.serviceModel.countDocuments(filter).exec()

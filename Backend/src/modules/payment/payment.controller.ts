@@ -52,11 +52,10 @@ export class PaymentController {
     @Req() req: any, // Assuming you might need the request object for user info
   ) {
     const userId = req.user.id
-    const currentBookingPayment = req.session.currentBookingPayment
     return this.paymentService.createForBooking(
       CheckVnPayPaymentDto,
       userId,
-      currentBookingPayment,
+      CheckVnPayPaymentDto.vnp_TxnRef,
     )
   }
 
@@ -74,11 +73,10 @@ export class PaymentController {
     @Req() req: any, // Assuming you might need the request object for user info
   ) {
     const userId = req.user.id
-    const currentServiceCasePayment = req.session.currentServiceCasePayment
     return this.paymentService.createForCase(
       CheckVnPayPaymentDto,
       userId,
-      currentServiceCasePayment,
+      CheckVnPayPaymentDto.vnp_TxnRef,
     )
   }
 

@@ -53,6 +53,18 @@ export class ServiceCase extends BaseEntity {
     ref: 'Result',
   })
   result: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+  })
+  doctor: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+  })
+  sampleCollector: mongoose.Schema.Types.ObjectId
 }
 
 export const ServiceCaseSchema = SchemaFactory.createForClass(ServiceCase)

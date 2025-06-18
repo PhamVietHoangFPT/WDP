@@ -67,8 +67,8 @@ export class TestRequestHistoryController {
   })
   async findAll(
     @Query() paginationQuery: PaginationQueryDto,
-    @Param('accountId') accountId: string, // Assuming you might need accountId for filtering
-    @Param('serviceCaseId') serviceCaseId?: string, // Optional parameter for filtering by service case
+    @Query('accountId') accountId: string,
+    @Query('serviceCaseId') serviceCaseId: string,
   ): Promise<PaginatedResponse<TestRequestHistoryDocument>> {
     return this.testRequestHistoryService.findAllTestRequestHistory(
       paginationQuery.pageNumber,

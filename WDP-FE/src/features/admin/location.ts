@@ -57,9 +57,15 @@ const locationAPI = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['facilities', 'wards', 'districts', 'provinces', 'addresses', 'facility-addresses'],
+      invalidatesTags: [
+        'facilities',
+        'wards',
+        'districts',
+        'provinces',
+        'addresses',
+        'facility-addresses',
+      ],
     }),
-
 
     // getBlogsDetail: builder.query({
     //   query: (id) => ({
@@ -124,9 +130,9 @@ export const {
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
   useCreateFacilityMutation,
-//   useGetBlogsMinimalListQuery,
-//   useCreateSlotsMutation,
-//   useGetBlogsDetailQuery,
-//   useUpdateBlogsMutation,
-//   useDeleteBlogsMutation,
+  //   useGetBlogsMinimalListQuery,
+  //   useCreateSlotsMutation,
+  //   useGetBlogsDetailQuery,
+  //   useUpdateBlogsMutation,
+  //   useDeleteBlogsMutation,
 } = locationAPI

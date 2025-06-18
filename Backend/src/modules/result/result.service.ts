@@ -23,7 +23,10 @@ export class ResultService implements IResultService {
     private testRequestStatusRepository: ITestRequestStatusRepository,
   ) {}
 
-  async create(createResultDto: CreateResultDto): Promise<ResultDocument> {
+  async create(
+    createResultDto: CreateResultDto,
+    doctorId: string,
+  ): Promise<ResultDocument> {
     // Kiểm tra xem service case có tồn tại không
     const currentStatusOfServiceCase =
       await this.serviceCaseRepository.getCurrentStatusId(
@@ -50,6 +53,7 @@ export class ResultService implements IResultService {
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       createResultDto.serviceCase.toString(),
       newStatus.toString(),
+      doctorId,
     )
     return await this.resultRepository.create(createResultDto)
   }
