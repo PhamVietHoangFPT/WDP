@@ -124,5 +124,20 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .select('totalFee')
       .lean()
     return serviceCase ? serviceCase.totalFee : null
+
+  }
+
+  async updateResultId(
+    id: string,
+    resultId: string,
+  ): Promise<ServiceCaseDocument | null> {
+    return this.serviceCaseModel
+      .findByIdAndUpdate(
+        id,
+        { result: new mongoose.Types.ObjectId(resultId) },
+        { new: true },
+      )
+      .exec()
+
   }
 }

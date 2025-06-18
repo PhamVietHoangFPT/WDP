@@ -55,6 +55,11 @@ export default function HeaderCus() {
       label: 'Tạo người test ADN',
       onClick: () => navigate('/create-testee'),
     },
+    {
+      key: 'list-testee',
+      label: 'Danh sách người test ADN',
+      onClick: () => navigate('/list-testee'),
+    },
   ]
   return (
     <Header style={{ background: '#fff', borderBottom: '1px solid #eee' }}>

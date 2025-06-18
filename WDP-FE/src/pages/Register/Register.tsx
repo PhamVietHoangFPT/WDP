@@ -1,5 +1,5 @@
 import { Layout, Card, Typography, Row, Col, Button } from 'antd'
-import Logo from '../../assets/Logo.png'
+// import Logo from '../../assets/Logo.png'
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
 import { useEffect } from 'react'
