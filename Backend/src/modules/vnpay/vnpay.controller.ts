@@ -49,14 +49,10 @@ export class VnpayController {
     status: 200,
     description: 'URL thanh toán được xây dựng thành công',
   })
-  async getPaymentUrlForBooking(
-    @Body() PaymentBookingDto: PaymentBookingDto,
-    @Req() req: Request,
-  ) {
-    req.session.currentBookingPayment = PaymentBookingDto.bookingId
+  async getPaymentUrlForBooking(@Body() PaymentBookingDto: PaymentBookingDto) {
     const paymentUrl =
       await this.vnpayService.getPaymentUrlForBooking(PaymentBookingDto)
-    return paymentUrl
+    return { redirectUrl: paymentUrl }
   }
 
   @Post('payment-for-service-case')
@@ -79,6 +75,6 @@ export class VnpayController {
     const paymentUrl = await this.vnpayService.getPaymentUrlForServiceCase(
       PaymentServiceCaseDto,
     )
-    return paymentUrl
+    return { redirectUrl: paymentUrl }
   }
 }

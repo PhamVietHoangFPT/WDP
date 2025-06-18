@@ -6,6 +6,9 @@ export interface ITestRequestHistoryRepository {
     serviceCaseId: string,
     testRequestStatusId: string,
     accountId: string,
+    staffId?: string,
+    sampleCollectorId?: string,
+    doctorId?: string,
   ): Promise<TestRequestHistoryDocument>
 
   findAllTestRequestHistory(

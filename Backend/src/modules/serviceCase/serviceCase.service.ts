@@ -117,6 +117,9 @@ export class ServiceCaseService implements IServiceCaseService {
   async updateCurrentStatus(
     id: string,
     currentStatus: string,
+    staffId?: string,
+    sampleCollectorId?: string,
+    doctorId?: string,
   ): Promise<ServiceCaseResponseDto | null> {
     const oldServiceCaseStatusId =
       await this.serviceCaseRepository.getCurrentStatusId(id)
@@ -143,6 +146,9 @@ export class ServiceCaseService implements IServiceCaseService {
           await this.serviceCaseRepository.updateCurrentStatus(
             id,
             currentStatus,
+            staffId,
+            sampleCollectorId,
+            doctorId,
           )
         if (!updatedServiceCase) {
           throw new Error('Cập nhật trạng thái hiện tại không thành công')
@@ -158,6 +164,9 @@ export class ServiceCaseService implements IServiceCaseService {
     updatedServiceCase = await this.serviceCaseRepository.updateCurrentStatus(
       id,
       currentStatus,
+      staffId,
+      sampleCollectorId,
+      doctorId,
     )
     if (!updatedServiceCase) {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')

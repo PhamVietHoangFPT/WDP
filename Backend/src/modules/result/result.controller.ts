@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common'
 
@@ -45,8 +46,9 @@ export class ResultController {
   @ApiResponse({ status: 201, type: ApiResponseDto })
   async create(
     @Body() createResultDto: CreateResultDto,
+    @Req() req: any, // Assuming req contains user info
   ): Promise<ApiResponseDto<ResultDocument>> {
-    const data = await this.resultService.create(createResultDto)
+    const data = await this.resultService.create(createResultDto, req.user.id)
     return {
       data: [data],
       statusCode: 201,

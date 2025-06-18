@@ -34,7 +34,6 @@ import { RoleEnum } from 'src/common/enums/role.enum'
 @ApiTags('service-cases')
 @Controller('service-cases')
 @UseGuards(AuthGuard, RolesGuard)
-
 @ApiBearerAuth()
 export class ServiceCaseController {
   constructor(
@@ -88,14 +87,12 @@ export class ServiceCaseController {
   }
 
   @Patch(':id/status/:currentStatus')
-
   @Roles(
     RoleEnum.DELIVERY_STAFF,
     RoleEnum.DOCTOR,
     RoleEnum.SAMPLE_COLLECTOR,
     RoleEnum.STAFF,
   )
-
   @ApiOperation({ summary: 'Cập nhật trạng thái hiện tại của hồ sơ dịch vụ' })
   @ApiParam({
     name: 'id',
@@ -113,10 +110,26 @@ export class ServiceCaseController {
   async updateCurrentStatus(
     @Param('id') id: string,
     @Param('currentStatus') currentStatus: string,
+    @Req() req: any,
   ): Promise<ApiResponseDto<ServiceCaseResponseDto> | null> {
-    console.log(id, currentStatus)
+    let staffId: string | undefined
+    let sampleCollectorId: string | undefined
+    let doctorId: string | undefined
+    if (req.user.role === RoleEnum.STAFF) {
+      staffId = req.user.id
+    } else if (req.user.role === RoleEnum.SAMPLE_COLLECTOR) {
+      sampleCollectorId = req.user.id
+    } else if (req.user.role === RoleEnum.DOCTOR) {
+      doctorId = req.user.id
+    }
     const updatedServiceCase =
-      await this.serviceCaseService.updateCurrentStatus(id, currentStatus)
+      await this.serviceCaseService.updateCurrentStatus(
+        id,
+        currentStatus,
+        staffId,
+        sampleCollectorId,
+        doctorId,
+      )
     if (!updatedServiceCase) {
       return null
     }

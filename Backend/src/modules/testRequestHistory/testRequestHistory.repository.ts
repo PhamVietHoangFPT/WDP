@@ -20,11 +20,17 @@ export class TestRequestHistoryRepository
     serviceCaseId: string,
     testRequestStatusId: string,
     accountId: string,
+    staffId?: string,
+    sampleCollectorId?: string,
   ): Promise<TestRequestHistoryDocument> {
     const createdTestRequestHistory = new this.testRequestHistoryModel({
       serviceCase: new mongoose.Types.ObjectId(serviceCaseId),
       testRequestStatus: new mongoose.Types.ObjectId(testRequestStatusId),
       account: new mongoose.Types.ObjectId(accountId),
+      staff: staffId ? new mongoose.Types.ObjectId(staffId) : null,
+      sampleCollector: sampleCollectorId
+        ? new mongoose.Types.ObjectId(sampleCollectorId)
+        : null,
       createdAt: new Date(),
     })
     return createdTestRequestHistory.save()
