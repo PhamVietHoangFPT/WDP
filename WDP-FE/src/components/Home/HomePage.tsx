@@ -4,7 +4,24 @@ import { LoadingOutlined } from '@ant-design/icons'
 import Logo from '../../assets/Logo.png'
 import Content from '../Content/content'
 import Introduction from '../Introduction/introduction'
+import type { Service } from '../../types/service'
+import { useGetServiceListQuery } from '../../features/service/serviceAPI'
+import ServiceCardSlider from '../ServiceSlider/serviceSlider'
+
+interface ServiceListResponse {
+  data: {
+    data: Service[]
+  }
+  isLoading: boolean
+}
+
 const Homepage: React.FC = () => {
+  const { data, isLoading } = useGetServiceListQuery<ServiceListResponse>({
+    pageNumber: 1,
+    pageSize: 5,
+  })
+  const dataService = data.data
+  console.log(dataService)
   return (
     <div
       style={{
@@ -49,15 +66,19 @@ const Homepage: React.FC = () => {
             btnContent='Xem tất cả dịch vụ'
             linkURL='/sessions'
           />
-          <LoadingOutlined
-            style={{
-              fontSize: '50px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '30vh',
-            }}
-          />
+          {isLoading ? (
+            <LoadingOutlined
+              style={{
+                fontSize: '50px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '30vh',
+              }}
+            />
+          ) : (
+            <ServiceCardSlider services={dataService || []} />
+          )}
         </div>
         {/* Danh sach blog */}
         <div style={{ marginBottom: '48px' }}>
