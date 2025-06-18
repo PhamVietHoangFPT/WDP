@@ -1,11 +1,7 @@
-import { Button, Space, Typography } from 'antd'
+import { Space, Typography } from 'antd'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { CalendarOutlined } from '@ant-design/icons'
 const { Title, Paragraph } = Typography
-
 const Introduction: React.FC = () => {
-  const navigate = useNavigate()
   return (
     <div style={{ padding: '0 16px' }}>
       <Title level={1} style={{ marginBottom: '24px', color: '#1890ff' }}>
@@ -17,16 +13,6 @@ const Introduction: React.FC = () => {
         quả nhanh, hỗ trợ trực tiếp tại nhà.
       </Paragraph>
       <Space>
-        <Button
-          type='primary'
-          size='large'
-          icon={<CalendarOutlined />}
-          onClick={() => {
-            navigate('booking')
-          }}
-        >
-          Đặt lịch hẹn
-        </Button>
       </Space>
     </div>
   )
