@@ -1,12 +1,12 @@
 import React from 'react'
-import { Row, Col, Button, Typography } from 'antd'
+import { Row, Col } from 'antd'
 import Logo from '../../assets/Logo.png'
-import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { LoadingOutlined } from '@ant-design/icons'
 import Introduction from '../Introduction/introduction'
 import type { Service } from '../../types/service'
 import { useGetServiceListQuery } from '../../features/service/serviceAPI'
 import ServiceCardSlider from '../ServiceSlider/serviceSlider'
+import Content from '../Content/content'
 
 interface ServiceListResponse {
   data: {
@@ -81,13 +81,11 @@ const Homepage: React.FC = () => {
         </div>
         {/* Danh sach blog */}
         <div style={{ marginBottom: '48px' }}>
-          <Title
-            level={2}
-            style={{ textAlign: 'center', marginBottom: '32px' }}
-          >
-            Các bài viết mới
-          </Title>
-
+          <Content
+            title='CÁC BÀI VIẾT'
+            btnContent='Xem tất cả bài viết'
+            linkURL='/sessions'
+          />
           <LoadingOutlined
             style={{
               fontSize: '50px',
