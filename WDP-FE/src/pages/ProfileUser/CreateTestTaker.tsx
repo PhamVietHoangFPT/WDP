@@ -68,7 +68,7 @@ export default function CreateTesteeForm() {
   }
 
   return (
-    <Layout>
+    <div>
       <HeaderCus />
       <Card
         style={{
@@ -144,6 +144,6 @@ export default function CreateTesteeForm() {
           </Form.Item>
         </Form>
       </Card>
-    </Layout>
+    </div>
   )
 }

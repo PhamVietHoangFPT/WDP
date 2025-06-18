@@ -26,6 +26,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
+
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
@@ -33,6 +34,7 @@ import { RoleEnum } from 'src/common/enums/role.enum'
 @ApiTags('service-cases')
 @Controller('service-cases')
 @UseGuards(AuthGuard, RolesGuard)
+
 @ApiBearerAuth()
 export class ServiceCaseController {
   constructor(
@@ -86,12 +88,14 @@ export class ServiceCaseController {
   }
 
   @Patch(':id/status/:currentStatus')
+
   @Roles(
     RoleEnum.DELIVERY_STAFF,
     RoleEnum.DOCTOR,
     RoleEnum.SAMPLE_COLLECTOR,
     RoleEnum.STAFF,
   )
+
   @ApiOperation({ summary: 'Cập nhật trạng thái hiện tại của hồ sơ dịch vụ' })
   @ApiParam({
     name: 'id',

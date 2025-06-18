@@ -3,17 +3,48 @@ import { apiSlice } from '../../apis/apiSlice'
 const slotApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSlotsList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
+      query: ({
+        pageNumber,
+        pageSize,
+        facilityId,
+        startDate,
+        endDate,
+        isAvailable,
+      }) => ({
         url: '/slots',
         method: 'GET',
         params: {
           pageNumber,
           pageSize,
+          facilityId, // Thêm tham số lọc cơ sở
+          startDate, // Thêm tham số ngày bắt đầu
+          endDate, // Thêm tham số ngày kết thúc
+          isAvailable,
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['blogs'],
+      providesTags: ['slots'],
     }),
+
+    createSlotTemplate: builder.mutation({
+      query: (data) => ({
+        url: '/slotTemplates',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['slots'],
+    }),
+
+    getSlotTemplateForFacility: builder.query({
+      query: (facilityId) => ({
+        url: `/slotTemplates/facility/${facilityId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['slots'],
+    }),
+
     getBlogsMinimalList: builder.query({
       query: ({ pageNumber, pageSize }) => ({
         url: '/blogs/minimal',
@@ -66,8 +97,10 @@ const slotApi = apiSlice.injectEndpoints({
 export const {
   useGetSlotsListQuery,
   useGetBlogsMinimalListQuery,
+  useCreateSlotTemplateMutation,
   useCreateSlotsMutation,
   useGetBlogsDetailQuery,
   useUpdateBlogsMutation,
   useDeleteBlogsMutation,
+  useGetSlotTemplateForFacilityQuery,
 } = slotApi
