@@ -48,6 +48,13 @@ const Navbar: React.FC = () => {
         url: '/vaccines?pageNumber=1',
       },
       {
+        key: 'booking',
+        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
+        label: 'Đặt chỗ',
+        style: { fontSize: '16px', color: '#616161' },
+        url: '/booking',
+      },
+      {
         key: 'blogs',
         icon: <FontAwesomeIcon icon={faBlog} style={{ fontSize: '16px' }} />,
         label: 'Cẩm nang',
