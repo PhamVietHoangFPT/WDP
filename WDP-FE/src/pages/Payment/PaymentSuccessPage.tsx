@@ -4,12 +4,13 @@ import React, { useEffect, useState } from 'react'
 import { Card, Typography, Button, message } from 'antd'
 import { useCreateBookingPaymentHistoryMutation } from '../../features/customer/paymentApi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-
+import Cookies from 'js-cookie'
 const { Title, Text } = Typography
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const currentBooking = Cookies.get('currentBooking')
 
   const [status, setStatus] = useState<'success' | 'error' | 'processing'>(
     'processing'
@@ -24,9 +25,8 @@ export default function PaymentSuccessPage() {
     console.log('🔍 VNPay Query Params:', rawData)
 
     const responseCode = rawData.vnp_ResponseCode
-    const bookingId = rawData.vnp_TxnRef
 
-    if (!responseCode || !bookingId) {
+    if (!responseCode) {
       message.error('Thiếu thông tin thanh toán từ VNPay')
       setStatus('error')
       return
@@ -34,7 +34,7 @@ export default function PaymentSuccessPage() {
 
     const payload = {
       ...rawData,
-      vnp_Amount: Number(rawData.vnp_Amount),
+      bookingId: currentBooking,
     }
 
     createBookingPaymentHistory(payload)

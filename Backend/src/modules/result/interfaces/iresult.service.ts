@@ -3,7 +3,10 @@ import { CreateResultDto } from '../dto/createResult.dto'
 import { UpdateResultDto } from '../dto/updateResult.dto'
 
 export interface IResultService {
-  create(createResultDto: CreateResultDto): Promise<ResultDocument>
+  create(
+    createResultDto: CreateResultDto,
+    doctorId: string,
+  ): Promise<ResultDocument>
 
   findById(id: string): Promise<ResultDocument | null>
 

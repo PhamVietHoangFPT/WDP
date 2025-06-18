@@ -43,7 +43,7 @@ export class VnpayService {
     const dataSend = {
       vnp_Amount: 100000,
       vnp_OrderInfo: 'Thanh toán đặt chỗ ' + PaymentData.bookingId,
-      vnp_TxnRef: randomUUID(),
+      vnp_TxnRef: PaymentData.bookingId,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,
@@ -65,7 +65,7 @@ export class VnpayService {
     const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: randomUUID(),
+      vnp_TxnRef: PaymentData.serviceCaseId,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,

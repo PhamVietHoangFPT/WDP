@@ -38,7 +38,7 @@ export class ServiceController {
   constructor(
     @Inject(IServiceService)
     private readonly serviceService: IServiceService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -73,16 +73,21 @@ export class ServiceController {
     description: 'Số trang',
   })
   @ApiResponse({ status: HttpStatus.OK, type: [ServiceResponseDto] })
-  async findAll(@Query(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      forbidNonWhitelisted: true,
-    }),
-  ) paginationQuery: PaginationQueryDto) {
+  async findAll(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        forbidNonWhitelisted: true,
+      }),
+    )
+    paginationQuery: PaginationQueryDto,
+  ) {
     const { pageNumber, pageSize } = paginationQuery
-    const result = await this.serviceService.findAllService(pageNumber || 1,
-      pageSize || 10,)
+    const result = await this.serviceService.findAllService(
+      pageNumber || 1,
+      pageSize || 10,
+    )
     return result
   }
   @UseGuards(AuthGuard)
