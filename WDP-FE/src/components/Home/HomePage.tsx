@@ -20,7 +20,7 @@ const Homepage: React.FC = () => {
     pageNumber: 1,
     pageSize: 5,
   })
-  const dataService = data.data
+  const dataService = data?.data
   return (
     <div
       style={{
