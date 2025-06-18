@@ -22,6 +22,7 @@ import {
   TestRequestStatus,
   TestRequestStatusSchema,
 } from '../testRequestStatus/schemas/testRequestStatus.schema'
+import { BookingModule } from '../booking/booking.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -37,6 +38,7 @@ import {
     CaseMemberModule,
     AuthModule,
     RoleModule,
+    BookingModule,
   ],
   controllers: [SampleCollectorController],
   providers: [SampleCollectorService],

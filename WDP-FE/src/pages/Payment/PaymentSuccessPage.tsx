@@ -4,13 +4,11 @@ import React, { useEffect, useState } from 'react'
 import { Card, Typography, Button, message } from 'antd'
 import { useCreateBookingPaymentHistoryMutation } from '../../features/customer/paymentApi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import Cookies from 'js-cookie'
 const { Title, Text } = Typography
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const currentBooking = Cookies.get('currentBooking')
 
   const [status, setStatus] = useState<'success' | 'error' | 'processing'>(
     'processing'
@@ -34,7 +32,6 @@ export default function PaymentSuccessPage() {
 
     const payload = {
       ...rawData,
-      bookingId: currentBooking,
     }
 
     createBookingPaymentHistory(payload)

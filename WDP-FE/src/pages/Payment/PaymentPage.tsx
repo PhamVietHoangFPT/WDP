@@ -47,7 +47,6 @@ export default function PaymentPage() {
 
       const bookingId = bookingRes?.data?._id || bookingRes?._id
       if (!bookingId) throw new Error('Không thể tạo booking')
-      Cookies.set('currentBooking', bookingId)
       const redirectUrl = await createPaymentUrl({
         bookingId: bookingId,
       }).unwrap()
