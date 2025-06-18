@@ -10,6 +10,7 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import { useCreateSlotsMutation } from '../../features/admin/slotAPI' // adjust path as needed
 import { useState } from 'react'
+import Cookies from 'js-cookie'
 
 const { Title } = Typography
 
@@ -24,6 +25,13 @@ const CreateSlot: React.FC = () => {
     daysToGenerate: number
     startDate: Dayjs
   }) => {
+    const userToken = Cookies.get('userToken')
+    if (!userToken) {
+      message.error('Bạn cần đăng nhập để thực hiện hành động này')
+      navigate('/login')
+      return
+    }
+
     const { daysToGenerate, startDate } = values
 
     try {

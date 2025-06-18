@@ -7,10 +7,13 @@ import MainLayout from '../components/layout/MainLayout'
 import { ManagerLayout } from '../components/layout/ManagerLayout'
 import { StaffLayout } from '../components/layout/StaffLayout'
 import AdminHomePage from '../pages/AdminHomePage/AdminHomePage'
+import CreateFacilityAdmin from '../pages/CreateFacilityAdmin/CreateFacilityAdmin'
 import Blog from '../pages/Blogs/Blog'
 import BlogDetail from '../pages/Blogs/BlogDetail'
 import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffHomePage'
 import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
+import FacilityDetailAdmin from '../pages/FacilityDetailAdmin/FacilityDetailAdmin'
+import FacilityListAdmin from '../pages/FacilityListAdmin/FacilityListAdmin'
 import Login from '../pages/Login/Login'
 import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
 import CreateTesteeForm from '../pages/ProfileUser/CreateTestTaker'
@@ -19,6 +22,7 @@ import TestTakerEditForm from '../pages/ProfileUser/TestTakerEditForm'
 import TestTakerList from '../pages/ProfileUser/TestTakerList'
 import Register from '../pages/Register/Register'
 import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
+import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
 
@@ -80,12 +84,32 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin',
         component: AdminHomePage,
-        // role: ['admin'],
+        role: ['Admin'],
       },
       {
         path: '/admin/slotAdmin',
         component: CreateSlot,
-        // role: ['admin'],
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/slotsFacilitiesAdmin',
+        component: SlotsFacilitiesList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/createFacility',
+        component: CreateFacilityAdmin,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/facility',
+        component: FacilityListAdmin,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/facility/:id',
+        component: FacilityDetailAdmin,
+        role: ['Admin'],
       },
     ],
   },
