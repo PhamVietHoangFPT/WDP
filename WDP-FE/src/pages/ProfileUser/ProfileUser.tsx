@@ -12,7 +12,7 @@ import { jwtDecode } from 'jwt-decode'
 import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
-const { Header, Content } = Layout
+const { Content } = Layout
 
 interface DecodedToken {
   name?: string
