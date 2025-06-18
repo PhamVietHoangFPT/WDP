@@ -38,7 +38,7 @@ const CustomHeader = () => {
           }}
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div>HỆ THỐNG TRUNG TÂM TIÊM CHỦNG VẮC XIN CHO TRẺ EM</div>
+          <div>HỆ THỐNG TRUNG TÂM XÉT NGHIÊM ADN UY TÍN HÀNG ĐẦU</div>
           <div>AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM *</div>
         </div>
       </div>

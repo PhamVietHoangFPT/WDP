@@ -7,12 +7,16 @@ import MainLayout from '../components/layout/MainLayout'
 import { ManagerLayout } from '../components/layout/ManagerLayout'
 import { StaffLayout } from '../components/layout/StaffLayout'
 import AdminHomePage from '../pages/AdminHomePage/AdminHomePage'
+import Blog from '../pages/Blogs/Blog'
+import BlogDetail from '../pages/Blogs/BlogDetail'
 import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffHomePage'
 import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
 import Login from '../pages/Login/Login'
 import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
 import CreateTesteeForm from '../pages/ProfileUser/CreateTestTaker'
 import ProfileUser from '../pages/ProfileUser/ProfileUser'
+import TestTakerEditForm from '../pages/ProfileUser/TestTakerEditForm'
+import TestTakerList from '../pages/ProfileUser/TestTakerList'
 import Register from '../pages/Register/Register'
 import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
@@ -49,6 +53,24 @@ const routes: LayoutRoute[] = [
         path: '/create-testee',
         component: CreateTesteeForm,
         role: ['Customer'],
+      },
+      {
+        path: '/list-testee',
+        component: TestTakerList,
+        role: ['Customer'],
+      },
+      {
+        path: '/test-takers/edit/:id',
+        component: TestTakerEditForm,
+        role: ['Customer'],
+      },
+      {
+        path: '/blogs',
+        component: Blog,
+      },
+      {
+        path: '/blogs/:id',
+        component: BlogDetail,
       },
     ],
   },
