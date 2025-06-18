@@ -1,8 +1,8 @@
 import React from 'react'
-import { Row, Col } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
+import { Row, Col, Button, Typography } from 'antd'
 import Logo from '../../assets/Logo.png'
-import Content from '../Content/content'
+import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import Introduction from '../Introduction/introduction'
 import type { Service } from '../../types/service'
 import { useGetServiceListQuery } from '../../features/service/serviceAPI'
@@ -21,7 +21,6 @@ const Homepage: React.FC = () => {
     pageSize: 5,
   })
   const dataService = data.data
-  console.log(dataService)
   return (
     <div
       style={{
@@ -82,11 +81,13 @@ const Homepage: React.FC = () => {
         </div>
         {/* Danh sach blog */}
         <div style={{ marginBottom: '48px' }}>
-          <Content
-            title='CÁC BÀI VIẾT MỚI'
-            btnContent='Xem tất cả bài viết'
-            linkURL='/sessions'
-          />
+          <Title
+            level={2}
+            style={{ textAlign: 'center', marginBottom: '32px' }}
+          >
+            Các bài viết mới
+          </Title>
+
           <LoadingOutlined
             style={{
               fontSize: '50px',

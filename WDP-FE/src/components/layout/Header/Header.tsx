@@ -1,5 +1,5 @@
 import { Layout } from 'antd'
-import Logo from '../../../assets/Logo.png'
+// import Logo from '../../../assets/Logo.png'
 const { Header } = Layout
 
 const CustomHeader = () => {
@@ -30,7 +30,7 @@ const CustomHeader = () => {
         }}
       >
         <img
-          src={Logo}
+          // src={Logo}
           alt=''
           style={{
             width: '150px',
@@ -38,7 +38,7 @@ const CustomHeader = () => {
           }}
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div>HỆ THỐNG TRUNG TÂM TIÊM CHỦNG VẮC XIN CHO TRẺ EM</div>
+          <div>HỆ THỐNG TRUNG TÂM XÉT NGHIÊM ADN UY TÍN HÀNG ĐẦU</div>
           <div>AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM *</div>
         </div>
       </div>

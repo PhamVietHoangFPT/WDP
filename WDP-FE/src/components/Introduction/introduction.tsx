@@ -5,12 +5,12 @@ const Introduction: React.FC = () => {
   return (
     <div style={{ padding: '0 16px' }}>
       <Title level={1} style={{ marginBottom: '24px', color: '#1890ff' }}>
-        Bảo vệ bạn và những người thân yêu bằng tiêm chủng
+        Xét nghiêm ADN hàng đầu Việt Nam, uy tín, chất lượng, đảm bảo an toàn
+        thông tin
       </Title>
       <Paragraph style={{ fontSize: '16px', marginBottom: '24px' }}>
-        Tiêm chủng là một trong những cách hiệu quả nhất để phòng ngừa bệnh tật.
-        Hãy tiêm chủng ngay hôm nay để bảo vệ bản thân và giúp xây dựng miễn
-        dịch cộng đồng.
+        Chúng tôi có các y, bác sĩ có chuyên môn cao. Hỗ trợ nhanh chóng, có kết
+        quả nhanh, hỗ trợ trực tiếp tại nhà.
       </Paragraph>
       <Space>
       </Space>

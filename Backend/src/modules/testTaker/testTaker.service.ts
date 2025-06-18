@@ -27,6 +27,7 @@ export class TestTakerService implements ITestTakerService {
       _id: testTaker._id,
       name: testTaker.name,
       personalId: testTaker.personalId,
+      dateOfBirth: testTaker.dateOfBirth,
       account: testTaker.account,
       gender: testTaker.gender,
     })

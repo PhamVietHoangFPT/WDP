@@ -23,11 +23,11 @@ const AppFooter: React.FC = () => {
           }}
         >
           <Text strong>
-            <h1 style={{ color: '#ffffff' }}>KIDS VACCINE</h1>
+            <h1 style={{ color: '#ffffff' }}>ADN</h1>
           </Text>{' '}
           <Text style={{ color: '#ffffff' }}>
-            © {new Date().getFullYear()} - Hệ thống trung tâm tiêm chủng vắc
-            xin cho trẻ em
+            © {new Date().getFullYear()} - Hệ thống trung tâm xét nghiệm ADN
+            hàng đầu
           </Text>
           <br />
           <Text type='secondary' style={{ color: '#ffffff' }}>
@@ -35,7 +35,7 @@ const AppFooter: React.FC = () => {
           </Text>
           <br />
           <Text type='secondary' style={{ color: '#ffffff' }}>
-            Email: kidvaccine@kidvaccine.com | SĐT: 0281234567
+            Email: adn@gamil.com | SĐT: 0916306945
           </Text>
         </Col>
         <Col span={12}>

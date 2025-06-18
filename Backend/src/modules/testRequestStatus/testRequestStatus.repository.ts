@@ -17,11 +17,15 @@ export class TestRequestStatusRepository
   ) {}
 
   async getAll(): Promise<TestRequestStatusDocument[]> {
-    return this.model.find().select('_id testRequestStatus').exec()
+    return this.model
+      .find()
+      .select('_id testRequestStatus order')
+      .sort({ order: 1 })
+      .exec()
   }
 
   async findById(id: string): Promise<TestRequestStatusDocument | null> {
-    return this.model.findById(id).select('_id testRequestStatus').exec()
+    return this.model.findById(id).select('_id testRequestStatus order').exec()
   }
 
   async findByTestRequestStatus(
@@ -29,7 +33,21 @@ export class TestRequestStatusRepository
   ): Promise<TestRequestStatusDocument | null> {
     return this.model
       .findOne({ testRequestStatus: name })
-      .select('_id testRequestStatus')
+      .select('_id testRequestStatus order')
       .exec()
+  }
+
+  async getTestRequestStatusIdByName(name: string): Promise<string | null> {
+    const result = await this.model
+      .findOne({ testRequestStatus: name })
+      .select('_id')
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return result ? result._id.toString() : null
+  }
+
+  async getTestRequestStatusOrder(id: string): Promise<number | null> {
+    const result = await this.model.findById(id).select('order').exec()
+    return result ? result.order : null
   }
 }

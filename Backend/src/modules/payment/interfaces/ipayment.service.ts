@@ -9,10 +9,11 @@ export interface IPaymentService {
     userId: string,
     bookingId: string,
   ): Promise<PaymentDocument>
-  // createForCase(
-  //   checkVnPayPayment: CheckVnPayPaymentDto,
-  //   userId: string,
-  // ): Promise<PaymentDocument>
+  createForCase(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument>
   findById(
     id: string,
     userId?: string,
