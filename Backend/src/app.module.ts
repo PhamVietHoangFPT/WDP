@@ -62,6 +62,7 @@ import { ResultModule } from './modules/result/result.module'
     ServiceCaseModule,
     TestRequestHistoryModule,
     ResultModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],
