@@ -1,15 +1,26 @@
 import React from 'react'
-import { Row, Col, Button, Typography } from 'antd'
-import { CalendarOutlined, LoadingOutlined } from '@ant-design/icons'
-// import Logo from '../../assets/Logo.png'
-import { useNavigate } from 'react-router-dom'
+import { Row, Col } from 'antd'
+import Logo from '../../assets/Logo.png'
+import { LoadingOutlined } from '@ant-design/icons'
 import Introduction from '../Introduction/introduction'
+import type { Service } from '../../types/service'
+import { useGetServiceListQuery } from '../../features/service/serviceAPI'
+import ServiceCardSlider from '../ServiceSlider/serviceSlider'
+import Content from '../Content/content'
 
-const { Title, Paragraph } = Typography
+interface ServiceListResponse {
+  data: {
+    data: Service[]
+  }
+  isLoading: boolean
+}
 
 const Homepage: React.FC = () => {
-  const navigate = useNavigate()
-
+  const { data, isLoading } = useGetServiceListQuery<ServiceListResponse>({
+    pageNumber: 1,
+    pageSize: 5,
+  })
+  const dataService = data?.data
   return (
     <div
       style={{
@@ -36,7 +47,7 @@ const Homepage: React.FC = () => {
           </Col>
           <Col xs={24} md={12}>
             <img
-              // src={Logo || '/placeholder.svg'}
+              src={Logo || '/placeholder.svg'}
               alt=''
               style={{
                 width: '100%',
@@ -44,48 +55,37 @@ const Homepage: React.FC = () => {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
             />
-
-            {/* <Button
-              type='primary'
-              size='large'
-              icon={<CalendarOutlined />}
-              onClick={() => {
-                navigate('login')
-              }}
-            >
-              Login
-            </Button> */}
           </Col>
         </Row>
 
         {/* Danh sach dich vu */}
         <div style={{ marginBottom: '48px' }}>
-          <Title
-            level={2}
-            style={{ textAlign: 'center', marginBottom: '32px' }}
-          >
-            Một số loại vaccine
-          </Title>
-
-          <LoadingOutlined
-            style={{
-              fontSize: '50px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '30vh',
-            }}
+          <Content
+            title='CÁC DỊCH VỤ'
+            btnContent='Xem tất cả dịch vụ'
+            linkURL='/sessions'
           />
+          {isLoading ? (
+            <LoadingOutlined
+              style={{
+                fontSize: '50px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '30vh',
+              }}
+            />
+          ) : (
+            <ServiceCardSlider services={dataService || []} />
+          )}
         </div>
         {/* Danh sach blog */}
         <div style={{ marginBottom: '48px' }}>
-          <Title
-            level={2}
-            style={{ textAlign: 'center', marginBottom: '32px' }}
-          >
-            Các bài viết mới
-          </Title>
-
+          <Content
+            title='CÁC BÀI VIẾT'
+            btnContent='Xem tất cả bài viết'
+            linkURL='/sessions'
+          />
           <LoadingOutlined
             style={{
               fontSize: '50px',
