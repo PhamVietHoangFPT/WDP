@@ -27,14 +27,9 @@ export class BookingService implements IBookingService {
     private readonly bookingStatusRepository: IBookingStatusRepository,
   ) {}
 
-  private mapToResponseDto(booking: Booking): BookingResponseDto {
-    return new BookingResponseDto({
-      _id: booking._id,
-      slot: booking.slot,
-      account: booking.account,
-      bookingStatus: booking.bookingStatus,
-      bookingDate: booking.bookingDate,
-    })
+  private mapToResponseDto(data: any): BookingResponseDto {
+    // Constructor của DTO mới sẽ tự động gán các thuộc tính khớp tên
+    return new BookingResponseDto(data)
   }
 
   async create(

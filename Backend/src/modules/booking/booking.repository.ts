@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import { Booking, BookingDocument } from './schemas/booking.schema'
 import { IBookingRepository } from './interfaces/ibooking.repository'
 import { CreateBookingDto } from './dto/createBooking.dto'
@@ -9,6 +9,7 @@ import { SlotDocument } from '../slot/schemas/slot.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 import { BookingStatusDocument } from '../bookingStatus/schemas/bookingStatus.schema'
+import { populate } from 'dotenv'
 
 @Injectable()
 export class BookingRepository implements IBookingRepository {
@@ -119,8 +120,23 @@ export class BookingRepository implements IBookingRepository {
   ): mongoose.Query<BookingDocument[], BookingDocument> {
     return this.bookingModel
       .find({ ...filter, created_by: userId })
+      .select(
+        '-__v -created_by -updated_by -created_at -updated_at -deleted_at -deleted_by',
+      )
       .populate({ path: 'account', select: 'name email phoneNumber' })
-      .populate({ path: 'slot', select: 'startTime endTime' })
+      .populate({
+        path: 'slot',
+        select: 'startTime endTime',
+        populate: {
+          path: 'slotTemplate',
+          select: 'facility',
+          populate: {
+            path: 'facility',
+            select: 'facilityName address',
+            populate: { path: 'address', select: 'fullAddress' },
+          },
+        },
+      })
       .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
       .lean()
   }
@@ -259,22 +275,120 @@ export class BookingRepository implements IBookingRepository {
       .exec()
   }
 
-  async getAllBookingByStatus(
-    isUsed: boolean,
-    userId: string,
-  ): Promise<BookingDocument[]> {
-    const bookingStatus =
-      await this.bookingStatusRepository.findByBookingStatus('Thành công')
-    return this.bookingModel
-      .find({
-        isUsed: isUsed,
-        created_by: userId,
-        bookingStatus: bookingStatus,
-      })
-      .select('-account')
-      .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
-      .populate({ path: 'slot', select: 'startTime endTime -_id' })
+  async getAllBookingByStatus(isUsed: boolean, userId: string): Promise<any[]> {
+    // <-- Sửa 3: Đổi kiểu dữ liệu trả về thành any[] hoặc DTO
 
+    // Lấy object bookingStatus
+    const bookingStatusDoc =
+      await this.bookingStatusRepository.findByBookingStatus('Thành công')
+
+    // Nếu không tìm thấy status "Thành công", trả về mảng rỗng để tránh lỗi
+    if (!bookingStatusDoc) {
+      return []
+    }
+
+    // Chuyển đổi userId từ string sang ObjectId để so sánh
+    const userObjectId = new Types.ObjectId(userId)
+
+    return this.bookingModel
+      .aggregate([
+        // --- Giai đoạn 1: Lọc các booking ban đầu (đã sửa) ---
+        {
+          $match: {
+            isUsed: isUsed,
+            created_by: userObjectId, // <-- Sửa 1: Dùng ObjectId của user
+            bookingStatus: bookingStatusDoc._id, // <-- Sửa 2: Dùng _id của status
+          },
+        },
+
+        // --- Giai đoạn 2: Nối bảng để lấy thông tin chi tiết (giữ nguyên) ---
+        {
+          $lookup: {
+            from: 'bookingstatuses',
+            localField: 'bookingStatus',
+            foreignField: '_id',
+            as: 'bookingStatusInfo',
+          },
+        },
+        {
+          $unwind: {
+            path: '$bookingStatusInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // ... các giai đoạn lookup và unwind còn lại giữ nguyên ...
+        {
+          $lookup: {
+            from: 'slots',
+            localField: 'slot',
+            foreignField: '_id',
+            as: 'slotInfo',
+          },
+        },
+        { $unwind: { path: '$slotInfo', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'slottemplates',
+            localField: 'slotInfo.slotTemplate',
+            foreignField: '_id',
+            as: 'slotTemplateInfo',
+          },
+        },
+        {
+          $unwind: {
+            path: '$slotTemplateInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: 'facilities',
+            localField: 'slotTemplateInfo.facility',
+            foreignField: '_id',
+            as: 'facilityInfo',
+          },
+        },
+        {
+          $unwind: {
+            path: '$facilityInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: 'addresses',
+            localField: 'facilityInfo.address', // Lấy ID địa chỉ từ facility
+            foreignField: '_id',
+            as: 'addressInfo', // Đặt tên cho kết quả nối
+          },
+        },
+        {
+          $unwind: {
+            path: '$addressInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // --- Giai đoạn 4: Định hình kết quả trả về (giữ nguyên) ---
+        {
+          $project: {
+            _id: 1,
+            isUsed: 1,
+            bookingDate: 1,
+            createdAt: '$created_at',
+            status: '$bookingStatusInfo.bookingStatus',
+            slot: {
+              startTime: '$slotInfo.startTime',
+              endTime: '$slotInfo.endTime',
+            },
+            facility: {
+              _id: '$facilityInfo._id',
+              facilityName: '$facilityInfo.facilityName',
+              // Sửa lại dòng này để lấy chuỗi địa chỉ
+              address: '$addressInfo.fullAddress', // Quan trọng: Đổi tên trường địa chỉ nếu cần
+            },
+          },
+        },
+      ])
       .exec()
   }
 }
