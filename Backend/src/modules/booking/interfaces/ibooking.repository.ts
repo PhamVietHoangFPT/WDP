@@ -36,10 +36,7 @@ export interface IBookingRepository {
   getBookingDateById(id: string): Promise<Date | null>
   updateSlotStatusIfPaymentFailed(currentTime: Date): Promise<void>
   updateBookingStatusToUsed(bookingId: string): Promise<BookingDocument | null>
-  getAllBookingByStatus(
-    isUsed: boolean,
-    userId: string,
-  ): Promise<BookingDocument[]>
+  getAllBookingByStatus(isUsed: boolean, userId: string): Promise<any[]>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')
