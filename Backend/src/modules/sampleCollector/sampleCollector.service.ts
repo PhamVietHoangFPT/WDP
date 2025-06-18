@@ -18,6 +18,7 @@ import {
   ServiceCaseDocument,
 } from '../serviceCase/schemas/serviceCase.schema'
 import { Booking, BookingDocument } from '../booking/schemas/booking.schema'
+import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 
 @Injectable()
 export class SampleCollectorService {
@@ -27,7 +28,9 @@ export class SampleCollectorService {
     @InjectModel(CaseMember.name)
     private readonly caseMemberModel: Model<CaseMemberDocument>,
     @InjectModel(Booking.name)
-    private readonly bookingRepository: Model<BookingDocument>,
+    private readonly bookingModel: Model<BookingDocument>,
+    @Inject(IBookingRepository)
+    private readonly bookingRepository: IBookingRepository,
     @Inject(IRoleRepository)
     private readonly roleRepository: IRoleRepository,
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
@@ -37,15 +40,6 @@ export class SampleCollectorService {
   ) {}
 
   async assignJob() {
-    // Lay tai khoan cua nhung nguoi thu mau
-    const roleId = await this.roleRepository.getRoleIdByName('Sample Collector')
-    const accounts = await this.accountModel
-      .find({ role: roleId })
-      .select('_id facility')
-      .exec()
-    const accountIds = accounts.map((account) => {
-      return { id: account._id, facility: account.facility }
-    })
     // Lay danh sach nhung ho so thu mau tai nha
     const caseMembersAtHome = await this.caseMemberModel
       .find({ isAtHome: true })
@@ -69,12 +63,53 @@ export class SampleCollectorService {
       .exec()
     // Lay cac service case cua nhung ho so thu mau tai nha la da thanh toan
     const serviceCases = await this.serviceCaseRepository.find({
-      caseMember: { $in: caseMemberIds },
+      caseMember: { $in: caseMemberIds.map((id) => id.id) },
       testRequestStatus: testRequestStatusId._id,
     })
 
-    const bookingDate = this.bookingRepository.find({
-      _id: caseMemberIds.map((caseMember) => caseMember.booking),
+    const serviceCaseIds = serviceCases.map((serviceCase) => {
+      return {
+        id: serviceCase._id,
+        caseMember: serviceCase.caseMember,
+        totalFee: serviceCase.totalFee,
+      }
+    })
+    // Lay danh sach booking cua nhung ho so thu mau tai nha
+    const bookingDate = await this.bookingModel
+      .find({
+        _id: caseMemberIds.map((caseMember) => caseMember.booking),
+      })
+      .select('bookingDate')
+      .exec()
+    const bookingDates = bookingDate.map((booking) => {
+      return {
+        id: booking._id,
+        bookingDate: booking.bookingDate,
+      }
+    })
+
+    const facilitiesId = await Promise.all(
+      caseMemberIds.map((caseMember) => {
+        return this.bookingRepository.getFacilityIdByBookingId(
+          caseMember.booking,
+        )
+      }),
+    )
+
+    // Lay danh sach facility cua nhung tai khoan thu mau
+    const facilities = await this.facilityModel
+      .find({ _id: { $in: facilitiesId } })
+      .select('_id')
+      .exec()
+
+    // Lay tai khoan cua nhung nguoi thu mau
+    const roleId = await this.roleRepository.getRoleIdByName('Sample Collector')
+    const accounts = await this.accountModel
+      .find({ role: roleId, facility: { $in: facilities } })
+      .select('_id facility')
+      .exec()
+    const accountSampleCollectorIds = accounts.map((account) => {
+      return { id: account._id, facility: account.facility }
     })
   }
 }

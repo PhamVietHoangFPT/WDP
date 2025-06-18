@@ -16,7 +16,7 @@ export class BookingRepository implements IBookingRepository {
     @InjectModel(Booking.name)
     private bookingModel: Model<BookingDocument>,
     @Inject(ISlotRepository)
-    private slot: ISlotRepository,
+    private slotRepository: ISlotRepository,
     @Inject(IBookingStatusRepository)
     private bookingStatusRepository: IBookingStatusRepository,
   ) {}
@@ -35,7 +35,7 @@ export class BookingRepository implements IBookingRepository {
       created_by: userId,
       bookingStatus: bookingStatus,
     })
-    await this.slot.setBookingStatus(createBookingDto.slot, true)
+    await this.slotRepository.setBookingStatus(createBookingDto.slot, true)
     return await newBooking.save()
   }
 
@@ -76,9 +76,12 @@ export class BookingRepository implements IBookingRepository {
     const existingBooking = await this.bookingModel.findOne({
       _id: id,
     })
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    await this.slot.setBookingStatus(existingBooking.slot.toString(), false)
-    await this.slot.setBookingStatus(updateBookingDto.slot, true)
+    await this.slotRepository.setBookingStatus(
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      existingBooking.slot.toString(),
+      false,
+    )
+    await this.slotRepository.setBookingStatus(updateBookingDto.slot, true)
     return this.bookingModel
       .findOneAndUpdate(
         { _id: id, created_by: userId },
@@ -127,7 +130,7 @@ export class BookingRepository implements IBookingRepository {
   }
 
   async findBySlotId(slotId: string): Promise<SlotDocument | null> {
-    return await this.slot.findById(slotId)
+    return await this.slotRepository.findById(slotId)
   }
 
   async updatePayment(
@@ -179,5 +182,99 @@ export class BookingRepository implements IBookingRepository {
       .select('bookingDate')
       .exec()
     return booking ? booking.bookingDate : null
+  }
+
+  async updateSlotStatusIfPaymentFailed(currentTime: Date): Promise<void> {
+    const bookingStatus =
+      await this.bookingStatusRepository.findByBookingStatus('Chờ thanh toán')
+    const failedBookings = await this.bookingModel
+      .find({
+        bookingStatus: bookingStatus,
+        created_at: { $lt: new Date(currentTime.getTime() + 10 * 60 * 1000) }, // 10 minutes before current time
+      })
+      .select('slot')
+
+    for (const booking of failedBookings) {
+      if (booking.slot) {
+        await this.slotRepository.setBookingStatus(
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
+          booking.slot.toString(),
+          false,
+        )
+        const newBookingStatus =
+          await this.bookingStatusRepository.findByBookingStatus(
+            'Hủy do quá hạn thanh toán',
+          )
+        await this.bookingModel.updateOne(
+          { _id: booking._id },
+          {
+            bookingStatus: newBookingStatus,
+            updated_at: new Date(),
+          },
+        )
+      }
+    }
+
+    const bookingStatusPaymentFailed =
+      await this.bookingStatusRepository.findByBookingStatus(
+        'Thanh toán thất bại',
+      )
+    const paymentFailedBookings = await this.bookingModel
+      .find({
+        bookingStatus: bookingStatusPaymentFailed,
+        created_at: { $lt: new Date(currentTime.getTime() + 10 * 60 * 1000) }, // 10 minutes before current time
+      })
+      .select('slot')
+    for (const booking of paymentFailedBookings) {
+      if (booking.slot) {
+        await this.slotRepository.setBookingStatus(
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
+          booking.slot.toString(),
+          false,
+        )
+        const newBookingStatus =
+          await this.bookingStatusRepository.findByBookingStatus(
+            'Hủy do quá hạn thanh toán',
+          )
+        await this.bookingModel.updateOne(
+          { _id: booking._id },
+          {
+            bookingStatus: newBookingStatus,
+            updated_at: new Date(),
+          },
+        )
+      }
+    }
+  }
+
+  async updateBookingStatusToUsed(
+    bookingId: string,
+  ): Promise<BookingDocument | null> {
+    return this.bookingModel
+      .findOneAndUpdate(
+        { _id: bookingId },
+        { isUsed: true, updated_at: new Date() },
+        { new: true },
+      )
+      .exec()
+  }
+
+  async getAllBookingByStatus(
+    isUsed: boolean,
+    userId: string,
+  ): Promise<BookingDocument[]> {
+    const bookingStatus =
+      await this.bookingStatusRepository.findByBookingStatus('Thành công')
+    return this.bookingModel
+      .find({
+        isUsed: isUsed,
+        created_by: userId,
+        bookingStatus: bookingStatus,
+      })
+      .select('-account')
+      .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
+      .populate({ path: 'slot', select: 'startTime endTime -_id' })
+
+      .exec()
   }
 }

@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
 import { CaseMember, CaseMemberDocument } from './schemas/caseMember.schema'
 import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
 import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
 import { ICaseMemberRepository } from './interfaces/icaseMember.repository'
+import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 
 @Injectable()
 export class CaseMemberRepository implements ICaseMemberRepository {
   constructor(
     @InjectModel(CaseMember.name)
     private readonly model: Model<CaseMemberDocument>,
+    @Inject(IBookingRepository)
+    private readonly bookingRepository: IBookingRepository,
   ) {}
 
   async create(
@@ -21,6 +24,7 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       ...dto,
       created_by: userId,
     })
+    await this.bookingRepository.updateBookingStatusToUsed(dto.booking)
     return createCaseMember
   }
 

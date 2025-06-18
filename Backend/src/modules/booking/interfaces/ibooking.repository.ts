@@ -34,6 +34,12 @@ export interface IBookingRepository {
   checkExistById(id: string): Promise<boolean>
   getFacilityIdByBookingId(id: string): Promise<string | null>
   getBookingDateById(id: string): Promise<Date | null>
+  updateSlotStatusIfPaymentFailed(currentTime: Date): Promise<void>
+  updateBookingStatusToUsed(bookingId: string): Promise<BookingDocument | null>
+  getAllBookingByStatus(
+    isUsed: boolean,
+    userId: string,
+  ): Promise<BookingDocument[]>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')
