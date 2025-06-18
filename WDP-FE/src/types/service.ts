@@ -1,14 +1,13 @@
-import type { Sample } from "./sample";
-import type { TimeReturn } from "./timeReturn";
+import type { Sample } from './sample'
+import type { TimeReturn } from './timeReturn'
 
 export interface Service {
-    id: string;
-    fee: number;
-    timeReturn: TimeReturn;
-    sample: Sample;
-    isAdministration: boolean;
-    isAgnate: boolean;
-    delete_by: string;
-    delete_at: Date;
+  id: string
+  fee: number
+  timeReturn: TimeReturn
+  sample: Sample
+  isAdministration: boolean
+  isAgnate: boolean
+  delete_by: string
+  delete_at: Date
 }
-
