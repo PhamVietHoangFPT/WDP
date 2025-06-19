@@ -6,7 +6,7 @@ import type { TestTaker } from '../../types/testTaker';
 import type { Booking } from '../../types/booking/booking';
 import type { Service } from '../../types/service';
 import { useGetServiceDetailQuery } from '../../features/service/serviceAPI';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useCreateCaseMemberMutation } from '../../features/caseMembers/caseMemebers';
 import { useCreateServiceCaseMutation } from '../../features/serviceCase/serviceCase';
@@ -27,6 +27,7 @@ interface ServiceDetailResponse {
 }
 
 const ServiceAtHomeForm: React.FC = () => {
+    const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
@@ -153,11 +154,11 @@ const ServiceAtHomeForm: React.FC = () => {
                                 <Col span={24} key={fieldName}>
                                     <Form.Item
                                         name={fieldName}
-                                        label={`Test Taker ${index + 1}`}
-                                        rules={[{ required: true, message: `Please select Test Taker ${index + 1}` }]}
+                                        label={`Người xét nghiệm ${index + 1}`}
+                                        rules={[{ required: true, message: `Vui lòng chọn người ${index + 1}` }]}
                                     >
                                         <Select
-                                            placeholder={`Select Test Taker ${index + 1}`}
+                                            placeholder={`Chọn người xét nghiệm ${index + 1}`}
                                             options={getAvailableTestTakers(fieldName).map((taker) => ({
                                                 value: taker._id,
                                                 label: taker.name || `Test Taker ${taker._id}`,
@@ -171,7 +172,7 @@ const ServiceAtHomeForm: React.FC = () => {
                             <Space style={{ width: '100%', marginBottom: 16 }}>
                                 {testTakerCount < 3 && (
                                     <Button type="dashed" onClick={addTestTaker} block>
-                                        Add Another Test Taker
+                                        Thêm người xét nghiệm
                                     </Button>
                                 )}
                                 {testTakerCount === 3 && (
@@ -184,34 +185,46 @@ const ServiceAtHomeForm: React.FC = () => {
                         <Col span={24}>
                             <Form.Item
                                 name="booking"
-                                label="Booking"
-                                rules={[{ required: true, message: 'Please select a Booking' }]}
+                                label="Chọn lịch hẹn"
+                                rules={[{ required: true, message: 'Vui lòng chọn lịch hẹn' }]}
                             >
                                 <Space direction="vertical" style={{ width: '100%' }}>
-                                    <Row gutter={[16, 16]}>
-                                        {dataBookingList.map((booking) => (
-                                            <Col span={12} key={booking?._id}>
-                                                <Card
-                                                    title={`Ngày: ${moment(booking.bookingDate).format('DD-MM-YYYY')}`}
-                                                    style={{
-                                                        border: selectedBooking === booking?._id ? '2px solid #1890ff' : '1px solid #d9d9d9',
-                                                        backgroundColor: selectedBooking === booking?._id ? '#e6f7ff' : 'white',
-                                                    }}
-                                                >
-                                                    <p>Giờ bắt đầu: {booking.slot.startTime} A.M</p>
-                                                    <p>Giờ kết thúc: {booking.slot.endTime} A.M</p>
-                                                    <Button
-                                                        type="primary"
-                                                        onClick={() => handleSelectBooking(booking._id)}
-                                                        block
-                                                        disabled={selectedBooking === booking?._id}
+                                    {dataBookingList && dataBookingList.length > 0 ? (
+                                        <Row gutter={[16, 16]}>
+                                            {dataBookingList.map((booking) => (
+                                                <Col span={12} key={booking?._id}>
+                                                    <Card
+                                                        title={`Ngày: ${moment(booking.bookingDate).format('DD-MM-YYYY')}`}
+                                                        style={{
+                                                            border: selectedBooking === booking?._id ? '2px solid #1890ff' : '1px solid #d9d9d9',
+                                                            backgroundColor: selectedBooking === booking?._id ? '#e6f7ff' : 'white',
+                                                        }}
                                                     >
-                                                        {selectedBooking === booking?._id ? 'Selected' : 'Select'}
-                                                    </Button>
-                                                </Card>
-                                            </Col>
-                                        ))}
-                                    </Row>
+                                                        <p>Giờ bắt đầu: {booking.slot.startTime} A.M</p>
+                                                        <p>Giờ kết thúc: {booking.slot.endTime} A.M</p>
+                                                        <Button
+                                                            type="primary"
+                                                            onClick={() => handleSelectBooking(booking._id)}
+                                                            block
+                                                            disabled={selectedBooking === booking?._id}
+                                                        >
+                                                            {selectedBooking === booking?._id ? 'Selected' : 'Select'}
+                                                        </Button>
+                                                    </Card>
+                                                </Col>
+                                            ))}
+                                        </Row>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '16px' }}>
+                                            <p style={{ fontStyle: "italic" }}>Chưa đặt chỗ</p>
+                                            <Button
+                                                type="primary"
+                                                onClick={() => navigate('/booking')}
+                                            >
+                                                Đặt chỗ ngay
+                                            </Button>
+                                        </div>
+                                    )}
                                 </Space>
                             </Form.Item>
                         </Col>
