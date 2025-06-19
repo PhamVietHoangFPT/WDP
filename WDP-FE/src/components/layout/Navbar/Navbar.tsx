@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
         icon: <SmileOutlined style={{ fontSize: '16px' }} />,
         label: 'Dịch vụ',
         style: { fontSize: '16px', color: '#616161' },
-        url: '/vaccines?pageNumber=1',
+        url: '/services',
       },
       {
         key: 'booking',
