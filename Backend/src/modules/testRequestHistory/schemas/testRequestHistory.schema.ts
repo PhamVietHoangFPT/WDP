@@ -26,6 +26,27 @@ export class TestRequestHistory extends BaseEntity {
     required: true,
   })
   testRequestStatus: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: true,
+  })
+  account: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: false,
+  })
+  staff?: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: false,
+  })
+  sampleCollector?: mongoose.Schema.Types.ObjectId
 }
 
 export const TestRequestHistorySchema =

@@ -24,6 +24,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
   ApiResponse,
+  ApiParam,
 } from '@nestjs/swagger'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
@@ -107,6 +108,31 @@ export class BookingController {
       message: 'Lấy danh sách mẫu khung giờ thành công',
       statusCode: HttpStatus.OK,
     }
+  }
+
+  @Get('status/:isUsed')
+  @ApiOperation({ summary: 'Lấy danh sách lịch hẹn theo trạng thái' })
+  @ApiParam({
+    name: 'isUsed',
+    required: true,
+    description:
+      'Trạng thái của lịch hẹn (true: đã sử dụng, false: chưa sử dụng)',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [BookingResponseDto],
+  })
+  async getAllBookingByStatus(
+    @Param('isUsed') isUsed: boolean,
+    @Req() req: any,
+  ): Promise<BookingResponseDto[]> {
+    const userId = req.user.id
+    const bookings = await this.bookingService.getAllBookingByStatus(
+      isUsed,
+      userId,
+    )
+    return bookings.map((booking) => new BookingResponseDto({ ...booking }))
   }
 
   @Put('change-slot/:id')

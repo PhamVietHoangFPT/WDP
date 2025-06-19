@@ -1,4 +1,3 @@
-// src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Payment, PaymentSchema } from './schemas/payment.schema'

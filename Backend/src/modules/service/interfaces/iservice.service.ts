@@ -9,8 +9,10 @@ export interface IServiceService {
     createServiceDto: CreateServiceDto,
   ): Promise<CreateServiceDto>
 
-  findAllService(pageNumber: number,
-    pageSize: number): Promise<PaginatedResponse<ServiceResponseDto>>
+  findAllService(
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponse<ServiceResponseDto>>
   findServiceById(id: string): Promise<ServiceResponseDto>
 
   updateService(

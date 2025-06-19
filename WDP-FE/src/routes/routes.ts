@@ -28,6 +28,8 @@ import type { LayoutRoute } from '../types/routes'
 import BookingPage from '../pages/BookingPage/BookingPage'
 import PaymentPage from '../pages/Payment/PaymentPage'
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
+import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
+import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
 
 const routes: LayoutRoute[] = [
   {
@@ -90,9 +92,17 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
-        path: '/payment-success',
+        path: '/',
         component: PaymentSuccessPage,
         role: ['Customer'],
+      },
+      {
+        path: '/home-registeration',
+        component: HomeRegisteration,
+      },
+      {
+        path: '/register-service-at-home/:id',
+        component: ServiceAtHome,
       },
     ],
   },

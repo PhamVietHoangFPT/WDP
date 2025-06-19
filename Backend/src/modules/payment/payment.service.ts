@@ -34,6 +34,7 @@ export class PaymentService implements IPaymentService {
       orderInfo: payment.orderInfo,
       transactionNo: payment.transactionNo,
       paymentType: payment.paymentType,
+      amount: payment.amount,
     })
   }
 

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { Card, Typography, Button, message } from 'antd'
 import { useCreateBookingPaymentHistoryMutation } from '../../features/customer/paymentApi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-
 const { Title, Text } = Typography
 
 export default function PaymentSuccessPage() {
@@ -24,9 +23,8 @@ export default function PaymentSuccessPage() {
     console.log('🔍 VNPay Query Params:', rawData)
 
     const responseCode = rawData.vnp_ResponseCode
-    const bookingId = rawData.vnp_TxnRef
 
-    if (!responseCode || !bookingId) {
+    if (!responseCode) {
       message.error('Thiếu thông tin thanh toán từ VNPay')
       setStatus('error')
       return
@@ -34,7 +32,6 @@ export default function PaymentSuccessPage() {
 
     const payload = {
       ...rawData,
-      vnp_Amount: Number(rawData.vnp_Amount),
     }
 
     createBookingPaymentHistory(payload)

@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useState } from "react"
-import { Form, Input, Button, Typography, message, Select } from "antd"
-import { useNavigate } from "react-router-dom"
+import type React from 'react'
+import { useState } from 'react'
+import { Form, Input, Button, Typography, message, Select } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import {
   useGetProvinceListQuery,
   useGetDistrictListQuery,
@@ -22,25 +22,33 @@ const CreateFacilityForm: React.FC = () => {
   const navigate = useNavigate()
   const [form] = Form.useForm()
 
-  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null)
-  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null)
+  // State for cascading dropdowns
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(
+    null
+  )
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
+    null
+  )
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
 
-  const { data: provincesData, isLoading: provincesLoading } = useGetProvinceListQuery({
-    pageNumber: 1,
-    pageSize: 100,
-  })
-
-  const { data: districtsData, isLoading: districtsLoading } = useGetDistrictListQuery(
-    {
+  // API queries - Remove generic types and access data directly
+  const { data: provincesData, isLoading: provincesLoading } =
+    useGetProvinceListQuery({
       pageNumber: 1,
       pageSize: 100,
-      province_code: selectedProvince?.code,
-    },
-    {
-      skip: !selectedProvince?.code,
-    },
-  )
+    })
+
+  const { data: districtsData, isLoading: districtsLoading } =
+    useGetDistrictListQuery(
+      {
+        pageNumber: 1,
+        pageSize: 100,
+        province_code: selectedProvince?.code,
+      },
+      {
+        skip: !selectedProvince?.code,
+      }
+    )
 
   const { data: wardsData, isLoading: wardsLoading } = useGetWardListQuery(
     {
@@ -50,7 +58,7 @@ const CreateFacilityForm: React.FC = () => {
     },
     {
       skip: !selectedDistrict?.code,
-    },
+    }
   )
 
   const [createFacilityAddress] = useCreateFacilityAddressMutation()
@@ -80,7 +88,7 @@ const CreateFacilityForm: React.FC = () => {
   const handleSubmit = async (values: any) => {
     try {
       if (!selectedProvince || !selectedDistrict || !selectedWard) {
-        message.error("Vui lòng chọn đầy đủ thông tin địa chỉ")
+        message.error('Vui lòng chọn đầy đủ thông tin địa chỉ')
         return
       }
 
@@ -104,21 +112,27 @@ const CreateFacilityForm: React.FC = () => {
       }).unwrap()
       const addressId = addressResponse._id
 
-      // ✅ Step 2: Create facility
+      console.log('Address created:', addressResponse)
+
+      // Step 2: Create facility with address ID
       const facilityData: FacilityInfo = {
         facilityName: values.facilityName,
         phoneNumber: values.phoneNumber,
         address: addressId,
       }
 
-      const facilityResponse = await createFacility({ data: facilityData }).unwrap()
-      message.success(facilityResponse.message || "Tạo cơ sở thành công!")
+      console.log('Creating facility with:', facilityData)
 
+      const facilityResponse = (await createFacility({
+        data: facilityData,
+      }).unwrap()) as { message: string }
+
+      message.success(facilityResponse.message || 'Tạo cơ sở thành công!')
       form.resetFields()
       setSelectedProvince(null)
       setSelectedDistrict(null)
       setSelectedWard(null)
-      navigate("/admin/createFacility")
+      navigate('/admin/createFacility')
     } catch (error: any) {
       if (error.status === 404) {
         message.error("Tên, số điện thoại hoặc địa chỉ đã tồn tại")
@@ -130,36 +144,53 @@ const CreateFacilityForm: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "600px", margin: "0 auto" }}>
+    <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
       <Title level={2}>Tạo Cơ Sở Mới</Title>
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ marginTop: "24px" }}>
-        <Form.Item label="Tên cơ sở" name="facilityName" rules={[{ required: true, message: "Vui lòng nhập tên cơ sở" }]}>
-          <Input placeholder="Nhập tên cơ sở" />
+      <Form
+        form={form}
+        layout='vertical'
+        onFinish={handleSubmit}
+        style={{ marginTop: '24px' }}
+      >
+        {/* Facility Name */}
+        <Form.Item
+          label='Tên cơ sở'
+          name='facilityName'
+          rules={[{ required: true, message: 'Vui lòng nhập tên cơ sở' }]}
+        >
+          <Input placeholder='Nhập tên cơ sở' />
         </Form.Item>
 
         <Form.Item
-          label="Số điện thoại"
-          name="phoneNumber"
+          label='Số điện thoại'
+          name='phoneNumber'
           rules={[
-            { required: true, message: "Vui lòng nhập số điện thoại" },
+            { required: true, message: 'Vui lòng nhập số điện thoại' },
             {
               pattern: /^[0-9]{10,11}$/,
-              message: "Số điện thoại phải có 10-11 chữ số",
+              message: 'Số điện thoại phải có 10-11 chữ số',
             },
           ]}
         >
-          <Input placeholder="Nhập số điện thoại" />
+          <Input placeholder='Nhập số điện thoại' />
         </Form.Item>
 
-        <Form.Item label="Thành phố" name="province" rules={[{ required: true, message: "Vui lòng chọn thành phố" }]}>
+        {/* Province */}
+        <Form.Item
+          label='Thành phố'
+          name='province'
+          rules={[{ required: true, message: 'Vui lòng chọn thành phố' }]}
+        >
           <Select
-            placeholder="Chọn thành phố"
+            placeholder='Chọn thành phố'
             loading={provincesLoading}
             onChange={handleProvinceChange}
             showSearch
             filterOption={(input, option) =>
-              (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+              (option?.children as unknown as string)
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
             }
           >
             {provincesData?.map((province: Province) => (
@@ -170,15 +201,22 @@ const CreateFacilityForm: React.FC = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item label="Quận" name="district" rules={[{ required: true, message: "Vui lòng chọn quận" }]}>
+        {/* District */}
+        <Form.Item
+          label='Quận'
+          name='district'
+          rules={[{ required: true, message: 'Vui lòng chọn quận' }]}
+        >
           <Select
-            placeholder="Chọn quận"
+            placeholder='Chọn quận'
             loading={districtsLoading}
             onChange={handleDistrictChange}
             disabled={!selectedProvince}
             showSearch
             filterOption={(input, option) =>
-              (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+              (option?.children as unknown as string)
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
             }
           >
             {districtsData?.map((district: District) => (
@@ -189,15 +227,22 @@ const CreateFacilityForm: React.FC = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item label="Phường" name="ward" rules={[{ required: true, message: "Vui lòng chọn phường" }]}>
+        {/* Ward */}
+        <Form.Item
+          label='Phường'
+          name='ward'
+          rules={[{ required: true, message: 'Vui lòng chọn phường' }]}
+        >
           <Select
-            placeholder="Chọn phường"
+            placeholder='Chọn phường'
             loading={wardsLoading}
             onChange={handleWardChange}
             disabled={!selectedDistrict}
             showSearch
             filterOption={(input, option) =>
-              (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+              (option?.children as unknown as string)
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
             }
           >
             {wardsData?.map((ward: Ward) => (
@@ -208,23 +253,28 @@ const CreateFacilityForm: React.FC = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item label="Số nhà" name="houseNumber" rules={[{ required: true, message: "Vui lòng nhập số nhà" }]}>
-          <Input placeholder="Nhập số nhà" />
+        {/* House Number */}
+        <Form.Item
+          label='Số nhà'
+          name='houseNumber'
+          rules={[{ required: true, message: 'Vui lòng nhập số nhà' }]}
+        >
+          <Input placeholder='Nhập số nhà' />
         </Form.Item>
 
         {selectedProvince && selectedDistrict && selectedWard && (
-          <Form.Item label="Địa chỉ đầy đủ">
+          <Form.Item label='Địa chỉ đầy đủ'>
             <Input
-              value={`${form.getFieldValue("houseNumber") || ""}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
+              value={`${form.getFieldValue('houseNumber') || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
               disabled
-              style={{ backgroundColor: "#f5f5f5" }}
+              style={{ backgroundColor: '#f5f5f5' }}
             />
           </Form.Item>
         )}
 
         <Form.Item>
-          <div style={{ display: "flex", gap: "16px" }}>
-            <Button type="primary" htmlType="submit" size="large">
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <Button type='primary' htmlType='submit' size='large'>
               Tạo mới
             </Button>
             <Button onClick={() => navigate("/admin/facility")} size="large">

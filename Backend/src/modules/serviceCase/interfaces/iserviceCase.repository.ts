@@ -24,6 +24,9 @@ export interface IServiceCaseRepository {
   updateCurrentStatus(
     id: string,
     currentStatus: string,
+    staffId?: string,
+    sampleCollectorId?: string,
+    doctorId?: string,
   ): Promise<ServiceCaseDocument | null>
 
   findByCaseMemberId(caseMemberId: string): Promise<string | null>

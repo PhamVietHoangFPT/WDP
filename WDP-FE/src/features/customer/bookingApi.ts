@@ -10,7 +10,18 @@ export const bookingApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getBookingStatus: builder.query({
+      query: (isUsed) => ({
+        url: `/bookings/status/${isUsed}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['bookings'],
+    }),
   }),
 })
 
-export const { useCreateBookingMutation } = bookingApi
+export const {
+  useCreateBookingMutation,
+  useGetBookingStatusQuery
+} = bookingApi

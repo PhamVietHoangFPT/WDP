@@ -83,11 +83,19 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async updateCurrentStatus(
     id: string,
     currentStatus: string,
+    staffId?: string,
+    sampleCollectorId?: string,
+    doctorId?: string,
   ): Promise<ServiceCaseDocument | null> {
     const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
       id,
       {
         currentStatus: new mongoose.Types.ObjectId(currentStatus),
+        staff: staffId ? new mongoose.Types.ObjectId(staffId) : null,
+        sampleCollector: sampleCollectorId
+          ? new mongoose.Types.ObjectId(sampleCollectorId)
+          : null,
+        doctor: doctorId ? new mongoose.Types.ObjectId(doctorId) : null,
       },
       { new: true },
     )
@@ -96,6 +104,9 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       updatedServiceCase?._id.toString(),
       currentStatus,
       updatedServiceCase?.created_by.toString(),
+      staffId,
+      sampleCollectorId,
+      doctorId,
     )
     return updatedServiceCase
   }
@@ -124,7 +135,6 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .select('totalFee')
       .lean()
     return serviceCase ? serviceCase.totalFee : null
-
   }
 
   async updateResultId(
@@ -138,6 +148,5 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
         { new: true },
       )
       .exec()
-
   }
 }

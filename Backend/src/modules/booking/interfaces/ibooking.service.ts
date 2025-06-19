@@ -20,6 +20,11 @@ export interface IBookingService {
     userId: string,
   ): Promise<BookingResponseDto | null>
   cancel(id: string, userId: string): Promise<BookingResponseDto | null>
+  setStatusIfPaymentFailed(): Promise<void>
+  getAllBookingByStatus(
+    isUsed: boolean,
+    userId: string,
+  ): Promise<BookingResponseDto[]>
 }
 
 export const IBookingService = Symbol('IBookingService')

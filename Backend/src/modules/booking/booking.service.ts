@@ -15,7 +15,7 @@ import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import mongoose from 'mongoose'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
-
+import { Cron } from '@nestjs/schedule'
 @Injectable()
 export class BookingService implements IBookingService {
   constructor(
@@ -27,14 +27,9 @@ export class BookingService implements IBookingService {
     private readonly bookingStatusRepository: IBookingStatusRepository,
   ) {}
 
-  private mapToResponseDto(booking: Booking): BookingResponseDto {
-    return new BookingResponseDto({
-      _id: booking._id,
-      slot: booking.slot,
-      account: booking.account,
-      bookingStatus: booking.bookingStatus,
-      bookingDate: booking.bookingDate,
-    })
+  private mapToResponseDto(data: any): BookingResponseDto {
+    // Constructor của DTO mới sẽ tự động gán các thuộc tính khớp tên
+    return new BookingResponseDto(data)
   }
 
   async create(
@@ -148,5 +143,22 @@ export class BookingService implements IBookingService {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
     return this.mapToResponseDto(cancelBooking)
+  }
+
+  async getAllBookingByStatus(
+    isUsed: boolean,
+    userId: string,
+  ): Promise<BookingResponseDto[]> {
+    const bookings = await this.bookingRepository.getAllBookingByStatus(
+      isUsed,
+      userId,
+    )
+    return bookings.map((booking: Booking) => this.mapToResponseDto(booking))
+  }
+
+  @Cron('* */3 * * * *')
+  async setStatusIfPaymentFailed(): Promise<void> {
+    const currentTime = new Date()
+    await this.bookingRepository.updateSlotStatusIfPaymentFailed(currentTime)
   }
 }

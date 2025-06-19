@@ -36,7 +36,7 @@ export const paymentApi = apiSlice.injectEndpoints({
     // ✅ Tạo lịch sử thanh toán cho dịch vụ
     createServicePaymentHistory: builder.mutation({
       query: (data) => ({
-        url: '/payments/service-case',
+        url: '/vnpay/payment-for-service-case',
         method: 'POST',
         body: data,
       }),

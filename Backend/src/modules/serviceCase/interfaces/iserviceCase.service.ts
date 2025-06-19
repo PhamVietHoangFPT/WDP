@@ -16,6 +16,9 @@ export interface IServiceCaseService {
   updateCurrentStatus(
     id: string,
     currentStatus: string,
+    staffId?: string,
+    sampleCollectorId?: string,
+    doctorId?: string,
   ): Promise<ServiceCaseResponseDto | null>
 }
 
