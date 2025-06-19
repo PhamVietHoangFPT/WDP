@@ -50,13 +50,6 @@ const Navbar: React.FC = () => {
       {
         key: 'booking',
         icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
-        label: 'Đăng ký lịch',
-        style: { fontSize: '16px', color: '#616161' },
-        url: '/booking',
-      },
-      {
-        key: 'booking',
-        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
         label: 'Đặt chỗ',
         style: { fontSize: '16px', color: '#616161' },
         url: '/booking',
@@ -93,18 +86,18 @@ const Navbar: React.FC = () => {
       },
       ...(userData
         ? [
-          {
-            key: 'logout',
-            icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
-            label: 'Đăng xuất',
-            style: { fontSize: '16px', color: 'red' },
-            onClick: () => {
-              Cookies.remove('userData')
-              Cookies.remove('userToken')
-              navigate('/login')
+            {
+              key: 'logout',
+              icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
+              label: 'Đăng xuất',
+              style: { fontSize: '16px', color: 'red' },
+              onClick: () => {
+                Cookies.remove('userData')
+                Cookies.remove('userToken')
+                navigate('/login')
+              },
             },
-          },
-        ]
+          ]
         : []),
     ]
   }, [userData, navigate])
