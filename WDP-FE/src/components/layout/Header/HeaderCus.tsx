@@ -60,6 +60,11 @@ export default function HeaderCus() {
       label: 'Danh sách người test ADN',
       onClick: () => navigate('/list-testee'),
     },
+    {
+      key: 'payment-history',
+      label: 'Lịch sử thanh toán',
+      onClick: () => navigate('/payment-history'),
+    },
   ]
   return (
     <Header style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
