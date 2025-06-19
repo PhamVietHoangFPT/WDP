@@ -60,7 +60,15 @@ const locationAPI = apiSlice.injectEndpoints({
       invalidatesTags: ['facilities', 'wards', 'districts', 'provinces', 'addresses', 'facility-addresses'],
     }),
 
-
+    checkFacilityDuplicate: builder.query({
+      query: ({ facilityName, phoneNumber, fullAddress }) => ({
+        url: `/facilities/check-duplicate`,
+        method: 'POST',
+        body: { facilityName, phoneNumber, fullAddress },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['facilities'],
+    }),
     // getBlogsDetail: builder.query({
     //   query: (id) => ({
     //     url: `/blogs/${id}`,
@@ -124,6 +132,7 @@ export const {
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
   useCreateFacilityMutation,
+  useLazyCheckFacilityDuplicateQuery,
 //   useGetBlogsMinimalListQuery,
 //   useCreateSlotsMutation,
 //   useGetBlogsDetailQuery,
