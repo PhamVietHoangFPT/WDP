@@ -56,7 +56,7 @@ export const SideBar = () => {
     {
       key: 'manager',
       icon: <BarChartOutlined />,
-      label: 'Dashboard Manager',
+      label: 'Quản trị',
       onClick: () => navigate('manager'),
     },
   ]
