@@ -56,7 +56,7 @@ export const SideBar = () => {
   {
     key: 'admin',
     icon: <BarChartOutlined />,
-    label: 'Trang quản trị',
+    label: 'Quản trị',
     onClick: () => navigate('admin'),
   },
   {
