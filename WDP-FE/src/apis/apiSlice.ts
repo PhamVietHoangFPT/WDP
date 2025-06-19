@@ -33,7 +33,8 @@ export const apiSlice = createApi({
     'addresses',
     'facility-addresses',
     'PaymentHistory',
-    'services'
+    'services',
+    'CaseMembers',
   ],
 
   endpoints: () => ({}),

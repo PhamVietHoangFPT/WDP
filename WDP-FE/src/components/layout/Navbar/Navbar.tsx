@@ -40,12 +40,19 @@ const Navbar: React.FC = () => {
         style: { fontSize: '16px', color: '#616161' },
         url: '/',
       },
+      // {
+      //   key: 'services',
+      //   icon: <SmileOutlined style={{ fontSize: '16px' }} />,
+      //   label: 'Dịch vụ',
+      //   style: { fontSize: '16px', color: '#616161' },
+      //   url: '/vaccines?pageNumber=1',
+      // },
       {
-        key: 'services',
-        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
-        label: 'Dịch vụ',
+        key: 'booking',
+        icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
+        label: 'Đăng ký lịch',
         style: { fontSize: '16px', color: '#616161' },
-        url: '/vaccines?pageNumber=1',
+        url: '/booking',
       },
       {
         key: 'blogs',
