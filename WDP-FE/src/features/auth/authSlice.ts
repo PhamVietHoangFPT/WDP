@@ -51,7 +51,7 @@ const authSlice = createSlice({
       if (state.userData.role === 'Customer') {
         window.location.href = '/'
       } else if (state.userData.role === 'Staff') {
-        window.location.href = '/staff/customer-account'
+        window.location.href = '/staff'
       } else {
         window.location.href = `/${state.userData.role.toLowerCase()}`
       }

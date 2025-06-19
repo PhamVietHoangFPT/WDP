@@ -10,9 +10,10 @@ import {
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
   useCreateFacilityMutation,
-} from '../../features/admin/location'
-import type { Province, District, Ward } from '../../types/location'
-import type { FacilityInfo } from '../../types/facilities'
+  useLazyCheckFacilityDuplicateQuery, // ✅ Add this
+} from "../../features/admin/location"
+import type { Province, District, Ward } from "../../types/location"
+import type { FacilityInfo } from "../../types/facilities"
 
 const { Title } = Typography
 const { Option } = Select
@@ -60,11 +61,10 @@ const CreateFacilityForm: React.FC = () => {
     }
   )
 
-  // Mutations
   const [createFacilityAddress] = useCreateFacilityAddressMutation()
   const [createFacility] = useCreateFacilityMutation()
+  const [checkDuplicate] = useLazyCheckFacilityDuplicateQuery() // ✅ Added hook
 
-  // Handle province selection
   const handleProvinceChange = (value: number) => {
     const province = provincesData?.find((p: Province) => p.code === value)
     setSelectedProvince(province || null)
@@ -73,7 +73,6 @@ const CreateFacilityForm: React.FC = () => {
     form.setFieldsValue({ district: undefined, ward: undefined })
   }
 
-  // Handle district selection
   const handleDistrictChange = (value: number) => {
     const district = districtsData?.find((d: District) => d.code === value)
     setSelectedDistrict(district || null)
@@ -81,13 +80,11 @@ const CreateFacilityForm: React.FC = () => {
     form.setFieldsValue({ ward: undefined })
   }
 
-  // Handle ward selection
   const handleWardChange = (value: number) => {
     const ward = wardsData?.find((w: Ward) => w.code === value)
     setSelectedWard(ward || null)
   }
 
-  // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
       if (!selectedProvince || !selectedDistrict || !selectedWard) {
@@ -95,13 +92,21 @@ const CreateFacilityForm: React.FC = () => {
         return
       }
 
-      // Create full address string
-      const fullAddress =
-        `${values.houseNumber || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
+      const fullAddress = `${values.houseNumber || ""}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
 
-      console.log('Creating address with:', { fullAddress })
+      // ✅ Step 0: Check duplicates
+      const duplicateRes = await checkDuplicate({
+        facilityName: values.facilityName.trim(),
+        phoneNumber: values.phoneNumber.trim(),
+        fullAddress,
+      }).unwrap()
 
-      // Step 1: Create address
+      if (duplicateRes?.isDuplicate) {
+        message.error("Tên, số điện thoại hoặc địa chỉ đã tồn tại")
+        return
+      }
+
+      // ✅ Step 1: Create address
       const addressResponse = await createFacilityAddress({
         data: { fullAddress },
       }).unwrap()
@@ -113,7 +118,7 @@ const CreateFacilityForm: React.FC = () => {
       const facilityData: FacilityInfo = {
         facilityName: values.facilityName,
         phoneNumber: values.phoneNumber,
-        address: addressId, // Use the address ID from the response
+        address: addressId,
       }
 
       console.log('Creating facility with:', facilityData)
@@ -129,15 +134,14 @@ const CreateFacilityForm: React.FC = () => {
       setSelectedWard(null)
       navigate('/admin/createFacility')
     } catch (error: any) {
-      console.error('Error creating facility:', error)
-      message.error(error.message || 'Có lỗi xảy ra khi tạo cơ sở')
+      if (error.status === 404) {
+        message.error("Tên, số điện thoại hoặc địa chỉ đã tồn tại")
+        return
+      }
+      console.error("Error creating facility:", error)
+      message.error(error?.message || "Có lỗi xảy ra khi tạo cơ sở")
     }
   }
-
-  // Debug logging
-  console.log('Provinces data:', provincesData)
-  console.log('Districts data:', districtsData)
-  console.log('Wards data:', wardsData)
 
   return (
     <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
@@ -158,7 +162,6 @@ const CreateFacilityForm: React.FC = () => {
           <Input placeholder='Nhập tên cơ sở' />
         </Form.Item>
 
-        {/* Phone Number */}
         <Form.Item
           label='Số điện thoại'
           name='phoneNumber'
@@ -259,7 +262,6 @@ const CreateFacilityForm: React.FC = () => {
           <Input placeholder='Nhập số nhà' />
         </Form.Item>
 
-        {/* Address Preview */}
         {selectedProvince && selectedDistrict && selectedWard && (
           <Form.Item label='Địa chỉ đầy đủ'>
             <Input
@@ -270,13 +272,12 @@ const CreateFacilityForm: React.FC = () => {
           </Form.Item>
         )}
 
-        {/* Submit Button */}
         <Form.Item>
           <div style={{ display: 'flex', gap: '16px' }}>
             <Button type='primary' htmlType='submit' size='large'>
               Tạo mới
             </Button>
-            <Button onClick={() => navigate('/admin/facilities')} size='large'>
+            <Button onClick={() => navigate("/admin/facility")} size="large">
               Hủy
             </Button>
           </div>
