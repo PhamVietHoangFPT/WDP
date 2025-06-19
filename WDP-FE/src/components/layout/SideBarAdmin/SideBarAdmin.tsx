@@ -53,37 +53,38 @@ export const SideBar = () => {
   const userData = userDataString ? JSON.parse(userDataString) : {}
   // Define the menu items
   const items = [
-    {
-      key: 'admin',
-      icon: <BarChartOutlined />,
-      label: 'Dashboard Admin',
-      onClick: () => navigate('admin'),
-    },
-    {
-      key: 'admin/slotAdmin',
-      icon: <BarChartOutlined />,
-      label: 'Slot',
-      onClick: () => navigate('admin/slotAdmin'),
-    },
-    {
-      key: 'admin/slotsFacilitiesAdmin',
-      icon: <BarChartOutlined />,
-      label: 'Slot Facilities',
-      onClick: () => navigate('admin/slotsFacilitiesAdmin'),
-    },
-    // {
-    //   key: 'admin/createFacility',
-    //   icon: <BarChartOutlined />,
-    //   label: 'Create Facility',
-    //   onClick: () => navigate('admin/createFacility'),
-    // },
-    {
-      key: 'admin/facility',
-      icon: <BarChartOutlined />,
-      label: 'Facilities',
-      onClick: () => navigate('admin/facility'),
-    },
-  ]
+  {
+    key: 'admin',
+    icon: <BarChartOutlined />,
+    label: 'Trang quản trị',
+    onClick: () => navigate('admin'),
+  },
+  {
+    key: 'admin/slotAdmin',
+    icon: <BarChartOutlined />,
+    label: 'Ca làm việc',
+    onClick: () => navigate('admin/slotAdmin'),
+  },
+  {
+    key: 'admin/slotsFacilitiesAdmin',
+    icon: <BarChartOutlined />,
+    label: 'Ca & Cơ sở',
+    onClick: () => navigate('admin/slotsFacilitiesAdmin'),
+  },
+  // {
+  //   key: 'admin/createFacility',
+  //   icon: <BarChartOutlined />,
+  //   label: 'Tạo cơ sở',
+  //   onClick: () => navigate('admin/createFacility'),
+  // },
+  {
+    key: 'admin/facility',
+    icon: <BarChartOutlined />,
+    label: 'Danh sách cơ sở',
+    onClick: () => navigate('admin/facility'),
+  },
+]
+
 
   return (
     <Sider
