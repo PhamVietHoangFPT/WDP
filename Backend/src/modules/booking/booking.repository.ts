@@ -9,7 +9,6 @@ import { SlotDocument } from '../slot/schemas/slot.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 import { BookingStatusDocument } from '../bookingStatus/schemas/bookingStatus.schema'
-import { populate } from 'dotenv'
 
 @Injectable()
 export class BookingRepository implements IBookingRepository {
@@ -298,6 +297,9 @@ export class BookingRepository implements IBookingRepository {
             isUsed: isUsed,
             created_by: userObjectId, // <-- Sửa 1: Dùng ObjectId của user
             bookingStatus: bookingStatusDoc._id, // <-- Sửa 2: Dùng _id của status
+            bookingDate: {
+              $gte: new Date(new Date().setHours(0, 0, 0, 0)), // Lọc từ đầu ngày hôm nay
+            },
           },
         },
 
@@ -374,7 +376,6 @@ export class BookingRepository implements IBookingRepository {
             _id: 1,
             isUsed: 1,
             bookingDate: 1,
-            createdAt: '$created_at',
             status: '$bookingStatusInfo.bookingStatus',
             slot: {
               startTime: '$slotInfo.startTime',
