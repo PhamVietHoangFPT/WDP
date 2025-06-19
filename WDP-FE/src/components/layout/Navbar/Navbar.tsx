@@ -55,6 +55,13 @@ const Navbar: React.FC = () => {
         url: '/booking',
       },
       {
+        key: 'booking',
+        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
+        label: 'Đặt chỗ',
+        style: { fontSize: '16px', color: '#616161' },
+        url: '/booking',
+      },
+      {
         key: 'blogs',
         icon: <FontAwesomeIcon icon={faBlog} style={{ fontSize: '16px' }} />,
         label: 'Cẩm nang',
@@ -71,7 +78,7 @@ const Navbar: React.FC = () => {
         icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
         label: 'Lấy mẫu tại nhà',
         style: { fontSize: '16px', color: '#616161' },
-        url: '/vaccine-registration',
+        url: '/home-registeration',
       },
       {
         key: userData ? 'profile' : 'login',
@@ -86,18 +93,18 @@ const Navbar: React.FC = () => {
       },
       ...(userData
         ? [
-            {
-              key: 'logout',
-              icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
-              label: 'Đăng xuất',
-              style: { fontSize: '16px', color: 'red' },
-              onClick: () => {
-                Cookies.remove('userData')
-                Cookies.remove('userToken')
-                navigate('/login')
-              },
+          {
+            key: 'logout',
+            icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
+            label: 'Đăng xuất',
+            style: { fontSize: '16px', color: 'red' },
+            onClick: () => {
+              Cookies.remove('userData')
+              Cookies.remove('userToken')
+              navigate('/login')
             },
-          ]
+          },
+        ]
         : []),
     ]
   }, [userData, navigate])

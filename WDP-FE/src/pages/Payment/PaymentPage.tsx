@@ -1,4 +1,3 @@
-import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Card, Typography, Button, message } from 'antd'
 import Cookies from 'js-cookie'
@@ -27,7 +26,7 @@ export default function PaymentPage() {
 
   const facilityName =
     facilitiesData?.data?.find(
-      (f) => f._id === slot.facility?._id || f._id === slot.facilityId
+      (f: any) => f._id === slot.facility?._id || f._id === slot.facilityId
     )?.facilityName || 'Không rõ'
 
   const handlePayment = async () => {
@@ -44,14 +43,11 @@ export default function PaymentPage() {
         account: String(accountId),
         note: 'Đặt lịch hẹn xét nghiệm ADN',
       }).unwrap()
-
-      const bookingId = bookingRes?.data?._id || bookingRes?._id
+      const bookingId = bookingRes._doc?._id || bookingRes?._id
       if (!bookingId) throw new Error('Không thể tạo booking')
-      Cookies.set('currentBooking', bookingId)
       const redirectUrl = await createPaymentUrl({
         bookingId: bookingId,
       }).unwrap()
-      console.log('Redirect URL:', redirectUrl)
       window.open(redirectUrl, '_blank')
     } catch (err: any) {
       console.error('❌ Lỗi:', err)

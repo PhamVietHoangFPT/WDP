@@ -30,6 +30,9 @@ import PaymentPage from '../pages/Payment/PaymentPage'
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
 import PaymentHistory from '../pages/ProfileUser/PaymentHistory'
 import PaymentDetail from '../pages/ProfileUser/PaymentDetail'
+import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
+import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
+
 
 const routes: LayoutRoute[] = [
   {
@@ -92,7 +95,7 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
-        path: '/payment-success',
+        path: '/',
         component: PaymentSuccessPage,
         role: ['Customer'],
       },
@@ -105,6 +108,14 @@ const routes: LayoutRoute[] = [
         path: '/payment-history/:id',
         component: PaymentDetail,
         role: ['Customer'],
+      },
+      {
+        path: '/home-registeration',
+        component: HomeRegisteration,
+      },
+      {
+        path: '/register-service-at-home/:id',
+        component: ServiceAtHome,
       },
     ],
   },
