@@ -45,32 +45,61 @@ const FacilityDetailAdmin: React.FC = () => {
   const [updateFacility] = useUpdateFacilityMutation()
   const [createSlotTemplate] = useCreateSlotTemplateMutation()
 
-  useEffect(() => {
-    if (data) {
-      form.setFieldsValue({
-        facilityName: data.facilityName,
-        phoneNumber: data.phoneNumber,
-        address: {
-          fullAddress: data.address?.fullAddress,
-        },
-      })
+  // useEffect(() => {
+  //   if (data) {
+  //     form.setFieldsValue({
+  //       facilityName: data.facilityName,
+  //       phoneNumber: data.phoneNumber,
+  //       address: {
+  //         fullAddress: data.address?.fullAddress,
+  //       },
+  //     })
 
-      // If working time exists, set form and show it
-      console.log(slotTemplate)
-      if (
-        slotTemplate.data[0].workTimeStart &&
-        slotTemplate.data[0].workTimeEnd &&
-        slotTemplate.data[0].slotDuration
-      ) {
-        workingForm.setFieldsValue({
-          workTimeStart: slotTemplate.data[0].workTimeStart,
-          workTimeEnd: slotTemplate.data[0].workTimeEnd,
-          slotDuration: slotTemplate.data[0].slotDuration,
-        })
-        setShowWorkingTimeForm(true)
-      }
+  //     // If working time exists, set form and show it
+  //     console.log(slotTemplate)
+  //     if (
+  //       slotTemplate.data[0].workTimeStart &&
+  //       slotTemplate.data[0].workTimeEnd &&
+  //       slotTemplate.data[0].slotDuration
+  //     ) {
+  //       workingForm.setFieldsValue({
+  //         workTimeStart: slotTemplate.data[0].workTimeStart,
+  //         workTimeEnd: slotTemplate.data[0].workTimeEnd,
+  //         slotDuration: slotTemplate.data[0].slotDuration,
+  //       })
+  //       setShowWorkingTimeForm(true)
+  //     }
+  //   }
+  // }, [data, form, workingForm, slotTemplate])
+
+  useEffect(() => {
+  if (data) {
+    form.setFieldsValue({
+      facilityName: data.facilityName,
+      phoneNumber: data.phoneNumber,
+      address: {
+        fullAddress: data.address?.fullAddress,
+      },
+    })
+  }
+
+  if (slotTemplate?.data?.length > 0) {
+    const slot = slotTemplate.data[0]
+
+    if (slot.workTimeStart && slot.workTimeEnd && slot.slotDuration) {
+      workingForm.setFieldsValue({
+        workTimeStart: slot.workTimeStart.slice(0, 5), // convert HH:mm:ss → HH:mm
+        workTimeEnd: slot.workTimeEnd.slice(0, 5),
+        slotDuration: slot.slotDuration,
+      })
+      setShowWorkingTimeForm(true)
     }
-  }, [data, form, workingForm, slotTemplate])
+  } else {
+    // Không có slot template
+    setShowWorkingTimeForm(false)
+  }
+}, [data, slotTemplate, form, workingForm])
+
 
   // Hàm xử lý khi submit form
   const handleSave = async (values: any) => {

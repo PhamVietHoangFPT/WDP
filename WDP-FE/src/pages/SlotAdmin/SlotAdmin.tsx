@@ -7,7 +7,11 @@ import {
   Typography,
   message,
 } from 'antd'
-import dayjs, { Dayjs } from 'dayjs'
+import 'dayjs/locale/vi'
+import locale from 'antd/es/locale/vi_VN'
+import dayjs from 'dayjs'
+import { ConfigProvider } from 'antd'
+
 import { useCreateSlotsMutation } from '../../features/admin/slotAPI' // adjust path as needed
 import { useState } from 'react'
 import Cookies from 'js-cookie'
@@ -53,6 +57,7 @@ const CreateSlot: React.FC = () => {
   }
 
   return (
+    <ConfigProvider locale={locale}>
     <div style={{ padding: '24px' }}>
       <Title level={2}>Tạo Slot</Title>
       <Form form={form} layout='vertical' onFinish={handleSave}>
@@ -82,6 +87,7 @@ const CreateSlot: React.FC = () => {
         </Form.Item>
       </Form>
     </div>
+  </ConfigProvider>
   )
 }
 
