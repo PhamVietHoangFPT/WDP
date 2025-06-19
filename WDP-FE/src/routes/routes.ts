@@ -190,7 +190,7 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff',
         component: StaffHomePage,
-        // role: ['admin'],
+        role: ['Staff'],
       },
     ],
   },

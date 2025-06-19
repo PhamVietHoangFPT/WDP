@@ -53,37 +53,38 @@ export const SideBar = () => {
   const userData = userDataString ? JSON.parse(userDataString) : {}
   // Define the menu items
   const items = [
-    {
-      key: 'admin',
-      icon: <BarChartOutlined />,
-      label: 'Dashboard Admin',
-      onClick: () => navigate('admin'),
-    },
-    {
-      key: 'admin/slotAdmin',
-      icon: <BarChartOutlined />,
-      label: 'Slot',
-      onClick: () => navigate('admin/slotAdmin'),
-    },
-    {
-      key: 'admin/slotsFacilitiesAdmin',
-      icon: <BarChartOutlined />,
-      label: 'Slot Facilities',
-      onClick: () => navigate('admin/slotsFacilitiesAdmin'),
-    },
-    {
-      key: 'admin/createFacility',
-      icon: <BarChartOutlined />,
-      label: 'Create Facility',
-      onClick: () => navigate('admin/createFacility'),
-    },
-    {
-      key: 'admin/facility',
-      icon: <BarChartOutlined />,
-      label: 'Facility',
-      onClick: () => navigate('admin/facility'),
-    },
-  ]
+  {
+    key: 'admin',
+    icon: <BarChartOutlined />,
+    label: 'Quản trị',
+    onClick: () => navigate('admin'),
+  },
+  {
+    key: 'admin/slotAdmin',
+    icon: <BarChartOutlined />,
+    label: 'Ca làm việc',
+    onClick: () => navigate('admin/slotAdmin'),
+  },
+  {
+    key: 'admin/slotsFacilitiesAdmin',
+    icon: <BarChartOutlined />,
+    label: 'Ca & Cơ sở',
+    onClick: () => navigate('admin/slotsFacilitiesAdmin'),
+  },
+  // {
+  //   key: 'admin/createFacility',
+  //   icon: <BarChartOutlined />,
+  //   label: 'Tạo cơ sở',
+  //   onClick: () => navigate('admin/createFacility'),
+  // },
+  {
+    key: 'admin/facility',
+    icon: <BarChartOutlined />,
+    label: 'Danh sách cơ sở',
+    onClick: () => navigate('admin/facility'),
+  },
+]
+
 
   return (
     <Sider
@@ -181,10 +182,10 @@ export const SideBar = () => {
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Manager User'}
+                {userData?.Name || 'Admin User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'manager@vaccitrack.com'}
+                {userData?.Email || 'admin@vaccitrack.com'}
               </div>
             </div>
           )}

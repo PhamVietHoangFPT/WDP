@@ -56,7 +56,7 @@ export const SideBar = () => {
     {
       key: 'delivery',
       icon: <BarChartOutlined />,
-      label: 'Dashboard Delivery Staff',
+      label: 'Quản trị',
       onClick: () => navigate('delivery'),
     },
   ]
