@@ -80,7 +80,7 @@ export const SideBar = () => {
     {
       key: 'admin/facility',
       icon: <BarChartOutlined />,
-      label: 'Facility',
+      label: 'Facilities',
       onClick: () => navigate('admin/facility'),
     },
   ]
@@ -181,10 +181,10 @@ export const SideBar = () => {
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Manager User'}
+                {userData?.Name || 'Admin User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'manager@vaccitrack.com'}
+                {userData?.Email || 'admin@vaccitrack.com'}
               </div>
             </div>
           )}
