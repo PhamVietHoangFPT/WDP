@@ -11,9 +11,9 @@ import {
   useCreateFacilityAddressMutation,
   useCreateFacilityMutation,
   useLazyCheckFacilityDuplicateQuery, // ✅ Add this
-} from "../../features/admin/location"
-import type { Province, District, Ward } from "../../types/location"
-import type { FacilityInfo } from "../../types/facilities"
+} from '../../features/admin/location'
+import type { Province, District, Ward } from '../../types/location'
+import type { FacilityInfo } from '../../types/facilities'
 
 const { Title } = Typography
 const { Option } = Select
@@ -92,7 +92,8 @@ const CreateFacilityForm: React.FC = () => {
         return
       }
 
-      const fullAddress = `${values.houseNumber || ""}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
+      const fullAddress =
+        `${values.houseNumber || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
 
       // ✅ Step 0: Check duplicates
       const duplicateRes = await checkDuplicate({
@@ -102,7 +103,7 @@ const CreateFacilityForm: React.FC = () => {
       }).unwrap()
 
       if (duplicateRes?.isDuplicate) {
-        message.error("Tên, số điện thoại hoặc địa chỉ đã tồn tại")
+        message.error('Tên, số điện thoại hoặc địa chỉ đã tồn tại')
         return
       }
 
@@ -135,11 +136,11 @@ const CreateFacilityForm: React.FC = () => {
       navigate('/admin/createFacility')
     } catch (error: any) {
       if (error.status === 404) {
-        message.error("Tên, số điện thoại hoặc địa chỉ đã tồn tại")
+        message.error('Tên, số điện thoại hoặc địa chỉ đã tồn tại')
         return
       }
-      console.error("Error creating facility:", error)
-      message.error(error?.message || "Có lỗi xảy ra khi tạo cơ sở")
+      console.error('Error creating facility:', error)
+      message.error(error?.message || 'Có lỗi xảy ra khi tạo cơ sở')
     }
   }
 
@@ -277,7 +278,7 @@ const CreateFacilityForm: React.FC = () => {
             <Button type='primary' htmlType='submit' size='large'>
               Tạo mới
             </Button>
-            <Button onClick={() => navigate("/admin/facility")} size="large">
+            <Button onClick={() => navigate('/admin/facility')} size='large'>
               Hủy
             </Button>
           </div>
