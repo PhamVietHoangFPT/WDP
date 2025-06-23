@@ -38,38 +38,6 @@ export class PaymentService implements IPaymentService {
     })
   }
 
-  async createForBooking(
-    checkVnPayPayment: CheckVnPayPaymentDto,
-    userId: string,
-    bookingId?: string,
-  ): Promise<PaymentDocument> {
-    const paymentData: CreatePaymentHistoryDto = {
-      tmnCode: checkVnPayPayment.vnp_TmnCode,
-      amount: checkVnPayPayment.vnp_Amount,
-      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
-      responseCode: checkVnPayPayment.vnp_ResponseCode,
-      payDate: checkVnPayPayment.vnp_PayDate,
-      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
-      orderInfo: checkVnPayPayment.vnp_OrderInfo,
-      transactionNo: checkVnPayPayment.vnp_TransactionNo,
-    }
-    const existingPayment =
-      await this.paymentRepository.findWithTransactionReferenceNumber(
-        paymentData.transactionReferenceNumber,
-      )
-    if (existingPayment) {
-      throw new ForbiddenException(
-        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
-      )
-    }
-    const payment = await this.paymentRepository.createForBooking(
-      paymentData,
-      userId,
-      bookingId,
-    )
-    return payment.save()
-  }
-
   async createForCase(
     checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,

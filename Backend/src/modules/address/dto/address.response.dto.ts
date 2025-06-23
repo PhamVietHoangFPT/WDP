@@ -23,11 +23,6 @@ export class AddressResponseDto {
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   account: mongoose.Schema.Types.ObjectId
 
-  @ApiProperty()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1z', type: String })
-  @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  testTaker: mongoose.Schema.Types.ObjectId
-
   constructor(partial: Partial<Address>) {
     Object.assign(this, partial)
   }

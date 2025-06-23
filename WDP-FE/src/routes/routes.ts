@@ -95,7 +95,7 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
-        path: '/',
+        path: '/payment-success',
         component: PaymentSuccessPage,
         role: ['Customer'],
       },

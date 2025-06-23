@@ -4,11 +4,6 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { PaymentHistoryResponseDto } from '../dto/paymentHistoryResponse.dto'
 
 export interface IPaymentService {
-  createForBooking(
-    checkVnPayPayment: CheckVnPayPaymentDto,
-    userId: string,
-    bookingId: string,
-  ): Promise<PaymentDocument>
   createForCase(
     checkVnPayPayment: CheckVnPayPaymentDto,
     userId: string,

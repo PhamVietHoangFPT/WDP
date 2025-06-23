@@ -24,7 +24,6 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       ...dto,
       created_by: userId,
     })
-    await this.bookingRepository.updateBookingStatusToUsed(dto.booking)
     return createCaseMember
   }
 

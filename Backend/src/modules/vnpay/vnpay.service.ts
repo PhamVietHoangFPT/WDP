@@ -13,7 +13,6 @@ export class VnpayService {
     @Inject(IServiceCaseRepository)
     private readonly serviceCaseRepository: IServiceCaseRepository,
   ) {}
-  vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
 
   async getBankList(): Promise<Bank[]> {
     return this.vnpayService.getBankList()
@@ -23,7 +22,7 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = this.vnp_ReturnUrl
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success-any/'
     const dataSend = {
       ...PaymentData,
       vnp_CreateDate: dateFormat(createDate),
@@ -39,7 +38,7 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = this.vnp_ReturnUrl
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
     const dataSend = {
       vnp_Amount: 100000,
       vnp_OrderInfo: 'Thanh toán đặt chỗ ' + PaymentData.bookingId,
@@ -58,7 +57,7 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = this.vnp_ReturnUrl
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success-service/'
     const totalFee = await this.serviceCaseRepository.getTotalFeeById(
       PaymentData.serviceCaseId,
     )

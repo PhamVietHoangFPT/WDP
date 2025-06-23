@@ -39,7 +39,6 @@ export class AddressRepository implements IAddressRepository {
     return this.addressModel
       .find({ deleted_at: null })
       .populate({ path: 'account', select: 'name email -_id' })
-      .populate({ path: 'testTaker', select: 'name email -_id' })
       .lean()
       .exec()
   }

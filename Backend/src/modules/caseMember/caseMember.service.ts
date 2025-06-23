@@ -107,31 +107,6 @@ export class CaseMemberService implements ICaseMemberService {
       throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
     }
 
-    // Kiểm tra lịch hẹn đã được sử dụng chưa
-    const isBookingUsed = await this.caseMemberRepository.checkBookingUsed(
-      dto.booking,
-    )
-
-    if (isBookingUsed) {
-      throw new ConflictException(
-        'Lịch hẹn này đã được sử dụng cho một hồ sơ nhóm người cần xét nghiệm khác',
-      )
-    }
-
-    // Kiểm tra trạng thái của lịch hẹn
-    const bookingStatus = await this.bookingRepository.getBookingStatusById(
-      dto.booking,
-    )
-    if (!bookingStatus) {
-      throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
-    }
-    if (bookingStatus.bookingStatus !== 'Thành công') {
-      throw new ConflictException(
-        'Hồ sơ đặt lịch hẹn ' +
-          bookingStatus.bookingStatus.toString().toLocaleLowerCase(),
-      )
-    }
-
     // Kiểm tra ngày giờ của lịch hẹn
     const bookingExistDate = await this.bookingRepository.getBookingDateById(
       dto.booking,
@@ -217,34 +192,6 @@ export class CaseMemberService implements ICaseMemberService {
 
     if (!bookingExist) {
       throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
-    }
-
-    // Kiểm tra lịch hẹn đã được sử dụng chưa
-    const oldBookingUsed =
-      await this.caseMemberRepository.getBookingIdByCaseMemberId(id)
-    if (oldBookingUsed && oldBookingUsed.toString() !== dto.booking) {
-      const isBookingUsed = await this.caseMemberRepository.checkBookingUsed(
-        dto.booking,
-      )
-      if (isBookingUsed) {
-        throw new ConflictException(
-          'Lịch hẹn này đã được sử dụng cho một hồ sơ nhóm người cần xét nghiệm khác',
-        )
-      }
-    }
-
-    // Kiểm tra trạng thái của lịch hẹn
-    const bookingStatus = await this.bookingRepository.getBookingStatusById(
-      dto.booking,
-    )
-    if (!bookingStatus) {
-      throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
-    }
-    if (bookingStatus.bookingStatus !== 'Thành công') {
-      throw new ConflictException(
-        'Hồ sơ đặt lịch hẹn ' +
-          bookingStatus.bookingStatus.toString().toLocaleLowerCase(),
-      )
     }
 
     // Kiểm tra ngày giờ của lịch hẹn
