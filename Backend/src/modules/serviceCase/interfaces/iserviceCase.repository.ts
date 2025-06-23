@@ -39,5 +39,7 @@ export interface IServiceCaseRepository {
     id: string,
     resultId: string,
   ): Promise<ServiceCaseDocument | null>
+
+  getBookingIdsByTime(time: Date, currentStatusId: string): Promise<string[]>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

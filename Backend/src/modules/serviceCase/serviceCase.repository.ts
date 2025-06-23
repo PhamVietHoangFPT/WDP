@@ -149,4 +149,51 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       )
       .exec()
   }
+
+  async getBookingIdsByTime(
+    time: Date,
+    currentStatusId: string,
+  ): Promise<string[]> {
+    type BookingIdResult = { bookingId?: mongoose.Types.ObjectId }
+
+    const results: BookingIdResult[] = await this.serviceCaseModel.aggregate([
+      {
+        $match: {
+          created_at: { $lt: time },
+          currentStatus: new mongoose.Types.ObjectId(currentStatusId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'casemembers',
+          localField: 'caseMember',
+          foreignField: '_id',
+          as: 'caseMemberDetails',
+        },
+      },
+      { $unwind: '$caseMemberDetails' },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'caseMemberDetails.booking',
+          foreignField: '_id',
+          as: 'bookingDetails',
+        },
+      },
+      { $unwind: '$bookingDetails' },
+      {
+        $project: {
+          _id: 0,
+          bookingId: '$bookingDetails._id',
+        },
+      },
+    ])
+
+    // 3. DÙNG .filter() và .map() ĐỂ BIẾN ĐỔI TOÀN BỘ MẢNG KẾT QUẢ
+    const bookingIds = results
+      .filter((result) => result.bookingId)
+      .map((result) => result.bookingId.toString())
+
+    return bookingIds // Trả về mảng các chuỗi ID
+  }
 }

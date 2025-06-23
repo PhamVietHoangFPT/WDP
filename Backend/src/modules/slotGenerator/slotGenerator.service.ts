@@ -48,7 +48,7 @@ export class SlotGenerationService {
 
   public async handleOverdueSlotCleanup() {
     this.logger.log(
-      'Bắt đầu tác vụ SOFT-DELETE các slot quá hạn chưa được đặt (chạy hàng giờ)...',
+      'Bắt đầu tác vụ XÓA các slot quá hạn chưa được đặt (chạy hàng giờ)...',
     )
 
     const now = new Date()
@@ -62,7 +62,7 @@ export class SlotGenerationService {
       0,
     )
     console.log(startOfToday)
-    // Phần 1: Soft-delete các slot của những ngày TRƯỚC ngày hiện tại
+    // Phần 1: XÓA các slot của những ngày TRƯỚC ngày hiện tại
     try {
       const deleteResult = await this.slotModel
         .deleteMany({
@@ -80,25 +80,24 @@ export class SlotGenerationService {
       }
     } catch (error) {
       this.logger.error(
-        '(Hàng giờ) Lỗi khi SOFT-DELETE slot của các ngày trước:',
+        '(Hàng giờ) Lỗi khi XÓA slot của các ngày trước:',
         error,
       )
     }
     const currentUTCDayStart = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
     )
-    // Phần 2: Soft-delete các slot của NGÀY HÔM NAY đã qua thời gian kết thúc
+    // Phần 2: XÓA các slot của NGÀY HÔM NAY đã qua thời gian kết thúc
     const todaysUnbookedSlots = await this.slotModel
       .find({
         isBooked: false,
         slotDate: currentUTCDayStart,
-        deleted_at: null, // Chỉ lấy những slot chưa bị xóa mềm
       })
       .exec()
 
     if (todaysUnbookedSlots.length === 0) {
       this.logger.log(
-        '(Hàng giờ) Không có slot nào của ngày hôm nay (chưa soft-delete) cần dọn dẹp thêm.',
+        '(Hàng giờ) Không có slot nào của ngày hôm nay (chưa XÓA) cần dọn dẹp thêm.',
       )
       this.logger.log('(Hàng giờ) Hoàn tất tác vụ dọn dẹp slot.')
       return
@@ -130,27 +129,23 @@ export class SlotGenerationService {
 
     if (slotIdsToSoftDeleteToday.length > 0) {
       try {
-        // Dòng bạn cung cấp đã gần đúng, chỉ cần thêm phần update
         const resultToday = await this.slotModel
-          .updateMany(
-            {
-              _id: { $in: slotIdsToSoftDeleteToday },
-            },
-            { $set: { deleted_at: now } }, // Cập nhật trường deleted_at
-          )
+          .deleteMany({
+            _id: { $in: slotIdsToSoftDeleteToday },
+          })
           .exec()
         this.logger.log(
-          `(Hàng giờ) Đã SOFT-DELETE ${resultToday.modifiedCount} slot quá hạn (trong ngày hôm nay) chưa được đặt.`,
+          `(Hàng giờ) Đã XÓA ${resultToday.deletedCount} slot quá hạn (trong ngày hôm nay) chưa được đặt.`,
         )
       } catch (error) {
         this.logger.error(
-          '(Hàng giờ) Lỗi khi SOFT-DELETE slot của ngày hôm nay:',
+          '(Hàng giờ) Lỗi khi XÓA slot của ngày hôm nay:',
           error,
         )
       }
     } else {
       this.logger.log(
-        '(Hàng giờ) Không có slot nào của ngày hôm nay (đã được kiểm tra và chưa soft-delete) đã quá hạn và chưa được đặt.',
+        '(Hàng giờ) Không có slot nào của ngày hôm nay (đã được kiểm tra và chưa XÓA) đã quá hạn và chưa được đặt.',
       )
     }
     this.logger.log('(Hàng giờ) Hoàn tất tác vụ dọn dẹp slot.')
