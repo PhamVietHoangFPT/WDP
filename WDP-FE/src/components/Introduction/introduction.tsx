@@ -12,8 +12,7 @@ const Introduction: React.FC = () => {
         Chúng tôi có các y, bác sĩ có chuyên môn cao. Hỗ trợ nhanh chóng, có kết
         quả nhanh, hỗ trợ trực tiếp tại nhà.
       </Paragraph>
-      <Space>
-      </Space>
+      <Space></Space>
     </div>
   )
 }

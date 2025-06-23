@@ -73,16 +73,16 @@ const ServiceCardSlider: React.FC<ServiceCardSliderProps> = ({ services }) => {
                   <p style={{ fontWeight: 'bold', fontStyle: 'italic' }}>
                     Giá:{' '}
                     {service.fee &&
-                      service.timeReturn &&
-                      service.timeReturn.timeReturnFee &&
-                      service.sample.fee &&
-                      service.sample.sampleType.sampleTypeFee
+                    service.timeReturn &&
+                    service.timeReturn.timeReturnFee &&
+                    service.sample.fee &&
+                    service.sample.sampleType.sampleTypeFee
                       ? (
-                        service.fee +
-                        service.timeReturn.timeReturnFee +
-                        service.sample.fee +
-                        service.sample.sampleType.sampleTypeFee
-                      ).toLocaleString('vi-VN') + '₫'
+                          service.fee +
+                          service.timeReturn.timeReturnFee +
+                          service.sample.fee +
+                          service.sample.sampleType.sampleTypeFee
+                        ).toLocaleString('vi-VN') + '₫'
                       : 'Contact for pricing'}
                   </p>
                 </div>

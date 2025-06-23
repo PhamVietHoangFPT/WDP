@@ -73,33 +73,32 @@ const FacilityDetailAdmin: React.FC = () => {
   // }, [data, form, workingForm, slotTemplate])
 
   useEffect(() => {
-  if (data) {
-    form.setFieldsValue({
-      facilityName: data.facilityName,
-      phoneNumber: data.phoneNumber,
-      address: {
-        fullAddress: data.address?.fullAddress,
-      },
-    })
-  }
-
-  if (slotTemplate?.data?.length > 0) {
-    const slot = slotTemplate.data[0]
-
-    if (slot.workTimeStart && slot.workTimeEnd && slot.slotDuration) {
-      workingForm.setFieldsValue({
-        workTimeStart: slot.workTimeStart.slice(0, 5), // convert HH:mm:ss → HH:mm
-        workTimeEnd: slot.workTimeEnd.slice(0, 5),
-        slotDuration: slot.slotDuration,
+    if (data) {
+      form.setFieldsValue({
+        facilityName: data.facilityName,
+        phoneNumber: data.phoneNumber,
+        address: {
+          fullAddress: data.address?.fullAddress,
+        },
       })
-      setShowWorkingTimeForm(true)
     }
-  } else {
-    // Không có slot template
-    setShowWorkingTimeForm(false)
-  }
-}, [data, slotTemplate, form, workingForm])
 
+    if (slotTemplate?.data?.length > 0) {
+      const slot = slotTemplate.data[0]
+
+      if (slot.workTimeStart && slot.workTimeEnd && slot.slotDuration) {
+        workingForm.setFieldsValue({
+          workTimeStart: slot.workTimeStart.slice(0, 5), // convert HH:mm:ss → HH:mm
+          workTimeEnd: slot.workTimeEnd.slice(0, 5),
+          slotDuration: slot.slotDuration,
+        })
+        setShowWorkingTimeForm(true)
+      }
+    } else {
+      // Không có slot template
+      setShowWorkingTimeForm(false)
+    }
+  }, [data, slotTemplate, form, workingForm])
 
   // Hàm xử lý khi submit form
   const handleSave = async (values: any) => {

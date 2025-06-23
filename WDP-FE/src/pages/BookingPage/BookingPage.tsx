@@ -1,4 +1,3 @@
-// src/pages/BookingPage.tsx
 import React, { useState } from 'react'
 import {
   DatePicker,
@@ -14,7 +13,6 @@ import {
 import dayjs from 'dayjs'
 import viVN from 'antd/locale/vi_VN'
 import isoWeek from 'dayjs/plugin/isoWeek'
-import { useNavigate } from 'react-router-dom'
 import { useGetFacilitiesListQuery } from '../../features/admin/facilitiesAPI'
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import type { Facility } from '../../types/facilities'
@@ -46,14 +44,21 @@ const DAYS_OF_WEEK = [
   { key: 'sunday', label: 'CHỦ NHẬT', short: 'CN' },
 ]
 
-const BookingPage: React.FC = () => {
+interface BookingComponentProps {
+  onSelectBooking: (slotId: string) => void
+  selectedSlotId: string | null
+}
+
+const BookingComponent: React.FC<BookingComponentProps> = ({
+  onSelectBooking,
+  selectedSlotId,
+}) => {
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
   const [isAvailable, setIsAvailable] = useState(true)
   const [dateRange, setDateRange] = useState([
     dayjs().startOf('isoWeek'),
     dayjs().endOf('isoWeek'),
   ])
-  const navigate = useNavigate()
 
   const { data: facilitiesData, isLoading: facilitiesLoading } =
     useGetFacilitiesListQuery({ pageNumber: 1, pageSize: 50 })
@@ -72,7 +77,7 @@ const BookingPage: React.FC = () => {
 
   const getSlotsForDayAndTime = (dayDate: dayjs.Dayjs, timeSlot: any) => {
     if (!slotsData) return []
-    return slotsData.filter((slot) => {
+    return slotsData.filter((slot: any) => {
       const slotDate = dayjs(slot.slotDate)
       return (
         slotDate.isSame(dayDate, 'day') &&
@@ -88,12 +93,12 @@ const BookingPage: React.FC = () => {
 
   return (
     <ConfigProvider locale={viVN}>
-      <div style={{ padding: 24 }}>
-        <Title level={3}>Đặt lịch hẹn</Title>
+      <div style={{ width: 'fit-content', padding: 16 }}>
+        <Title level={4}>Chọn lịch hẹn</Title>
 
         <div
           style={{
-            marginBottom: 24,
+            marginBottom: 16,
             display: 'flex',
             gap: 16,
             flexWrap: 'wrap',
@@ -194,26 +199,8 @@ const BookingPage: React.FC = () => {
                               </div>
                               <Button
                                 type='primary'
-                                onClick={() => {
-                                  const facilityObj =
-                                    facilitiesData?.data?.find(
-                                      (f) => f._id === facilityId
-                                    )
-
-                                  navigate('/payment', {
-                                    state: {
-                                      slot: {
-                                        ...slot,
-                                        facility: {
-                                          _id: facilityObj?._id,
-                                          facilityName:
-                                            facilityObj?.facilityName ||
-                                            'Không rõ',
-                                        },
-                                      },
-                                    },
-                                  })
-                                }}
+                                onClick={() => onSelectBooking(slot._id)}
+                                disabled={selectedSlotId === slot._id}
                               >
                                 Đặt lịch
                               </Button>
@@ -243,4 +230,4 @@ const BookingPage: React.FC = () => {
   )
 }
 
-export default BookingPage
+export default BookingComponent

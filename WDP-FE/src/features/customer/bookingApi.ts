@@ -21,7 +21,4 @@ export const bookingApi = apiSlice.injectEndpoints({
   }),
 })
 
-export const {
-  useCreateBookingMutation,
-  useGetBookingStatusQuery
-} = bookingApi
+export const { useCreateBookingMutation, useGetBookingStatusQuery } = bookingApi

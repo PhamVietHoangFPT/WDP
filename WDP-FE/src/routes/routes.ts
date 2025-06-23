@@ -33,7 +33,6 @@ import PaymentDetail from '../pages/ProfileUser/PaymentDetail'
 import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
 import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
 
-
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
@@ -83,11 +82,6 @@ const routes: LayoutRoute[] = [
       {
         path: '/blogs/:id',
         component: BlogDetail,
-      },
-      {
-        path: '/booking',
-        component: BookingPage,
-        role: ['Customer'],
       },
       {
         path: '/payment',
