@@ -64,20 +64,18 @@ export class SlotGenerationService {
     console.log(startOfToday)
     // Phần 1: Soft-delete các slot của những ngày TRƯỚC ngày hiện tại
     try {
-      const resultPastDays = await this.slotModel
-        .updateMany(
-          {
-            isBooked: false,
-            slotDate: { $lt: startOfToday },
-            deleted_at: null, // Chỉ tác động đến những slot chưa bị xóa mềm
-          },
-          { $set: { deleted_at: now } }, // Cập nhật trường deleted_at
-        )
+      const deleteResult = await this.slotModel
+        .deleteMany({
+          isBooked: false,
+          slotDate: { $lt: startOfToday },
+        })
         .exec()
 
-      if (resultPastDays.modifiedCount > 0) {
+      // Sử dụng "deletedCount" thay vì "modifiedCount"
+      if (deleteResult.deletedCount > 0) {
         this.logger.log(
-          `(Hàng giờ) Đã SOFT-DELETE ${resultPastDays.modifiedCount} slot quá hạn (từ các ngày trước) chưa được đặt.`,
+          // Cập nhật log để phản ánh đúng hành động
+          `(Hàng giờ) Đã XÓA VĨNH VIỄN ${deleteResult.deletedCount} slot quá hạn (từ các ngày trước) chưa được đặt.`,
         )
       }
     } catch (error) {
