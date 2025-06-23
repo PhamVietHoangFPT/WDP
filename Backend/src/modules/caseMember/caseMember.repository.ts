@@ -74,10 +74,7 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       .populate({ path: 'testTaker', select: 'name -_id' })
       .populate({
         path: 'booking',
-        populate: [
-          { path: 'slot', select: 'startTime endTime -_id' },
-          { path: 'bookingStatus', select: 'bookingStatus -_id' },
-        ],
+        populate: [{ path: 'slot', select: 'startTime endTime -_id' }],
         select: 'slot bookingStatus',
       })
 
@@ -115,10 +112,7 @@ export class CaseMemberRepository implements ICaseMemberRepository {
       .populate({ path: 'testTaker', select: 'name gender dateOfBirth -_id' })
       .populate({
         path: 'booking',
-        populate: [
-          { path: 'slot', select: 'startTime endTime -_id' },
-          { path: 'bookingStatus', select: 'bookingStatus -_id' },
-        ],
+        populate: [{ path: 'slot', select: 'startTime endTime -_id' }],
         select: 'slot bookingStatus bookingDate -_id',
       })
       .lean()

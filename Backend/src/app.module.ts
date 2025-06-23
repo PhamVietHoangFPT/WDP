@@ -63,9 +63,9 @@ import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipment
     TestRequestHistoryModule,
     ResultModule,
     SampleCollectorModule,
-    KitShipmentStatusModule
+    KitShipmentStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

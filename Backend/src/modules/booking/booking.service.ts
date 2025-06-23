@@ -10,7 +10,7 @@ import { IBookingService } from './interfaces/ibooking.service'
 import { CreateBookingDto } from './dto/createBooking.dto'
 import { UpdateBookingDto } from './dto/updateBooking.dto'
 import { BookingResponseDto } from './dto/bookingResponse.dto'
-import { Booking } from './schemas/booking.schema'
+import { BookingDocument } from './schemas/booking.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import mongoose from 'mongoose'
@@ -23,9 +23,14 @@ export class BookingService implements IBookingService {
     private readonly slotRepository: ISlotRepository,
   ) {}
 
-  private mapToResponseDto(data: any): BookingResponseDto {
+  private mapToResponseDto(data: BookingDocument): BookingResponseDto {
     // Constructor của DTO mới sẽ tự động gán các thuộc tính khớp tên
-    return new BookingResponseDto(data)
+    return new BookingResponseDto({
+      _id: data._id,
+      slot: data.slot,
+      bookingDate: data.bookingDate,
+      note: data.note,
+    })
   }
 
   async create(
@@ -77,7 +82,7 @@ export class BookingService implements IBookingService {
     ])
 
     const totalPages = Math.ceil(totalItems / pageSize)
-    const data = bookings.map((booking: Booking) =>
+    const data = bookings.map((booking: BookingDocument) =>
       this.mapToResponseDto(booking),
     ) // Explicitly type `booking`
     return {

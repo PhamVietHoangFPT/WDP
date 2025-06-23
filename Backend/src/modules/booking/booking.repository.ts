@@ -36,7 +36,6 @@ export class BookingRepository implements IBookingRepository {
       .findOne({ _id: id, account: userId })
       .populate({ path: 'account', select: 'name email phoneNumber' })
       .populate({ path: 'slot', select: 'startTime endTime' })
-      .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
       .exec()
   }
 
@@ -45,7 +44,6 @@ export class BookingRepository implements IBookingRepository {
       .find({ account: userId })
       .populate({ path: 'account', select: 'name email phoneNumber' })
       .populate({ path: 'slot', select: 'startTime endTime' })
-      .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
       .exec()
   }
 
@@ -101,7 +99,6 @@ export class BookingRepository implements IBookingRepository {
           },
         },
       })
-      .populate({ path: 'bookingStatus', select: 'bookingStatus -_id' })
       .lean()
   }
 

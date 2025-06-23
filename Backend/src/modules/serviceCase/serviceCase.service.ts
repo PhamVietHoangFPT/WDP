@@ -17,7 +17,7 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceRepository } from '../service/interfaces/iservice.repository'
 import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
-
+import { Cron } from '@nestjs/schedule'
 @Injectable()
 export class ServiceCaseService implements IServiceCaseService {
   constructor(
@@ -172,5 +172,33 @@ export class ServiceCaseService implements IServiceCaseService {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')
     }
     return this.mapToResponseDto(updatedServiceCase)
+  }
+
+  @Cron('0 */3 * * * *')
+  async handleCron() {
+    const now = new Date()
+    const futureTime = new Date(now.getTime() + 10 * 60 * 1000)
+    // Trường hợp chưa thanh toán
+    const currentStatusId =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Chờ thanh toán',
+      )
+    const bookingId = await this.serviceCaseRepository.getBookingIdsByTime(
+      futureTime,
+      currentStatusId,
+    )
+
+    // Trường hợp thanh toán thất bại
+    const failedPaymentStatusId =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Thanh toán thất bại',
+      )
+    const failedPaymentStatusBookingId =
+      await this.serviceCaseRepository.getBookingIdsByTime(
+        futureTime,
+        failedPaymentStatusId,
+      )
+
+    console.log(bookingId, failedPaymentStatusBookingId)
   }
 }
