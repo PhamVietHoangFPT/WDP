@@ -21,9 +21,6 @@ export class Address extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TestTaker' })
-  testTaker: mongoose.Schema.Types.ObjectId
 }
 
 export const AddressSchema = SchemaFactory.createForClass(Address)

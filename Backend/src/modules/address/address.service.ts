@@ -18,7 +18,6 @@ export class AddressService implements IAddressService {
       fullAddress: address.fullAddress,
       isKitShippingAddress: address.isKitShippingAddress,
       account: address.account,
-      testTaker: address.testTaker,
     })
   }
 

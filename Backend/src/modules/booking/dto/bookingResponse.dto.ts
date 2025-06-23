@@ -58,10 +58,6 @@ export class BookingResponseDto {
   // --- THAY ĐỔI 2: THAY ĐỔI CẤU TRÚC CÁC TRƯỜNG ĐỂ KHỚP VỚI AGGREGATE ---
 
   @Expose()
-  @ApiProperty({ type: String }) // Status giờ là string, không phải ObjectId
-  status: string // Đổi tên từ bookingStatus thành status cho khớp với $project
-
-  @Expose()
   @ApiProperty({ type: SlotDetailDto })
   @Type(() => SlotDetailDto) // Quan trọng: Giúp class-transformer biết cách biến đổi object lồng nhau
   slot: SlotDetailDto
@@ -76,11 +72,6 @@ export class BookingResponseDto {
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   account: mongoose.Schema.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
-  @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-  payment: mongoose.Schema.Types.ObjectId
 
   // --- THAY ĐỔI 3: CẬP NHẬT CONSTRUCTOR ---
   // Constructor giờ đây nhận vào một object bất kỳ (kết quả từ aggregate)
