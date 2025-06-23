@@ -29,6 +29,7 @@ import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 import { TestRequestHistoryModule } from './modules/testRequestHistory/testRequestHistory.module'
 import { ResultModule } from './modules/result/result.module'
 import { SampleCollectorModule } from './modules/sampleCollectorGenerator/sampleCollector.module'
+import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipmentStatus.module'
 @Module({
   imports: [
     databaseConfig,
@@ -62,8 +63,9 @@ import { SampleCollectorModule } from './modules/sampleCollectorGenerator/sample
     TestRequestHistoryModule,
     ResultModule,
     SampleCollectorModule,
+    KitShipmentStatusModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
