@@ -28,15 +28,6 @@ export class Booking extends BaseEntity {
     required: true,
   })
   account: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Payment' })
-  payment: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'BookingStatus' })
-  bookingStatus: mongoose.Schema.Types.ObjectId
-
-  @Prop({ type: Boolean, default: false })
-  isUsed: boolean
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking)

@@ -15,7 +15,6 @@ import { PaymentModule } from './modules/payment/payment.module'
 import { AddressModule } from './modules/address/address.module'
 import { LocationModule } from './modules/location/location.module'
 import { BookingModule } from './modules/booking/booking.module'
-import { BookingStatusModule } from './modules/bookingStatus/bookingStatus.module'
 import { PaymentTypeModule } from './modules/paymentType/paymentType.module'
 import { ImageModule } from './modules/image/image.module'
 import { SampleModule } from './modules/sample/sample.module'
@@ -49,7 +48,6 @@ import { SampleCollectorModule } from './modules/sampleCollectorGenerator/sample
     ImageModule,
     BlogModule,
     BookingModule,
-    BookingStatusModule,
     PaymentTypeModule,
     VnPayModule,
     BookingModule,

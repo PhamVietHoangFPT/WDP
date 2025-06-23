@@ -40,25 +40,6 @@ export class PaymentController {
     private readonly paymentService: IPaymentService,
   ) {}
 
-  @Post('booking')
-  @ApiOperation({ summary: 'Tạo lịch sử thanh toán cho đặt chỗ' })
-  @ApiBody({ type: CheckVnPayPaymentDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Lịch sử thanh toán được tạo thành công',
-  })
-  createPaymentHistoryForBooking(
-    @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
-    @Req() req: any, // Assuming you might need the request object for user info
-  ) {
-    const userId = req.user.id
-    return this.paymentService.createForBooking(
-      CheckVnPayPaymentDto,
-      userId,
-      CheckVnPayPaymentDto.vnp_TxnRef,
-    )
-  }
-
   @Post('service-case')
   @ApiOperation({
     summary: 'Tạo lịch sử thanh toán cho trường hợp xét nghiệm',

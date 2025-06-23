@@ -24,9 +24,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
   ApiResponse,
-  ApiParam,
 } from '@nestjs/swagger'
-import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
@@ -110,31 +108,6 @@ export class BookingController {
     }
   }
 
-  @Get('status/:isUsed')
-  @ApiOperation({ summary: 'Lấy danh sách lịch hẹn theo trạng thái' })
-  @ApiParam({
-    name: 'isUsed',
-    required: true,
-    description:
-      'Trạng thái của lịch hẹn (true: đã sử dụng, false: chưa sử dụng)',
-    type: Boolean,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: [BookingResponseDto],
-  })
-  async getAllBookingByStatus(
-    @Param('isUsed') isUsed: boolean,
-    @Req() req: any,
-  ): Promise<BookingResponseDto[]> {
-    const userId = req.user.id
-    const bookings = await this.bookingService.getAllBookingByStatus(
-      isUsed,
-      userId,
-    )
-    return bookings.map((booking) => new BookingResponseDto({ ...booking }))
-  }
-
   @Put('change-slot/:id')
   @ApiOperation({ summary: 'Cập nhật thông tin một lịch hẹn' })
   @ApiResponse({ status: HttpStatus.OK, type: BookingResponseDto })
@@ -145,22 +118,5 @@ export class BookingController {
   ): Promise<BookingResponseDto> {
     const userId = req.user.id
     return this.bookingService.update(id, updateBookingDto, userId)
-  }
-
-  @Put('cancel/:id')
-  @ApiOperation({ summary: 'Hủy một lịch hẹn' })
-  @ApiResponse({ status: HttpStatus.OK, type: BookingResponseDto })
-  async cancel(
-    @Param('id') id: string,
-    @Req() req: any,
-  ): Promise<ApiResponseDto<BookingResponseDto>> {
-    const userId = req.user.id
-    const data = await this.bookingService.cancel(id, userId)
-    return new ApiResponseDto<BookingResponseDto>({
-      data: [data],
-      success: true,
-      message: 'Hủy lịch hẹn thành công',
-      statusCode: HttpStatus.OK,
-    })
   }
 }

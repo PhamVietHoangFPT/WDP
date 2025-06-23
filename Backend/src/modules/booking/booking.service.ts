@@ -14,8 +14,6 @@ import { Booking } from './schemas/booking.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import mongoose from 'mongoose'
-import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
-import { Cron } from '@nestjs/schedule'
 @Injectable()
 export class BookingService implements IBookingService {
   constructor(
@@ -23,8 +21,6 @@ export class BookingService implements IBookingService {
     private readonly bookingRepository: IBookingRepository,
     @Inject(ISlotRepository)
     private readonly slotRepository: ISlotRepository,
-    @Inject(IBookingStatusRepository)
-    private readonly bookingStatusRepository: IBookingStatusRepository,
   ) {}
 
   private mapToResponseDto(data: any): BookingResponseDto {
@@ -104,18 +100,6 @@ export class BookingService implements IBookingService {
     if (!updateBookingCheck) {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
-    const currentBookingStatus =
-      await this.bookingStatusRepository.findByBookingStatus('Đã hủy')
-    if (
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      updateBookingCheck.bookingStatus.toString() ===
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      currentBookingStatus.toString()
-    ) {
-      throw new BadRequestException(
-        `Lịch hẹn đã bị hủy. Không thể cập nhật lại.`,
-      )
-    }
     const updateByUser = new mongoose.Types.ObjectId(userId)
     if (
       updateBookingCheck.updated_by &&
@@ -135,30 +119,5 @@ export class BookingService implements IBookingService {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
     return this.mapToResponseDto(updatedBooking)
-  }
-
-  async cancel(id: string, userId: string): Promise<BookingResponseDto> {
-    const cancelBooking = await this.bookingRepository.cancel(id, userId)
-    if (!cancelBooking) {
-      throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
-    }
-    return this.mapToResponseDto(cancelBooking)
-  }
-
-  async getAllBookingByStatus(
-    isUsed: boolean,
-    userId: string,
-  ): Promise<BookingResponseDto[]> {
-    const bookings = await this.bookingRepository.getAllBookingByStatus(
-      isUsed,
-      userId,
-    )
-    return bookings.map((booking: Booking) => this.mapToResponseDto(booking))
-  }
-
-  @Cron('* */3 * * * *')
-  async setStatusIfPaymentFailed(): Promise<void> {
-    const currentTime = new Date()
-    await this.bookingRepository.updateSlotStatusIfPaymentFailed(currentTime)
   }
 }

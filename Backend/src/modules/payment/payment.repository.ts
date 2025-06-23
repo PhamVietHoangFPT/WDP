@@ -5,7 +5,6 @@ import { Payment, PaymentDocument } from './schemas/payment.schema'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
-import { IBookingStatusRepository } from '../bookingStatus/interfaces/ibookingStatus.repository'
 import { IPaymentTypeRepository } from '../paymentType/interfaces/ipaymentType.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
@@ -17,8 +16,6 @@ export class PaymentRepository implements IPaymentRepository {
     private paymentModel: Model<PaymentDocument>,
     @Inject(IBookingRepository)
     private bookingRepository: IBookingRepository,
-    @Inject(IBookingStatusRepository)
-    private bookingStatusRepository: IBookingStatusRepository,
     @Inject(IPaymentTypeRepository)
     private paymentTypeRepository: IPaymentTypeRepository,
     @Inject(ITestRequestStatusRepository)
@@ -26,42 +23,6 @@ export class PaymentRepository implements IPaymentRepository {
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
   ) {}
-
-  async createForBooking(
-    createPaymentHistoryDto: CreatePaymentHistoryDto,
-    userId: string,
-    bookingId: string,
-  ): Promise<PaymentDocument> {
-    const newPayment = new this.paymentModel(createPaymentHistoryDto)
-    const paymentType =
-      await this.paymentTypeRepository.findByPaymentType('Đặt chỗ')
-    newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
-    newPayment.paymentType = paymentType._id
-    let bookingStatus: any = null
-    if (
-      createPaymentHistoryDto.transactionStatus !== '00' &&
-      createPaymentHistoryDto.responseCode !== '00'
-    ) {
-      bookingStatus = await this.bookingStatusRepository.findByBookingStatus(
-        'Thanh toán thất bại',
-      )
-    } else if (
-      createPaymentHistoryDto.transactionStatus === '00' &&
-      createPaymentHistoryDto.responseCode === '00'
-    ) {
-      bookingStatus =
-        await this.bookingStatusRepository.findByBookingStatus('Thành công')
-    }
-    if (bookingId) {
-      await this.bookingRepository.updatePayment(
-        bookingId,
-        bookingStatus,
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        newPayment._id.toString(),
-      )
-    }
-    return await newPayment.save()
-  }
 
   async createForServiceCase(
     createPaymentHistoryDto: CreatePaymentHistoryDto,

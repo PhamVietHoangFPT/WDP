@@ -86,18 +86,18 @@ const Navbar: React.FC = () => {
       },
       ...(userData
         ? [
-          {
-            key: 'logout',
-            icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
-            label: 'Đăng xuất',
-            style: { fontSize: '16px', color: 'red' },
-            onClick: () => {
-              Cookies.remove('userData')
-              Cookies.remove('userToken')
-              navigate('/login')
+            {
+              key: 'logout',
+              icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
+              label: 'Đăng xuất',
+              style: { fontSize: '16px', color: 'red' },
+              onClick: () => {
+                Cookies.remove('userData')
+                Cookies.remove('userToken')
+                navigate('/login')
+              },
             },
-          },
-        ]
+          ]
         : []),
     ]
   }, [userData, navigate])
