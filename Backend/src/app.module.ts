@@ -29,6 +29,7 @@ import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 import { TestRequestHistoryModule } from './modules/testRequestHistory/testRequestHistory.module'
 import { ResultModule } from './modules/result/result.module'
 import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipmentStatus.module'
+import { ManagerModule } from './modules/manager/manager.module'
 @Module({
   imports: [
     databaseConfig,
@@ -62,6 +63,7 @@ import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipment
     TestRequestHistoryModule,
     ResultModule,
     KitShipmentStatusModule,
+    ManagerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

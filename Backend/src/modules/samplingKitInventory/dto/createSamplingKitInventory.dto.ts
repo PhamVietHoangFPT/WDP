@@ -7,10 +7,6 @@ export class CreateSamplingKitInventoryDto {
   @IsNotEmpty()
   lotNumber: string
 
-  @ApiProperty({ description: 'Ngày nhập lô', type: Date })
-  @IsNotEmpty()
-  importDate: Date
-
   @ApiProperty({ description: 'Ngày hết hạn', type: Date })
   @IsNotEmpty()
   expDate: Date

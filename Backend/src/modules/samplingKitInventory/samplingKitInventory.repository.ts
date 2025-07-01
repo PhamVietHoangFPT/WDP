@@ -24,6 +24,7 @@ export class SamplingKitInventoryRepository
   ): Promise<SamplingKitInventoryDocument> {
     const newSamplingKitInventory = new this.samplingKitInventoryModel({
       ...createSamplingKitInventoryDto,
+      importDate: new Date(),
       facility: facilityId,
       create_at: new Date(),
       create_by: userId,
