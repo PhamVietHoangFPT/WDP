@@ -160,4 +160,14 @@ export class BookingRepository implements IBookingRepository {
       .exec()
     return booking ? booking.bookingDate : null
   }
+
+  async getSlotIdByBookingId(id: string): Promise<string | null> {
+    const booking = await this.bookingModel
+      .findById(id)
+      // Populate chỉ lấy trường _id từ collection 'slot' để tối ưu hiệu suất
+      .populate<{ slot: { _id: any } | null }>({ path: 'slot', select: '_id' })
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return booking?.slot?._id?.toString() ?? null
+  }
 }

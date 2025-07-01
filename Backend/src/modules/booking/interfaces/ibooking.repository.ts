@@ -26,6 +26,7 @@ export interface IBookingRepository {
   checkExistById(id: string): Promise<boolean>
   getFacilityIdByBookingId(id: string): Promise<string | null>
   getBookingDateById(id: string): Promise<Date | null>
+  getSlotIdByBookingId(id: string): Promise<string | null>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')

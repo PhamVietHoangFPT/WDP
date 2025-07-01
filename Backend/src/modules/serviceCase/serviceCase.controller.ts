@@ -140,4 +140,9 @@ export class ServiceCaseController {
       success: true,
     }
   }
+
+  @Post('Test')
+  test(): Promise<void> {
+    return this.serviceCaseService.handleCron()
+  }
 }

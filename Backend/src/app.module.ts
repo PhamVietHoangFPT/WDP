@@ -28,7 +28,6 @@ import { TestRequestStatusModule } from './modules/testRequestStatus/testRequest
 import { ServiceCaseModule } from './modules/serviceCase/serviceCase.module'
 import { TestRequestHistoryModule } from './modules/testRequestHistory/testRequestHistory.module'
 import { ResultModule } from './modules/result/result.module'
-import { SampleCollectorModule } from './modules/sampleCollectorGenerator/sampleCollector.module'
 import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipmentStatus.module'
 @Module({
   imports: [
@@ -62,7 +61,6 @@ import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipment
     ServiceCaseModule,
     TestRequestHistoryModule,
     ResultModule,
-    SampleCollectorModule,
     KitShipmentStatusModule,
   ],
   controllers: [AppController],
