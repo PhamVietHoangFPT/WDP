@@ -58,36 +58,36 @@ const CreateSlot: React.FC = () => {
 
   return (
     <ConfigProvider locale={locale}>
-    <div style={{ padding: '24px' }}>
-      <Title level={2}>Tạo Slot</Title>
-      <Form form={form} layout='vertical' onFinish={handleSave}>
-        <Form.Item
-          label='Số ngày cần tạo'
-          name='daysToGenerate'
-          rules={[{ required: true, message: 'Vui lòng nhập số ngày' }]}
-        >
-          <InputNumber min={1} max={30} style={{ width: '100%' }} />
-        </Form.Item>
+      <div style={{ padding: '24px' }}>
+        <Title level={2}>Tạo Slot</Title>
+        <Form form={form} layout='vertical' onFinish={handleSave}>
+          <Form.Item
+            label='Số ngày cần tạo'
+            name='daysToGenerate'
+            rules={[{ required: true, message: 'Vui lòng nhập số ngày' }]}
+          >
+            <InputNumber min={1} max={30} style={{ width: '100%' }} />
+          </Form.Item>
 
-        <Form.Item
-          label='Ngày bắt đầu'
-          name='startDate'
-          rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu' }]}
-        >
-          <DatePicker style={{ width: '100%' }} />
-        </Form.Item>
+          <Form.Item
+            label='Ngày bắt đầu'
+            name='startDate'
+            rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
 
-        <Form.Item>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <Button type='primary' htmlType='submit' loading={loading}>
-              Tạo
-            </Button>
-            <Button onClick={() => navigate('/admin/slots')}>Trở lại</Button>
-          </div>
-        </Form.Item>
-      </Form>
-    </div>
-  </ConfigProvider>
+          <Form.Item>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <Button type='primary' htmlType='submit' loading={loading}>
+                Tạo
+              </Button>
+              <Button onClick={() => navigate('/admin/slots')}>Trở lại</Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </div>
+    </ConfigProvider>
   )
 }
 

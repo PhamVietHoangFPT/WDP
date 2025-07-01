@@ -50,7 +50,6 @@ export const paymentApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-
   }),
 })
 
@@ -59,5 +58,5 @@ export const {
   useCreatePaymentUrlMutation,
   useCreateBookingPaymentMutation,
   useCreateServicePaymentMutation,
-  useCreateServiceCasePaymentMutation
+  useCreateServiceCasePaymentMutation,
 } = paymentApi
