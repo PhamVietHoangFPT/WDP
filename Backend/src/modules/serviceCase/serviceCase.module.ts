@@ -11,6 +11,8 @@ import { ServiceModule } from '../service/service.module'
 import { CaseMemberModule } from '../caseMember/caseMember.module'
 import { AuthModule } from '../auth/auth.module'
 import { TestRequestHistoryModule } from '../testRequestHistory/testRequestHistory.module'
+import { SlotModule } from '../slot/slot.module'
+import { BookingModule } from '../booking/booking.module'
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { TestRequestHistoryModule } from '../testRequestHistory/testRequestHisto
     CaseMemberModule,
     TestRequestHistoryModule,
     AuthModule,
+    SlotModule,
+    BookingModule,
   ],
   controllers: [ServiceCaseController],
   providers: [

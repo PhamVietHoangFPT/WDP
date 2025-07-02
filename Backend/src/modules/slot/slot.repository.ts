@@ -25,7 +25,7 @@ export class SlotRepository implements ISlotRepository {
   async findById(id: string): Promise<SlotDocument | null> {
     return this.slotModel
       .findById(id)
-      .populate({ path: 'slotTemplate', select: 'daysOfWeek -_id' })
+      .populate({ path: 'slotTemplate', select: 'facility -_id' })
       .exec()
   }
 

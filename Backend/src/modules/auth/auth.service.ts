@@ -13,11 +13,13 @@ import * as bcrypt from 'bcrypt'
 import { IAuthRepository } from './interfaces/iauth.repository'
 import { LoginDto } from './dto/login.dto'
 import { LoginResponseDto } from './dto/loginResponse.dto'
+import { ConfigService } from '@nestjs/config'
 // import { hashPassword } from 'src/utils/hashPassword'
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
+    private configService: ConfigService,
     @Inject(IAuthRepository) private readonly authRepository: IAuthRepository,
   ) {}
 
@@ -29,11 +31,18 @@ export class AuthService {
   }
 
   generateToken(payload: any): Promise<string> {
-    return Promise.resolve(this.jwtService.sign(payload))
+    const jwtSecret = this.configService.get<string>('JWT_SECRET')
+    return Promise.resolve(this.jwtService.sign(payload, { secret: jwtSecret }))
   }
 
-  verifyToken(token: string): Promise<any> {
-    return this.jwtService.verify(token)
+  async verifyToken(token: string): Promise<any> {
+    try {
+      const jwtSecret = this.configService.get<string>('JWT_SECRET')
+      const payload = await this.jwtService.verify(token, { secret: jwtSecret })
+      return payload
+    } catch (error) {
+      throw new HttpException('Token không hợp lệ', 401)
+    }
   }
 
   decodeToken(token: string): Promise<any> {

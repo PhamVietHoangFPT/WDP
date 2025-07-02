@@ -20,6 +20,8 @@ export interface IServiceCaseService {
     sampleCollectorId?: string,
     doctorId?: string,
   ): Promise<ServiceCaseResponseDto | null>
+
+  handleCron(): Promise<void>
 }
 
 export const IServiceCaseService = Symbol('IServiceCaseService')

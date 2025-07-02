@@ -4,6 +4,7 @@ import {
   NotFoundException,
   Logger,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common'
 
 import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
@@ -74,24 +75,29 @@ export class SamplingKitInventoryService
       throw new ConflictException(`Ngày hết hạn phải lớn hơn ngày hiện tại.`)
     }
 
-    if (createSamplingKitInventoryDto.importDate > new Date()) {
-      throw new ConflictException(`Ngày nhập khẩu phải nhỏ hơn ngày hiện tại.`)
-    }
+    try {
+      const newSamplingKitInventory =
+        await this.samplingKitInventoryRepository.create(
+          createSamplingKitInventoryDto,
+          facilityId,
+          userId,
+        )
+      return this.mapToResponseDto(newSamplingKitInventory)
+    } catch (error) {
+      if (error.code === 11000) {
+        // Nếu đúng, ném ra lỗi ConflictException với thông báo rõ ràng
+        this.logger.error(`Lỗi khi tạo mẫu kit: ${error.message}`, error.stack)
+        throw new ConflictException(
+          `Mã mẫu kit này đã tồn tại. Vui lòng chọn một mã khác.`,
+        )
+      }
 
-    if (
-      createSamplingKitInventoryDto.importDate >
-      createSamplingKitInventoryDto.expDate
-    ) {
-      throw new ConflictException(`Ngày nhập khẩu phải nhỏ hơn ngày hết hạn.`)
-    }
-
-    const newSamplingKitInventory =
-      await this.samplingKitInventoryRepository.create(
-        createSamplingKitInventoryDto,
-        facilityId,
-        userId,
+      // Đối với tất cả các lỗi khác không xác định, ném ra lỗi chung
+      // để tránh lộ chi tiết kỹ thuật không cần thiết.
+      throw new InternalServerErrorException(
+        `Đã có lỗi xảy ra khi tạo mẫu kit.`,
       )
-    return this.mapToResponseDto(newSamplingKitInventory)
+    }
   }
 
   async findById(id: string): Promise<SamplingKitInventoryResponseDto> {

@@ -1,0 +1,42 @@
+import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
+import { ManagerService } from './manager.service'
+import { ManagerRepository } from './manager.repository'
+import { IManagerService } from './interfaces/imanager.service'
+import { IManagerRepository } from './interfaces/imanager.repository'
+import { ManagerController } from './manager.controller'
+import { Account, AccountSchema } from '../account/schemas/account.schema'
+import {
+  ServiceCase,
+  ServiceCaseSchema,
+} from '../serviceCase/schemas/serviceCase.schema'
+import { AuthModule } from '../auth/auth.module'
+import { RoleModule } from '../role/role.module'
+import { Address, AddressSchema } from '../address/schemas/address.schema'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Account.name, schema: AccountSchema },
+      { name: ServiceCase.name, schema: ServiceCaseSchema },
+      { name: Address.name, schema: AddressSchema },
+    ]),
+    AuthModule,
+    RoleModule,
+    TestRequestStatusModule,
+  ],
+  controllers: [ManagerController],
+  providers: [
+    {
+      provide: IManagerRepository,
+      useClass: ManagerRepository,
+    },
+    {
+      provide: IManagerService,
+      useClass: ManagerService,
+    },
+  ],
+  exports: [IManagerService, IManagerRepository, MongooseModule],
+})
+export class ManagerModule {}
