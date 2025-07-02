@@ -11,7 +11,8 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { IManagerRepository } from './interfaces/imanager.repository'
 import { IRoleRepository } from '../role/interfaces/irole.repository'
-import { Address, AddressDocument } from '../address/schemas/address.schema'
+
+import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 
 @Injectable()
 export class ManagerRepository implements IManagerRepository {
@@ -22,8 +23,8 @@ export class ManagerRepository implements IManagerRepository {
     private readonly serviceCaseModel: Model<ServiceCaseDocument>,
     @Inject(IRoleRepository)
     private readonly roleRepository: IRoleRepository,
-    @InjectModel(Address.name)
-    private readonly addressModel: Model<AddressDocument>,
+    @Inject(ITestRequestStatusRepository)
+    private readonly testRequestStatusRepository: ITestRequestStatusRepository,
   ) {}
 
   async assignSampleCollectorToServiceCase(
@@ -104,9 +105,166 @@ export class ManagerRepository implements IManagerRepository {
   async getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
   ): Promise<ServiceCase[]> {
-    return this.serviceCaseModel
-      .find({ sampleCollector: null, facility: facilityId })
-      .lean()
-      .exec()
+    const serviceCaseStatus =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)',
+      )
+    return await this.serviceCaseModel.aggregate([
+      {
+        $match: {
+          sampleCollector: null,
+          currentStatus: new Types.ObjectId(serviceCaseStatus),
+        },
+      },
+      // Ket noi voi casemembers
+      {
+        $lookup: {
+          from: 'casemembers',
+          let: { caseMemberId: '$caseMember' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+                isAtHome: true,
+              },
+            },
+          ],
+          as: 'caseMembers',
+        },
+      },
+      // Mo mang caseMembers
+      {
+        $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true },
+      },
+      // Tim booking trong caseMembers
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { bookingId: '$caseMembers.booking' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$bookingId'],
+                },
+              },
+            },
+          ],
+          as: 'bookings',
+        },
+      },
+      // Mo mang bookings
+      {
+        $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true },
+      },
+      // Ket noi voi slots
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: { $toObjectId: '$bookings.slot' } }, // Chuyển đổi trực tiếp trong let
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slots',
+        },
+      },
+      // Mo mang slots
+      {
+        $unwind: { path: '$slots', preserveNullAndEmptyArrays: true },
+      },
+      // ket noi voi slottemplates
+      {
+        $lookup: {
+          from: 'slottemplates',
+          let: { slotTemplateId: '$slots.slotTemplate' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotTemplateId'],
+                },
+              },
+            },
+          ],
+          as: 'slotTemplates',
+        },
+      },
+      // Mo mang slotTemplates
+      {
+        $unwind: { path: '$slotTemplates', preserveNullAndEmptyArrays: true },
+      },
+      // ket noi voi facilities
+      {
+        $lookup: {
+          from: 'facilities',
+          let: { facilityId: '$slotTemplates.facility' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$facilityId'] },
+                    { $eq: ['$_id', new Types.ObjectId(facilityId)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'facilities',
+        },
+      },
+      // Mo bang facilities
+      {
+        $unwind: { path: '$facilities', preserveNullAndEmptyArrays: true },
+      },
+      // Ket noi voi accounts
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accounts',
+        },
+      },
+      // Mo mang accounts
+      {
+        $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true },
+      },
+      // Chon truong can thiet
+      {
+        $project: {
+          _id: 1,
+          totalFee: 1,
+          account: {
+            _id: '$accounts._id',
+            name: '$accounts.name',
+            email: '$accounts.email',
+            phoneNumber: '$accounts.phoneNumber',
+          },
+          bookingDate: '$bookings.bookingDate',
+          bookingTime: '$slots.startTime',
+          facility: {
+            _id: '$facilities._id',
+            name: '$facilities.facilityName',
+          },
+        },
+      },
+    ])
   }
 }

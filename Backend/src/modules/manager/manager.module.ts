@@ -13,6 +13,7 @@ import {
 import { AuthModule } from '../auth/auth.module'
 import { RoleModule } from '../role/role.module'
 import { Address, AddressSchema } from '../address/schemas/address.schema'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Address, AddressSchema } from '../address/schemas/address.schema'
     ]),
     AuthModule,
     RoleModule,
+    TestRequestStatusModule,
   ],
   controllers: [ManagerController],
   providers: [
