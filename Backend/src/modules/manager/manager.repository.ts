@@ -31,8 +31,8 @@ export class ManagerRepository implements IManagerRepository {
     serviceCaseId: string,
     sampleCollectorId: string,
     userId: string,
-  ): Promise<void> {
-    await this.serviceCaseModel.findByIdAndUpdate(
+  ): Promise<ServiceCaseDocument> {
+    const data = await this.serviceCaseModel.findByIdAndUpdate(
       serviceCaseId,
       {
         sampleCollector: sampleCollectorId,
@@ -41,6 +41,7 @@ export class ManagerRepository implements IManagerRepository {
       },
       { new: true },
     )
+    return data
   }
 
   async getAllSampleCollectors(facilityId: string): Promise<AccountDocument[]> {
@@ -104,11 +105,13 @@ export class ManagerRepository implements IManagerRepository {
 
   async getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
+    isAtHome: boolean,
   ): Promise<ServiceCase[]> {
     const serviceCaseStatus =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
         'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)',
       )
+    console.log(isAtHome)
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
@@ -127,7 +130,6 @@ export class ManagerRepository implements IManagerRepository {
                 $expr: {
                   $eq: ['$_id', '$$caseMemberId'],
                 },
-                isAtHome: true,
               },
             },
           ],
@@ -137,6 +139,12 @@ export class ManagerRepository implements IManagerRepository {
       // Mo mang caseMembers
       {
         $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true },
+      },
+      // Loc serviceCase theo isAtHome
+      {
+        $match: {
+          'caseMembers.isAtHome': isAtHome, // Lọc chính xác các serviceCase có casemember isAtHome mong muốn
+        },
       },
       // Tim booking trong caseMembers
       {

@@ -59,10 +59,16 @@ export class ManagerController {
     }
   }
 
-  @Get('service-cases-without-sample-collector')
+  @Get('service-cases-without-sample-collector/:isAtHome')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ chưa có nhân viên lấy mẫu' })
+  @ApiParam({
+    name: 'isAtHome',
+    description: 'Lọc hồ sơ tại nhà (true) hoặc tại cơ sở (false)',
+    required: false,
+    type: Boolean,
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Danh sách hồ sơ chưa có nhân viên lấy mẫu',
@@ -71,17 +77,59 @@ export class ManagerController {
   })
   async getAllServiceCasesWithoutSampleCollector(
     @Req() req: any,
+    @Param('isAtHome') isAtHome: boolean = true, // Default to true if not provided
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
     const facilityId = req.user.facility._id
     const data =
       await this.managerService.getAllServiceCasesWithoutSampleCollector(
         facilityId,
+        isAtHome,
       )
     return {
       statusCode: HttpStatus.OK,
       success: true,
       message: 'Danh sách hồ sơ chưa có nhân viên lấy mẫu',
       data: data.map((item) => new ServiceCaseResponseDto(item)),
+    }
+  }
+
+  @Put('service-cases/:serviceCaseId/sample-collector/:sampleCollectorId')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({
+    summary: 'Gán nhân viên lấy mẫu cho hồ sơ dịch vụ',
+  })
+  @ApiParam({
+    name: 'serviceCaseId',
+    description: 'ID của hồ sơ dịch vụ',
+    required: true,
+  })
+  @ApiParam({
+    name: 'sampleCollectorId',
+    description: 'ID của nhân viên lấy mẫu',
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cập nhật thành công',
+    type: ApiResponseDto,
+  })
+  async assignSampleCollectorToServiceCase(
+    @Param('serviceCaseId') serviceCaseId: string,
+    @Param('sampleCollectorId') sampleCollectorId: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const userId = req.user.id
+    const data = await this.managerService.assignSampleCollectorToServiceCase(
+      serviceCaseId,
+      sampleCollectorId,
+      userId,
+    )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Cập nhật thành công',
+      data: [data],
     }
   }
 }

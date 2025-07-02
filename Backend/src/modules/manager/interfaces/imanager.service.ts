@@ -6,10 +6,11 @@ export interface IManagerService {
     serviceCaseId: string,
     sampleCollectorId: string,
     userId: string,
-  ): Promise<void>
+  ): Promise<ServiceCaseResponseDto>
   getAllSampleCollectors(facilityId: string): Promise<AccountResponseDto[]>
   getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
+    isAtHome: boolean,
   ): Promise<ServiceCaseResponseDto[]>
 }
 

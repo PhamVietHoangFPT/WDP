@@ -25,10 +25,12 @@ export class ManagerService implements IManagerService {
 
   async getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
+    isAtHome: boolean,
   ): Promise<ServiceCaseResponseDto[]> {
     const serviceCases =
       await this.managerRepository.getAllServiceCasesWithoutSampleCollector(
         facilityId,
+        isAtHome,
       )
     if (!serviceCases || serviceCases.length === 0) {
       throw new NotFoundException(
@@ -42,5 +44,16 @@ export class ManagerService implements IManagerService {
     serviceCaseId: string,
     sampleCollectorId: string,
     userId: string,
-  ): Promise<void> {}
+  ): Promise<ServiceCaseResponseDto> {
+    const serviceCase =
+      await this.managerRepository.assignSampleCollectorToServiceCase(
+        serviceCaseId,
+        sampleCollectorId,
+        userId,
+      )
+    if (!serviceCase) {
+      throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
+    }
+    return new ServiceCaseResponseDto(serviceCase)
+  }
 }
