@@ -7,10 +7,12 @@ import { IAuthService } from './interfaces/iauth.service'
 import { IAuthRepository } from './interfaces/iauth.repository'
 import { Account, AccountSchema } from '../account/schemas/account.schema'
 import { jwtModule } from 'src/config/jwt.config'
+import { EmailModule } from '../email/email.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
     jwtModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [
