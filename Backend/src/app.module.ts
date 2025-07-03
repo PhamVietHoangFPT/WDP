@@ -30,6 +30,7 @@ import { TestRequestHistoryModule } from './modules/testRequestHistory/testReque
 import { ResultModule } from './modules/result/result.module'
 import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipmentStatus.module'
 import { ManagerModule } from './modules/manager/manager.module'
+import { EmailModule } from './modules/email/email.module'
 @Module({
   imports: [
     databaseConfig,
@@ -64,6 +65,7 @@ import { ManagerModule } from './modules/manager/manager.module'
     ResultModule,
     KitShipmentStatusModule,
     ManagerModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

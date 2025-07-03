@@ -15,6 +15,7 @@ import { LoginResponseDto } from './dto/loginResponse.dto'
 import { RegisterResponseDto } from './dto/registerResponse.dto'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { IEmailService } from '../email/interfaces/iemail.service'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,6 +23,8 @@ export class AuthController {
   constructor(
     @Inject(IAuthService) // Ensure the correct token is used
     private readonly authService: IAuthService,
+    @Inject(IEmailService)
+    private readonly emailService: IEmailService, // Inject the email service
   ) {}
 
   @Post('login')
@@ -62,5 +65,16 @@ export class AuthController {
       success: true,
       message: 'Đăng ký thành công',
     })
+  }
+
+  @Post('test-email')
+  @ApiOperation({ summary: 'Kiểm tra email' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ApiResponseDto<string>,
+  })
+  @HttpCode(HttpStatus.OK)
+  async testEmail() {
+    return this.emailService.testEmail('hoangpvse183123@fpt.edu.vn')
   }
 }
