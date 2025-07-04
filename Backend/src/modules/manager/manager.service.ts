@@ -4,6 +4,9 @@ import { IManagerRepository } from './interfaces/imanager.repository'
 import { IManagerService } from './interfaces/imanager.service'
 import { AccountResponseDto } from '../account/dto/accountResponse.dto'
 import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
+import { RoleDocument } from '../role/schemas/role.schema'
+import { ManagerCreateAccountDto } from './dto/managerCreateAccount.dto'
+import { Account } from '../account/schemas/account.schema'
 
 @Injectable()
 export class ManagerService implements IManagerService {
@@ -11,6 +14,17 @@ export class ManagerService implements IManagerService {
     @Inject(IManagerRepository)
     private readonly managerRepository: IManagerRepository,
   ) {}
+
+  private mapToResponseDto(user: Account): AccountResponseDto {
+    return new AccountResponseDto({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      facility: user.facility,
+    })
+  }
 
   async getAllSampleCollectors(
     facilityId: string,
@@ -55,5 +69,29 @@ export class ManagerService implements IManagerService {
       throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
     }
     return new ServiceCaseResponseDto(serviceCase)
+  }
+
+  async managerCreateAccount(
+    accountData: Partial<ManagerCreateAccountDto>,
+    userId: string,
+    facilityId: string,
+  ): Promise<AccountResponseDto> {
+    const createdAccount = await this.managerRepository.managerCreateAccount(
+      accountData,
+      userId,
+      facilityId,
+    )
+    if (!createdAccount) {
+      throw new NotFoundException('Không thể tạo tài khoản')
+    }
+    return this.mapToResponseDto(createdAccount)
+  }
+
+  async managerGetAllRoles(): Promise<RoleDocument[]> {
+    const roles = await this.managerRepository.managerGetAllRoles()
+    if (!roles || roles.length === 0) {
+      throw new NotFoundException('Không tìm thấy vai trò nào')
+    }
+    return roles
   }
 }

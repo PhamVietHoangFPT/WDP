@@ -1,4 +1,5 @@
 import { AccountDocument } from 'src/modules/account/schemas/account.schema'
+import { RoleDocument } from 'src/modules/role/schemas/role.schema'
 import {
   ServiceCase,
   ServiceCaseDocument,
@@ -15,6 +16,12 @@ export interface IManagerRepository {
     facilityId: string,
     isAtHome: boolean,
   ): Promise<ServiceCase[]>
+  managerCreateAccount(
+    accountData: Partial<AccountDocument>,
+    userId: string,
+    facilityId: string,
+  ): Promise<AccountDocument>
+  managerGetAllRoles(): Promise<RoleDocument[]>
 }
 
 export const IManagerRepository = Symbol('IManagerRepository')
