@@ -6,6 +6,7 @@ import {
   // InternalServerErrorException,
   HttpException,
   Inject,
+  HttpStatus,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
@@ -55,43 +56,34 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-    try {
-      const { email, password } = loginDto
+    const { email, password } = loginDto
 
-      const account = await this.authRepository.loginByEmail(email).exec()
+    const account = await this.authRepository.loginByEmail(email).exec()
 
-      if (!account) {
-        throw new NotFoundException('Tài khoản không tồn tại')
-      }
-
-      const isPasswordValid = await this.comparePassword(
-        password,
-        account.password,
-      )
-      if (!isPasswordValid) {
-        throw new HttpException('Sai mật khẩu', 401)
-      }
-
-      const token = await this.generateToken({
-        id: account._id,
-        email: account.email,
-        name: account.name,
-        phoneNumber: account.phoneNumber,
-        role: account.role.role,
-        facility: account.facility,
-        gender: account.gender,
-      })
-
-      return new LoginResponseDto({
-        accessToken: token,
-      })
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error
-      } else {
-        console.log(error)
-        throw new HttpException('Đã xảy ra lỗi trong quá trình đăng nhập', 500)
-      }
+    if (!account) {
+      throw new NotFoundException('Tài khoản không tồn tại')
     }
+
+    const isPasswordValid = await this.comparePassword(
+      password,
+      account.password,
+    )
+    if (!isPasswordValid) {
+      throw new HttpException('Sai mật khẩu', HttpStatus.BAD_REQUEST)
+    }
+
+    const token = await this.generateToken({
+      id: account._id,
+      email: account.email,
+      name: account.name,
+      phoneNumber: account.phoneNumber,
+      role: account.role.role,
+      facility: account.facility,
+      gender: account.gender,
+    })
+
+    return new LoginResponseDto({
+      accessToken: token,
+    })
   }
 }

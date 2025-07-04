@@ -8,8 +8,9 @@ import { IsString, IsNotEmpty } from 'class-validator'
 import mongoose from 'mongoose'
 
 export class CreateResultDto {
-  @ApiProperty({ example: 95, required: true })
-  adnPercentage: number
+  @ApiProperty({ example: '99.999', required: true })
+  @IsNotEmpty({ message: 'ADN Percentage không được để trống' })
+  adnPercentage: string
 
   @ApiProperty({
     example: '682dbf1e3ecf256c0683b4d8',
