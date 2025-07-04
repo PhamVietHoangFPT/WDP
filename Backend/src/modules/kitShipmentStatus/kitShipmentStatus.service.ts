@@ -3,6 +3,7 @@ import {
     Inject,
     NotFoundException,
     BadRequestException,
+    ConflictException,
 } from '@nestjs/common'
 import { IKitShipmentStatusService } from './interfaces/ikitShipmentStatus.service'
 import { IKitShipmentStatusRepository } from './interfaces/ikitShipmentStatus.repository'
@@ -26,18 +27,36 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
         })
     }
 
+    async validateShipmentStatusUniqueness(
+        status: string,
+        order: number,
+        repository: any,
+    ): Promise<void> {
+        const existingName = await repository.findByName(status);
+        if (existingName) {
+            throw new BadRequestException(
+                `Trạng thái vận chuyển với tên "${status}" đã tồn tại.`,
+            );
+        }
+        const existingOrder = await repository.findByOrder(order);
+        if (existingOrder) {
+            throw new BadRequestException(
+                `Thứ tự của trạng thái vận chuyển đã tồn tại.`,
+            );
+        }
+    }
+
     async create(
         data: CreateKitShipmentStatusDto,
         userId: string,
     ): Promise<KitShipmentStatusResponseDto> {
-        const existingStatus = await this.kitShipmentStatusRepository.findByName(data.status)
-        if (existingStatus) {
-            throw new BadRequestException(
-                `Trạng thái vận chuyển với tên "${data.status}" đã tồn tại.`,
-            )
-        }
-        const createStatus = await this.kitShipmentStatusRepository.create(data, userId)
-        return this.mapToResponseDto(createStatus)
+        await this.validateShipmentStatusUniqueness(
+            data.status,
+            data.order,
+            this.kitShipmentStatusRepository,
+        );
+        const createStatus = await this.kitShipmentStatusRepository.create(data, userId);
+        return this.mapToResponseDto(createStatus);
     }
 
     async findAll(): Promise<KitShipmentStatusResponseDto[]> {
@@ -63,10 +82,30 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
         data: UpdateKitShipmentStatusDto,
         userId: string,
     ): Promise<KitShipmentStatusResponseDto | null> {
-        const existingType = await this.kitShipmentStatusRepository.findById(id)
-        if (!existingType) {
+        const existingStatus = await this.kitShipmentStatusRepository.findById(id)
+        if (!existingStatus) {
             throw new NotFoundException(
                 `Không tìm thấy kiểu trạng thái vận chuyển với ID ${id}.`,
+            )
+        }
+
+        if (
+            existingStatus.status === data.status &&
+            existingStatus.order === data.order
+        ) {
+            throw new ConflictException('Không có thay đổi nào để cập nhật.')
+        }
+
+        const existingName = await this.kitShipmentStatusRepository.findByName(data.status)
+        if (existingName) {
+            throw new BadRequestException(
+                `Trạng thái vận chuyển với tên "${data.status}" đã tồn tại.`,
+            )
+        }
+        const existingOrder = await this.kitShipmentStatusRepository.findByOrder(data.order)
+        if (existingOrder) {
+            throw new BadRequestException(
+                `Thứ tự của trạng thái vận chuyển đã tồn tại.`,
             )
         }
         const updatedType = await this.kitShipmentStatusRepository.update(id, data, userId)
