@@ -12,6 +12,9 @@ export class KitShipmentStatusRepository implements IKitShipmentStatusRepository
         @InjectModel(KitShipmentStatus.name)
         private KitShipmentStatusModel: Model<KitShipmentStatusDocument>,
     ) { }
+    findByOrder(order: number): Promise<KitShipmentStatusDocument | null> {
+        return this.KitShipmentStatusModel.findOne({ order, deleted_at: null }).exec()
+    }
 
     async create(
         createTypeDto: CreateKitShipmentStatusDto,

@@ -13,5 +13,7 @@ export interface IKitShipmentStatusRepository {
     ): Promise<KitShipmentStatusDocument | null>
     delete(id: string, userId: string): Promise<boolean>
     findByName(status: string): Promise<KitShipmentStatusDocument | null>
+    findByOrder(order: number): Promise<KitShipmentStatusDocument | null>
+
 }
 export const IKitShipmentStatusRepository = Symbol('IKitShipmentStatusRepository')
