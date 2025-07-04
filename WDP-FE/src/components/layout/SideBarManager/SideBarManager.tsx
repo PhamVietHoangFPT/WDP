@@ -59,6 +59,12 @@ export const SideBar = () => {
       label: 'Quản trị',
       onClick: () => navigate('manager'),
     },
+    {
+      key: 'manager/samples',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị mẫu thu ',
+      onClick: () => navigate('manager/samples'),
+    },
   ]
 
   return (
