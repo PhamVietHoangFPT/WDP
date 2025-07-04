@@ -8,11 +8,13 @@ import {
 } from 'src/modules/serviceCase/schemas/serviceCase.schema'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import { IManagerRepository } from './interfaces/imanager.repository'
 import { IRoleRepository } from '../role/interfaces/irole.repository'
 
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
+import { Role, RoleDocument } from '../role/schemas/role.schema'
+import { hashPassword } from 'src/utils/hashPassword'
 
 @Injectable()
 export class ManagerRepository implements IManagerRepository {
@@ -25,6 +27,8 @@ export class ManagerRepository implements IManagerRepository {
     private readonly roleRepository: IRoleRepository,
     @Inject(ITestRequestStatusRepository)
     private readonly testRequestStatusRepository: ITestRequestStatusRepository,
+    @InjectModel(Role.name)
+    private readonly roleModel: Model<RoleDocument>,
   ) {}
 
   async assignSampleCollectorToServiceCase(
@@ -274,5 +278,28 @@ export class ManagerRepository implements IManagerRepository {
         },
       },
     ])
+  }
+
+  async managerCreateAccount(
+    accountData: Partial<AccountDocument>,
+    userId: string,
+    facilityId: string,
+  ): Promise<AccountDocument> {
+    const passwordHash = await hashPassword('123456')
+    accountData.password = passwordHash
+    const newAccount = await this.accountModel.create({
+      ...accountData,
+      created_by: new Types.ObjectId(userId),
+      facility: new Types.ObjectId(facilityId),
+    })
+    return newAccount
+  }
+
+  async managerGetAllRoles(): Promise<RoleDocument[]> {
+    return await this.roleModel
+      .find({
+        role: { $nin: ['Admin', 'Manager', 'Customer'] }, // Loại bỏ cả 'Admin' và 'Manager'
+      })
+      .exec()
   }
 }

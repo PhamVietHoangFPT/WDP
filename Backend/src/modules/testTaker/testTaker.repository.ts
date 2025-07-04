@@ -32,7 +32,7 @@ export class TestTakerRepository implements ITestTakerRepository {
     limit: number,
   ): Promise<TestTaker[]> {
     const filter: any = {}
-
+    console.log(queryDto.accountId)
     if (queryDto.name) {
       filter.name = { $regex: queryDto.name, $options: 'i' }
     }
@@ -50,17 +50,20 @@ export class TestTakerRepository implements ITestTakerRepository {
     }
 
     if (queryDto.accountId && Types.ObjectId.isValid(queryDto.accountId)) {
-      filter.accountId = new Types.ObjectId(queryDto.accountId)
+      filter.account = new Types.ObjectId(queryDto.accountId)
     }
 
-    return this.testTakerModel
-      .find(filter)
-      .skip(skip)
-      .limit(limit)
-      .sort({ name: 1 })
-      .populate({ path: 'account', select: 'name email' })
-      .lean()
-      .exec()
+    return (
+      this.testTakerModel
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        .find(filter)
+        .skip(skip)
+        .limit(limit)
+        .sort({ name: 1 })
+        .populate({ path: 'account', select: 'name email' })
+        .lean()
+        .exec()
+    )
   }
 
   async countAll(queryDto: QueryTestTakerDto): Promise<number> {
@@ -83,10 +86,15 @@ export class TestTakerRepository implements ITestTakerRepository {
     }
 
     if (queryDto.accountId && Types.ObjectId.isValid(queryDto.accountId)) {
-      filter.accountId = new Types.ObjectId(queryDto.accountId)
+      filter.account = new Types.ObjectId(queryDto.accountId)
     }
 
-    return this.testTakerModel.countDocuments(filter).exec()
+    return (
+      this.testTakerModel
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        .countDocuments(filter)
+        .exec()
+    )
   }
 
   async update(

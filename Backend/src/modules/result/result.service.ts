@@ -12,7 +12,7 @@ import { UpdateResultDto } from './dto/updateResult.dto'
 import { ResultDocument } from './schemas/result.schema'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
-
+import { IEmailService } from '../email/interfaces/iemail.service'
 @Injectable()
 export class ResultService implements IResultService {
   constructor(
@@ -21,6 +21,7 @@ export class ResultService implements IResultService {
     private serviceCaseRepository: IServiceCaseRepository,
     @Inject(ITestRequestStatusRepository)
     private testRequestStatusRepository: ITestRequestStatusRepository,
+    @Inject(IEmailService) private emailService: IEmailService,
   ) {}
 
   async create(
@@ -28,12 +29,13 @@ export class ResultService implements IResultService {
     doctorId: string,
   ): Promise<ResultDocument> {
     // Kiểm tra xem service case có tồn tại không
+    // Kiểm tra xem trạng thái hiện tại đang ở đâu
     const currentStatusOfServiceCase =
       await this.serviceCaseRepository.getCurrentStatusId(
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         createResultDto.serviceCase.toString(),
       )
-    // Kiểm tra xem trạng thái hiện tại đang ở đâu
+
     const currentOrderStatus =
       await this.testRequestStatusRepository.getTestRequestStatusOrder(
         currentStatusOfServiceCase,
@@ -44,18 +46,39 @@ export class ResultService implements IResultService {
       )
     }
 
+    if (currentOrderStatus === 9) {
+      throw new ForbiddenException(
+        'Không thể tạo kết quả khi trạng thái hiện tại của trường hợp xét nghiệm đã có kết quả.',
+      )
+    }
+
+    if (currentOrderStatus > 9) {
+      throw new ForbiddenException(
+        'Không thể tạo kết quả khi trạng thái hiện tại của trường hợp xét nghiệm đã hoàn thành.',
+      )
+    }
+
     // Cập nhật lại trạng thái hiện tại của service case
     const newStatus =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
         'Đã có kết quả',
       )
-    await this.serviceCaseRepository.updateCurrentStatus(
+    const serviceCaseData =
+      await this.serviceCaseRepository.updateCurrentStatus(
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        createResultDto.serviceCase.toString(),
+        newStatus.toString(),
+        doctorId,
+      )
+    const data = await this.resultRepository.create(createResultDto)
+    await this.emailService.sendEmailForResult(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      createResultDto.serviceCase.toString(),
-      newStatus.toString(),
+      serviceCaseData.account.toString(),
+      data.adnPercentage,
       doctorId,
+      data.conclusion,
     )
-    return await this.resultRepository.create(createResultDto)
+    return data
   }
 
   async findById(id: string): Promise<ResultDocument | null> {

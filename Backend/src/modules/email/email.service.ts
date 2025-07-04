@@ -3,12 +3,20 @@ import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { IEmailService } from './interfaces/iemail.service'
+import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '../account/schemas/account.schema'
+import { Model } from 'mongoose'
+import { Facility } from '../facility/schemas/facility.schema'
 
 @Injectable()
 export class EmailService implements IEmailService {
   constructor(
     private readonly mailerService: MailerService,
     private configService: ConfigService,
+    @InjectModel(Account.name)
+    private readonly accountModel: Model<Account>,
+    @InjectModel(Facility.name)
+    private readonly facilityModel: Model<Facility>,
   ) {}
 
   APP_NAME = this.configService.get<string>('APP_NAME')
@@ -54,7 +62,46 @@ export class EmailService implements IEmailService {
         appName: this.APP_NAME,
       },
     })
-    console.log(`Email kiểm tra đã được gửi đến ${email}`)
+  }
+
+  async sendEmailForResult(
+    customerId: string,
+    adnPercentage: string,
+    doctorId: string,
+    conclusion: string,
+  ): Promise<void> {
+    const doctorAccount = await this.accountModel
+      .findOne({ _id: doctorId })
+      .select('name facility -_id')
+      .exec()
+    const customerAccount = await this.accountModel
+      .findOne({
+        _id: customerId,
+      })
+      .select('email name -_id')
+      .exec()
+    const facility = await this.facilityModel
+      .findOne({ _id: doctorAccount.facility })
+      .select('facilityName -_id')
+      .exec()
+    await this.mailerService.sendMail({
+      to: customerAccount.email,
+      subject: 'Kết quả của bạn',
+      template: 'adn-result', // Tên file template (ví dụ: result.hbs)
+      context: {
+        message: 'Đây là kết quả của bạn từ hệ thống.',
+        appName: this.APP_NAME,
+        customerName: customerAccount.name,
+        doctorName: doctorAccount
+          ? doctorAccount.name
+          : 'Bác sĩ không xác định',
+        facilityName: facility ? facility.facilityName : 'Cơ sở không xác định',
+        adnPercentage: adnPercentage,
+        conclusion: conclusion,
+        currentYear: new Date().getFullYear(),
+      },
+    })
+    console.log(`Email kết quả đã được gửi đến ${customerAccount.email}`)
   }
 
   // Thêm các phương thức gửi email khác tùy theo nhu cầu

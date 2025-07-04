@@ -5,6 +5,9 @@ import { EmailService } from './email.service'
 import { join } from 'path'
 import { ConfigModule, ConfigService } from '@nestjs/config' // Import ConfigModule, ConfigService
 import { IEmailService } from './interfaces/iemail.service' // Import interface for EmailService
+import { MongooseModule } from '@nestjs/mongoose'
+import { Account, AccountSchema } from '../account/schemas/account.schema'
+import { Facility, FacilitySchema } from '../facility/schemas/facility.schema'
 @Module({
   imports: [
     ConfigModule, // Đảm bảo ConfigModule đã được import
@@ -34,6 +37,10 @@ import { IEmailService } from './interfaces/iemail.service' // Import interface 
         },
       }),
     }),
+    MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
+    MongooseModule.forFeature([
+      { name: Facility.name, schema: FacilitySchema },
+    ]),
   ],
   providers: [
     {
