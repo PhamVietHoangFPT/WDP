@@ -30,8 +30,8 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
-@ApiTags('KitShipment')
-@Controller('kitShipment')
+@ApiTags('kit-shipment')
+@Controller('kit-shipment')
 export class KitShipmentController {
   constructor(
     @Inject(IKitShipmentService)

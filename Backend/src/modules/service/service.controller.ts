@@ -29,10 +29,9 @@ import { CreateServiceDto } from './dto/createService.dto'
 import { ServiceResponseDto } from './dto/serviceResponse.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
-import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 
-@ApiTags('Services')
+@ApiTags('services')
 @Controller('services')
 export class ServiceController {
   constructor(

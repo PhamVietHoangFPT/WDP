@@ -3,7 +3,7 @@ import { IPaymentTypeService } from './interfaces/ipaymentType.service'
 import { PaymentTypeDocument } from './schemas/paymentType.schema'
 import { ApiTags } from '@nestjs/swagger'
 
-@ApiTags('paymentType')
+@ApiTags('payment-type')
 @Controller('payment-type')
 export class PaymentTypeController {
   constructor(

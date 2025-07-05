@@ -27,7 +27,7 @@ import { RoleEnum } from 'src/common/enums/role.enum'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
-@ApiTags('SampleTypes')
+@ApiTags('sample-types')
 @Controller('sample-types')
 export class SampleTypeController {
   constructor(

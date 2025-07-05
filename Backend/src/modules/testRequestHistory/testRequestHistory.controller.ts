@@ -23,8 +23,8 @@ import { TestRequestHistoryDocument } from './schemas/testRequestHistory.schema'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
 
-@ApiTags('testRequestHistories')
-@Controller('testRequestHistories')
+@ApiTags('test-request-histories')
+@Controller('test-request-histories')
 @UseGuards(AuthGuard, RolesGuard)
 @ApiBearerAuth()
 @Roles(RoleEnum.STAFF, RoleEnum.CUSTOMER)

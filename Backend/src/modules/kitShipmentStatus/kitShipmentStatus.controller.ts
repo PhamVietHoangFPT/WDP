@@ -27,8 +27,8 @@ import { IKitShipmentStatusService } from './interfaces/ikitShipmentStatus.servi
 import { KitShipmentStatusResponseDto } from './dto/KitShipmentStatusResponse.dto'
 import { CreateKitShipmentStatusDto } from './dto/createKitShipmentStatus.dto'
 import { UpdateKitShipmentStatusDto } from './dto/updateKitShipmentStatus.dto'
-@ApiTags('KitShipmentStatus')
-@Controller('kitshipmentstatus')
+@ApiTags('kit-shipment-status')
+@Controller('kit-shipment-status')
 export class KitShipmentStatusController {
   constructor(
     @Inject(IKitShipmentStatusService)

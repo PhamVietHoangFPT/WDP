@@ -36,8 +36,8 @@ import { SlotTemplateResponseDto } from './dto/slotTemplateResponse.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 
-@ApiTags('slotTemplates')
-@Controller('slotTemplates')
+@ApiTags('slot-templates')
+@Controller('slot-templates')
 export class SlotTemplateController {
   constructor(
     @Inject(ISlotTemplateService)

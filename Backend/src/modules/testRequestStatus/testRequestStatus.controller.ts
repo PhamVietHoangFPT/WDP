@@ -3,7 +3,7 @@ import { ITestRequestStatusService } from './interfaces/itestRequestStatus.servi
 import { ApiTags } from '@nestjs/swagger'
 import { TestRequestStatusDocument } from './schemas/testRequestStatus.schema'
 
-@ApiTags('TestRequestStatus')
+@ApiTags('test-request-status')
 @Controller('test-request-status')
 export class TestRequestStatusController {
   constructor(
