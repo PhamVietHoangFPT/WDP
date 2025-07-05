@@ -31,6 +31,7 @@ import { ResultModule } from './modules/result/result.module'
 import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipmentStatus.module'
 import { ManagerModule } from './modules/manager/manager.module'
 import { EmailModule } from './modules/email/email.module'
+import { KitShipmentModule } from './modules/KitShipment/kitShipment.module'
 @Module({
   imports: [
     databaseConfig,
@@ -66,6 +67,7 @@ import { EmailModule } from './modules/email/email.module'
     KitShipmentStatusModule,
     ManagerModule,
     EmailModule,
+    KitShipmentModule
   ],
   controllers: [AppController],
   providers: [AppService],
