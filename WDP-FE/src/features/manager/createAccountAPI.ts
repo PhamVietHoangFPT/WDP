@@ -18,13 +18,14 @@ const createAccountAPI = apiSlice.injectEndpoints({
       providesTags: ['create-account'],
     }),
 
-    getServiceNoSampleCollectorList: builder.query({
-      query: (isAtHome) => ({
-        url: `managers/service-cases-without-sample-collector/${isAtHome}`,
-        method: 'GET',
+    createAccount: builder.mutation({
+      query: (data) => ({
+        url: '/managers/create-account',
+        method: 'POST',
+        body: data,
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collectors'],
+      invalidatesTags: ['create-account'],
     }),
 
     // createSlotTemplate: builder.mutation({
