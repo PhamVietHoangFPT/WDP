@@ -14,6 +14,7 @@ import { AuthModule } from '../auth/auth.module'
 import { RoleModule } from '../role/role.module'
 import { Address, AddressSchema } from '../address/schemas/address.schema'
 import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+import { Role, RoleSchema } from '../role/schemas/role.schema'
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.
       { name: Account.name, schema: AccountSchema },
       { name: ServiceCase.name, schema: ServiceCaseSchema },
       { name: Address.name, schema: AddressSchema },
+      { name: Role.name, schema: RoleSchema },
     ]),
     AuthModule,
     RoleModule,

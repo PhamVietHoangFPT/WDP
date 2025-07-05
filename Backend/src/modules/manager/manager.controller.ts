@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
   Inject,
   Param,
+  Post,
   Put,
   Req,
   UseGuards,
@@ -15,6 +17,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger'
 
 import { IManagerService } from './interfaces/imanager.service'
@@ -26,6 +29,8 @@ import { RolesGuard } from '../../common/guard/roles.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
 import { RoleEnum } from '../../common/enums/role.enum'
 import { FacilityAccessGuard } from 'src/common/guard/facility.guard'
+import { RoleDocument } from '../role/schemas/role.schema'
+import { ManagerCreateAccountDto } from './dto/managerCreateAccount.dto'
 
 @ApiTags('managers')
 @Controller('managers')
@@ -129,6 +134,58 @@ export class ManagerController {
       statusCode: HttpStatus.OK,
       success: true,
       message: 'Cập nhật thành công',
+      data: [data],
+    }
+  }
+
+  @Get('roles')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Quản lý lấy danh sách vai trò' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách vai trò',
+    type: ApiResponseDto<RoleDocument[]>,
+    isArray: true,
+  })
+  async getAllRoles(): Promise<ApiResponseDto<RoleDocument>> {
+    const data = await this.managerService.managerGetAllRoles()
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách vai trò',
+      data: data,
+    }
+  }
+
+  @Post('create-account')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Tạo tài khoản mới' })
+  @ApiBody({
+    description: 'Thông tin tài khoản mới',
+    type: ManagerCreateAccountDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Tạo tài khoản thành công',
+    type: ApiResponseDto<ManagerCreateAccountDto>,
+  })
+  async createAccount(
+    @Body() accountData: Partial<ManagerCreateAccountDto>,
+    @Req() req: any, // Lấy thông tin người dùng từ request
+  ): Promise<ApiResponseDto<ManagerCreateAccountDto>> {
+    const userId = req.user.id
+    const facilityId = req.user.facility._id
+    const data = await this.managerService.managerCreateAccount(
+      accountData,
+      userId,
+      facilityId,
+    )
+    return {
+      statusCode: HttpStatus.CREATED,
+      success: true,
+      message: 'Tạo tài khoản thành công',
       data: [data],
     }
   }

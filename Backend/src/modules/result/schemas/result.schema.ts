@@ -12,8 +12,8 @@ export class Result extends BaseEntity {
   })
   _id: mongoose.Schema.Types.ObjectId
 
-  @Prop({ type: Number, required: true, trim: true })
-  adnPercentage: number
+  @Prop({ type: String, required: true, trim: true })
+  adnPercentage: string
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   doctorId: mongoose.Schema.Types.ObjectId

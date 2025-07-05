@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kết Quả Xét Nghiệm ADN Của Bạn Từ {{appName}}</title>
+  <style>
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .header img {
+      max-width: 150px;
+      /* Thêm logo của công ty bạn nếu có */
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .header h1 {
+      color: #2c3e50;
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .content {
+      padding: 20px 0;
+    }
+
+    .content p {
+      margin-bottom: 10px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .data-table th,
+    .data-table td {
+      border: 1px solid #dddddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .data-table th {
+      background-color: #f2f2f2;
+      color: #555555;
+      font-weight: bold;
+    }
+
+    .conclusion {
+      font-weight: bold;
+      color: #007bff;
+      /* Màu xanh dương nổi bật */
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #007bff;
+      border-radius: 5px;
+      background-color: #e6f2ff;
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #eeeeee;
+      font-size: 12px;
+      color: #777777;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 12px 25px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Thông Báo Kết Quả Xét Nghiệm ADN</h1>
+    </div>
+    <div class="content">
+      <p>Kính gửi Quý khách {{customerName}}</p>
+      <p>Chúng tôi xin trân trọng thông báo kết quả xét nghiệm ADN của bạn đã sẵn sàng từ **{{appName}}**.</p>
+      <p>{{message}}</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Thông tin</th>
+            <th>Chi tiết</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Người thực hiện phân tích</td>
+            <td>{{doctorName}}</td>
+          </tr>
+          <tr>
+            <td>Cơ sở thực hiện xét nghiệm</td>
+            <td>{{facilityName}}</td>
+          </tr>
+          <tr>
+            <td>Tỷ lệ tương thích ADN</td>
+            <td><strong>{{adnPercentage}}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="conclusion">
+        <strong>Kết luận:</strong> {{conclusion}}
+      </p>
+
+      <div class="button-container">
+        <a href="URL_TO_YOUR_RESULT_PORTAL" class="button">Xem kết quả chi tiết của bạn</a>
+      </div>
+
+      <p style="margin-top: 30px;">Nếu Quý khách có bất kỳ thắc mắc nào về kết quả này, xin vui lòng liên hệ với chúng
+        tôi qua thông tin bên dưới.</p>
+      <p>Trân trọng cảm ơn sự tin tưởng của Quý khách.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{currentYear}} {{appName}}. All rights reserved.</p>
+      <p>Đây là email tự động, vui lòng không trả lời email này.</p>
+    </div>
+  </div>
+</body>
+
+</html>

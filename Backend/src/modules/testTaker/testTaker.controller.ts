@@ -74,6 +74,7 @@ export class TestTakerController {
   @ApiOperation({ summary: 'Lấy danh sách test takers' })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiQuery({ name: 'pageNumber', required: false, type: Number })
+  @ApiQuery({ name: 'accountId', required: true, type: String })
   @ApiResponse({
     status: HttpStatus.OK,
     type: PaginatedResponseDto<TestTakerResponseDto>,
@@ -86,10 +87,9 @@ export class TestTakerController {
         forbidNonWhitelisted: true,
       }),
     )
-    query: QueryTestTakerDto & PaginationQueryDto, // ✅ Kết hợp cả lọc và phân trang
+    query: QueryTestTakerDto & PaginationQueryDto,
   ): Promise<PaginatedResponseDto<TestTakerResponseDto>> {
     const { pageNumber = 1, pageSize = 10, ...filterQuery } = query
-
     const result = await this.testTakerService.findAll(
       filterQuery, // ✅ query điều kiện lọc
       pageNumber,
