@@ -28,12 +28,16 @@ import { ResultDocument } from '../result/schemas/result.schema'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
+import { IDoctorService } from './interfaces/idoctor.service'
+import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
 @ApiTags('doctors')
 @Controller('doctors')
 @ApiBearerAuth()
 export class DoctorController {
   constructor(
     @Inject(IResultService) private readonly resultService: IResultService,
+    @Inject(IDoctorService)
+    private readonly doctorService: IDoctorService,
   ) {}
 
   @Post('/results')
@@ -87,6 +91,31 @@ export class DoctorController {
       data: [data],
       statusCode: 200,
       message: 'Cập nhật kết quả thành công',
+      success: true,
+    }
+  }
+
+  @Get('/service-cases-without-results')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.DOCTOR)
+  @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa trả kết quả' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách hồ sơ dịch vụ chưa trả kết quả',
+    type: ApiResponseDto,
+    isArray: true,
+  })
+  async getAllServiceCasesWithoutResults(
+    @Req() req: any, // Assuming req contains user info
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id // Assuming user has facility info
+    const data =
+      await this.doctorService.getAllServiceCasesWithoutResults(facilityId)
+    return {
+      data: data,
+      statusCode: 200,
+      message: 'Lấy danh sách hồ sơ dịch vụ chưa trả kết quả thành công',
       success: true,
     }
   }
