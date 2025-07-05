@@ -33,6 +33,7 @@ import PaymentDetail from '../pages/ProfileUser/PaymentDetail'
 import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
 import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
 import Sample from '../pages/Sample/Sample'
+import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
 
 const routes: LayoutRoute[] = [
   {
@@ -160,6 +161,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/manager/samples',
         component: Sample,
+        // role: ['admin'],
+      },
+      {
+        path: '/manager/create-account',
+        component: ManagerCreateAccount,
         // role: ['admin'],
       },
     ],
