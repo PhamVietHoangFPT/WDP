@@ -19,24 +19,24 @@ import {
   ApiBody,
 } from '@nestjs/swagger'
 
-import { CreateResultDto } from './dto/createResult.dto'
-import { UpdateResultDto } from './dto/updateResult.dto'
+import { CreateResultDto } from '../result/dto/createResult.dto'
+import { UpdateResultDto } from '../result/dto/updateResult.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
-import { IResultService } from './interfaces/iresult.service'
+import { IResultService } from '../result/interfaces/iresult.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
-import { ResultDocument } from './schemas/result.schema'
+import { ResultDocument } from '../result/schemas/result.schema'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
-@ApiTags('results')
-@Controller('results')
+@ApiTags('doctors')
+@Controller('doctors')
 @ApiBearerAuth()
-export class ResultController {
+export class DoctorController {
   constructor(
     @Inject(IResultService) private readonly resultService: IResultService,
   ) {}
 
-  @Post()
+  @Post('/results')
   @ApiOperation({ summary: 'Tạo kết quả mới' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.DOCTOR)
@@ -57,7 +57,7 @@ export class ResultController {
     }
   }
 
-  @Get(':id')
+  @Get('/results/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Lấy kết quả theo ID' })
   @ApiParam({ name: 'id', type: String, description: 'Result ID' })
@@ -73,7 +73,7 @@ export class ResultController {
     }
   }
 
-  @Put(':id')
+  @Put('/results/:id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.DOCTOR)
   @ApiOperation({ summary: 'Cập nhật kết quả theo ID' })

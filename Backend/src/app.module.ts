@@ -32,6 +32,7 @@ import { KitShipmentStatusModule } from './modules/kitShipmentStatus/kitShipment
 import { ManagerModule } from './modules/manager/manager.module'
 import { EmailModule } from './modules/email/email.module'
 import { KitShipmentModule } from './modules/KitShipment/kitShipment.module'
+import { DoctorModule } from './modules/doctor/doctor.module'
 @Module({
   imports: [
     databaseConfig,
@@ -67,7 +68,8 @@ import { KitShipmentModule } from './modules/KitShipment/kitShipment.module'
     KitShipmentStatusModule,
     ManagerModule,
     EmailModule,
-    KitShipmentModule
+    KitShipmentModule,
+    DoctorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
