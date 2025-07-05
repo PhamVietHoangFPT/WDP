@@ -1,10 +1,8 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Form, Input, Button, Typography, Select, Radio, message, Card, Spin, Space } from "antd"
 import { SaveOutlined } from "@ant-design/icons"
-import { useNavigate } from "react-router-dom"
+// import { useNavigate } from "react-router-dom"
 import { useGetRoleListQuery, useCreateAccountMutation } from "../../features/manager/createAccountAPI"
 
 const { Title } = Typography
@@ -24,17 +22,15 @@ interface Role {
 }
 
 const ManagerCreateAccount: React.FC = () => {
-  const navigate = useNavigate()
+//   const navigate = useNavigate()
   const [form] = Form.useForm()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch roles list
   const { data: rolesData, isLoading: isLoadingRoles } = useGetRoleListQuery({
     pageNumber: 1,
-    pageSize: 100, // Get all roles
+    pageSize: 100, 
   })
 
-  // Create account mutation
   const [createAccount] = useCreateAccountMutation()
 
   const handleSubmit = async (values: CreateAccountForm) => {
@@ -43,9 +39,6 @@ const ManagerCreateAccount: React.FC = () => {
       const response = await createAccount(values).unwrap()
       message.success("Tạo tài khoản thành công!")
       form.resetFields()
-
-      // Optional: Navigate back to accounts list or stay on form
-      // navigate('/manager/accounts')
 
       console.log("Account created:", response)
     } catch (error: any) {
@@ -56,9 +49,9 @@ const ManagerCreateAccount: React.FC = () => {
     }
   }
 
-  const handleReset = () => {
-    form.resetFields()
-  }
+//   const handleReset = () => {
+//     form.resetFields()
+//   }
 
   const validatePhoneNumber = (_: any, value: string) => {
     if (!value) {
@@ -143,13 +136,13 @@ const ManagerCreateAccount: React.FC = () => {
                 Tạo tài khoản
               </Button>
 
-              <Button type="default" onClick={handleReset} disabled={isSubmitting} size="large">
+              {/* <Button type="default" onClick={handleReset} disabled={isSubmitting} size="large">
                 Đặt lại
               </Button>
 
               <Button type="default" onClick={() => navigate(-1)} disabled={isSubmitting} size="large">
                 Quay lại
-              </Button>
+              </Button> */}
             </Space>
           </Form.Item>
         </Form>
