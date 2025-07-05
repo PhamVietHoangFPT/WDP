@@ -37,7 +37,8 @@ export const apiSlice = createApi({
     'bookings',
     'case-members',
     'service-cases',
-    'sample-collectors'
+    'sample-collectors',
+    'create-account',
   ],
 
   endpoints: () => ({}),
