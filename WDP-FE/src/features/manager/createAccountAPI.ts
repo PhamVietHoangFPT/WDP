@@ -97,6 +97,6 @@ const createAccountAPI = apiSlice.injectEndpoints({
 })
 
 export const {
-  useGetSampleCollectorListQuery,
-  useGetServiceNoSampleCollectorListQuery,
+  useGetRoleListQuery,
+  useCreateAccountMutation,
 } = createAccountAPI

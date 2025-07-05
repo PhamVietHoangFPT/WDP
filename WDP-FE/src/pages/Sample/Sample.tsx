@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Table, Button, Typography, Spin, Pagination, message, Space, Select, Dropdown, Menu, Tag } from "antd"
