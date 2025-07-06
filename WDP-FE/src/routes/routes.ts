@@ -34,6 +34,8 @@ import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
 import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
 import Sample from '../pages/Sample/Sample'
 import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
+import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
+import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
 
 const routes: LayoutRoute[] = [
   {
@@ -181,11 +183,21 @@ const routes: LayoutRoute[] = [
     ],
   },
   {
-    layout: DoctorLayout,
+    layout: DeliveryStaffLayout,
     data: [
       {
-        path: '/doctor',
-        component: DoctorHomePage,
+        path: '/delivery',
+        component: DeliveryStaffHomePage,
+        // role: ['admin'],
+      },
+    ],
+  },
+  {
+    layout: SampleCollectorLayout,
+    data: [
+      {
+        path: '/sample collector',
+        component: SampleCollectorHomePage,
         // role: ['admin'],
       },
     ],
