@@ -36,6 +36,7 @@ import Sample from '../pages/Sample/Sample'
 import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
 import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
 import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
+import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/SampleCollectorServiceCase'
 
 const routes: LayoutRoute[] = [
   {
@@ -198,6 +199,21 @@ const routes: LayoutRoute[] = [
       {
         path: '/sample collector',
         component: SampleCollectorHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/sample collector/service-cases',
+        component: SampleCollectorServiceCase,
+        // role: ['admin'],
+      },
+    ],
+  },
+  {
+    layout: DoctorLayout,
+    data: [
+      {
+        path: '/doctor',
+        component: DoctorHomePage,
         // role: ['admin'],
       },
     ],

@@ -57,7 +57,7 @@ export const SideBar = () => {
       key: 'sample-collector',
       icon: <BarChartOutlined />,
       label: 'Quản trị mẫu thu',
-      onClick: () => navigate('sample-collector'),
+      onClick: () => navigate('sample collector/service-cases'),
     },
     // {
     //   key: 'manager/samples',
