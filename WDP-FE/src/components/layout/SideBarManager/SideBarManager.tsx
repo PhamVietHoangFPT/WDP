@@ -59,6 +59,18 @@ export const SideBar = () => {
       label: 'Quản trị',
       onClick: () => navigate('manager'),
     },
+    {
+      key: 'manager/samples',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị mẫu thu ',
+      onClick: () => navigate('manager/samples'),
+    },
+    {
+      key: 'manager/create-account',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị tài khoản',
+      onClick: () => navigate('manager/create-account'),
+    },
   ]
 
   return (
