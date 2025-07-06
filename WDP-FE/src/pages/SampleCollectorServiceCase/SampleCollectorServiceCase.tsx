@@ -2,11 +2,12 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Table, Typography, Spin, Pagination, Select, Tag } from "antd"
+import { Table, Typography, Spin, Pagination, Select, Tag, Button, Dropdown, Menu, Modal, message } from "antd"
 import type { ColumnsType } from "antd/es/table"
 import {
   useGetServiceCaseStatusListQuery,
   useGetAllServiceCasesQuery,
+  useUpdateServiceCaseStatusMutation,
 } from "../../features/sampleCollector/sampleCollectorAPI"
 
 const { Title } = Typography
@@ -15,6 +16,7 @@ interface ServiceCase {
   _id: string
   statusDetails: string
   bookingDate: string
+  currentStatus?: string // Add current status ID if available
 }
 
 interface ServiceCaseStatus {
@@ -27,6 +29,9 @@ const SampleCollectorServiceCase: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("")
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
+  const [updateModalVisible, setUpdateModalVisible] = useState(false)
+  const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
+  const [newStatusId, setNewStatusId] = useState<string>("")
 
   // Fetch service case status list for dropdown
   const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
@@ -43,6 +48,9 @@ const SampleCollectorServiceCase: React.FC = () => {
   } = useGetAllServiceCasesQuery(selectedStatus, {
     skip: !selectedStatus,
   })
+
+  // Update service case status mutation
+  const [updateServiceCaseStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusMutation()
 
   // Reset page number when status changes
   useEffect(() => {
@@ -61,6 +69,83 @@ const SampleCollectorServiceCase: React.FC = () => {
       default:
         return "default"
     }
+  }
+
+  // Get current status order
+  const getCurrentStatusOrder = (statusName: string) => {
+    const status = statusListData?.data?.find((s: ServiceCaseStatus) => s.testRequestStatus === statusName)
+    return status?.order || 0
+  }
+
+  // Get available next statuses (only higher order)
+  const getAvailableNextStatuses = (currentStatusName: string) => {
+    const currentOrder = getCurrentStatusOrder(currentStatusName)
+    return [...(statusListData?.data || [])]
+      .filter((status: ServiceCaseStatus) => status.order > currentOrder)
+      .sort((a: ServiceCaseStatus, b: ServiceCaseStatus) => a.order - b.order)
+  }
+
+  // Handle status update
+  const handleStatusUpdate = async () => {
+    if (!selectedServiceCase || !newStatusId) return
+
+    try {
+      const currentStatusId = statusListData?.data?.find(
+        (s: ServiceCaseStatus) => s.testRequestStatus === selectedServiceCase.statusDetails,
+      )?._id
+
+      await updateServiceCaseStatus({
+        id: selectedServiceCase._id,
+        currentStatus: currentStatusId,
+        data: { newStatus: newStatusId },
+      }).unwrap()
+
+      message.success("Cập nhật trạng thái thành công!")
+      setUpdateModalVisible(false)
+      setSelectedServiceCase(null)
+      setNewStatusId("")
+    } catch (error: any) {
+      console.error("Update status error:", error)
+      message.error(error?.data?.message || "Cập nhật trạng thái thất bại!")
+    }
+  }
+
+  // Get status update menu
+  const getStatusUpdateMenu = (record: ServiceCase) => {
+    const availableStatuses = getAvailableNextStatuses(record.statusDetails)
+
+    if (availableStatuses.length === 0) {
+      return (
+        <Menu
+          items={[
+            {
+              key: "no-update",
+              label: <span style={{ color: "#999" }}>Không thể cập nhật thêm</span>,
+              disabled: true,
+            },
+          ]}
+        />
+      )
+    }
+
+    return (
+      <Menu
+        items={availableStatuses.map((status: ServiceCaseStatus) => ({
+          key: status._id,
+          label: (
+            <div
+              onClick={() => {
+                setSelectedServiceCase(record)
+                setNewStatusId(status._id)
+                setUpdateModalVisible(true)
+              }}
+            >
+              {status.testRequestStatus}
+            </div>
+          ),
+        }))}
+      />
+    )
   }
 
   const columns: ColumnsType<ServiceCase> = [
@@ -116,10 +201,26 @@ const SampleCollectorServiceCase: React.FC = () => {
         }
       },
     },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_, record) => {
+        const availableStatuses = getAvailableNextStatuses(record.statusDetails)
+        const canUpdate = availableStatuses.length > 0
+
+        return (
+          <Dropdown overlay={getStatusUpdateMenu(record)} trigger={["click"]} disabled={!canUpdate}>
+            <Button type="primary" disabled={!canUpdate}>
+              {canUpdate ? "Cập nhật trạng thái" : "Không thể cập nhật"}
+            </Button>
+          </Dropdown>
+        )
+      },
+    },
   ]
 
   // Handle service cases data properly - ensure we get fresh data for each filter
-  const serviceCases = selectedStatus && serviceCasesData?.data ? serviceCasesData.data : []
+  const serviceCases = selectedStatus && serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
   const totalItems = serviceCases.length
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
@@ -128,6 +229,10 @@ const SampleCollectorServiceCase: React.FC = () => {
   // Get current status name for display
   const currentStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === selectedStatus)?.testRequestStatus || ""
+
+  // Get new status name for modal
+  const newStatusName =
+    statusListData?.data?.find((status: ServiceCaseStatus) => status._id === newStatusId)?.testRequestStatus || ""
 
   return (
     <div style={{ padding: 24 }}>
@@ -184,7 +289,7 @@ const SampleCollectorServiceCase: React.FC = () => {
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <Spin size="large" />
         </div>
-      ) : serviceCasesError ? (
+      ) : serviceCasesError || totalItems === 0 ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
             {`Không có dịch vụ nào với trạng thái "${currentStatusName}"`}
@@ -220,6 +325,39 @@ const SampleCollectorServiceCase: React.FC = () => {
           )}
         </>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal
+        title="Xác nhận cập nhật trạng thái"
+        open={updateModalVisible}
+        onOk={handleStatusUpdate}
+        onCancel={() => {
+          setUpdateModalVisible(false)
+          setSelectedServiceCase(null)
+          setNewStatusId("")
+        }}
+        confirmLoading={isUpdating}
+        okText="Xác nhận"
+        cancelText="Hủy"
+      >
+        <div style={{ padding: "16px 0" }}>
+          <p>
+            <strong>Mã dịch vụ:</strong> {selectedServiceCase?._id.slice(-8).toUpperCase()}
+          </p>
+          <p>
+            <strong>Trạng thái hiện tại:</strong>{" "}
+            <Tag color={getStatusColor(selectedServiceCase?.statusDetails || "")}>
+              {selectedServiceCase?.statusDetails}
+            </Tag>
+          </p>
+          <p>
+            <strong>Trạng thái mới:</strong> <Tag color={getStatusColor(newStatusName)}>{newStatusName}</Tag>
+          </p>
+          <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#fff7e6", borderRadius: "6px" }}>
+            <strong>⚠️ Lưu ý:</strong> Việc cập nhật trạng thái không thể hoàn tác sau khi thực hiện!
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

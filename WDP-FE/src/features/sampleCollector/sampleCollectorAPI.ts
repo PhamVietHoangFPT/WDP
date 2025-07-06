@@ -28,7 +28,15 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       providesTags: ['sample-collector'],
     }),
 
-    
+    updateServiceCaseStatus: builder.mutation({
+      query: ({ data, id, currentStatus }) => ({
+        url: `/service-cases/${id}/status/${currentStatus}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['sample-collector'],
+    }),
 
 
     // createSlotTemplate: builder.mutation({
@@ -102,4 +110,5 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
 export const {
     useGetServiceCaseStatusListQuery,
     useGetAllServiceCasesQuery,
+    useUpdateServiceCaseStatusMutation,
 } = sampleCollectorAPI
