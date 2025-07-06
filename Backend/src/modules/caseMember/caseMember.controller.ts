@@ -34,12 +34,12 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 
 @ApiTags('case-members')
 @Controller('case-members')
-// @UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class CaseMemberController {
   constructor(
     @Inject(ICaseMemberService)
     private readonly caseMemberService: ICaseMemberService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiBearerAuth()

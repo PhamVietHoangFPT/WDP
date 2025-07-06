@@ -8,7 +8,7 @@ import {
 } from 'src/modules/serviceCase/schemas/serviceCase.schema'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model, Types } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { IManagerRepository } from './interfaces/imanager.repository'
 import { IRoleRepository } from '../role/interfaces/irole.repository'
 

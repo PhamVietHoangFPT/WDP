@@ -7,17 +7,18 @@ export type KitShipmentStatusDocument = HydratedDocument<KitShipmentStatus>
 
 @Schema()
 export class KitShipmentStatus extends BaseEntity {
-    @Prop({
-        type: mongoose.Schema.Types.ObjectId,
-        default: () => new mongoose.Types.ObjectId(),
-    })
-    _id: mongoose.Schema.Types.ObjectId
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    default: () => new mongoose.Types.ObjectId(),
+  })
+  _id: mongoose.Schema.Types.ObjectId
 
-    @Prop({ type: String, required: true })
-    status: string
+  @Prop({ type: String, required: true })
+  status: string
 
-    @Prop({ type: Number }) 
-    order: number
+  @Prop({ type: Number })
+  order: number
 }
 
-export const KitShipmentStatusSchema = SchemaFactory.createForClass(KitShipmentStatus)
+export const KitShipmentStatusSchema =
+  SchemaFactory.createForClass(KitShipmentStatus)

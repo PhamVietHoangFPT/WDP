@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Result, ResultSchema } from './schemas/result.schema'
-import { ResultController } from './result.controller'
 import { IResultService } from './interfaces/iresult.service'
 import { ResultService } from './result.service'
 import { IResultRepository } from './interfaces/iresult.repository'
@@ -19,7 +18,6 @@ import { EmailModule } from '../email/email.module'
     TestRequestStatusModule,
     EmailModule,
   ],
-  controllers: [ResultController],
   providers: [
     {
       provide: IResultService,
@@ -30,5 +28,6 @@ import { EmailModule } from '../email/email.module'
       useClass: ResultRepository,
     },
   ],
+  exports: [IResultService, IResultRepository],
 })
 export class ResultModule {}

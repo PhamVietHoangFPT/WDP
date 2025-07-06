@@ -1,27 +1,29 @@
-import { Module } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
-import { KitShipment, KitShipmentSchema } from "./schemas/kitShipment.schema";
-import { AuthModule } from "../auth/auth.module";
-import { AccountModule } from "../account/account.module";
-import { KitShipmentStatusModule } from "../kitShipmentStatus/kitShipmentStatus.module";
-import { AddressModule } from "../address/address.module";
-import { CaseMemberModule } from "../caseMember/caseMember.module";
-import { SamplingKitInventoryModule } from "../samplingKitInventory/samplingKitInventory.module";
-import { KitShipmentController } from "./kitShipment.controller";
-import { IKitShipmentRepository } from "./interfaces/ikitShipment.repository";
-import { KitShipmentRepository } from "./kitShipment.repository";
-import { IKitShipmentService } from "./interfaces/ikitShipment.service";
-import { KitShipmentService } from "./kitShipment.service";
+import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
+import { KitShipment, KitShipmentSchema } from './schemas/kitShipment.schema'
+import { AuthModule } from '../auth/auth.module'
+import { AccountModule } from '../account/account.module'
+import { KitShipmentStatusModule } from '../kitShipmentStatus/kitShipmentStatus.module'
+import { AddressModule } from '../address/address.module'
+import { CaseMemberModule } from '../caseMember/caseMember.module'
+import { SamplingKitInventoryModule } from '../samplingKitInventory/samplingKitInventory.module'
+import { KitShipmentController } from './kitShipment.controller'
+import { IKitShipmentRepository } from './interfaces/ikitShipment.repository'
+import { KitShipmentRepository } from './kitShipment.repository'
+import { IKitShipmentService } from './interfaces/ikitShipment.service'
+import { KitShipmentService } from './kitShipment.service'
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: KitShipment.name, schema: KitShipmentSchema }]),
+    MongooseModule.forFeature([
+      { name: KitShipment.name, schema: KitShipmentSchema },
+    ]),
     AuthModule,
     AccountModule,
     KitShipmentStatusModule,
     AddressModule,
     CaseMemberModule,
-    SamplingKitInventoryModule
+    SamplingKitInventoryModule,
   ],
   controllers: [KitShipmentController],
   providers: [
@@ -36,4 +38,4 @@ import { KitShipmentService } from "./kitShipment.service";
   ],
   exports: [IKitShipmentRepository, IKitShipmentService],
 })
-export class KitShipmentModule { }
+export class KitShipmentModule {}

@@ -28,7 +28,7 @@ import { UpdateSampleDto } from './dto/update-sample.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { SampleResponseDto } from './dto/sample-response.dto'
 
-@ApiTags('Samples')
+@ApiTags('samples')
 @Controller('samples')
 export class SampleController {
   constructor(

@@ -15,12 +15,13 @@ import { ITimeReturnService } from './interfaces/itimeReturn.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { RoleEnum } from 'src/common/enums/role.enum'
 import { Roles } from 'src/common/decorators/roles.decorator'
-import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { CreateTimeReturnDto } from './dto/createTimeReturn.dto'
 import { UpdateTimeReturnDto } from './dto/updateTimeReturn.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
-@Controller('timeReturn')
+@ApiTags('time-return')
+@Controller('time-return')
 export class TimeReturnController {
   constructor(
     @Inject(ITimeReturnService)
