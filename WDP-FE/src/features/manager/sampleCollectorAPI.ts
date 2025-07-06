@@ -2,12 +2,12 @@ import { apiSlice } from '../../apis/apiSlice'
 
 const sampleCollectorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getServiceCaseStatusList: builder.query({
+    getSampleCollectorList: builder.query({
       query: ({
         pageNumber,
         pageSize,
       }) => ({
-        url: '/sample-collector/service-case-status',
+        url: '/managers/sample-collectors',
         method: 'GET',
         params: {
           pageNumber,
@@ -15,21 +15,17 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collector'],
+      providesTags: ['sample-collectors'],
     }),
 
-
-    getAllServiceCases: builder.query({
-      query: (serviceCaseStatus) => ({
-        url: `/sample-collector/service-cases/${serviceCaseStatus}`,
+    getServiceNoSampleCollectorList: builder.query({
+      query: (isAtHome) => ({
+        url: `managers/service-cases-without-sample-collector/${isAtHome}`,
         method: 'GET',
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collector'],
+      providesTags: ['sample-collectors'],
     }),
-
-    
-
 
     // createSlotTemplate: builder.mutation({
     //   query: (data) => ({
@@ -100,6 +96,6 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
 })
 
 export const {
-    useGetServiceCaseStatusListQuery,
-    useGetAllServiceCasesQuery,
+  useGetSampleCollectorListQuery,
+  useGetServiceNoSampleCollectorListQuery,
 } = sampleCollectorAPI
