@@ -33,6 +33,7 @@ import { ManagerModule } from './modules/manager/manager.module'
 import { EmailModule } from './modules/email/email.module'
 import { KitShipmentModule } from './modules/KitShipment/kitShipment.module'
 import { DoctorModule } from './modules/doctor/doctor.module'
+import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector.module'
 @Module({
   imports: [
     databaseConfig,
@@ -70,6 +71,7 @@ import { DoctorModule } from './modules/doctor/doctor.module'
     EmailModule,
     KitShipmentModule,
     DoctorModule,
+    SampleCollectorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
