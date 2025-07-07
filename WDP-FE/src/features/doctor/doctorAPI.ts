@@ -34,12 +34,13 @@ const doctorAPI = apiSlice.injectEndpoints({
     }),
 
     getTestTaker: builder.query({
-      query: (id) => ({
+      query: (id: string) => ({
         url: `/test-takers/${id}`,
         method: 'GET',
       }),
-      transformResponse: (res) => res,
-      providesTags: ['doctor'],
+      // QUAN TRỌNG: transformResponse để lấy data[0]
+      transformResponse: (res: any) => res.data?.[0], // API trả về {data: [{...}]}, cần lấy object bên trong
+      providesTags: (result, error, id) => [{ type: 'doctor', id }], // Caching từng testTaker theo ID
     }),
 
     // getAllServiceCases: builder.query({

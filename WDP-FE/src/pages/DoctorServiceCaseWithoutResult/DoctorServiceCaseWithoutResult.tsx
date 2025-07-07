@@ -1,14 +1,16 @@
+"use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Table, Typography, Tag, Button, Select, Modal, message, Alert } from "antd" 
+import { Table, Typography, Tag, Button, Select, Modal, message, Alert, Spin } from "antd" // Thêm Spin
 import type { ColumnsType } from "antd/es/table"
 import { EditOutlined, PlusOutlined, EyeOutlined } from "@ant-design/icons"
 import {
   useGetServiceCaseWithoutResultsListQuery,
   useGetAllRequestStatusListQuery,
   useUpdateServiceCaseStatusMutation,
-} from "../../features/doctor/doctorAPI" 
+  useGetTestTakerQuery, // Import hook mới từ doctorAPI
+} from "../../features/doctor/doctorAPI"
 
 const { Title } = Typography
 
@@ -20,7 +22,7 @@ interface ServiceCase {
     order: number
   }
   caseMember: {
-    testTaker: string[]
+    testTaker: string[] // Mảng các ID của testTaker
   }
   bookingDate: string
   timeReturn: number
@@ -31,6 +33,46 @@ interface RequestStatus {
   testRequestStatus: string
   order: number
 }
+
+// Định nghĩa interface cho TestTaker (dựa trên response của API)
+interface TestTaker {
+  _id: string;
+  name: string;
+  personalId: string;
+  dateOfBirth: string;
+  account: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  gender: boolean;
+}
+
+// Component con để fetch và hiển thị tên TestTaker
+interface TestTakerNameProps {
+  id: string;
+}
+
+const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
+  // Bỏ qua query nếu id không hợp lệ hoặc rỗng, mặc dù trong trường hợp này id luôn có.
+  // Tuy nhiên, thêm kiểm tra này là một best practice.
+  const { data: testTaker, isLoading, error } = useGetTestTakerQuery(id, {
+    skip: !id, // Bỏ qua nếu id rỗng hoặc undefined
+  });
+
+  if (isLoading) {
+    return <Spin size="small" />; // Hiển thị spinner nhỏ khi đang tải tên
+  }
+
+  if (error) {
+    // console.error("Error fetching test taker:", error); // Có thể log lỗi ra console để debug
+    return <span style={{ color: '#ff4d4f' }}>{id.slice(-8).toUpperCase()} (Lỗi tải tên)</span>; // Hiển thị ID và thông báo lỗi
+  }
+
+  // testTaker giờ đây là object TestTaker trực tiếp nhờ transformResponse
+  return <span>{testTaker?.name || id.slice(-8).toUpperCase()}</span>; // Hiển thị tên, nếu không có tên thì fallback về ID
+};
+
 
 const DoctorServiceCaseWithoutResult: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
@@ -48,8 +90,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   const {
     data: serviceCasesData,
     error: fetchError,
-    isLoading: isLoadingServices, 
-    isFetching: isFetchingServices, 
+    isLoading: isLoadingServices,
+    isFetching: isFetchingServices,
     refetch: refetchServiceCases,
   } = useGetServiceCaseWithoutResultsListQuery(
     {
@@ -59,7 +101,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       resultExists,
     },
     {
-      skip: !selectedStatus, 
+      skip: !selectedStatus,
     },
   )
 
@@ -67,6 +109,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
 
 
   useEffect(() => {
+    // Set default status to first available status (order 7)
     if (statusListData?.data && !selectedStatus) {
       const defaultStatus = statusListData.data.find((status: RequestStatus) => status.order === 7)
       if (defaultStatus) setSelectedStatus(defaultStatus._id)
@@ -105,24 +148,22 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       message.success("Cập nhật trạng thái thành công!")
       setUpdateModalVisible(false)
       setSelectedServiceCase(null)
-      refetchServiceCases() 
+      refetchServiceCases()
     } catch (error: any) {
       console.error("Update status error:", error)
       message.error(
         error?.data?.message || error?.statusText || "Không thể kết nối đến máy chủ"
       )
-      refetchServiceCases() 
+      refetchServiceCases()
     }
   }
 
   const handleCreateResult = (id: string) => {
     message.info("Chức năng đang được phát triển")
- 
   }
 
   const handleViewDetails = (id: string) => {
     message.info("Xem chi tiết: " + id)
-    
   }
 
   const columns: ColumnsType<ServiceCase> = [
@@ -167,13 +208,14 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       },
     },
     {
-      title: "Người thực hiện",
+      title: "Người xét nghiệm",
       key: "testTaker",
       render: (_, record) => (
         <div>
+          {/* Mapping qua mảng testTaker IDs và render component TestTakerName cho mỗi ID */}
           {record.caseMember.testTaker.map((takerId) => (
-            <div key={takerId} style={{ fontSize: 12, fontFamily: "monospace" }}>
-              {takerId.slice(-8).toUpperCase()}
+            <div key={takerId} style={{ fontSize: 12 }}>
+              <TestTakerName id={takerId} />
             </div>
           ))}
         </div>
@@ -235,7 +277,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           value={selectedStatus}
           onChange={(value) => {
             setSelectedStatus(value)
-            setPageNumber(1) 
+            setPageNumber(1)
           }}
           style={{ width: 200 }}
           placeholder="Chọn trạng thái"
@@ -255,7 +297,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           value={resultExists}
           onChange={(v) => {
             setResultExists(v)
-            setPageNumber(1) 
+            setPageNumber(1)
           }}
           style={{ width: 120 }}
         >
@@ -264,7 +306,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         </Select>
       </div>
 
-     
       {fetchError && (
         <Alert
           message="Lỗi tải dữ liệu"
@@ -284,7 +325,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         />
       )}
 
-      
       {!selectedStatus && (
         <Alert
           message="Vui lòng chọn trạng thái"
@@ -295,8 +335,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         />
       )}
 
-      {/* Bọc Table trong một div có minHeight để giữ chiều cao */}
-      <div style={{ minHeight: '400px' /* Điều chỉnh chiều cao này cho phù hợp với số dòng data */ }}> 
+      <div style={{ minHeight: '400px' }}>
         <Table
           dataSource={serviceCases}
           columns={columns}
@@ -313,10 +352,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
               setPageSize(size || 10)
             },
           }}
-          
-          loading={isFetchingServices} 
+          loading={isFetchingServices}
           scroll={{ x: 1000 }}
-          // Custom emptyText khi không có dữ liệu
           locale={{
             emptyText: (
               <div style={{ padding: '20px 0' }}>
