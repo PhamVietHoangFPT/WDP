@@ -56,8 +56,8 @@ export const SideBar = () => {
     {
       key: 'doctor',
       icon: <BarChartOutlined />,
-      label: 'Quản trị',
-      onClick: () => navigate('doctor'),
+      label: 'Hồ sơ chưa có kết quả',
+      onClick: () => navigate('doctor/service-cases-without-results'),
     },
   ]
 
