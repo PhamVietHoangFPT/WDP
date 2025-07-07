@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import { ServiceCase, ServiceCaseDocument } from './schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from './dto/createServiceCase.dto'
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
@@ -195,5 +195,43 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .map((result) => result.bookingId.toString())
 
     return bookingIds // Trả về mảng các chuỗi ID
+  }
+
+  async findByBookingId(bookingId: string): Promise<boolean> {
+    // 1. Validate bookingId ngay từ đầu để tránh BSONError
+    if (!Types.ObjectId.isValid(bookingId)) {
+      console.warn('Invalid bookingId provided. Returning false.')
+      return false // Trả về false ngay nếu ID không hợp lệ
+    }
+
+    const results = await this.serviceCaseModel.aggregate([
+      {
+        $lookup: {
+          from: 'casemembers',
+          localField: 'caseMember',
+          foreignField: '_id',
+          as: 'caseMemberDetails',
+        },
+      },
+      // Nếu $unwind không có preserveNullAndEmptyArrays, nó sẽ loại bỏ các tài liệu không có caseMemberDetails
+      // Điều này là hợp lý nếu bạn chỉ muốn tìm serviceCase có liên kết caseMember hợp lệ
+      { $unwind: '$caseMemberDetails' },
+
+      // THAY ĐỔI LỚN NHẤT: Lọc trực tiếp theo bookingId tại đây
+      {
+        $match: {
+          'caseMemberDetails.booking': new Types.ObjectId(bookingId), // Sử dụng Types.ObjectId đã chuyển đổi
+        },
+      },
+
+      // THAY ĐỔI ĐỂ TỐI ƯU HIỆU SUẤT: Chỉ cần tìm thấy 1 tài liệu
+      { $limit: 1 },
+
+      // THAY ĐỔI ĐỂ TỐI ƯU: Chỉ project ra _id (hoặc bất kỳ trường nhỏ nào)
+      { $project: { _id: 1 } },
+    ])
+
+    // Kiểm tra xem có bất kỳ kết quả nào được trả về không
+    return results.length > 0 // Trả về true nếu tìm thấy ít nhất 1 serviceCase với bookingId đó, ngược lại là false
   }
 }

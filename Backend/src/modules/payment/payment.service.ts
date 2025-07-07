@@ -83,7 +83,7 @@ export class PaymentService implements IPaymentService {
         .skip(skip)
         .limit(pageSize)
         .exec(),
-      this.paymentRepository.countDocuments(filter),
+      this.paymentRepository.countDocuments(filter, userId),
     ])
 
     const totalPages = Math.ceil(totalItems / pageSize)
