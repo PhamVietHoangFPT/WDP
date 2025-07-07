@@ -22,6 +22,8 @@ export interface IServiceCaseService {
   ): Promise<ServiceCaseResponseDto | null>
 
   handleCron(): Promise<void>
+
+  cancelServiceCaseIfNoCheckin(): Promise<void>
 }
 
 export const IServiceCaseService = Symbol('IServiceCaseService')
