@@ -98,7 +98,7 @@ export class DoctorController {
     }
   }
 
-  @Get('/service-cases-without-results/:currentStatus/:resultExists')
+  @Get('/service-cases-without-results')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.DOCTOR)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa trả kết quả' })

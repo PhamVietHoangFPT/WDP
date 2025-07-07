@@ -3,13 +3,9 @@ import { apiSlice } from '../../apis/apiSlice'
 const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getServiceCaseWithoutResultsList: builder.query({
-      query: ({ pageNumber, pageSize, currentStatus, resultExists }) => ({
-        url: `/doctors/service-cases-without-results/${currentStatus}/${resultExists}`, 
+      query: ({ currentStatus, resultExists }) => ({
+        url: `doctors/service-cases-without-results?currentStatus=${currentStatus}&resultExists=${resultExists}`, 
         method: 'GET',
-        params: {
-          pageNumber,
-          pageSize,
-        },
       }),
       transformResponse: (res) => res,
       providesTags: ['doctor'],
