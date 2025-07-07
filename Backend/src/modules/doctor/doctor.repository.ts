@@ -3,32 +3,29 @@ import {
   ServiceCaseDocument,
 } from '../serviceCase/schemas/serviceCase.schema'
 
-import { Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Model, Types } from 'mongoose'
 import { InjectModel } from '@nestjs/mongoose'
 import { IDoctorRepository } from './interfaces/idoctor.repository'
-import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 @Injectable()
 export class DoctorRepository implements IDoctorRepository {
   constructor(
     @InjectModel(ServiceCase.name)
     private readonly serviceCaseModel: Model<ServiceCaseDocument>,
-    @Inject(ITestRequestStatusRepository)
-    private readonly testRequestStatusRepository: ITestRequestStatusRepository,
   ) {}
 
   async getAllServiceCasesWithoutResults(
     facilityId: string,
+    doctorId: string,
+    currentStatus: string,
+    resultExists: boolean,
   ): Promise<ServiceCaseDocument[]> {
-    const testRequestStatus =
-      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
-        'Chờ duyệt kết quả',
-      )
     return this.serviceCaseModel.aggregate([
       {
         $match: {
-          currentStatus: new Types.ObjectId(testRequestStatus),
-          result: { $exists: false },
+          currentStatus: new Types.ObjectId(currentStatus), // Loc theo currentStatus
+          doctor: new Types.ObjectId(doctorId),
+          result: { $exists: resultExists },
         },
       },
       // Mo bang testRequestStatuses
@@ -162,14 +159,56 @@ export class DoctorRepository implements IDoctorRepository {
           'facilities._id': new Types.ObjectId(facilityId), // Loc theo facilityId
         },
       },
+      {
+        $lookup: {
+          from: 'services',
+          let: { serviceId: '$caseMembers.service' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$serviceId'],
+                },
+              },
+            },
+          ],
+          as: 'services',
+        },
+      },
+      {
+        $unwind: { path: '$services', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'timereturns',
+          let: { timeReturnId: '$services.timeReturn' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$timeReturnId'],
+                },
+              },
+            },
+          ],
+          as: 'timeReturns',
+        },
+      },
+      {
+        $unwind: {
+          path: '$timeReturns',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       // Chon truong can thiet
       {
         $project: {
           _id: 1,
           currentStatus: 1,
-          caseMember: '$caseMembers._id',
-          facility: {
-            name: '$facilities.facilityName',
+          bookingDate: '$bookings.bookingDate',
+          timeReturn: '$timeReturns.timeReturn',
+          caseMember: {
+            testTaker: '$caseMembers.testTaker',
           },
         },
       },

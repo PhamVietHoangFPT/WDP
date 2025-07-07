@@ -234,4 +234,139 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     // Kiểm tra xem có bất kỳ kết quả nào được trả về không
     return results.length > 0 // Trả về true nếu tìm thấy ít nhất 1 serviceCase với bookingId đó, ngược lại là false
   }
+
+  async findByCurrentStatusId(
+    currentStatusId: string,
+  ): Promise<string[] | null> {
+    const serviceCases = await this.serviceCaseModel
+      .find({ currentStatus: new Types.ObjectId(currentStatusId) }) // Sử dụng Types.ObjectId để tránh BSONError
+      .select('_id')
+      .lean()
+      .exec()
+    return serviceCases.length > 0
+      ? serviceCases.map((sc) => sc._id.toString())
+      : null
+  }
+
+  async getServiceCaseCheckinTime(serviceCaseId: string): Promise<Date | null> {
+    // Validate serviceCaseId ngay từ đầu để tránh BSONError
+    if (!Types.ObjectId.isValid(serviceCaseId)) {
+      console.warn('Invalid serviceCaseId provided. Returning null.')
+      return null
+    }
+
+    const serviceCaseResults = await this.serviceCaseModel.aggregate([
+      {
+        $match: { _id: new Types.ObjectId(serviceCaseId) }, // Dùng Types.ObjectId nhất quán
+      },
+      {
+        $lookup: {
+          from: 'casemembers',
+          let: { caseMemberId: '$caseMember' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'caseMemberDetails',
+        },
+      },
+      // Các $unwind sau $lookup nên dùng preserveNullAndEmptyArrays: true
+      // nếu bạn muốn tài liệu gốc vẫn được giữ lại ngay cả khi không tìm thấy chi tiết join.
+      // Nếu không, tài liệu serviceCase sẽ bị loại bỏ nếu không có caseMemberDetails hợp lệ.
+      {
+        $unwind: {
+          path: '$caseMemberDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { bookingId: '$caseMemberDetails.booking' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$bookingId'],
+                },
+              },
+            },
+          ],
+          as: 'bookingDetails',
+        },
+      },
+      {
+        $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: '$bookingDetails.slot'.toString() },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slotDetails',
+        },
+      },
+      { $unwind: { path: '$slotDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 0,
+          booking: '$bookingDetails.bookingDate',
+          checkinDateTime: {
+            $cond: {
+              if: {
+                $and: ['$bookingDetails.bookingDate', '$slotDetails.startTime'],
+              },
+              then: {
+                $dateFromParts: {
+                  year: { $year: '$bookingDetails.bookingDate' },
+                  month: { $month: '$bookingDetails.bookingDate' },
+                  day: { $dayOfMonth: '$bookingDetails.bookingDate' },
+                  hour: {
+                    $toInt: {
+                      $arrayElemAt: [
+                        { $split: ['$slotDetails.startTime', ':'] },
+                        0,
+                      ],
+                    },
+                  },
+                  minute: {
+                    $toInt: {
+                      $arrayElemAt: [
+                        { $split: ['$slotDetails.startTime', ':'] },
+                        1,
+                      ],
+                    },
+                  },
+                },
+              },
+              else: null,
+            },
+          },
+        },
+      },
+      // Giới hạn 1 kết quả vì bạn chỉ tìm theo 1 serviceCaseId
+      { $limit: 1 },
+    ])
+    // --- SỬA LỖI Ở ĐÂY ---
+    // Kiểm tra nếu có kết quả và lấy phần tử đầu tiên
+    if (serviceCaseResults.length > 0) {
+      // Truy cập thuộc tính checkinDateTime của phần tử đầu tiên
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      return serviceCaseResults[0].checkinDateTime || null
+    }
+    return null // Trả về null nếu không tìm thấy serviceCase hoặc checkinDateTime là null
+  }
 }

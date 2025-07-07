@@ -145,4 +145,9 @@ export class ServiceCaseController {
   test(): Promise<void> {
     return this.serviceCaseService.handleCron()
   }
+
+  @Post('cancel-checkin')
+  cancelServiceCaseIfNoCheckin(): Promise<void> {
+    return this.serviceCaseService.cancelServiceCaseIfNoCheckin()
+  }
 }

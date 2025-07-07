@@ -319,4 +319,42 @@ export class ServiceCaseService implements IServiceCaseService {
       `Hoàn thành cron job lúc ${new Date().toISOString()} cho ${bookingIds.length} lượt đặt chờ thanh toán và ${failedPaymentStatusBookingIds.length} lượt thanh toán thất bại.`,
     )
   }
+
+  @Cron('0 */30 8-17 * * *')
+  async cancelServiceCaseIfNoCheckin(): Promise<void> {
+    const currentStatusId =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)',
+      )
+
+    const serviceCases =
+      await this.serviceCaseRepository.findByCurrentStatusId(currentStatusId)
+
+    if (!serviceCases || serviceCases.length === 0) {
+      this.logger.log(
+        'Không có trường hợp xét nghiệm nào cần hủy do không check-in.',
+      )
+      return
+    }
+
+    const now = new Date()
+    const cancelStatusId =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName('Hủy')
+
+    for (const serviceCaseId of serviceCases) {
+      const checkinTime =
+        await this.serviceCaseRepository.getServiceCaseCheckinTime(
+          serviceCaseId,
+        )
+      if (now > checkinTime) {
+        await this.serviceCaseRepository.updateCurrentStatus(
+          serviceCaseId,
+          cancelStatusId,
+        )
+        this.logger.log(
+          `Đã hủy trường hợp xét nghiệm với ID: ${serviceCaseId} do không check-in.`,
+        )
+      }
+    }
+  }
 }
