@@ -58,7 +58,7 @@ export default function HeaderCus() {
     {
       key: 'list-testee',
       label: 'Danh sách người test ADN',
-      onClick: () => navigate('/list-testee'),
+      onClick: () => navigate('/list-testee?pageNumber=1&pageSize=10'),
     },
     {
       key: 'payment-history',

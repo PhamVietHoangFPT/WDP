@@ -7,8 +7,9 @@ import {
   message,
   Typography,
   Tag,
+  Pagination,
 } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useDeleteTestTakerMutation,
   useGetTestTakersQuery,
@@ -23,8 +24,15 @@ export default function TestTakerList() {
   const token = Cookies.get('userToken')
   const decoded: any = jwtDecode(token || '')
   const accountId = decoded?.id
+  const [searchParams] = useSearchParams()
+  const pageNumber = searchParams.get('pageNumber') || '1'
+  const pageSize = searchParams.get('pageSize') || '10'
 
-  const { data = [], isLoading } = useGetTestTakersQuery(accountId)
+  const { data = [], isLoading } = useGetTestTakersQuery({
+    accountId,
+    pageSize: Number(pageSize),
+    pageNumber: Number(pageNumber),
+  })
   const list = data?.data ?? []
 
   const navigate = useNavigate()
@@ -108,7 +116,23 @@ export default function TestTakerList() {
         dataSource={list}
         loading={isLoading}
         bordered
+        pagination={false}
       />
+      {isLoading ? (
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
+          <Typography.Text>Đang tải dữ liệu...</Typography.Text>
+        </div>
+      ) : (
+        <Pagination
+          style={{ marginTop: 20, textAlign: 'center' }}
+          total={data?.pagination?.totalItems || 0}
+          pageSize={Number(pageSize)}
+          current={Number(pageNumber)}
+          onChange={(page, size) => {
+            navigate(`/list-testee?pageNumber=${page}&pageSize=${size}`)
+          }}
+        />
+      )}
     </div>
   )
 }

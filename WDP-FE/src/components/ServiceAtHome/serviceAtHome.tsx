@@ -24,12 +24,16 @@ interface ServiceDetailResponse {
 
 const ServiceAtHomeForm: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const accountId = Cookies.get('userData')
+    ? JSON.parse(Cookies.get('userData') as string).id
+    : undefined
   const [form] = Form.useForm()
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null)
   const [testTakerCount, setTestTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
-    pageNumber: 1,
-    pageSize: 5,
+    accountId: accountId,
+    pageSize: null,
+    pageNumber: null,
   })
   const { data: serviceDetail } =
     useGetServiceDetailQuery<ServiceDetailResponse>(id)
