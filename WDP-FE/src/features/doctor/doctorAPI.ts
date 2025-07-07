@@ -3,8 +3,8 @@ import { apiSlice } from '../../apis/apiSlice'
 const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getServiceCaseWithoutResultsList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
-        url: '/doctors/service-cases-without-results',
+      query: ({ pageNumber, pageSize, currentStatus, resultExists }) => ({
+        url: `/doctors/service-cases-without-results/${currentStatus}/${resultExists}`, 
         method: 'GET',
         params: {
           pageNumber,
@@ -13,6 +13,28 @@ const doctorAPI = apiSlice.injectEndpoints({
       }),
       transformResponse: (res) => res,
       providesTags: ['doctor'],
+    }),
+
+    getAllRequestStatusList: builder.query({
+      query: ({ pageNumber, pageSize }) => ({
+        url: '/doctors/test-request-statuses',
+        method: 'GET',
+        params: {
+          pageNumber,
+          pageSize,
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['sample-collector'],
+    }),
+
+    updateServiceCaseStatus: builder.mutation({
+      query: ({ id, currentStatus }) => ({
+        url: `/service-cases/${id}/status/${currentStatus}`,
+        method: 'PATCH',
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['sample-collector'],
     }),
 
     // getAllServiceCases: builder.query({
@@ -73,34 +95,12 @@ const doctorAPI = apiSlice.injectEndpoints({
     //   transformResponse: (res) => res,
     //   invalidatesTags: ['blogs'],
     // }),
-    // getBlogsDetail: builder.query({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['blogs'],
-    // }),
-    // updateBlogs: builder.mutation({
-    //   query: ({ data, id }) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'PUT',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    // deleteBlogs: builder.mutation({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'DELETE',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
+    
   }),
 })
 
 export const {
   useGetServiceCaseWithoutResultsListQuery,
+    useGetAllRequestStatusListQuery,
+    useUpdateServiceCaseStatusMutation,
 } = doctorAPI
