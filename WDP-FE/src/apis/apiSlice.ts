@@ -39,6 +39,7 @@ export const apiSlice = createApi({
     'service-cases',
     'sample-collectors',
     'create-account',
+    'sample-collector',
   ],
 
   endpoints: () => ({}),

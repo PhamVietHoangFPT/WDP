@@ -34,6 +34,9 @@ import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
 import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
 import Sample from '../pages/Sample/Sample'
 import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
+import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
+import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
+import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/SampleCollectorServiceCase'
 
 const routes: LayoutRoute[] = [
   {
@@ -176,6 +179,31 @@ const routes: LayoutRoute[] = [
       {
         path: '/delivery',
         component: DeliveryStaffHomePage,
+        // role: ['admin'],
+      },
+    ],
+  },
+  {
+    layout: DeliveryStaffLayout,
+    data: [
+      {
+        path: '/delivery',
+        component: DeliveryStaffHomePage,
+        // role: ['admin'],
+      },
+    ],
+  },
+  {
+    layout: SampleCollectorLayout,
+    data: [
+      {
+        path: '/sample collector',
+        component: SampleCollectorHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/sample collector/service-cases',
+        component: SampleCollectorServiceCase,
         // role: ['admin'],
       },
     ],
