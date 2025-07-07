@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import { Payment, PaymentDocument } from './schemas/payment.schema'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
@@ -90,18 +90,27 @@ export class PaymentRepository implements IPaymentRepository {
         .populate({ path: 'paymentType', select: 'paymentType' })
       return query
     }
+    console.log(userId)
     const query = this.paymentModel
       .find({
         ...filter, // Thêm các điều kiện lọc khác nếu cần
-        created_by: new mongoose.Types.ObjectId(userId) as any, // Lọc theo userId
+        created_by: new Types.ObjectId(userId), // Lọc theo userId
       })
       .populate({ path: 'paymentType', select: 'paymentType' })
 
     return query
   }
 
-  async countDocuments(filter: Record<string, unknown>): Promise<number> {
-    return this.paymentModel.countDocuments(filter).exec()
+  async countDocuments(
+    filter: Record<string, unknown>,
+    userId?: string,
+  ): Promise<number> {
+    return this.paymentModel
+      .countDocuments({
+        ...filter,
+        ...(userId ? { created_by: new Types.ObjectId(userId) } : {}),
+      })
+      .exec()
   }
 
   async findWithTransactionReferenceNumber(

@@ -170,4 +170,10 @@ export class BookingRepository implements IBookingRepository {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return booking?.slot?._id?.toString() ?? null
   }
+
+  async getAllBookingsIds(): Promise<string[]> {
+    const bookings = await this.bookingModel.find().exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return bookings.map((booking) => booking._id.toString())
+  }
 }

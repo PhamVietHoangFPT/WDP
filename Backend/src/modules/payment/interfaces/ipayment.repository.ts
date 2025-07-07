@@ -10,7 +10,10 @@ export interface IPaymentRepository {
     filter?: Record<string, unknown>,
   ): mongoose.Query<PaymentDocument[], PaymentDocument>
 
-  countDocuments(filter: Record<string, unknown>): Promise<number>
+  countDocuments(
+    filter: Record<string, unknown>,
+    userId?: string,
+  ): Promise<number>
   findWithTransactionReferenceNumber(
     transactionReferenceNumber: string,
   ): Promise<boolean>

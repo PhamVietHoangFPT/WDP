@@ -185,7 +185,7 @@ export class ServiceCaseService implements IServiceCaseService {
   @Cron('0 */3 * * * *')
   async handleCron() {
     const now = new Date()
-    const futureTime = new Date(now.getTime() + 10 * 60 * 1000)
+    const futureTime = new Date(now.getTime())
     this.logger.log(
       `Bắt đầu cron job lúc ${now.toISOString()}, kiểm tra các lượt đặt sau ${futureTime.toISOString()}`,
     )
@@ -209,6 +209,52 @@ export class ServiceCaseService implements IServiceCaseService {
         futureTime,
         failedPaymentStatusId,
       )
+
+    // Trường hợp chưa thanh toán
+    const unpaidBookingIds =
+      await this.serviceCaseRepository.getBookingIdsByTime(futureTime, null)
+
+    const allBookingIds = await this.bookingRepository.getAllBookingsIds()
+    const bookingIdsToRemove: string[] = []
+    for (const allBookingId of allBookingIds) {
+      const isServiceCaseExist =
+        await this.serviceCaseRepository.findByBookingId(allBookingId)
+      if (!isServiceCaseExist) {
+        // Nếu không có service case, thêm vào danh sách để xóa
+        bookingIdsToRemove.push(allBookingId)
+      }
+    }
+    for (const bookingIdToRemove of bookingIdsToRemove) {
+      const slotId = await this.bookingRepository.getSlotIdByBookingId(
+        bookingIdToRemove.toString(),
+      )
+      if (slotId) {
+        const updateBookingStatus = await this.slotRepository.setBookingStatus(
+          slotId.toString(),
+          false,
+        )
+        if (!updateBookingStatus) {
+          this.logger.log(
+            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${bookingIdToRemove.toString()}`,
+          )
+        }
+      } else {
+        this.logger.log(
+          `Không tìm thấy slot cho booking ID: ${bookingIdToRemove.toString()}`,
+        )
+      }
+    }
+    // Cập nhật trạng thái đặt chỗ cho các bookingIds
+    if (
+      bookingIds.length === 0 &&
+      failedPaymentStatusBookingIds.length === 0 &&
+      unpaidBookingIds.length === 0
+    ) {
+      this.logger.log(
+        `Không có lượt đặt nào cần xử lý lúc ${now.toISOString()}`,
+      )
+      return
+    }
 
     for (const bookingId of bookingIds) {
       const slotId = await this.bookingRepository.getSlotIdByBookingId(
@@ -249,6 +295,26 @@ export class ServiceCaseService implements IServiceCaseService {
         )
       }
     }
+
+    for (const unpaidBookingId of unpaidBookingIds) {
+      const slotId = await this.bookingRepository.getSlotIdByBookingId(
+        unpaidBookingId.toString(),
+      )
+      if (slotId) {
+        const updateUnpaidBookingStatus =
+          await this.slotRepository.setBookingStatus(slotId.toString(), false)
+        if (!updateUnpaidBookingStatus) {
+          this.logger.log(
+            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${unpaidBookingId.toString()}`,
+          )
+        }
+      } else {
+        this.logger.log(
+          `Không tìm thấy slot cho booking ID: ${unpaidBookingId.toString()}`,
+        )
+      }
+    }
+
     this.logger.log(
       `Hoàn thành cron job lúc ${new Date().toISOString()} cho ${bookingIds.length} lượt đặt chờ thanh toán và ${failedPaymentStatusBookingIds.length} lượt thanh toán thất bại.`,
     )

@@ -67,6 +67,13 @@ const Navbar: React.FC = () => {
   const userItems = useMemo(() => {
     return [
       {
+        key: 'adn-at-facility',
+        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
+        label: 'Dịch vụ hành chính',
+        style: { fontSize: '16px', color: '#616161' },
+        url: '/register-service',
+      },
+      {
         key: 'kit',
         icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
         label: 'Lấy mẫu tại nhà',

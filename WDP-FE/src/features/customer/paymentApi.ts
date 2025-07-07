@@ -45,8 +45,8 @@ export const paymentApi = apiSlice.injectEndpoints({
 
     // ✅ Lấy danh sách lịch sử thanh toán
     getPaymentList: builder.query({
-      query: () => ({
-        url: '/payments',
+      query: ({ pageSize, pageNumber }) => ({
+        url: `/payments?pageSize=${pageSize}&pageNumber=${pageNumber}`,
         method: 'GET',
       }),
       providesTags: ['PaymentHistory'],

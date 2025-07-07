@@ -22,7 +22,7 @@ interface ServiceDetailResponse {
   data: Service
 }
 
-const ServiceAtHomeForm: React.FC = () => {
+const ServiceAtFacilityForm: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const accountId = Cookies.get('userData')
     ? JSON.parse(Cookies.get('userData') as string).id
@@ -102,7 +102,7 @@ const ServiceAtHomeForm: React.FC = () => {
         booking: bookingId,
         service: id,
         note: '',
-        isAtHome: true,
+        isAtHome: false,
       }
       const caseMember = await createCaseMember({ data }).unwrap()
       const caseMemberId = caseMember?.data?._id || caseMember?._id
@@ -218,8 +218,8 @@ const ServiceAtHomeForm: React.FC = () => {
             </Col>
             <Col span={24}>
               <p style={{ fontStyle: 'italic', color: 'gray' }}>
-                * Các dịch vụ tại nhà chỉ có thể được sử dụng với mục đích dân
-                sự
+                * Đây là dịch vụ hành chính, cần có mặt tại cơ sở để thực hiện
+                lấy mẫu. Vui lòng chọn lịch hẹn phù hợp.
               </p>
             </Col>
             <Col span={24}>
@@ -241,4 +241,4 @@ const ServiceAtHomeForm: React.FC = () => {
   )
 }
 
-export default ServiceAtHomeForm
+export default ServiceAtFacilityForm
