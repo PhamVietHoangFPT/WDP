@@ -43,6 +43,16 @@ const doctorAPI = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'doctor', id }], // Caching từng testTaker theo ID
     }),
 
+    createServiceCaseResult: builder.mutation({
+      query: (data) => ({
+        url: '/doctors/results',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['doctor'],
+    }),
+
     // getAllServiceCases: builder.query({
     //   query: (serviceCaseStatus) => ({
     //     url: `/sample-collector/service-cases/${serviceCaseStatus}`,
@@ -110,4 +120,5 @@ export const {
     useGetAllRequestStatusListQuery,
     useUpdateServiceCaseStatusMutation,
   useGetTestTakerQuery,
+  useCreateServiceCaseResultMutation,
 } = doctorAPI
