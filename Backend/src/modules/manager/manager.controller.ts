@@ -189,4 +189,85 @@ export class ManagerController {
       data: [data],
     }
   }
+
+  @Get('service-cases-without-doctor')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa có bác sĩ' })
+  async getAllServiceCaseWithoutDoctor(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data =
+      await this.managerService.getAllServiceCaseWithoutDoctor(facilityId)
+    return {
+      data: data.map((item) => new ServiceCaseResponseDto(item)),
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách hồ sơ dịch vụ chưa có bác sĩ',
+    }
+  }
+
+  @Put('service-cases/:serviceCaseId/doctor/:doctorId')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({
+    summary: 'Gán bác sĩ cho hồ sơ dịch vụ',
+  })
+  @ApiParam({
+    name: 'serviceCaseId',
+    description: 'ID của hồ sơ dịch vụ',
+    required: true,
+  })
+  @ApiParam({
+    name: 'doctorId',
+    description: 'ID của bác sĩ',
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cập nhật thành công',
+    type: ApiResponseDto<ServiceCaseResponseDto>,
+  })
+  async assignDoctorToServiceCase(
+    @Param('serviceCaseId') serviceCaseId: string,
+    @Param('doctorId') doctorId: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const userId = req.user.id
+    const data = await this.managerService.assignDoctorToServiceCase(
+      serviceCaseId,
+      doctorId,
+      userId,
+    )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Cập nhật thành công',
+      data: [data],
+    }
+  }
+
+  @Get('doctors')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách bác sĩ',
+    type: AccountResponseDto,
+    isArray: true,
+  })
+  async getAllDoctors(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<AccountResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data = await this.managerService.getAllDoctors(facilityId)
+    return {
+      data: data.map((item) => new AccountResponseDto(item)),
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách bác sĩ',
+    }
+  }
 }

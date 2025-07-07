@@ -20,6 +20,15 @@ export interface IManagerService {
     facilityId: string,
   ): Promise<AccountResponseDto>
   managerGetAllRoles(): Promise<RoleDocument[]>
+  getAllServiceCaseWithoutDoctor(
+    facilityId: string,
+  ): Promise<ServiceCaseResponseDto[]>
+  assignDoctorToServiceCase(
+    serviceCaseId: string,
+    doctorId: string,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto>
+  getAllDoctors(facilityId: string): Promise<AccountResponseDto[]>
 }
 
 export const IManagerService = Symbol('IManagerService')
