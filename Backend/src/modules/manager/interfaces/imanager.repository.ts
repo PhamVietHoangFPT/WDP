@@ -22,6 +22,13 @@ export interface IManagerRepository {
     facilityId: string,
   ): Promise<AccountDocument>
   managerGetAllRoles(): Promise<RoleDocument[]>
+  getAllServiceCaseWithoutDoctor(facilityId: string): Promise<ServiceCase[]>
+  assignDoctorToServiceCase(
+    serviceCaseId: string,
+    doctorId: string,
+    userId: string,
+  ): Promise<ServiceCaseDocument>
+  getAllDoctors(facilityId: string): Promise<AccountDocument[]>
 }
 
 export const IManagerRepository = Symbol('IManagerRepository')
