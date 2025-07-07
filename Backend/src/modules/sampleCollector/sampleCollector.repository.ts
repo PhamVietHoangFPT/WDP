@@ -96,12 +96,63 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
       },
+      // Mo bang services
+      {
+        $lookup: {
+          from: 'services',
+          let: { serviceId: '$caseMemberDetails.service' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$serviceId'],
+                },
+              },
+            },
+          ],
+          as: 'serviceDetails',
+        },
+      },
+      // Mo mang serviceDetails
+      {
+        $unwind: { path: '$serviceDetails', preserveNullAndEmptyArrays: true },
+      },
+      // Mo bang time return
+      {
+        $lookup: {
+          from: 'timereturns',
+          let: { timeReturnId: '$serviceDetails.timeReturn' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$timeReturnId'],
+                },
+              },
+            },
+          ],
+          as: 'timeReturnDetails',
+        },
+      },
+      // Mo mang timeReturnDetails
+      {
+        $unwind: {
+          path: '$timeReturnDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       // Chon truong can thiet
       {
         $project: {
           _id: 1,
           statusDetails: '$statusDetails.testRequestStatus',
           bookingDate: '$bookingDetails.bookingDate',
+          timeReturn: {
+            $concat: [
+              { $toString: '$timeReturnDetails.timeReturn' }, // Chuyển số/value thành chuỗi
+              ' ngày', // Nối với đơn vị " ngày"
+            ],
+          },
         },
       },
     ])
