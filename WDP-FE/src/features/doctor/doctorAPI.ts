@@ -21,7 +21,7 @@ const doctorAPI = apiSlice.injectEndpoints({
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collector'],
+      providesTags: ['doctor'],
     }),
 
     updateServiceCaseStatus: builder.mutation({
@@ -30,7 +30,16 @@ const doctorAPI = apiSlice.injectEndpoints({
         method: 'PATCH',
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['sample-collector'],
+      invalidatesTags: ['doctor'],
+    }),
+
+    getTestTaker: builder.query({
+      query: (id) => ({
+        url: `/test-takers/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['doctor'],
     }),
 
     // getAllServiceCases: builder.query({
@@ -99,4 +108,5 @@ export const {
   useGetServiceCaseWithoutResultsListQuery,
     useGetAllRequestStatusListQuery,
     useUpdateServiceCaseStatusMutation,
+  useGetTestTakerQuery,
 } = doctorAPI
