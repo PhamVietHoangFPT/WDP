@@ -67,14 +67,17 @@ export class AuthController {
     })
   }
 
-  @Post('test-email')
-  @ApiOperation({ summary: 'Kiểm tra email' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: ApiResponseDto<string>,
-  })
-  @HttpCode(HttpStatus.OK)
-  async testEmail() {
-    return this.emailService.testEmail('hoangpvse183123@fpt.edu.vn')
-  }
+  // @Post('test-email')
+  // @ApiOperation({ summary: 'Kiểm tra email' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   type: ApiResponseDto<string>,
+  // })
+  // @HttpCode(HttpStatus.OK)
+  // async testEmail() {
+  //   return this.emailService.sendEmailNotificationForCheckIn(
+  //     '6867e821af7e375eba8ed5b4',
+  //     '686bc26ae6d7e74b2a4958f7',
+  //   )
+  // }
 }

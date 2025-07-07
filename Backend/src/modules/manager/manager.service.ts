@@ -37,6 +37,14 @@ export class ManagerService implements IManagerService {
     return sampleCollectors.map((item) => new AccountResponseDto(item))
   }
 
+  async getAllDoctors(facilityId: string): Promise<AccountResponseDto[]> {
+    const doctors = await this.managerRepository.getAllDoctors(facilityId)
+    if (!doctors || doctors.length === 0) {
+      throw new NotFoundException('Không tìm thấy bác sĩ nào')
+    }
+    return doctors.map((item) => new AccountResponseDto(item))
+  }
+
   async getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
@@ -65,6 +73,33 @@ export class ManagerService implements IManagerService {
         sampleCollectorId,
         userId,
       )
+    if (!serviceCase) {
+      throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
+    }
+    return new ServiceCaseResponseDto(serviceCase)
+  }
+
+  async getAllServiceCaseWithoutDoctor(
+    facilityId: string,
+  ): Promise<ServiceCaseResponseDto[]> {
+    const serviceCases =
+      await this.managerRepository.getAllServiceCaseWithoutDoctor(facilityId)
+    if (!serviceCases || serviceCases.length === 0) {
+      throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ nào')
+    }
+    return serviceCases.map((item) => new ServiceCaseResponseDto(item))
+  }
+
+  async assignDoctorToServiceCase(
+    serviceCaseId: string,
+    doctorId: string,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto> {
+    const serviceCase = await this.managerRepository.assignDoctorToServiceCase(
+      serviceCaseId,
+      doctorId,
+      userId,
+    )
     if (!serviceCase) {
       throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
     }

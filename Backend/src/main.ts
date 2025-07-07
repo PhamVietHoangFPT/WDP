@@ -5,7 +5,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ValidationPipe } from '@nestjs/common' // Nên có để validate DTOs
 import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'
-import * as dotenv from 'dotenv'
 import { join } from 'node:path'
 
 async function bootstrap() {
@@ -47,8 +46,6 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build()
-
-  dotenv.config()
 
   // Tạo Swagger document dựa trên cấu hình và ứng dụng NestJS
   // NestJS sẽ tự động quét các controller và DTO có decorator của @nestjs/swagger

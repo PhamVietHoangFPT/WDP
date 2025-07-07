@@ -8,6 +8,10 @@ export interface IEmailService {
     doctorId: string,
     conclusion: string,
   ): Promise<void>
+  sendEmailNotificationForCheckIn(
+    customerId: string,
+    bookingId: string,
+  ): Promise<void>
 }
 
 export const IEmailService = Symbol('IEmailService')

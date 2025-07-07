@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông báo lịch hẹn từ {{appName}}</title>
+  <style>
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .header h1 {
+      color: #2c3e50;
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .content {
+      padding: 20px 0;
+    }
+
+    .content p {
+      margin-bottom: 10px;
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-table th,
+    .info-table td {
+      border: 1px solid #dddddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .info-table th {
+      background-color: #f2f2f2;
+      color: #555555;
+      font-weight: bold;
+    }
+
+    .important-note {
+      background-color: #fff3cd;
+      /* Màu vàng nhạt */
+      border-left: 5px solid #ffc107;
+      /* Đường viền vàng */
+      padding: 15px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      color: #664d03;
+      /* Màu chữ đậm */
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #eeeeee;
+      font-size: 12px;
+      color: #777777;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 12px 25px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Thông Báo Lịch Hẹn</h1>
+    </div>
+    <div class="content">
+      <p>Kính gửi Quý khách <strong>{{customerName}}</strong>,</p>
+      <p>{{message}}</p>
+      <p>Thông tin chi tiết lịch hẹn của bạn:</p>
+
+      <table class="info-table">
+        <thead>
+          <tr>
+            <th>Mục</th>
+            <th>Chi tiết</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ngày hẹn</td>
+            <td><strong>{{bookingDate}}</strong></td>
+          </tr>
+          <tr>
+            <td>Thời gian bắt đầu</td>
+            <td><strong>{{bookingTime}}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="important-note">
+        <p><strong>Lưu ý quan trọng:</strong></p>
+        <p>Vui lòng sắp xếp thời gian để <strong>đến cơ sở check-in trước 30 phút</strong> so với thời gian bắt đầu lịch hẹn của
+          bạn ({{bookingTime}}) để đảm bảo quá trình diễn ra thuận lợi.</p>
+        <p>Nếu bạn đã chọn hình thức lấy mẫu tại nhà, bạn không cần đến cơ sở để check-in.</p>
+      </div>
+
+      <p>Xin vui lòng kiểm tra lại thông tin và đến đúng giờ hẹn. Nếu có bất kỳ thay đổi nào hoặc bạn cần hỗ trợ, xin
+        vui lòng liên hệ với chúng tôi.</p>
+        
+      <p style="margin-top: 30px;">Trân trọng cảm ơn sự hợp tác của Quý khách.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{currentYear}} {{appName}}. All rights reserved.</p>
+      <p>Đây là email tự động, vui lòng không trả lời email này.</p>
+    </div>
+  </div>
+</body>
+
+</html>
