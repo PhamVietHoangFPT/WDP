@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common'
@@ -17,6 +18,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger'
 
 import { CreateResultDto } from '../result/dto/createResult.dto'
@@ -30,6 +32,7 @@ import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
 import { IDoctorService } from './interfaces/idoctor.service'
 import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
+import { TestRequestStatus } from '../testRequestStatus/schemas/testRequestStatus.schema'
 @ApiTags('doctors')
 @Controller('doctors')
 @ApiBearerAuth()
@@ -95,27 +98,70 @@ export class DoctorController {
     }
   }
 
-  @Get('/service-cases-without-results')
+  @Get('/service-cases-without-results/:currentStatus/:resultExists')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.DOCTOR)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa trả kết quả' })
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'currentStatus',
+    required: true,
+    type: String,
+    description: 'Trạng thái hiện tại của hồ sơ dịch vụ',
+  })
+  @ApiQuery({
+    name: 'resultExists',
+    required: true,
+    type: Boolean,
+    description: 'Chỉ lấy hồ sơ dịch vụ chưa có kết quả (true/false)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Danh sách hồ sơ dịch vụ chưa trả kết quả',
+    description: 'Danh sách hồ sơ dịch vụ đã trả kết quả',
     type: ApiResponseDto,
     isArray: true,
   })
   async getAllServiceCasesWithoutResults(
     @Req() req: any, // Assuming req contains user info
+    @Query('currentStatus') currentStatus: string,
+    @Query('resultExists') resultExists: boolean, // Default to false if not provided
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
-    const facilityId = req.user.facility._id // Assuming user has facility info
-    const data =
-      await this.doctorService.getAllServiceCasesWithoutResults(facilityId)
+    const facilityId = req.user.facility._id
+    const doctorId = req.user.id // Assuming the user is a doctor
+    const data = await this.doctorService.getAllServiceCasesWithoutResults(
+      facilityId,
+      doctorId,
+      currentStatus,
+      resultExists,
+    )
     return {
       data: data,
       statusCode: 200,
       message: 'Lấy danh sách hồ sơ dịch vụ chưa trả kết quả thành công',
+      success: true,
+    }
+  }
+
+  @Get('/test-request-statuses')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.DOCTOR)
+  @ApiOperation({
+    summary: 'Lấy danh sách trạng thái yêu cầu xét nghiệm của bác sĩ',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách trạng thái yêu cầu xét nghiệm',
+    type: ApiResponseDto<TestRequestStatus[]>,
+  })
+  async getDoctorTestRequestStatuses(): Promise<
+    ApiResponseDto<TestRequestStatus>
+  > {
+    const data = await this.doctorService.getDoctorTestRequestStatuses()
+    return {
+      data: data,
+      statusCode: 200,
+      message: 'Lấy danh sách trạng thái yêu cầu xét nghiệm thành công',
       success: true,
     }
   }

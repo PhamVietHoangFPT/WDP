@@ -43,5 +43,9 @@ export interface IServiceCaseRepository {
   getBookingIdsByTime(time: Date, currentStatusId: string): Promise<string[]>
 
   findByBookingId(bookingId: string): Promise<boolean | null>
+
+  findByCurrentStatusId(currentStatusId: string): Promise<string[] | null>
+
+  getServiceCaseCheckinTime(serviceCaseId: string): Promise<Date | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

@@ -13,6 +13,10 @@ import {
   ServiceCaseSchema,
 } from '../serviceCase/schemas/serviceCase.schema'
 import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+import {
+  TestRequestStatus,
+  TestRequestStatusSchema,
+} from '../testRequestStatus/schemas/testRequestStatus.schema'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,6 +24,10 @@ import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.
       {
         name: ServiceCase.name,
         schema: ServiceCaseSchema,
+      },
+      {
+        name: TestRequestStatus.name,
+        schema: TestRequestStatusSchema,
       },
     ]),
     AuthModule,
