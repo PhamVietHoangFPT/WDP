@@ -1,25 +1,20 @@
-import React from 'react'
-import { Card, Table, Typography, Button } from 'antd'
+import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useGetPaymentListQuery } from '../../features/customer/paymentApi'
-import Cookies from 'js-cookie'
-import { jwtDecode } from 'jwt-decode'
 import HeaderCus from '../../components/layout/Header/HeaderCus'
+import { useSearchParams } from 'react-router-dom'
 
 const { Title } = Typography
 
 export default function PaymentHistory() {
   const navigate = useNavigate()
-
-  // 👉 Lấy accountId từ token
-  const token = Cookies.get('userToken')
-  const decoded: any = token ? jwtDecode(token) : null
-  const accountId = decoded?.id || decoded?._id
+  const [searchParams] = useSearchParams()
+  const pageNumber = searchParams.get('pageNumber') || '1'
+  const pageSize = searchParams.get('pageSize') || '5'
 
   const { data, isLoading } = useGetPaymentListQuery({
-    pageSize: 5,
-    pageNumber: 1,
-    accountId, // ✅ truyền nếu API có lọc theo account
+    pageSize: Number(pageSize),
+    pageNumber: Number(pageNumber),
   })
 
   const columns = [
@@ -51,12 +46,17 @@ export default function PaymentHistory() {
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'transactionStatus',
-      key: 'transactionStatus',
-      render: (status: string) =>
-        status?.toLowerCase().includes('thành công')
-          ? 'Thành công'
-          : 'Thất bại',
+      dataIndex: 'responseCode',
+      key: 'responseCode',
+      render: (status: string) => {
+        // Chuyển status về dạng chữ thường để so sánh không phân biệt hoa/thường
+        const lowerStatus = status.toLowerCase()
+        if (lowerStatus.includes('không ')) {
+          return <Tag color='red'>{status}</Tag>
+        } else {
+          return <Tag color='green'>{status}</Tag>
+        }
+      },
     },
     {
       title: 'Chi tiết',
@@ -79,7 +79,24 @@ export default function PaymentHistory() {
           rowKey='_id'
           dataSource={data?.data || []}
           columns={columns}
-          pagination={{ pageSize: 5 }}
+          pagination={false}
+        />
+        <Pagination
+          current={Number(pageNumber)}
+          pageSize={Number(pageSize)}
+          total={data?.pagination?.totalItems || 0}
+          onChange={(page, size) => {
+            navigate(`/payment-history?pageNumber=${page}&pageSize=${size}`)
+          }}
+          showSizeChanger
+          pageSizeOptions={['5', '10', '20']}
+          style={{
+            marginTop: '20px',
+            textAlign: 'center',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
         />
       </Card>
     </div>

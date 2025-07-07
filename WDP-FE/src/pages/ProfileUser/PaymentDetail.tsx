@@ -21,7 +21,7 @@ export default function PaymentHistoryDetail() {
     return <div style={{ padding: 24 }}>Đang tải dữ liệu...</div>
   }
 
-  if (!data?.data) {
+  if (!data) {
     return (
       <div style={{ padding: 24 }}>Không tìm thấy thông tin thanh toán.</div>
     )
@@ -37,7 +37,7 @@ export default function PaymentHistoryDetail() {
     orderInfo,
     tmnCode,
     paymentType,
-  } = data.data
+  } = data
 
   return (
     <Card style={{ maxWidth: 700, margin: '40px auto' }}>
@@ -71,7 +71,7 @@ export default function PaymentHistoryDetail() {
       </Descriptions>
       <Button
         type='primary'
-        onClick={() => navigate('/payment-history')}
+        onClick={() => navigate('/payment-history?pageNumber=1&pageSize=5')}
         style={{ marginTop: 24 }}
       >
         Quay lại danh sách

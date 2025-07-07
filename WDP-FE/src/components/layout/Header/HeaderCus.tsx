@@ -63,7 +63,7 @@ export default function HeaderCus() {
     {
       key: 'payment-history',
       label: 'Lịch sử thanh toán',
-      onClick: () => navigate('/payment-history'),
+      onClick: () => navigate('/payment-history?pageNumber=1&pageSize=5'),
     },
   ]
   return (

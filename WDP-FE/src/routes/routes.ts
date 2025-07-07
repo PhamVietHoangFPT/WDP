@@ -37,6 +37,8 @@ import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAcc
 import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
 import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
 import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/SampleCollectorServiceCase'
+import ServiceAtFacility from '../pages/ServiceAtFacility/ServiceAtFacility'
+import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacilityRegisteration'
 
 const routes: LayoutRoute[] = [
   {
@@ -115,6 +117,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/register-service-at-home/:id',
         component: ServiceAtHome,
+      },
+      {
+        path: '/register-service-at-facility/:id',
+        component: ServiceAtFacility,
+      },
+      {
+        path: '/register-service',
+        component: AdnFacilityRegisteration,
       },
     ],
   },
