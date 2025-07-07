@@ -8,6 +8,7 @@ import { IEmailService } from './interfaces/iemail.service' // Import interface 
 import { MongooseModule } from '@nestjs/mongoose'
 import { Account, AccountSchema } from '../account/schemas/account.schema'
 import { Facility, FacilitySchema } from '../facility/schemas/facility.schema'
+import { Booking, BookingSchema } from '../booking/schemas/booking.schema'
 @Module({
   imports: [
     ConfigModule, // Đảm bảo ConfigModule đã được import
@@ -37,9 +38,10 @@ import { Facility, FacilitySchema } from '../facility/schemas/facility.schema'
         },
       }),
     }),
-    MongooseModule.forFeature([{ name: Account.name, schema: AccountSchema }]),
     MongooseModule.forFeature([
+      { name: Account.name, schema: AccountSchema },
       { name: Facility.name, schema: FacilitySchema },
+      { name: Booking.name, schema: BookingSchema },
     ]),
   ],
   providers: [

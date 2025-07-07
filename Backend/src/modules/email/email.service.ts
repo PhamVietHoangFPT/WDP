@@ -5,8 +5,9 @@ import { ConfigService } from '@nestjs/config'
 import { IEmailService } from './interfaces/iemail.service'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '../account/schemas/account.schema'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { Facility } from '../facility/schemas/facility.schema'
+import { Booking } from '../booking/schemas/booking.schema'
 
 @Injectable()
 export class EmailService implements IEmailService {
@@ -17,9 +18,29 @@ export class EmailService implements IEmailService {
     private readonly accountModel: Model<Account>,
     @InjectModel(Facility.name)
     private readonly facilityModel: Model<Facility>,
+    @InjectModel(Booking.name)
+    private readonly bookingModel: Model<Booking>,
   ) {}
 
   APP_NAME = this.configService.get<string>('APP_NAME')
+
+  private formatVietnameseDate(date: Date): string {
+    const daysOfWeek = [
+      'Chủ Nhật',
+      'Thứ Hai',
+      'Thứ Ba',
+      'Thứ Tư',
+      'Thứ Năm',
+      'Thứ Sáu',
+      'Thứ Bảy',
+    ]
+    const day = date.getDate().toString().padStart(2, '0') // Ngày (01-31)
+    const month = (date.getMonth() + 1).toString().padStart(2, '0') // Tháng (01-12)
+    const year = date.getFullYear() // Năm
+    const dayName = daysOfWeek[date.getDay()] // Tên thứ trong tuần
+
+    return `${dayName}, ${day}/${month}/${year}`
+  }
 
   async sendUserWelcomeEmail(email: string, name: string): Promise<void> {
     await this.mailerService.sendMail({
@@ -104,5 +125,63 @@ export class EmailService implements IEmailService {
     console.log(`Email kết quả đã được gửi đến ${customerAccount.email}`)
   }
 
-  // Thêm các phương thức gửi email khác tùy theo nhu cầu
+  async sendEmailNotificationForCheckIn(
+    customerId: string,
+    bookingId: string,
+  ): Promise<void> {
+    const customerAccount = await this.accountModel
+      .findOne({ _id: customerId })
+      .select('email name -_id')
+      .exec()
+    const booking = await this.bookingModel.aggregate([
+      {
+        $match: { _id: new Types.ObjectId(bookingId) },
+      },
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: '$slot' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slotInfo',
+        },
+      },
+      {
+        $unwind: { path: '$slotInfo', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 0,
+          bookingDate: 1,
+          bookingTime: '$slotInfo.startTime',
+        },
+      },
+    ])
+
+    const formattedBookingDate = this.formatVietnameseDate(
+      new Date(booking[0]?.bookingDate),
+    )
+
+    await this.mailerService.sendMail({
+      to: customerAccount.email,
+      subject: 'Thông báo đặt lịch hẹn',
+      template: 'check-in-notification', // Tên file template (ví dụ: check-in-notification.hbs)
+      context: {
+        message: 'Thông báo lịch hẹn của bạn.',
+        appName: this.APP_NAME,
+        customerName: customerAccount.name,
+        bookingDate: formattedBookingDate,
+        bookingTime: booking[0]?.bookingTime,
+        currentYear: new Date().getFullYear(),
+      },
+    })
+    console.log(`Email thông báo đã được gửi đến ${customerAccount.email}`)
+  }
 }
