@@ -285,7 +285,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           disabled={isLoadingStatus}
         >
           {statusListData?.data
-            ?.filter((s) => s.order >= 7 && s.order <= 8)
+            ?.filter((s) => s.order >= 7 && s.order <= 9)
             ?.map((s) => (
               <Select.Option key={s._id} value={s._id}>
                 {s.testRequestStatus}
