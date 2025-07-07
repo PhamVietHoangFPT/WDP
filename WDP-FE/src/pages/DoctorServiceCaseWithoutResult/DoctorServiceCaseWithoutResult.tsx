@@ -2,7 +2,7 @@ import type React from "react"
 import { useState } from "react"
 import { Table, Typography, Spin, Tag, Button } from "antd"
 import type { ColumnsType } from "antd/es/table"
-import { EyeOutlined } from "@ant-design/icons"
+import { EditOutlined, EyeOutlined } from "@ant-design/icons"
 import { useGetServiceCaseWithoutResultsListQuery } from "../../features/doctor/doctorAPI"
 
 const { Title } = Typography
@@ -41,48 +41,48 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   }
 
   const columns: ColumnsType<ServiceCase> = [
-    {
-      title: "Mã dịch vụ",
-      dataIndex: "_id",
-      key: "_id",
-      render: (id: string) => (
-        <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: "bold" }}>
-          {id.slice(-8).toUpperCase()}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Mã dịch vụ",
+    //   dataIndex: "_id",
+    //   key: "_id",
+    //   render: (id: string) => (
+    //     <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: "bold" }}>
+    //       {id.slice(-8).toUpperCase()}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Trạng thái hiện tại",
       key: "currentStatus",
       render: (_, record) => <Tag color="orange">{record.currentStatus.testRequestStatus}</Tag>,
     },
-    {
-      title: "Thứ tự xử lý",
-      key: "order",
-      render: (_, record) => (
-        <div style={{ textAlign: "center", fontWeight: "bold" }}>{record.currentStatus.order}</div>
-      ),
-      sorter: (a, b) => a.currentStatus.order - b.currentStatus.order,
-    },
+    // {
+    //   title: "Thứ tự xử lý",
+    //   key: "order",
+    //   render: (_, record) => (
+    //     <div style={{ textAlign: "left", fontWeight: "bold" }}>{record.currentStatus.order}</div>
+    //   ),
+    //   sorter: (a, b) => a.currentStatus.order - b.currentStatus.order,
+    // },
     {
       title: "Cơ sở",
       key: "facility",
       render: (_, record) => <div style={{ fontWeight: "500" }}>{record.facility.name}</div>,
     },
-    {
-      title: "Thành viên phụ trách",
-      dataIndex: "caseMember",
-      key: "caseMember",
-      render: (caseMember: string) => (
-        <div style={{ fontFamily: "monospace", fontSize: "12px" }}>{caseMember.slice(-8).toUpperCase()}</div>
-      ),
-    },
+    // {
+    //   title: "Thành viên phụ trách",
+    //   dataIndex: "caseMember",
+    //   key: "caseMember",
+    //   render: (caseMember: string) => (
+    //     <div style={{ fontFamily: "monospace", fontSize: "12px" }}>{caseMember.slice(-8).toUpperCase()}</div>
+    //   ),
+    // },
     {
       title: "Hành động",
       key: "actions",
       render: (_, record) => (
-        <Button type="primary" icon={<EyeOutlined />} onClick={() => handleViewDetails(record._id)} size="small">
-          Xem chi tiết
+        <Button type="primary" icon={<EditOutlined />} onClick={() => handleViewDetails(record._id)} size="small">
+          Thêm kết quả
         </Button>
       ),
     },
