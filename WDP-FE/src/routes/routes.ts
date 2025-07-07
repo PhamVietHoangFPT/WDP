@@ -39,6 +39,7 @@ import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleColl
 import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/SampleCollectorServiceCase'
 import ServiceAtFacility from '../pages/ServiceAtFacility/ServiceAtFacility'
 import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacilityRegisteration'
+import DoctorServiceCaseWithoutResult from '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
 
 const routes: LayoutRoute[] = [
   {
@@ -224,6 +225,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor',
         component: DoctorHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/doctor/service-cases-without-results',
+        component: DoctorServiceCaseWithoutResult,
         // role: ['admin'],
       },
     ],
