@@ -20,7 +20,10 @@ interface ServiceCase {
   }
   phoneNumber: string
   bookingDate: string
-  facility: any
+  facility: {
+    _id: string
+    name: string
+  }
   isAtHome?: boolean
 }
 
@@ -114,7 +117,7 @@ const ServiceCaseListAdmin: React.FC = () => {
     {
       title: "Cơ sở",
       key: "facility",
-      render: (_, record) => record.facility?.facilityName || "N/A",
+      render: (_, record) => record.facility?.name || "N/A",
     },
     {
       title: "Hành động",
