@@ -9,5 +9,10 @@ export interface IAddressRepository {
     data: CreateAddressFacilityDto,
     userId: string,
   ): Promise<AddressDocument>
+  updateAddressById(
+    id: string,
+    data: Partial<CreateAddressDto>,
+    userId: string,
+  ): Promise<AddressDocument | null>
 }
 export const IAddressRepository = Symbol('IAddressRepository')
