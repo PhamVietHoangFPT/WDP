@@ -2,21 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Table, Button, Typography, Spin, Pagination, message, Space, Select, Dropdown, Menu, Tag, Modal } from "antd"
+import { Table, Button, Typography, Spin, Pagination, message, Space, Dropdown, Menu, Tag, Modal } from "antd"
 import type { ColumnsType } from "antd/es/table"
+import { UserAddOutlined, DownOutlined, HomeOutlined, ShopOutlined, ExclamationCircleOutlined } from "@ant-design/icons"
 import {
-  FilterOutlined,
-  UserAddOutlined,
-  DownOutlined,
-  HomeOutlined,
-  ShopOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons"
-import {
-  useGetSampleCollectorListQuery,
-  useGetServiceNoSampleCollectorListQuery,
-  useAddSampleCollectorToServiceCaseMutation,
-} from "../../features/manager/sampleCollectorAPI"
+  useGetDoctorListQuery,
+  useGetServiceCaseNoDoctorListQuery,
+  useAddDoctorToServiceCaseMutation,
+} from "../../features/manager/doctorAPI"
 
 const { Title } = Typography
 
@@ -35,87 +28,90 @@ interface ServiceCase {
     name: string
   }
   isAtHome?: boolean
+  status?: string
 }
 
-interface SampleCollector {
+interface Doctor {
   _id: string
   name: string
   email: string
   phoneNumber: string
-  addressInfo: string
+  specialization?: string
+  experience?: string
 }
 
-const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
-  const [isAtHome, setIsAtHome] = useState<boolean>(true)
+const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
-
   const [confirmModalVisible, setConfirmModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
-  const [selectedSampleCollector, setSelectedSampleCollector] = useState<SampleCollector | null>(null)
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
 
-  // Fetch service cases without sample collectors
+  // Fetch danh sách service cases chưa có bác sĩ
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
     isFetching: isFetchingServices,
     error: serviceCasesError,
-  } = useGetServiceNoSampleCollectorListQuery(isAtHome)
-
-  // Fetch sample collectors list
-  const { data: sampleCollectorsData, isLoading: isLoadingSampleCollectors } = useGetSampleCollectorListQuery({
+  } = useGetServiceCaseNoDoctorListQuery({
     pageNumber: 1,
-    pageSize: 100, // Get all sample collectors for dropdown
+    pageSize: 1000, // Get all for client-side pagination
   })
 
-  // Mutation để gán sample collector cho service case
-  const [addSampleCollectorToServiceCase, { isLoading: isAssigning }] = useAddSampleCollectorToServiceCaseMutation()
+  // Fetch danh sách bác sĩ
+  const { data: doctorsData, isLoading: isLoadingDoctors } = useGetDoctorListQuery({
+    pageNumber: 1,
+    pageSize: 100, // Get all doctors for dropdown
+  })
 
-  // Xử lý gán sample collector cho service case
-  const handleAssignSampleCollector = (serviceCase: ServiceCase, sampleCollector: SampleCollector) => {
+  // Mutation để gán bác sĩ cho service case
+  const [addDoctorToServiceCase, { isLoading: isAssigning }] = useAddDoctorToServiceCaseMutation()
+
+  // Xử lý gán bác sĩ cho service case
+  const handleAssignDoctor = (serviceCase: ServiceCase, doctor: Doctor) => {
     setSelectedServiceCase(serviceCase)
-    setSelectedSampleCollector(sampleCollector)
+    setSelectedDoctor(doctor)
     setConfirmModalVisible(true)
   }
 
-  // Xác nhận gán sample collector
+  // Xác nhận gán bác sĩ
   const handleConfirmAssignment = async () => {
-    if (!selectedServiceCase || !selectedSampleCollector) return
+    if (!selectedServiceCase || !selectedDoctor) return
 
     try {
-      await addSampleCollectorToServiceCase({
+      await addDoctorToServiceCase({
         serviceCaseId: selectedServiceCase._id,
-        sampleCollectorId: selectedSampleCollector._id,
+        doctorId: selectedDoctor._id,
         data: {}, // Empty data object as required by API
       }).unwrap()
 
-      message.success(`Đã gán nhân viên lấy mẫu ${selectedSampleCollector.name} cho dịch vụ thành công!`)
+      message.success(`Đã gán bác sĩ ${selectedDoctor.name} cho dịch vụ thành công!`)
       setConfirmModalVisible(false)
       setSelectedServiceCase(null)
-      setSelectedSampleCollector(null)
+      setSelectedDoctor(null)
     } catch (error: any) {
-      console.error("Error assigning sample collector:", error)
-      message.error(error?.data?.message || "Gán nhân viên lấy mẫu thất bại!")
+      console.error("Error assigning doctor:", error)
+      message.error(error?.data?.message || "Gán bác sĩ thất bại!")
     }
   }
 
-  // Hủy gán sample collector
+  // Hủy gán bác sĩ
   const handleCancelAssignment = () => {
     setConfirmModalVisible(false)
     setSelectedServiceCase(null)
-    setSelectedSampleCollector(null)
+    setSelectedDoctor(null)
   }
 
-  const getSampleCollectorMenu = (serviceCaseId: string) => {
-    const collectors = sampleCollectorsData?.data || []
+  const getDoctorMenu = (serviceCaseId: string) => {
+    const doctors = doctorsData?.data || []
 
-    if (collectors.length === 0) {
+    if (doctors.length === 0) {
       return (
         <Menu
           items={[
             {
-              key: "no-collectors",
-              label: <span style={{ color: "#999" }}>Không có nhân viên nào</span>,
+              key: "no-doctors",
+              label: <span style={{ color: "#999" }}>Không có bác sĩ nào</span>,
               disabled: true,
             },
           ]}
@@ -125,22 +121,22 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
 
     return (
       <Menu
-        items={collectors.map((collector: SampleCollector) => ({
-          key: collector._id,
+        items={doctors.map((doctor: Doctor) => ({
+          key: doctor._id,
           label: (
             <div
               onClick={() => {
                 const serviceCase = serviceCases.find((sc) => sc._id === serviceCaseId)
                 if (serviceCase) {
-                  handleAssignSampleCollector(serviceCase, collector)
+                  handleAssignDoctor(serviceCase, doctor)
                 }
               }}
             >
-              <div style={{ fontWeight: "bold" }}>{collector.name}</div>
-              <div style={{ fontSize: "12px", color: "#666" }}>{collector.email}</div>
-              <div style={{ fontSize: "12px", color: "#666" }}>{collector.phoneNumber}</div>
-              {collector.addressInfo && (
-                <div style={{ fontSize: "11px", color: "#999" }}>Địa chỉ: {collector.addressInfo}</div>
+              <div style={{ fontWeight: "bold" }}>{doctor.name}</div>
+              <div style={{ fontSize: "12px", color: "#666" }}>{doctor.email}</div>
+              <div style={{ fontSize: "12px", color: "#666" }}>{doctor.phoneNumber}</div>
+              {doctor.specialization && (
+                <div style={{ fontSize: "11px", color: "#999" }}>Chuyên khoa: {doctor.specialization}</div>
               )}
             </div>
           ),
@@ -165,8 +161,8 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
       title: "Loại dịch vụ",
       key: "serviceType",
       render: (_, record) => (
-        <Tag icon={isAtHome ? <HomeOutlined /> : <ShopOutlined />} color={isAtHome ? "green" : "blue"}>
-          {isAtHome ? "Tại nhà" : "Tại cơ sở"}
+        <Tag icon={record.isAtHome ? <HomeOutlined /> : <ShopOutlined />} color={record.isAtHome ? "green" : "blue"}>
+          {record.isAtHome ? "Tại nhà" : "Tại cơ sở"}
         </Tag>
       ),
     },
@@ -190,21 +186,20 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
       render: (_, record) => record.facility?.name || "N/A",
     },
     {
+      title: "Trạng thái",
+      key: "status",
+      render: (_, record) => <Tag color="orange">Chưa có bác sĩ</Tag>,
+    },
+    {
       title: "Hành động",
       key: "actions",
       render: (_, record) => (
         <Space size="middle">
-          {isAtHome && (
-            <Dropdown
-              overlay={getSampleCollectorMenu(record._id)}
-              trigger={["click"]}
-              disabled={isLoadingSampleCollectors}
-            >
-              <Button type="primary" icon={<UserAddOutlined />} loading={isLoadingSampleCollectors}>
-                Gán nhân viên <DownOutlined />
-              </Button>
-            </Dropdown>
-          )}
+          <Dropdown overlay={getDoctorMenu(record._id)} trigger={["click"]} disabled={isLoadingDoctors}>
+            <Button type="primary" icon={<UserAddOutlined />} loading={isLoadingDoctors}>
+              Gán bác sĩ <DownOutlined />
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
@@ -219,7 +214,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý dịch vụ chưa có nhân viên lấy mẫu</Title>
+      <Title level={2}>Quản lý dịch vụ chưa có bác sĩ</Title>
 
       <div
         style={{
@@ -231,17 +226,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <FilterOutlined />
-          <span>Lọc theo loại dịch vụ:</span>
-          <Select
-            value={isAtHome}
-            onChange={setIsAtHome}
-            style={{ width: 200 }}
-            options={[
-              { value: true, label: "🏠 Dịch vụ tại nhà" },
-              { value: false, label: "🏥 Dịch vụ tại cơ sở" },
-            ]}
-          />
+          <span style={{ fontSize: "16px", fontWeight: "500" }}>Danh sách dịch vụ chưa được gán bác sĩ</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -258,13 +243,9 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
       ) : serviceCasesError && serviceCasesError.status === 404 ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
-            {isAtHome
-              ? "Không có dịch vụ tại nhà nào chưa được gán nhân viên lấy mẫu"
-              : "Không có dịch vụ tại cơ sở nào chưa được gán nhân viên lấy mẫu"}
+            Không có dịch vụ nào chưa được gán bác sĩ
           </div>
-          <Button type="primary" onClick={() => setIsAtHome(!isAtHome)}>
-            Xem {isAtHome ? "dịch vụ tại cơ sở" : "dịch vụ tại nhà"}
-          </Button>
+          <div style={{ fontSize: "14px", color: "#999" }}>Tất cả dịch vụ đã được phân công bác sĩ phụ trách</div>
         </div>
       ) : serviceCasesError ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
@@ -281,9 +262,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             pagination={false}
             loading={isFetchingServices}
             locale={{
-              emptyText: isAtHome
-                ? "Không có dịch vụ tại nhà nào chưa được gán nhân viên lấy mẫu"
-                : "Không có dịch vụ tại cơ sở nào chưa được gán nhân viên lấy mẫu",
+              emptyText: "Không có dịch vụ nào chưa được gán bác sĩ",
             }}
           />
 
@@ -310,7 +289,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <ExclamationCircleOutlined style={{ color: "#faad14" }} />
-            <span>Xác nhận gán nhân viên lấy mẫu</span>
+            <span>Xác nhận gán bác sĩ</span>
           </div>
         }
         open={confirmModalVisible}
@@ -328,7 +307,6 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
               <div>• Khách hàng: {selectedServiceCase?.account.name}</div>
               <div>• Email: {selectedServiceCase?.account.email}</div>
               <div>• Số điện thoại: {selectedServiceCase?.phoneNumber}</div>
-              <div>• Loại dịch vụ: {selectedServiceCase?.isAtHome ? "Tại nhà" : "Tại cơ sở"}</div>
               <div>
                 • Ngày đặt:{" "}
                 {selectedServiceCase?.bookingDate
@@ -339,17 +317,16 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
                 • Tổng phí:{" "}
                 {selectedServiceCase?.totalFee ? `${selectedServiceCase.totalFee.toLocaleString("vi-VN")} VNĐ` : "N/A"}
               </div>
-              <div>• Cơ sở: {selectedServiceCase?.facility?.name || "N/A"}</div>
             </div>
           </div>
 
           <div style={{ marginBottom: "16px" }}>
-            <strong>Nhân viên lấy mẫu được chọn:</strong>
+            <strong>Bác sĩ được chọn:</strong>
             <div style={{ marginLeft: "16px", marginTop: "8px" }}>
-              <div>• Tên: {selectedSampleCollector?.name}</div>
-              <div>• Email: {selectedSampleCollector?.email}</div>
-              <div>• Số điện thoại: {selectedSampleCollector?.phoneNumber}</div>
-              {selectedSampleCollector?.addressInfo && <div>• Địa chỉ: {selectedSampleCollector.addressInfo}</div>}
+              <div>• Tên: {selectedDoctor?.name}</div>
+              <div>• Email: {selectedDoctor?.email}</div>
+              <div>• Số điện thoại: {selectedDoctor?.phoneNumber}</div>
+              {selectedDoctor?.specialization && <div>• Chuyên khoa: {selectedDoctor.specialization}</div>}
             </div>
           </div>
 
@@ -364,8 +341,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
           >
             <strong style={{ color: "#d46b08" }}>⚠️ Lưu ý:</strong>
             <div style={{ color: "#d46b08", marginTop: "4px" }}>
-              Sau khi gán nhân viên lấy mẫu, dịch vụ sẽ được chuyển sang trạng thái "Đã có nhân viên phụ trách" và không
-              thể hoàn tác.
+              Sau khi gán bác sĩ, dịch vụ sẽ được chuyển sang trạng thái "Đã có bác sĩ phụ trách" và không thể hoàn tác.
             </div>
           </div>
         </div>
@@ -374,4 +350,4 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   )
 }
 
-export default ManagerServiceCaseWithoutSampleCollector
+export default ManagerServiceCaseWithoutDoctor
