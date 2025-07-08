@@ -8,6 +8,8 @@ import TestTakerList from "../screens/customerScreens/test-taker/TestTakerList";
 import AddTestTaker from "../screens/customerScreens/test-taker/AddTestTaker";
 import TestTakerDetail from "../screens/customerScreens/test-taker/TestTakerDetail";
 import Profile from "../screens/customerScreens/Profile";
+import AtHomeServices from "../screens/customerScreens/booking/AtHomeRegistration";
+import RegisterServiceAtHome from "../screens/customerScreens/booking/RegisterServiceAtHome";
 // import RegisterScreen from "../screens/authScreens/RegisterScreen";
 
 // Định nghĩa kiểu cho Stack Navigator trong phần Auth
@@ -19,6 +21,8 @@ export type AuthStackParamList = {
   AddTestTaker: undefined;
   TestTakerDetail: undefined;
   Profile: undefined;
+  AtHomeServices: undefined;
+  RegisterServiceAtHome: undefined;
 };
 
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -42,6 +46,11 @@ const AuthNavigator = () => {
       <AuthStack.Screen name="TestTakerList" component={TestTakerList} />
       <AuthStack.Screen name="AddTestTaker" component={AddTestTaker} />
       <AuthStack.Screen name="TestTakerDetail" component={TestTakerDetail} />
+      <AuthStack.Screen name="AtHomeServices" component={AtHomeServices} />
+      <AuthStack.Screen
+        name="RegisterServiceAtHome"
+        component={RegisterServiceAtHome}
+      />
     </AuthStack.Navigator>
   );
 };
