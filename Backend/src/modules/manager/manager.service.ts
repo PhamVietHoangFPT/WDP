@@ -129,4 +129,13 @@ export class ManagerService implements IManagerService {
     }
     return roles
   }
+
+  async getAllDeliveryStaff(facilityId: string): Promise<AccountResponseDto[]> {
+    const deliveryStaff =
+      await this.managerRepository.getAllDeliveryStaff(facilityId)
+    if (!deliveryStaff || deliveryStaff.length === 0) {
+      throw new NotFoundException('Không tìm thấy nhân viên giao hàng nào')
+    }
+    return deliveryStaff.map((item) => new AccountResponseDto(item))
+  }
 }
