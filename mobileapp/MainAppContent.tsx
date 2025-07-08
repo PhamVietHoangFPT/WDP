@@ -5,9 +5,12 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 
 import Home from "./screens/Home";
 import Search from "./screens/customerScreens/Search";
-import Booking from "./screens/customerScreens/Booking";
+import Booking from "./screens/customerScreens/booking/RegisterServiceAtHome";
 import Blog from "./screens/customerScreens/Blog";
 import ProfileStack from "./navigation/ProfileStack";
+import AtHomeServices from "./screens/customerScreens/booking/AtHomeRegistration";
+import RegisterServiceAtHome from "./screens/customerScreens/booking/RegisterServiceAtHome";
+import BookingStack from "./navigation/BookingStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,7 +56,8 @@ export default function MainAppContent() {
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />
-      <Tab.Screen name="Booking" component={Booking} />
+      {/* <Tab.Screen name="Booking" component={Booking} /> */}
+      <Tab.Screen name="Booking" component={BookingStack} />
       <Tab.Screen name="Blog" component={Blog} />
       <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
