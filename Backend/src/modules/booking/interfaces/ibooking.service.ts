@@ -19,6 +19,7 @@ export interface IBookingService {
     updateBookingDto: Partial<UpdateBookingDto>,
     userId: string,
   ): Promise<BookingResponseDto | null>
+  autoSendEmailForNotification(): Promise<void>
 }
 
 export const IBookingService = Symbol('IBookingService')

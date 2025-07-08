@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
@@ -56,7 +57,6 @@ export class BookingRepository implements IBookingRepository {
       _id: id,
     })
     await this.slotRepository.setBookingStatus(
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       existingBooking.slot.toString(),
       false,
     )
@@ -173,7 +173,32 @@ export class BookingRepository implements IBookingRepository {
 
   async getAllBookingsIds(): Promise<string[]> {
     const bookings = await this.bookingModel.find().exec()
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return bookings.map((booking) => booking._id.toString())
+  }
+
+  async getAllBookingsIdByCurrentDate(currentDate: Date): Promise<any[]> {
+    const startOfToday = new Date(currentDate)
+    startOfToday.setHours(0, 0, 0, 0) // Đặt giờ, phút, giây, mili giây về 0
+    // --- KẾT THÚC CHUẨN HÓA ---
+
+    // Tính toán đầu ngày mai và đầu ngày kia DỰA TRÊN startOfToday
+    const startOfTomorrow = new Date(startOfToday.getTime() + 86400000) // 1 ngày sau startOfToday
+    const startOfNextDay = new Date(startOfToday.getTime() + 2 * 86400000) // 2 ngày sau startOfToday
+    const bookings = await this.bookingModel
+      .find({
+        bookingDate: {
+          $gte: startOfTomorrow, // Bắt đầu từ 00:00:00.000Z của ngày mai
+          $lt: startOfNextDay, // Đến trước 00:00:00.000Z của ngày kia
+        },
+      })
+      .select('_id account')
+      .lean()
+      .exec()
+    return bookings.map((booking) => {
+      return {
+        _id: booking._id.toString(),
+        accountId: booking.account.toString(), // <-- Nếu booking.account là ObjectId
+      }
+    })
   }
 }

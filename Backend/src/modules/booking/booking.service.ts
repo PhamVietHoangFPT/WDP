@@ -14,6 +14,8 @@ import { BookingDocument } from './schemas/booking.schema'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import mongoose from 'mongoose'
+import { IEmailService } from '../email/interfaces/iemail.service'
+import { Cron, CronExpression } from '@nestjs/schedule'
 @Injectable()
 export class BookingService implements IBookingService {
   constructor(
@@ -21,6 +23,8 @@ export class BookingService implements IBookingService {
     private readonly bookingRepository: IBookingRepository,
     @Inject(ISlotRepository)
     private readonly slotRepository: ISlotRepository,
+    @Inject(IEmailService)
+    private readonly emailService: IEmailService,
   ) {}
 
   private mapToResponseDto(data: BookingDocument): BookingResponseDto {
@@ -124,5 +128,21 @@ export class BookingService implements IBookingService {
       throw new NotFoundException(`Không tìm thấy lịch hẹn với ID ${id}.`)
     }
     return this.mapToResponseDto(updatedBooking)
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_8AM)
+  async autoSendEmailForNotification(): Promise<void> {
+    const currentDate = new Date()
+    const bookings: Array<{ _id: string; accountId: string }> =
+      await this.bookingRepository.getAllBookingsIdByCurrentDate(currentDate)
+
+    for (const bookingInfo of bookings) {
+      const bookingId: string = bookingInfo._id
+      const customerId: string = bookingInfo.accountId
+      await this.emailService.sendEmailNotificationForCheckIn(
+        customerId,
+        bookingId,
+      )
+    }
   }
 }

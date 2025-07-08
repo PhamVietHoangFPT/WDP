@@ -130,7 +130,7 @@ export class EmailService implements IEmailService {
     bookingId: string,
   ): Promise<void> {
     const customerAccount = await this.accountModel
-      .findOne({ _id: customerId })
+      .findOne({ _id: new Types.ObjectId(customerId) })
       .select('email name -_id')
       .exec()
     const booking = await this.bookingModel.aggregate([
@@ -168,6 +168,15 @@ export class EmailService implements IEmailService {
     const formattedBookingDate = this.formatVietnameseDate(
       new Date(booking[0]?.bookingDate),
     )
+
+    if (!customerAccount) {
+      console.error(`Không tìm thấy tài khoản khách hàng với ID ${customerId}`)
+      return
+    }
+    if (!booking || booking.length === 0) {
+      console.error(`Không tìm thấy lịch hẹn với ID ${bookingId}`)
+      return
+    }
 
     await this.mailerService.sendMail({
       to: customerAccount.email,
