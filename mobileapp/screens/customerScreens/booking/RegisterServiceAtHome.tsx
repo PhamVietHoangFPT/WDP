@@ -8,7 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   Linking,
-  SafeAreaView, // Import SafeAreaView
+  SafeAreaView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "react-native-elements";
@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Calendar } from "react-native-calendars";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { getFacilities } from "../../../services/adminApi.ts/facilitiesApi";
 import { getTestTakers } from "../../../services/customerApi/testTakerApi";
 import { getSlots } from "../../../services/adminApi.ts/slotApi";
@@ -23,28 +24,30 @@ import { createBooking } from "../../../services/customerApi/bookingApi";
 import { createCaseMember } from "../../../services/adminApi.ts/caseMembers";
 import { createServiceCase } from "../../../services/service/serviceCaseApi";
 import { createVNPayPayment } from "../../../services/customerApi/vnpayApi";
-// NOTE: You might need a library like 'jwt-decode' for token parsing
-// import { jwtDecode } from 'jwt-decode';
-
-// Import useBottomTabBarHeight for dynamic padding
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { jwtDecode } from "jwt-decode";
 
-// --- Helper Function to Get User ID from Token ---
+// ✅ Define Token Payload interface
+interface TokenPayload {
+  id: string;
+  // add more fields if your JWT includes them
+}
+
+// ✅ Corrected Helper Function
 const getAccountIdFromToken = async (): Promise<string | null> => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) return null;
-    // In a real app, you would decode the token to get the ID.
-    // For now, we'll use a mock decoded object or a direct ID.
-    const mockDecoded = { id: "user_123_abc" }; // Example decoded token
-    return mockDecoded.id;
+
+    const decoded: TokenPayload = jwtDecode(token);
+    return decoded.id;
   } catch (e) {
-    console.error("Failed to get account ID from token", e);
+    console.error("Failed to decode token", e);
     return null;
   }
 };
 
-// --- Interface Definitions ---
+// Interface Definitions
 interface Facility {
   _id: string;
   facilityName: string;
@@ -63,16 +66,14 @@ interface Slot {
   isBooked: boolean;
 }
 
-// --- Component ---
+// Main Component
 export default function RegisterServiceAtHome() {
   const route = useRoute();
   const navigation = useNavigation();
   const { serviceId } = route.params as { serviceId: string };
 
-  // Get the height of the bottom tab bar dynamically
   const tabBarHeight = useBottomTabBarHeight();
 
-  // Component State
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [availableTestTakers, setAvailableTestTakers] = useState<TestTaker[]>(
     []
@@ -94,17 +95,16 @@ export default function RegisterServiceAtHome() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initial Data Fetching
+  // Initial Fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [facilitiesRes, testTakersRes] = await Promise.all([
-          getFacilities(), //
-          getTestTakers(), //
+          getFacilities(),
+          getTestTakers(),
         ]);
         setFacilities(facilitiesRes.data || []);
-        // Assuming the API returns in the shape { data: { data: [...] } }
-        setAvailableTestTakers(testTakersRes.data || []); // ✅ Bỏ đi một .data
+        setAvailableTestTakers(testTakersRes.data || []);
       } catch (error) {
         console.error("Error fetching initial data:", error);
         Alert.alert("Lỗi", "Không thể tải dữ liệu cần thiết.");
@@ -127,9 +127,9 @@ export default function RegisterServiceAtHome() {
       return;
     }
     setSelectedDate(day.dateString);
-    setSelectedSlot(null); // Clear selected slot when a new date is chosen
+    setSelectedSlot(null);
     setLoadingSlots(true);
-    setSlots([]); // Clear previous slots
+    setSlots([]);
 
     try {
       const res = await getSlots({
@@ -138,8 +138,6 @@ export default function RegisterServiceAtHome() {
         endDate: day.dateString,
         isAvailable: true,
       });
-
-      // Adjust based on the actual response structure of getSlots
       const slotsArray = Array.isArray(res) ? res : res.data;
       const filteredSlots = slotsArray.filter((slot: Slot) => !slot.isBooked);
       setSlots(filteredSlots);
@@ -197,9 +195,7 @@ export default function RegisterServiceAtHome() {
 
     setIsSubmitting(true);
     try {
-      // Step 1: Create Booking
       const bookingRes = await createBooking({
-        //
         slot: selectedSlot,
         account: accountId,
         note: "Đặt lịch hẹn xét nghiệm ADN tại nhà.",
@@ -207,9 +203,7 @@ export default function RegisterServiceAtHome() {
       const bookingId = bookingRes?.data?._id || bookingRes?._id;
       if (!bookingId) throw new Error("Không thể tạo lịch hẹn.");
 
-      // Step 2: Create Case Member
       const caseMemberRes = await createCaseMember({
-        //
         testTaker: finalTestTakers,
         booking: bookingId,
         service: serviceId,
@@ -219,28 +213,25 @@ export default function RegisterServiceAtHome() {
       const caseMemberId = caseMemberRes?.data?._id || caseMemberRes?._id;
       if (!caseMemberId) throw new Error("Không thể tạo hồ sơ xét nghiệm.");
 
-      // Step 3: Create Service Case
       const serviceCaseRes = await createServiceCase({
         caseMember: caseMemberId,
-      }); //
+      });
       const serviceCaseId = serviceCaseRes?.data?._id || serviceCaseRes?._id;
       if (!serviceCaseId) throw new Error("Không thể tạo đơn dịch vụ.");
 
-      // Step 4: Create Payment URL using VNPay
       const paymentResponse = await createVNPayPayment({
         orderId: serviceCaseId,
         amount: 10000,
-        description: "Thanh toan dich vu",
-      }); //
-      const paymentUrl = paymentResponse?.paymentUrl; // Assuming the response object has a paymentUrl key
+        description: "Thanh toán dịch vụ",
+      });
+      const paymentUrl = paymentResponse?.paymentUrl;
       if (!paymentUrl) throw new Error("Không thể tạo liên kết thanh toán.");
 
-      // Step 5: Redirect to Payment
       const supported = await Linking.canOpenURL(paymentUrl);
       if (supported) {
         await Linking.openURL(paymentUrl);
         Alert.alert("Thành công", "Đang chuyển bạn đến trang thanh toán...");
-        navigation.goBack(); // Navigate back after redirection
+        navigation.goBack();
       } else {
         throw new Error("Không thể mở liên kết thanh toán.");
       }
@@ -255,13 +246,11 @@ export default function RegisterServiceAtHome() {
     }
   };
 
-  // Render Logic
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient colors={["#001f3f", "#0074D9"]} style={styles.container}>
         <ScrollView
           style={{ flex: 1 }}
-          // Dynamically add paddingBottom based on tab bar height
           contentContainerStyle={[
             styles.scroll,
             { paddingBottom: styles.scroll.paddingBottom + tabBarHeight },
@@ -269,12 +258,11 @@ export default function RegisterServiceAtHome() {
         >
           <Text style={styles.title}>Đăng Ký Dịch Vụ Tại Nhà</Text>
 
-          {/* --- Facility Selector --- */}
           <Text style={styles.section}>1. Chọn cơ sở</Text>
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={selectedFacility}
-              onValueChange={(itemValue) => handleFacilityChange(itemValue)}
+              onValueChange={handleFacilityChange}
               style={styles.picker}
               dropdownIconColor="#fff"
             >
@@ -289,7 +277,6 @@ export default function RegisterServiceAtHome() {
             </Picker>
           </View>
 
-          {/* --- Test Taker Selector --- */}
           <Text style={styles.section}>2. Chọn người xét nghiệm</Text>
           {[...Array(testTakerCount)].map((_, index) => {
             const pickerName = `taker${index + 1}`;
@@ -319,7 +306,7 @@ export default function RegisterServiceAtHome() {
             );
           })}
           <View style={styles.buttonContainer}>
-            {testTakerCount < 3 && (
+            {testTakerCount < 3 ? (
               <Button
                 title="Thêm người"
                 type="outline"
@@ -327,8 +314,7 @@ export default function RegisterServiceAtHome() {
                 titleStyle={{ color: "#fff" }}
                 onPress={() => setTestTakerCount(3)}
               />
-            )}
-            {testTakerCount === 3 && (
+            ) : (
               <Button
                 title="Bớt người"
                 type="outline"
@@ -344,7 +330,6 @@ export default function RegisterServiceAtHome() {
 
           <View style={{ marginTop: 20 }}>
             <Text style={styles.section}>3. Chọn ngày & lịch trống</Text>
-
             <Calendar
               onDayPress={handleDateSelect}
               markedDates={
@@ -368,9 +353,7 @@ export default function RegisterServiceAtHome() {
               }}
             />
 
-            {/* Slot section */}
             <Text style={styles.section}>Lịch trống</Text>
-
             <View style={{ minHeight: 100, marginBottom: 20 }}>
               {loadingSlots ? (
                 <ActivityIndicator size="large" color="#fff" />
@@ -400,7 +383,6 @@ export default function RegisterServiceAtHome() {
             </View>
           </View>
 
-          {/* --- Submission Button --- */}
           <Button
             title="Đăng Ký và Thanh Toán"
             onPress={handleSubmit}
@@ -417,7 +399,7 @@ export default function RegisterServiceAtHome() {
   );
 }
 
-// --- Styles ---
+// Styles stay the same as your original code
 const styles = StyleSheet.create({
   container: { flex: 1 },
   // Set a base paddingBottom here (e.g., 20 or 0),
