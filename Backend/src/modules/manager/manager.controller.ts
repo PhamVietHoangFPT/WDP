@@ -87,6 +87,30 @@ export class ManagerController {
     }
   }
 
+  @Get('delivery-staff')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách nhân viên giao hàng' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách nhân viên giao hàng',
+    type: AccountResponseDto,
+    isArray: true,
+  })
+  async getAllDeliveryStaff(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<AccountResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data = await this.managerService.getAllDeliveryStaff(facilityId)
+
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách nhân viên giao hàng',
+      data: data.map((item) => new AccountResponseDto(item)),
+    }
+  }
+
   @Get('service-cases-without-sample-collector/:isAtHome')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)

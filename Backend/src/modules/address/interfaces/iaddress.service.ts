@@ -8,5 +8,10 @@ export interface IAddressService {
     dto: CreateAddressDto,
     userId: string,
   ): Promise<AddressResponseDto>
+  updateAddressById(
+    id: string,
+    data: Partial<CreateAddressDto>,
+    userId: string,
+  ): Promise<AddressResponseDto | null>
 }
 export const IAddressService = Symbol('IAddressService')

@@ -7,12 +7,16 @@ import {
   Inject,
   Req,
   UseGuards,
+  Put,
+  Param,
 } from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiParam,
+  ApiBody,
 } from '@nestjs/swagger'
 import { IAddressService } from './interfaces/iaddress.service'
 import { CreateAddressDto } from './dto/create-address.dto'
@@ -61,5 +65,22 @@ export class AddressController {
   @ApiResponse({ status: HttpStatus.OK, type: [AddressResponseDto] })
   async findAll(): Promise<AddressResponseDto[]> {
     return this.addressService.findAll()
+  }
+
+  @Put(':id')
+  @ApiParam({ name: 'id', type: String, description: 'ID của địa chỉ' })
+  @ApiBody({
+    type: CreateAddressDto,
+    description: 'Dữ liệu cập nhật địa chỉ',
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: AddressResponseDto })
+  @ApiOperation({ summary: 'Cập nhật địa chỉ theo ID' })
+  async updateAddressById(
+    @Body() data: Partial<CreateAddressDto>,
+    @Req() user: any,
+    @Param('id') id: string,
+  ): Promise<AddressResponseDto | null> {
+    const userId = user?.id || user?._id
+    return this.addressService.updateAddressById(id, data, userId)
   }
 }

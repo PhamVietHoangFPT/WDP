@@ -41,4 +41,18 @@ export class AddressService implements IAddressService {
     const result = await this.addressRepo.createForFacility(dto, userId)
     return this.mapToResponseDto(result)
   }
+
+  async updateAddressById(
+    id: string,
+    data: Partial<CreateAddressDto>,
+    userId: string,
+  ): Promise<AddressResponseDto | null> {
+    const updatedAddress = await this.addressRepo.updateAddressById(
+      id,
+      data,
+      userId,
+    )
+    if (!updatedAddress) return null
+    return this.mapToResponseDto(updatedAddress)
+  }
 }

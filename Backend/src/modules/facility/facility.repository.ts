@@ -24,7 +24,7 @@ export class FacilityRepository implements IFacilityRepository {
   async findById(id: string): Promise<FacilityDocument | null> {
     return this.facilityModel
       .findById(id)
-      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .populate({ path: 'address', select: 'fullAddress _id' })
       .exec()
   }
 
