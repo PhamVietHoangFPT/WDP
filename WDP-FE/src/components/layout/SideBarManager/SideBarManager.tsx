@@ -66,6 +66,12 @@ export const SideBar = () => {
       onClick: () => navigate('manager/samples'),
     },
     {
+      key: 'manager/service-cases-without-doctor',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị dịch vụ ',
+      onClick: () => navigate('manager/service-cases-without-doctor'),
+    },
+    {
       key: 'manager/create-account',
       icon: <BarChartOutlined />,
       label: 'Quản trị tài khoản',
