@@ -64,6 +64,29 @@ export class ManagerController {
     }
   }
 
+  @Get('doctors')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách bác sĩ',
+    type: AccountResponseDto,
+    isArray: true,
+  })
+  async getAllDoctors(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<AccountResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data = await this.managerService.getAllDoctors(facilityId)
+    return {
+      data: data.map((item) => new AccountResponseDto(item)),
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách bác sĩ',
+    }
+  }
+
   @Get('service-cases-without-sample-collector/:isAtHome')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
@@ -95,6 +118,24 @@ export class ManagerController {
       success: true,
       message: 'Danh sách hồ sơ chưa có nhân viên lấy mẫu',
       data: data.map((item) => new ServiceCaseResponseDto(item)),
+    }
+  }
+
+  @Get('service-cases-without-doctor')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa có bác sĩ' })
+  async getAllServiceCaseWithoutDoctor(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data =
+      await this.managerService.getAllServiceCaseWithoutDoctor(facilityId)
+    return {
+      data: data.map((item) => new ServiceCaseResponseDto(item)),
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách hồ sơ dịch vụ chưa có bác sĩ',
     }
   }
 
@@ -138,76 +179,6 @@ export class ManagerController {
     }
   }
 
-  @Get('roles')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
-  @ApiOperation({ summary: 'Quản lý lấy danh sách vai trò' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Danh sách vai trò',
-    type: ApiResponseDto<RoleDocument[]>,
-    isArray: true,
-  })
-  async getAllRoles(): Promise<ApiResponseDto<RoleDocument>> {
-    const data = await this.managerService.managerGetAllRoles()
-    return {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'Danh sách vai trò',
-      data: data,
-    }
-  }
-
-  @Post('create-account')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
-  @ApiOperation({ summary: 'Tạo tài khoản mới' })
-  @ApiBody({
-    description: 'Thông tin tài khoản mới',
-    type: ManagerCreateAccountDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Tạo tài khoản thành công',
-    type: ApiResponseDto<ManagerCreateAccountDto>,
-  })
-  async createAccount(
-    @Body() accountData: Partial<ManagerCreateAccountDto>,
-    @Req() req: any, // Lấy thông tin người dùng từ request
-  ): Promise<ApiResponseDto<ManagerCreateAccountDto>> {
-    const userId = req.user.id
-    const facilityId = req.user.facility._id
-    const data = await this.managerService.managerCreateAccount(
-      accountData,
-      userId,
-      facilityId,
-    )
-    return {
-      statusCode: HttpStatus.CREATED,
-      success: true,
-      message: 'Tạo tài khoản thành công',
-      data: [data],
-    }
-  }
-
-  @Get('service-cases-without-doctor')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
-  @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa có bác sĩ' })
-  async getAllServiceCaseWithoutDoctor(
-    @Req() req: any,
-  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
-    const facilityId = req.user.facility._id
-    const data =
-      await this.managerService.getAllServiceCaseWithoutDoctor(facilityId)
-    return {
-      data: data.map((item) => new ServiceCaseResponseDto(item)),
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'Danh sách hồ sơ dịch vụ chưa có bác sĩ',
-    }
-  }
-
   @Put('service-cases/:serviceCaseId/doctor/:doctorId')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
@@ -248,26 +219,55 @@ export class ManagerController {
     }
   }
 
-  @Get('doctors')
+  @Post('create-account')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
-  @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
+  @ApiOperation({ summary: 'Tạo tài khoản mới' })
+  @ApiBody({
+    description: 'Thông tin tài khoản mới',
+    type: ManagerCreateAccountDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Tạo tài khoản thành công',
+    type: ApiResponseDto<ManagerCreateAccountDto>,
+  })
+  async createAccount(
+    @Body() accountData: Partial<ManagerCreateAccountDto>,
+    @Req() req: any, // Lấy thông tin người dùng từ request
+  ): Promise<ApiResponseDto<ManagerCreateAccountDto>> {
+    const userId = req.user.id
+    const facilityId = req.user.facility._id
+    const data = await this.managerService.managerCreateAccount(
+      accountData,
+      userId,
+      facilityId,
+    )
+    return {
+      statusCode: HttpStatus.CREATED,
+      success: true,
+      message: 'Tạo tài khoản thành công',
+      data: [data],
+    }
+  }
+
+  @Get('roles')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Quản lý lấy danh sách vai trò' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Danh sách bác sĩ',
-    type: AccountResponseDto,
+    description: 'Danh sách vai trò',
+    type: ApiResponseDto<RoleDocument[]>,
     isArray: true,
   })
-  async getAllDoctors(
-    @Req() req: any,
-  ): Promise<ApiResponseDto<AccountResponseDto>> {
-    const facilityId = req.user.facility._id
-    const data = await this.managerService.getAllDoctors(facilityId)
+  async getAllRoles(): Promise<ApiResponseDto<RoleDocument>> {
+    const data = await this.managerService.managerGetAllRoles()
     return {
-      data: data.map((item) => new AccountResponseDto(item)),
       statusCode: HttpStatus.OK,
       success: true,
-      message: 'Danh sách bác sĩ',
+      message: 'Danh sách vai trò',
+      data: data,
     }
   }
 }

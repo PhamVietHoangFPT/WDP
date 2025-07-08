@@ -10,12 +10,14 @@ import { BookingRepository } from './booking.repository'
 import { IBookingService } from './interfaces/ibooking.service'
 import { BookingService } from './booking.service'
 import { AuthModule } from '../auth/auth.module'
+import { EmailModule } from '../email/email.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Booking.name, schema: BookingSchema }]),
     AccountModule,
     SlotModule,
     AuthModule,
+    EmailModule,
   ],
 
   controllers: [BookingController],

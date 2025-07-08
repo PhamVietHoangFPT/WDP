@@ -71,13 +71,13 @@ export class ManagerRepository implements IManagerRepository {
       await this.roleRepository.getRoleIdByName('Sample Collector')
 
     const roleObjectId = new Types.ObjectId(sampleCollectorRole)
-
+    const facilityIdObject = new Types.ObjectId(facilityId)
     return await this.accountModel.aggregate([
       // Giai đoạn 1: Lọc tài khoản theo vai trò và cơ sở
       {
         $match: {
           role: roleObjectId,
-          facility: facilityId,
+          facility: facilityIdObject,
         },
       },
       // Giai đoạn 2: Kết nối với collection 'addresses'
@@ -129,14 +129,14 @@ export class ManagerRepository implements IManagerRepository {
     const doctorRole = await this.roleRepository.getRoleIdByName('Doctor')
 
     const roleObjectId = new Types.ObjectId(doctorRole)
+    const facilityIdObject = new Types.ObjectId(facilityId)
 
-    console.log(roleObjectId)
     return await this.accountModel.aggregate([
       // Giai đoạn 1: Lọc tài khoản theo vai trò và cơ sở
       {
         $match: {
           role: roleObjectId,
-          facility: facilityId,
+          facility: facilityIdObject,
         },
       },
       // Giai đoạn 2: Kết nối với collection 'addresses'
