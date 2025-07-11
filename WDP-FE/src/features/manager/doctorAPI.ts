@@ -1,10 +1,13 @@
 import { apiSlice } from '../../apis/apiSlice'
 
-const sampleCollectorAPI = apiSlice.injectEndpoints({
+const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSampleCollectorList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
-        url: '/managers/sample-collectors',
+    getDoctorList: builder.query({
+      query: ({
+        pageNumber,
+        pageSize,
+      }) => ({
+        url: '/managers/doctors',
         method: 'GET',
         params: {
           pageNumber,
@@ -12,27 +15,35 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collectors'],
+      providesTags: ['doctor'],
     }),
 
-    getServiceNoSampleCollectorList: builder.query({
-      query: (isAtHome) => ({
-        url: `managers/service-cases-without-sample-collector/${isAtHome}`,
+    getServiceCaseNoDoctorList: builder.query({
+      query: ({
+        pageNumber,
+        pageSize,
+      }) => ({
+        url: '/managers/service-cases-without-doctor',
         method: 'GET',
+        params: {
+          pageNumber,
+          pageSize,
+        },
       }),
       transformResponse: (res) => res,
-      providesTags: ['sample-collectors'],
+      providesTags: ['doctor'],
     }),
 
-    addSampleCollectorToServiceCase: builder.mutation({
-      query: ({ data, serviceCaseId, sampleCollectorId }) => ({
-        url: `/managers/service-cases/${serviceCaseId}/sample-collector/${sampleCollectorId}`,
+    addDoctorToServiceCase: builder.mutation({
+      query: ({ data, serviceCaseId, doctorId }) => ({
+        url: `/managers/service-cases/${serviceCaseId}/doctor/${doctorId}`,
         method: 'PUT',
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['sample-collectors'],
+      invalidatesTags: ['doctor'],
     }),
+
 
     // createSlotTemplate: builder.mutation({
     //   query: (data) => ({
@@ -103,7 +114,7 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
 })
 
 export const {
-  useGetSampleCollectorListQuery,
-  useGetServiceNoSampleCollectorListQuery,
-  useAddSampleCollectorToServiceCaseMutation,
-} = sampleCollectorAPI
+    useGetDoctorListQuery,
+    useGetServiceCaseNoDoctorListQuery,
+    useAddDoctorToServiceCaseMutation,
+} = doctorAPI

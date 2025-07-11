@@ -31,7 +31,6 @@ import PaymentHistory from '../pages/ProfileUser/PaymentHistory'
 import PaymentDetail from '../pages/ProfileUser/PaymentDetail'
 import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
 import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
-import Sample from '../pages/Sample/Sample'
 import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
 import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
 import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
@@ -41,6 +40,8 @@ import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacil
 import DoctorServiceCaseWithoutResult from '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
 import AdminService from '../pages/AdminService/AdminService'
 import ServiceDetail from '../components/Admin/AdminService/ServiceDetail'
+import ManagerServiceCaseWithoutDoctor from '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
+import ManagerServiceCaseWithoutSampleCollector from '../pages/Sample/Sample'
 
 const routes: LayoutRoute[] = [
   {
@@ -185,7 +186,12 @@ const routes: LayoutRoute[] = [
       },
       {
         path: '/manager/samples',
-        component: Sample,
+        component: ManagerServiceCaseWithoutSampleCollector,
+        // role: ['admin'],
+      },
+      {
+        path: '/manager/service-cases-without-doctor',
+        component: ManagerServiceCaseWithoutDoctor,
         // role: ['admin'],
       },
       {
