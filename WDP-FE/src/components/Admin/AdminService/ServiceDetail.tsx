@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useGetServiceDetailQuery } from '../../../features/service/serviceAPI'
-import { Card, Spin, Table, Tag, Typography } from 'antd'
+import { Card, Result, Spin, Table, Tag, Typography } from 'antd'
 
 const { Text } = Typography
 import './AdminService.css'
@@ -8,22 +8,32 @@ import type { Service } from '../../../types/service'
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>()
-  const { data, isLoading } = useGetServiceDetailQuery(serviceId)
+  const { data, isLoading, isError, error } =
+    useGetServiceDetailQuery(serviceId)
   if (isLoading) {
     return (
       <Spin size='large' style={{ display: 'block', margin: '20px auto' }} />
     )
   }
+  if (isError) {
+    // `error` có thể có cấu trúc như { status: 409, data: { message: '...' } }
+    const errorMessage = error?.data?.message || 'Có lỗi xảy ra'
+    const errorStatus = error?.status || 'Lỗi'
 
+    return (
+      <Result
+        status={errorStatus === 404 ? '404' : 'error'}
+        title={errorStatus}
+        subTitle={errorMessage}
+        style={{ marginTop: '20px' }}
+      />
+    )
+  }
   const totalFee =
     (data.fee || 0) +
     (data.sample?.fee || 0) +
     (data.sample?.sampleType?.sampleTypeFee || 0) +
     (data.timeReturn?.timeReturnFee || 0)
-
-  if (!data) {
-    return <div>Không tìm thấy dịch vụ</div>
-  }
 
   const formatCurrency = (value: number | undefined) => {
     if (typeof value !== 'number') {
@@ -100,7 +110,6 @@ export default function ServiceDetail() {
     },
   ]
 
-  console.log(data)
   return (
     <div>
       <Card

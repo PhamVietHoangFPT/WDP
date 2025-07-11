@@ -19,6 +19,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { CreateTimeReturnDto } from './dto/createTimeReturn.dto'
 import { UpdateTimeReturnDto } from './dto/updateTimeReturn.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { TimeReturnResponseDto } from './dto/timeReturn.response.dto'
 
 @ApiTags('time-return')
 @Controller('time-return')
@@ -75,6 +76,18 @@ export class TimeReturnController {
     return new ApiResponseDto<null>({
       success: true,
       message: 'Xóa ngày trả mẫu thử thành công',
+      statusCode: HttpStatus.OK,
+    })
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin ngày trả mẫu thử theo ID' })
+  async findById(@Param('id') id: string) {
+    const timeReturn = await this.timeReturnService.findById(id)
+    return new ApiResponseDto<TimeReturnResponseDto>({
+      success: true,
+      message: 'Lấy thông tin ngày trả mẫu thử thành công',
+      data: [timeReturn],
       statusCode: HttpStatus.OK,
     })
   }

@@ -41,6 +41,7 @@ export const apiSlice = createApi({
     'create-account',
     'sample-collector',
     'doctor',
+    'time-return',
   ],
 
   endpoints: () => ({}),

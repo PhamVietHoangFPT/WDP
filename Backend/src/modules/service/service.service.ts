@@ -11,6 +11,7 @@ import { Service } from './schemas/service.schema'
 import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { isMongoId } from 'class-validator'
 
 @Injectable()
 export class ServiceService implements IServiceService {
@@ -33,7 +34,12 @@ export class ServiceService implements IServiceService {
   }
 
   async findServiceById(id: string): Promise<ServiceResponseDto> {
-    //this variable is used to check if the service already exists
+    if (!id) {
+      throw new ConflictException('ID không được để trống')
+    }
+    if (!isMongoId(id)) {
+      throw new ConflictException('ID không hợp lệ')
+    }
     const existingService = await this.serviceRepository.findOneById(id)
     if (!existingService) {
       throw new ConflictException('Dịch vụ không tồn tại')
