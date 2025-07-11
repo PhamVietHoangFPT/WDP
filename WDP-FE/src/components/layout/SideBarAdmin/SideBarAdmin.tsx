@@ -71,17 +71,17 @@ export const SideBar = () => {
       label: 'Ca & Cơ sở',
       onClick: () => navigate('admin/slotsFacilitiesAdmin'),
     },
-    // {
-    //   key: 'admin/createFacility',
-    //   icon: <BarChartOutlined />,
-    //   label: 'Tạo cơ sở',
-    //   onClick: () => navigate('admin/createFacility'),
-    // },
     {
       key: 'admin/facility',
       icon: <BarChartOutlined />,
       label: 'Danh sách cơ sở',
       onClick: () => navigate('admin/facility'),
+    },
+    {
+      key: 'admin/serivice',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý dịch vụ',
+      onClick: () => navigate('admin/service?pageNumber=1&pageSize=10'),
     },
   ]
 

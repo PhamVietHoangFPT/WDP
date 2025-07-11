@@ -28,7 +28,7 @@ const slotApi = apiSlice.injectEndpoints({
 
     createSlotTemplate: builder.mutation({
       query: (data) => ({
-        url: '/slotTemplates',
+        url: '/slot-templates',
         method: 'POST',
         body: data,
       }),
@@ -38,7 +38,7 @@ const slotApi = apiSlice.injectEndpoints({
 
     getSlotTemplateForFacility: builder.query({
       query: (facilityId) => ({
-        url: `/slotTemplates/facility/${facilityId}`,
+        url: `/slot-templates/facility/${facilityId}`,
         method: 'GET',
       }),
       transformResponse: (res) => res,

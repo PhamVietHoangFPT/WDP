@@ -24,19 +24,10 @@ export const paymentApi = apiSlice.injectEndpoints({
       }),
     }),
 
-    // ✅ Tạo lịch sử thanh toán cho đặt chỗ
-    createBookingPaymentHistory: builder.mutation({
-      query: (data) => ({
-        url: '/payments/booking',
-        method: 'POST',
-        body: data,
-      }),
-    }),
-
     // ✅ Tạo lịch sử thanh toán cho dịch vụ
     createServicePaymentHistory: builder.mutation({
       query: (data) => ({
-        url: '/vnpay/payment-for-service-case',
+        url: '/payments/service-case',
         method: 'POST',
         body: data,
       }),
@@ -73,7 +64,6 @@ export const paymentApi = apiSlice.injectEndpoints({
 export const {
   useGetVnpayBanksQuery,
   useCreatePaymentUrlMutation,
-  useCreateBookingPaymentHistoryMutation,
   useCreateServicePaymentHistoryMutation,
   useGetPaymentListQuery,
   useGetPaymentByIdQuery,

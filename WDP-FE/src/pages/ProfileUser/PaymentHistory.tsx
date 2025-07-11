@@ -89,6 +89,9 @@ export default function PaymentHistory() {
             navigate(`/payment-history?pageNumber=${page}&pageSize=${size}`)
           }}
           showSizeChanger
+          showTotal={(total, range) =>
+            `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} lịch sử thanh toán`
+          }
           pageSizeOptions={['5', '10', '20']}
           style={{
             marginTop: '20px',

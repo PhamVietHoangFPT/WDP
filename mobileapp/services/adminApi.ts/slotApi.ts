@@ -100,7 +100,7 @@ export const deleteSlotTemplate = async (id: string) => {
 // Lấy danh sách slot templates theo Facility ID
 export const getSlotTemplatesByFacility = async (facilityId: string) => {
   const response = await fetch(
-    `${API_BASE_URL}/slotTemplates/facility/${facilityId}`
+    `${API_BASE_URL}/slot-templates/facility/${facilityId}`
   );
   if (!response.ok)
     throw new Error(

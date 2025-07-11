@@ -9,9 +9,8 @@ import {
   useGetDistrictListQuery,
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
-  useCreateFacilityMutation,
-  useLazyCheckFacilityDuplicateQuery, // ✅ Add this
-} from '../../features/admin/location'
+} from '../../features/location/location'
+import { useCreateFacilityMutation } from '../../features/admin/serviceAPI'
 import type { Province, District, Ward } from '../../types/location'
 import type { FacilityInfo } from '../../types/facilities'
 
@@ -63,7 +62,6 @@ const CreateFacilityForm: React.FC = () => {
 
   const [createFacilityAddress] = useCreateFacilityAddressMutation()
   const [createFacility] = useCreateFacilityMutation()
-  const [checkDuplicate] = useLazyCheckFacilityDuplicateQuery() // ✅ Added hook
 
   const handleProvinceChange = (value: number) => {
     const province = provincesData?.find((p: Province) => p.code === value)
@@ -94,18 +92,6 @@ const CreateFacilityForm: React.FC = () => {
 
       const fullAddress =
         `${values.houseNumber || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
-
-      // ✅ Step 0: Check duplicates
-      const duplicateRes = await checkDuplicate({
-        facilityName: values.facilityName.trim(),
-        phoneNumber: values.phoneNumber.trim(),
-        fullAddress,
-      }).unwrap()
-
-      if (duplicateRes?.isDuplicate) {
-        message.error('Tên, số điện thoại hoặc địa chỉ đã tồn tại')
-        return
-      }
 
       // ✅ Step 1: Create address
       const addressResponse = await createFacilityAddress({

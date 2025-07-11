@@ -25,7 +25,6 @@ import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
 import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
-import BookingPage from '../pages/BookingPage/BookingPage'
 import PaymentPage from '../pages/Payment/PaymentPage'
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
 import PaymentHistory from '../pages/ProfileUser/PaymentHistory'
@@ -40,6 +39,8 @@ import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/Samp
 import ServiceAtFacility from '../pages/ServiceAtFacility/ServiceAtFacility'
 import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacilityRegisteration'
 import DoctorServiceCaseWithoutResult from '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
+import AdminService from '../pages/AdminService/AdminService'
+import ServiceDetail from '../components/Admin/AdminService/ServiceDetail'
 
 const routes: LayoutRoute[] = [
   {
@@ -160,6 +161,16 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/facility/:id',
         component: FacilityDetailAdmin,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/service',
+        component: AdminService,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/service/:serviceId',
+        component: ServiceDetail,
         role: ['Admin'],
       },
     ],
