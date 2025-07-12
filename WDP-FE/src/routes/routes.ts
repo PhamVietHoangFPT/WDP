@@ -46,6 +46,8 @@ import TimeReturnList from '../components/Admin/AdminTimeReturn/TimeReturnList'
 import TimeReturnDetail from '../components/Admin/AdminTimeReturn/TimeReturnDetail'
 import SampleTypeList from '../components/Admin/AdminSampleType/SampleTypeList'
 import SampleTypeDetail from '../components/Admin/AdminSampleType/SampleTypeDetail'
+import SampleList from '../components/Admin/AdminSample/SampleList'
+import SampleDetail from '../components/Admin/AdminSample/SampleDetail'
 
 const routes: LayoutRoute[] = [
   {
@@ -196,6 +198,16 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/sample-types/:sampleTypeId',
         component: SampleTypeDetail,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/samples',
+        component: SampleList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/samples/:sampleId',
+        component: SampleDetail,
         role: ['Admin'],
       },
     ],

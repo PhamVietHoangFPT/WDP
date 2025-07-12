@@ -25,6 +25,7 @@ export class SampleService implements ISampleService {
     return new SampleResponseDto({
       _id: sample._id,
       name: sample.name,
+      fee: sample.fee,
       sampleType: sample.sampleType,
       deleted_at: sample.deleted_at,
       deleted_by: sample.deleted_by,

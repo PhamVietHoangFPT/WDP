@@ -83,6 +83,12 @@ export const SideBar = () => {
       onClick: () => navigate('admin/time-returns'),
     },
     {
+      key: 'admin/sample',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý mẫu',
+      onClick: () => navigate('admin/samples'),
+    },
+    {
       key: 'admin/sample-types',
       icon: <BarChartOutlined />,
       label: 'Chất lượng mẫu',
