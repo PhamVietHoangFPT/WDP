@@ -13,14 +13,16 @@ interface DecodedToken {
   [key: string]: any
 }
 
+import DoesnotLoginYet from './DoesnotLoginYet'
+import NoPermission from './NoPermission'
+
 const PermissionCheck: React.FC<Props> = ({ children, protectedRole }) => {
   const token = Cookies.get('userToken')
 
-  if (!token) {
+  if (!token && protectedRole?.length) {
     // ✅ Nếu không có token, vẫn cho vào
-    return <>{children}</>
+    return <DoesnotLoginYet />
   }
-
   try {
     const decoded = jwtDecode<DecodedToken>(token)
 
@@ -35,7 +37,7 @@ const PermissionCheck: React.FC<Props> = ({ children, protectedRole }) => {
       const userRole = decoded.role?.toLowerCase()
       const allowedRoles = protectedRole.map((r) => r.toLowerCase())
       if (!allowedRoles.includes(userRole)) {
-        return <div>Bạn không có quyền truy cập nội dung này.</div>
+        return <NoPermission></NoPermission>
       }
     }
 

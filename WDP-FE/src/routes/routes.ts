@@ -1,53 +1,157 @@
-import Homepage from '../components/Home/HomePage'
-import { AdminLayout } from '../components/layout/AdminLayout'
-import { DeliveryStaffLayout } from '../components/layout/DeliveryStaffLayout'
-import { DoctorLayout } from '../components/layout/DoctorLayout'
-import LoginRegisterLayout from '../components/layout/LoginRegisterLayout'
-import MainLayout from '../components/layout/MainLayout'
-import { ManagerLayout } from '../components/layout/ManagerLayout'
-import { StaffLayout } from '../components/layout/StaffLayout'
-import AdminHomePage from '../pages/AdminHomePage/AdminHomePage'
-import CreateFacilityAdmin from '../pages/CreateFacilityAdmin/CreateFacilityAdmin'
-import Blog from '../pages/Blogs/Blog'
-import BlogDetail from '../pages/Blogs/BlogDetail'
-import DeliveryStaffHomePage from '../pages/DeliveryStaffHomePage/DeliveryStaffHomePage'
-import DoctorHomePage from '../pages/DoctorHomePage/DoctorHomePage'
-import FacilityDetailAdmin from '../pages/FacilityDetailAdmin/FacilityDetailAdmin'
-import FacilityListAdmin from '../pages/FacilityListAdmin/FacilityListAdmin'
-import Login from '../pages/Login/Login'
-import ManagerHomePage from '../pages/ManagerHomePage/ManagerHomePage'
-import CreateTesteeForm from '../pages/ProfileUser/CreateTestTaker'
-import ProfileUser from '../pages/ProfileUser/ProfileUser'
-import TestTakerEditForm from '../pages/ProfileUser/TestTakerEditForm'
-import TestTakerList from '../pages/ProfileUser/TestTakerList'
-import Register from '../pages/Register/Register'
-import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
-import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
-import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
+import React from 'react'
 import type { LayoutRoute } from '../types/routes'
-import PaymentPage from '../pages/Payment/PaymentPage'
-import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
-import PaymentHistory from '../pages/ProfileUser/PaymentHistory'
-import PaymentDetail from '../pages/ProfileUser/PaymentDetail'
-import HomeRegisteration from '../pages/HomeRegisteration/homeRegisteration'
-import ServiceAtHome from '../pages/ServiceAtHome/serviceAtHome'
-import ManagerCreateAccount from '../pages/ManagerCreateAccount/ManagerCreateAccount'
-import { SampleCollectorLayout } from '../components/layout/SampleCollectorLayout'
-import SampleCollectorHomePage from '../pages/SampleCollectorHomePage/SampleCollectorHomePage'
-import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/SampleCollectorServiceCase'
-import ServiceAtFacility from '../pages/ServiceAtFacility/ServiceAtFacility'
-import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacilityRegisteration'
-import DoctorServiceCaseWithoutResult from '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
-import AdminService from '../pages/AdminService/AdminService'
-import ServiceDetail from '../components/Admin/AdminService/ServiceDetail'
-import ManagerServiceCaseWithoutDoctor from '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
-import ManagerServiceCaseWithoutSampleCollector from '../pages/Sample/Sample'
-import TimeReturnList from '../components/Admin/AdminTimeReturn/TimeReturnList'
-import TimeReturnDetail from '../components/Admin/AdminTimeReturn/TimeReturnDetail'
-import SampleTypeList from '../components/Admin/AdminSampleType/SampleTypeList'
-import SampleTypeDetail from '../components/Admin/AdminSampleType/SampleTypeDetail'
-import SampleList from '../components/Admin/AdminSample/SampleList'
-import SampleDetail from '../components/Admin/AdminSample/SampleDetail'
+// Các layout này được export dưới dạng named export { LayoutName }
+const AdminLayout = React.lazy(() =>
+  import('../components/layout/AdminLayout').then((module) => ({
+    default: module.AdminLayout,
+  }))
+)
+const DeliveryStaffLayout = React.lazy(() =>
+  import('../components/layout/DeliveryStaffLayout').then((module) => ({
+    default: module.DeliveryStaffLayout,
+  }))
+)
+const DoctorLayout = React.lazy(() =>
+  import('../components/layout/DoctorLayout').then((module) => ({
+    default: module.DoctorLayout,
+  }))
+)
+const ManagerLayout = React.lazy(() =>
+  import('../components/layout/ManagerLayout').then((module) => ({
+    default: module.ManagerLayout,
+  }))
+)
+const StaffLayout = React.lazy(() =>
+  import('../components/layout/StaffLayout').then((module) => ({
+    default: module.StaffLayout,
+  }))
+)
+const SampleCollectorLayout = React.lazy(() =>
+  import('../components/layout/SampleCollectorLayout').then((module) => ({
+    default: module.SampleCollectorLayout,
+  }))
+)
+
+// Các layout này được export dưới dạng export default
+const LoginRegisterLayout = React.lazy(
+  () => import('../components/layout/LoginRegisterLayout')
+)
+const MainLayout = React.lazy(() => import('../components/layout/MainLayout'))
+
+// --- Các Trang (tải lười - lazy loading) ---
+const Homepage = React.lazy(() => import('../components/Home/HomePage'))
+const AdminHomePage = React.lazy(
+  () => import('../pages/AdminHomePage/AdminHomePage')
+)
+const CreateFacilityAdmin = React.lazy(
+  () => import('../pages/CreateFacilityAdmin/CreateFacilityAdmin')
+)
+const Blog = React.lazy(() => import('../pages/Blogs/Blog'))
+const BlogDetail = React.lazy(() => import('../pages/Blogs/BlogDetail'))
+const DeliveryStaffHomePage = React.lazy(
+  () => import('../pages/DeliveryStaffHomePage/DeliveryStaffHomePage')
+)
+const DoctorHomePage = React.lazy(
+  () => import('../pages/DoctorHomePage/DoctorHomePage')
+)
+const FacilityDetailAdmin = React.lazy(
+  () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
+)
+const FacilityListAdmin = React.lazy(
+  () => import('../pages/FacilityListAdmin/FacilityListAdmin')
+)
+const Login = React.lazy(() => import('../pages/Login/Login'))
+const ManagerHomePage = React.lazy(
+  () => import('../pages/ManagerHomePage/ManagerHomePage')
+)
+const CreateTesteeForm = React.lazy(
+  () => import('../pages/ProfileUser/CreateTestTaker')
+)
+const ProfileUser = React.lazy(() => import('../pages/ProfileUser/ProfileUser'))
+const TestTakerEditForm = React.lazy(
+  () => import('../pages/ProfileUser/TestTakerEditForm')
+)
+const TestTakerList = React.lazy(
+  () => import('../pages/ProfileUser/TestTakerList')
+)
+const Register = React.lazy(() => import('../pages/Register/Register'))
+const CreateSlot = React.lazy(() => import('../pages/SlotAdmin/SlotAdmin'))
+const SlotsFacilitiesList = React.lazy(
+  () => import('../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin')
+)
+const StaffHomePage = React.lazy(
+  () => import('../pages/StaffHomePage/StaffHomePage')
+)
+const PaymentPage = React.lazy(() => import('../pages/Payment/PaymentPage'))
+const PaymentSuccessPage = React.lazy(
+  () => import('../pages/Payment/PaymentSuccessPage')
+)
+const PaymentHistory = React.lazy(
+  () => import('../pages/ProfileUser/PaymentHistory')
+)
+const PaymentDetail = React.lazy(
+  () => import('../pages/ProfileUser/PaymentDetail')
+)
+const HomeRegisteration = React.lazy(
+  () => import('../pages/HomeRegisteration/homeRegisteration')
+)
+const ServiceAtHome = React.lazy(
+  () => import('../pages/ServiceAtHome/serviceAtHome')
+)
+const ManagerCreateAccount = React.lazy(
+  () => import('../pages/ManagerCreateAccount/ManagerCreateAccount')
+)
+const SampleCollectorHomePage = React.lazy(
+  () => import('../pages/SampleCollectorHomePage/SampleCollectorHomePage')
+)
+const SampleCollectorServiceCase = React.lazy(
+  () => import('../pages/SampleCollectorServiceCase/SampleCollectorServiceCase')
+)
+const ServiceAtFacility = React.lazy(
+  () => import('../pages/ServiceAtFacility/ServiceAtFacility')
+)
+const AdnFacilityRegisteration = React.lazy(
+  () => import('../pages/AdnFacilityRegisteration/AdnFacilityRegisteration')
+)
+const DoctorServiceCaseWithoutResult = React.lazy(
+  () =>
+    import(
+      '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
+    )
+)
+const AdminService = React.lazy(
+  () => import('../pages/AdminService/AdminService')
+)
+const ServiceDetail = React.lazy(
+  () => import('../components/Admin/AdminService/ServiceDetail')
+)
+const ManagerServiceCaseWithoutDoctor = React.lazy(
+  () =>
+    import(
+      '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
+    )
+)
+const ManagerServiceCaseWithoutSampleCollector = React.lazy(
+  () => import('../pages/Sample/Sample')
+)
+const TimeReturnList = React.lazy(
+  () => import('../components/Admin/AdminTimeReturn/TimeReturnList')
+)
+const TimeReturnDetail = React.lazy(
+  () => import('../components/Admin/AdminTimeReturn/TimeReturnDetail')
+)
+const SampleTypeList = React.lazy(
+  () => import('../components/Admin/AdminSampleType/SampleTypeList')
+)
+const SampleTypeDetail = React.lazy(
+  () => import('../components/Admin/AdminSampleType/SampleTypeDetail')
+)
+const SampleList = React.lazy(
+  () => import('../components/Admin/AdminSample/SampleList')
+)
+const SampleDetail = React.lazy(
+  () => import('../components/Admin/AdminSample/SampleDetail')
+)
 
 const routes: LayoutRoute[] = [
   {
@@ -74,7 +178,6 @@ const routes: LayoutRoute[] = [
       {
         path: '/profile',
         component: ProfileUser,
-        role: ['Customer'],
       },
       {
         path: '/create-testee',
@@ -139,101 +242,85 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: AdminLayout,
+    role: ['Admin'],
     data: [
       {
         path: '/admin',
         component: AdminHomePage,
-        role: ['Admin'],
       },
       {
         path: '/admin/slotAdmin',
         component: CreateSlot,
-        role: ['Admin'],
       },
       {
         path: '/admin/slotsFacilitiesAdmin',
         component: SlotsFacilitiesList,
-        role: ['Admin'],
       },
       {
         path: '/admin/createFacility',
         component: CreateFacilityAdmin,
-        role: ['Admin'],
       },
       {
         path: '/admin/facility',
         component: FacilityListAdmin,
-        role: ['Admin'],
       },
       {
         path: '/admin/facility/:id',
         component: FacilityDetailAdmin,
-        role: ['Admin'],
       },
       {
         path: '/admin/service',
         component: AdminService,
-        role: ['Admin'],
       },
       {
         path: '/admin/service/:serviceId',
         component: ServiceDetail,
-        role: ['Admin'],
       },
       {
         path: '/admin/time-returns',
         component: TimeReturnList,
-        role: ['Admin'],
       },
       {
         path: '/admin/time-returns/:timeReturnId',
         component: TimeReturnDetail,
-        role: ['Admin'],
       },
       {
         path: '/admin/sample-types',
         component: SampleTypeList,
-        role: ['Admin'],
       },
       {
         path: '/admin/sample-types/:sampleTypeId',
         component: SampleTypeDetail,
-        role: ['Admin'],
       },
       {
         path: '/admin/samples',
         component: SampleList,
-        role: ['Admin'],
       },
       {
         path: '/admin/samples/:sampleId',
         component: SampleDetail,
-        role: ['Admin'],
       },
     ],
   },
   {
     layout: ManagerLayout,
+    role: ['Manager'],
     data: [
       {
         path: '/manager',
         component: ManagerHomePage,
-        // role: ['admin'],
       },
       {
         path: '/manager/samples',
         component: ManagerServiceCaseWithoutSampleCollector,
-        // role: ['admin'],
       },
       {
         path: '/manager/service-cases-without-doctor',
         component: ManagerServiceCaseWithoutDoctor,
-        // role: ['admin'],
       },
       {
         path: '/manager/create-account',
         component: ManagerCreateAccount,
-        // role: ['admin'],
       },
     ],
   },
