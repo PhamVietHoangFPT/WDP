@@ -42,8 +42,14 @@ export class TimeReturnController {
 
   @Get()
   @ApiOperation({ summary: 'Xem tất cả ngày trả của mẫu thử' })
-  findAllConditions() {
-    return this.timeReturnService.findAllTimeReturn()
+  async findAllConditions() {
+    const timeReturns = await this.timeReturnService.findAllTimeReturn()
+    return new ApiResponseDto<TimeReturnResponseDto>({
+      data: timeReturns,
+      success: true,
+      message: 'Lấy danh sách ngày trả mẫu thử thành công',
+      statusCode: HttpStatus.OK,
+    })
   }
 
   @UseGuards(AuthGuard)
