@@ -9,6 +9,9 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
+  AppstoreOutlined,
+  ClockCircleOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -71,28 +74,42 @@ export const SideBar = () => {
       onClick: () => navigate('admin/facility'),
     },
     {
-      key: 'admin/service',
-      icon: <BarChartOutlined />,
+      key: 'service',
+      icon: <AppstoreOutlined />,
       label: 'Quản lý dịch vụ',
-      onClick: () => navigate('admin/service?pageNumber=1&pageSize=10'),
-    },
-    {
-      key: 'admin/time-returns',
-      icon: <BarChartOutlined />,
-      label: 'Thời gian trả',
-      onClick: () => navigate('admin/time-returns'),
-    },
-    {
-      key: 'admin/sample',
-      icon: <BarChartOutlined />,
-      label: 'Quản lý mẫu',
-      onClick: () => navigate('admin/samples'),
-    },
-    {
-      key: 'admin/sample-types',
-      icon: <BarChartOutlined />,
-      label: 'Chất lượng mẫu',
-      onClick: () => navigate('admin/sample-types'),
+      children: [
+        {
+          key: 'admin/service',
+          icon: <AppstoreOutlined />,
+          label: 'Dịch vụ',
+          onClick: () => navigate('/admin/service'), // Sửa lại đường dẫn tuyệt đối
+        },
+        {
+          key: 'admin/time-returns',
+          icon: <ClockCircleOutlined />,
+          label: 'Thời gian trả',
+          onClick: () => navigate('/admin/time-returns'),
+        },
+        {
+          // Đây là mục cha, đóng vai trò là một nhóm
+          key: 'admin/sample-management', // Key cho nhóm submenu
+          icon: <ExperimentOutlined />,
+          label: 'Quản lý Mẫu',
+          // Các mục con được đặt trong mảng 'children'
+          children: [
+            {
+              key: 'admin/samples',
+              label: 'Loại mẫu thử',
+              onClick: () => navigate('/admin/samples'),
+            },
+            {
+              key: 'admin/sample-types',
+              label: 'Chất lượng mẫu thử',
+              onClick: () => navigate('/admin/sample-types'),
+            },
+          ],
+        },
+      ],
     },
   ]
 
