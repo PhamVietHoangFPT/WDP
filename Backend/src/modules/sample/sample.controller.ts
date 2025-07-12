@@ -59,6 +59,13 @@ export class SampleController {
     })
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin loại mẫu thử theo ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: SampleResponseDto })
+  async findById(@Param('id') id: string): Promise<SampleResponseDto> {
+    return this.sampleService.findById(id)
+  }
+
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth('bearer')

@@ -38,14 +38,14 @@ export class SampleRepository implements ISampleRepository {
   async findOneById(id: string): Promise<SampleDocument | null> {
     return this.sampleModel
       .findOne({ _id: id, deleted_at: null })
-      .populate({ path: 'sampleType', select: 'name' })
+      .populate({ path: 'sampleType', select: 'name sampleTypeFee' })
       .exec()
   }
 
   async findAll(): Promise<SampleDocument[] | null> {
     return await this.sampleModel
       .find({ deleted_at: null })
-      .populate({ path: 'sampleType', select: 'name' })
+      .populate({ path: 'sampleType', select: 'name sampleTypeFee' })
       .exec()
   }
 

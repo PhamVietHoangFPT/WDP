@@ -206,7 +206,6 @@ export class SlotTemplateController {
     @Request() req: any,
   ): Promise<ApiResponseDto<null>> {
     const userId = req.user.id as string
-    console.log(req.user)
     await this.slotTemplateService.deleteSlotTemplate(id, userId)
     return new ApiResponseDto<null>({
       success: true,

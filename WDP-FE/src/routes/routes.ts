@@ -25,7 +25,6 @@ import CreateSlot from '../pages/SlotAdmin/SlotAdmin'
 import SlotsFacilitiesList from '../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin'
 import StaffHomePage from '../pages/StaffHomePage/StaffHomePage'
 import type { LayoutRoute } from '../types/routes'
-import BookingPage from '../pages/BookingPage/BookingPage'
 import PaymentPage from '../pages/Payment/PaymentPage'
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage'
 import PaymentHistory from '../pages/ProfileUser/PaymentHistory'
@@ -39,8 +38,16 @@ import SampleCollectorServiceCase from '../pages/SampleCollectorServiceCase/Samp
 import ServiceAtFacility from '../pages/ServiceAtFacility/ServiceAtFacility'
 import AdnFacilityRegisteration from '../pages/AdnFacilityRegisteration/AdnFacilityRegisteration'
 import DoctorServiceCaseWithoutResult from '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
+import AdminService from '../pages/AdminService/AdminService'
+import ServiceDetail from '../components/Admin/AdminService/ServiceDetail'
 import ManagerServiceCaseWithoutDoctor from '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
 import ManagerServiceCaseWithoutSampleCollector from '../pages/Sample/Sample'
+import TimeReturnList from '../components/Admin/AdminTimeReturn/TimeReturnList'
+import TimeReturnDetail from '../components/Admin/AdminTimeReturn/TimeReturnDetail'
+import SampleTypeList from '../components/Admin/AdminSampleType/SampleTypeList'
+import SampleTypeDetail from '../components/Admin/AdminSampleType/SampleTypeDetail'
+import SampleList from '../components/Admin/AdminSample/SampleList'
+import SampleDetail from '../components/Admin/AdminSample/SampleDetail'
 
 const routes: LayoutRoute[] = [
   {
@@ -161,6 +168,46 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/facility/:id',
         component: FacilityDetailAdmin,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/service',
+        component: AdminService,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/service/:serviceId',
+        component: ServiceDetail,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/time-returns',
+        component: TimeReturnList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/time-returns/:timeReturnId',
+        component: TimeReturnDetail,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/sample-types',
+        component: SampleTypeList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/sample-types/:sampleTypeId',
+        component: SampleTypeDetail,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/samples',
+        component: SampleList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/samples/:sampleId',
+        component: SampleDetail,
         role: ['Admin'],
       },
     ],

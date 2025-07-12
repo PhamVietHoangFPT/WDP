@@ -17,13 +17,15 @@ import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import { useGetFacilitiesListQuery } from '../../features/admin/facilitiesAPI'
 import type { Facility } from '../../types/facilities'
 import type { Slot } from '../../types/slot'
-
+import weekOfYear from 'dayjs/plugin/weekOfYear' // Thêm plugin này để đảm bảo 'startOf('week')' hoạt động tốt
+import isBetween from 'dayjs/plugin/isBetween'
 dayjs.locale('vi')
-dayjs.extend(isoWeek) // ✅ Enable ISO week (Monday-first)
+dayjs.extend(isoWeek)
+dayjs.extend(weekOfYear)
+dayjs.extend(isBetween)
 
 const { Title } = Typography
 const { Option } = Select
-const { RangePicker } = DatePicker
 
 export interface FacilityListResponse {
   data: Facility[]
@@ -54,9 +56,12 @@ const DAYS_OF_WEEK = [
 const SlotsFacilitiesCalendar: React.FC = () => {
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
   const [isAvailable, setIsAvailable] = useState<boolean>(true)
-  const [dateRange, setDateRange] = useState<
-    [dayjs.Dayjs | null, dayjs.Dayjs | null]
-  >([dayjs().startOf('isoWeek'), dayjs().endOf('isoWeek')])
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().startOf('week'),
+    dayjs().endOf('week'),
+  ])
+  const [selectedDisplayDate, setSelectedDisplayDate] =
+    useState<dayjs.Dayjs | null>(dayjs().startOf('week'))
 
   const { data: facilitiesData, isLoading: facilitiesLoading } =
     useGetFacilitiesListQuery<FacilityListResponse>({
@@ -79,27 +84,44 @@ const SlotsFacilitiesCalendar: React.FC = () => {
       }
     )
 
-  const getSlotsForDayAndTime = (
-    dayDate: dayjs.Dayjs,
-    timeSlot: (typeof TIME_SLOTS)[0]
-  ) => {
-    if (!slotsData) return []
-    return slotsData.filter((slot) => {
-      const slotDate = dayjs(slot.slotDate)
-      const isSameDay = slotDate.isSame(dayDate, 'day')
-      const isInTimeRange =
-        slot.startTime >= timeSlot.start && slot.startTime < timeSlot.end
-      return isSameDay && isInTimeRange
-    })
-  }
-
   const getWeekDates = () => {
     if (!dateRange[0]) return []
     const startOfWeek = dateRange[0].startOf('isoWeek') // ✅ Use ISO week
     return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, 'day'))
   }
 
-  const weekDates = getWeekDates()
+  const getSlotsForDayAndTime = (dayDate: dayjs.Dayjs, timeSlot: any) => {
+    if (!slotsData) return []
+    return slotsData.filter((slot: any) => {
+      const slotDate = dayjs(slot.slotDate)
+      return (
+        slotDate.isSame(dayDate, 'day') &&
+        slot.startTime >= timeSlot.start &&
+        slot.startTime < timeSlot.end
+      )
+    })
+  }
+
+  // Tạo mảng các ngày trong tuần DỰA TRÊN dateRange
+  const weekDates = Array.from({ length: 7 }, (_, i) =>
+    (dateRange[0] || dayjs()).startOf('week').add(i, 'day')
+  )
+
+  // --- Hàm xử lý khi người dùng chọn một ngày từ DatePicker ---
+  const handleDateSelect = (value: dayjs.Dayjs | null) => {
+    if (value) {
+      // Khi người dùng chọn 1 ngày, tính toán đầu và cuối tuần của ngày đó
+      const startOfWeek = value.startOf('week')
+      const endOfWeek = value.endOf('week')
+
+      setDateRange([startOfWeek, endOfWeek]) // Cập nhật state dateRange với cả tuần
+      setSelectedDisplayDate(value) // Cập nhật ngày hiển thị trong input của DatePicker
+    } else {
+      // Xử lý khi người dùng xóa lựa chọn (clear)
+      setDateRange([null, null])
+      setSelectedDisplayDate(null)
+    }
+  }
 
   return (
     <ConfigProvider locale={viVN}>
@@ -154,14 +176,34 @@ const SlotsFacilitiesCalendar: React.FC = () => {
               ←
             </button>
 
-            <RangePicker
-              value={dateRange}
-              onChange={(val) =>
-                setDateRange(val as [dayjs.Dayjs | null, dayjs.Dayjs | null])
-              }
-              picker='week'
-              format='DD/MM/YYYY'
+            <DatePicker
+              picker='date' // Hiển thị lịch theo ngày (không phải tuần)
+              value={selectedDisplayDate} // Giá trị hiển thị trong ô input của DatePicker
+              onChange={handleDateSelect} // Xử lý khi chọn ngày
               style={{ width: 220 }}
+              // --- Tùy chỉnh để highlight cả tuần trong lịch ---
+              dateRender={(current) => {
+                const style: React.CSSProperties = {}
+                const start = dateRange[0]
+                const end = dateRange[1]
+
+                // Nếu ngày hiện tại trong lịch nằm trong tuần đã chọn
+                if (
+                  start &&
+                  end &&
+                  current.isBetween(start, end, 'day', '[]')
+                ) {
+                  style.backgroundColor = '#e6f7ff' // Màu nền highlight
+                  style.borderRadius = '4px' // Bo tròn nhẹ
+                  style.color = '#1890ff' // Màu chữ
+                  style.fontWeight = 'bold'
+                }
+                return (
+                  <div className='ant-picker-cell-inner' style={style}>
+                    {current.date()}
+                  </div>
+                )
+              }}
             />
 
             <button

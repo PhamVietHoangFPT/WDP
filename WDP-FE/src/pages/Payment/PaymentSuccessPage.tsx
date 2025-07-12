@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Card, Typography, Button, message } from 'antd'
-import { useCreateBookingPaymentHistoryMutation } from '../../features/customer/paymentApi'
+import { useCreateServicePaymentHistoryMutation } from '../../features/customer/paymentApi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 const { Title, Text } = Typography
 
@@ -13,38 +13,40 @@ export default function PaymentSuccessPage() {
   const [status, setStatus] = useState<'success' | 'error' | 'processing'>(
     'processing'
   )
-  const [createBookingPaymentHistory] = useCreateBookingPaymentHistoryMutation()
+  const [createServiceCasePaymentHistory] =
+    useCreateServicePaymentHistoryMutation()
+
+  const effectRan = useRef(false)
 
   useEffect(() => {
-    const rawData: Record<string, string> = Object.fromEntries(
-      searchParams.entries()
-    )
+    // Chỉ chạy logic khi effectRan.current là false
+    if (effectRan.current === false) {
+      const rawData = Object.fromEntries(searchParams.entries())
+      // ... (toàn bộ logic xử lý và gọi API của bạn đặt ở đây)
 
-    console.log('🔍 VNPay Query Params:', rawData)
+      const responseCode = rawData.vnp_ResponseCode
+      if (!responseCode) {
+        // ...
+        return
+      }
 
-    const responseCode = rawData.vnp_ResponseCode
+      createServiceCasePaymentHistory(rawData)
+        .unwrap()
+        .then(() => {
+          setStatus(responseCode === '00' ? 'success' : 'error')
+        })
+        .catch((err) => {
+          console.error('❌ Không thể lưu trạng thái thanh toán:', err)
+          message.error('Không thể cập nhật trạng thái thanh toán')
+          setStatus('error')
+        })
 
-    if (!responseCode) {
-      message.error('Thiếu thông tin thanh toán từ VNPay')
-      setStatus('error')
-      return
+      // Đánh dấu là đã chạy
+      return () => {
+        effectRan.current = true
+      }
     }
-
-    const payload = {
-      ...rawData,
-    }
-
-    createBookingPaymentHistory(payload)
-      .unwrap()
-      .then(() => {
-        setStatus(responseCode === '00' ? 'success' : 'error')
-      })
-      .catch((err) => {
-        console.error('❌ Không thể lưu trạng thái thanh toán:', err)
-        message.error('Không thể cập nhật trạng thái thanh toán')
-        setStatus('error')
-      })
-  }, [searchParams, createBookingPaymentHistory])
+  }, [searchParams, createServiceCasePaymentHistory])
 
   const renderContent = () => {
     if (status === 'processing') {

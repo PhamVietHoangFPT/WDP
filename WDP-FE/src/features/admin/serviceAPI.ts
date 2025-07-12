@@ -1,49 +1,50 @@
 import { apiSlice } from '../../apis/apiSlice'
 
-const facilitiesApi = apiSlice.injectEndpoints({
+const serviceAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getFacilitiesList: builder.query({
+    getServicesList: builder.query({
       query: ({ pageNumber, pageSize }) => ({
-        url: `/facilities?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        url: `/services?pageNumber=${pageNumber}&pageSize=${pageSize}`,
         method: 'GET',
       }),
       transformResponse: (res) => res,
-      providesTags: ['facilities'],
+      providesTags: ['services'],
     }),
 
     getFacilityDetail: builder.query({
       query: (id) => ({
-        url: `/facilities/${id}`,
+        url: `/services/${id}`,
         method: 'GET',
       }),
       transformResponse: (res) => res,
-      providesTags: ['facilities'],
+      providesTags: ['services'],
     }),
 
     updateFacility: builder.mutation({
       query: ({ data, id }) => ({
-        url: `/facilities/${id}`,
+        url: `/services/${id}`,
         method: 'PUT',
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['facilities'],
+      invalidatesTags: ['services'],
     }),
 
     createFacility: builder.mutation({
       query: ({ data }) => ({
-        url: `/facilities`,
+        url: `/services`,
         method: 'POST',
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['facilities'],
+      invalidatesTags: ['services'],
     }),
   }),
 })
 
 export const {
-  useGetFacilitiesListQuery,
+  useGetServicesListQuery,
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
-} = facilitiesApi
+  useCreateFacilityMutation,
+} = serviceAPI

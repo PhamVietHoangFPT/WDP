@@ -3,10 +3,7 @@ import { apiSlice } from '../../apis/apiSlice'
 const sampleCollectorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSampleCollectorList: builder.query({
-      query: ({
-        pageNumber,
-        pageSize,
-      }) => ({
+      query: ({ pageNumber, pageSize }) => ({
         url: '/managers/sample-collectors',
         method: 'GET',
         params: {

@@ -52,66 +52,6 @@ const doctorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['doctor'],
     }),
-
-    // getAllServiceCases: builder.query({
-    //   query: (serviceCaseStatus) => ({
-    //     url: `/sample-collector/service-cases/${serviceCaseStatus}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['sample-collector'],
-    // }),
-
-    // updateServiceCaseStatus: builder.mutation({
-    //   query: ({ id, currentStatus }) => ({
-    //     url: `/service-cases/${id}/status/${currentStatus}`,
-    //     method: 'PATCH',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['sample-collector'],
-    // }),
-
-    // createSlotTemplate: builder.mutation({
-    //   query: (data) => ({
-    //     url: '/slotTemplates',
-    //     method: 'POST',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['slots'],
-    // }),
-
-    // getSlotTemplateForFacility: builder.query({
-    //   query: (facilityId) => ({
-    //     url: `/slotTemplates/facility/${facilityId}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['slots'],
-    // }),
-
-    // getBlogsMinimalList: builder.query({
-    //   query: ({ pageNumber, pageSize }) => ({
-    //     url: '/blogs/minimal',
-    //     method: 'GET',
-    //     params: {
-    //       pageNumber,
-    //       pageSize,
-    //     },
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['blogs'],
-    // }),
-    // createSlots: builder.mutation({
-    //   query: (data) => ({
-    //     url: '/admin/slot-generation/trigger',
-    //     method: 'POST',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    
   }),
 })
 

@@ -25,6 +25,7 @@ export class SampleService implements ISampleService {
     return new SampleResponseDto({
       _id: sample._id,
       name: sample.name,
+      fee: sample.fee,
       sampleType: sample.sampleType,
       deleted_at: sample.deleted_at,
       deleted_by: sample.deleted_by,
@@ -153,5 +154,13 @@ export class SampleService implements ISampleService {
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi xóa mẫu thử.')
     }
+  }
+
+  async findById(id: string): Promise<SampleResponseDto> {
+    const sample = await this.sampleRepository.findOneById(id)
+    if (!sample) {
+      throw new ConflictException('Mẫu thử không tồn tại.')
+    }
+    return this.mapToResponseDto(sample)
   }
 }
