@@ -17,6 +17,8 @@ export interface ISampleService {
   ): Promise<any>
 
   deleteSample(id: string, userId: string): Promise<any>
+
+  findById(id: string): Promise<SampleResponseDto>
 }
 
 export const ISampleService = Symbol('ISampleService')

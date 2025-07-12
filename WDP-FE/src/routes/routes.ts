@@ -44,6 +44,8 @@ import ManagerServiceCaseWithoutDoctor from '../pages/ManagerServiceCaseWithoutD
 import ManagerServiceCaseWithoutSampleCollector from '../pages/Sample/Sample'
 import TimeReturnList from '../components/Admin/AdminTimeReturn/TimeReturnList'
 import TimeReturnDetail from '../components/Admin/AdminTimeReturn/TimeReturnDetail'
+import SampleTypeList from '../components/Admin/AdminSampleType/SampleTypeList'
+import SampleTypeDetail from '../components/Admin/AdminSampleType/SampleTypeDetail'
 
 const routes: LayoutRoute[] = [
   {
@@ -184,6 +186,16 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/time-returns/:timeReturnId',
         component: TimeReturnDetail,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/sample-types',
+        component: SampleTypeList,
+        role: ['Admin'],
+      },
+      {
+        path: '/admin/sample-types/:sampleTypeId',
+        component: SampleTypeDetail,
         role: ['Admin'],
       },
     ],

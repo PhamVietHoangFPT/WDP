@@ -23,7 +23,8 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/admin') return ['admin']
+    // If collapsed, return an empty array
+    if (collapsed) return []
 
     // Check if pathname includes any of these paths
     const paths = items.map((item) => item.key)
@@ -70,7 +71,7 @@ export const SideBar = () => {
       onClick: () => navigate('admin/facility'),
     },
     {
-      key: 'admin/serivice',
+      key: 'admin/service',
       icon: <BarChartOutlined />,
       label: 'Quản lý dịch vụ',
       onClick: () => navigate('admin/service?pageNumber=1&pageSize=10'),
@@ -80,6 +81,12 @@ export const SideBar = () => {
       icon: <BarChartOutlined />,
       label: 'Thời gian trả',
       onClick: () => navigate('admin/time-returns'),
+    },
+    {
+      key: 'admin/sample-types',
+      icon: <BarChartOutlined />,
+      label: 'Chất lượng mẫu',
+      onClick: () => navigate('admin/sample-types'),
     },
   ]
 

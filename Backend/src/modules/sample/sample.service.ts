@@ -154,4 +154,12 @@ export class SampleService implements ISampleService {
       throw new InternalServerErrorException('Lỗi khi xóa mẫu thử.')
     }
   }
+
+  async findById(id: string): Promise<SampleResponseDto> {
+    const sample = await this.sampleRepository.findOneById(id)
+    if (!sample) {
+      throw new ConflictException('Mẫu thử không tồn tại.')
+    }
+    return this.mapToResponseDto(sample)
+  }
 }

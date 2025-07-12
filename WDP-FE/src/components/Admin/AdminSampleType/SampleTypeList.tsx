@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import {
-  useGetTimeReturnsQuery,
-  useDeleteTimeReturnMutation,
-  useCreateTimeReturnMutation,
-} from '../../../features/admin/timeReturnAPI'
+  useGetSampleTypesQuery,
+  useDeleteSampleTypeMutation,
+  useCreateSampleTypeMutation, // Import hook tạo mới
+} from '../../../features/admin/sampleTypeAPI'
 import {
   Table,
   Spin,
   Button,
+  Space,
+  Popconfirm,
   Card,
   Typography,
   Result,
@@ -16,89 +18,76 @@ import {
   Form, // Import Form
   Input,
   InputNumber,
-  Popconfirm,
-  Space,
 } from 'antd'
-// ... các import khác cho action buttons
-
-import { EyeOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { useNavigate } from 'react-router-dom'
-
 const { Title } = Typography
+import { EyeOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
+import type { ColumnsType } from 'antd/es/table'
 
-export default function TimeReturnList() {
-  const {
-    data: response,
-    isLoading,
-    isError,
-    error,
-  } = useGetTimeReturnsQuery({})
-  const [deleteTimeReturn, { isLoading: isDeleting }] =
-    useDeleteTimeReturnMutation()
-  const navigate = useNavigate()
+interface SampleType {
+  _id: string
+  name: string
+  sampleTypeFee: number
+}
+
+export default function SampleTypeList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
-  const [createTimeReturn, { isLoading: isCreating }] =
-    useCreateTimeReturnMutation()
+
+  const { data: response, isLoading, isError } = useGetSampleTypesQuery({})
+  const [deleteSampleType, { isLoading: isDeleting }] =
+    useDeleteSampleTypeMutation()
+  const [createSampleType, { isLoading: isCreating }] =
+    useCreateSampleTypeMutation()
+
+  const navigate = useNavigate()
 
   // === Các hàm xử lý ===
   const showModal = () => setIsModalOpen(true)
 
   const handleCancel = () => {
     setIsModalOpen(false)
-    form.resetFields() // Xóa dữ liệu trong form khi đóng
+    form.resetFields()
   }
 
   const handleCreate = async (values) => {
     try {
-      await createTimeReturn(values).unwrap()
-      message.success('Tạo mới thành công!')
-      handleCancel() // Đóng modal và reset form
+      await createSampleType(values).unwrap()
+      message.success('Tạo kiểu mẫu thành công!')
+      handleCancel()
     } catch (error) {
-      message.error('Tạo mới thất bại. Vui lòng thử lại.')
+      message.error('Tạo thất bại. Vui lòng thử lại.')
     }
   }
+
+  // 2. Hàm xử lý khi người dùng xác nhận xóa
   const handleDelete = async (id) => {
     try {
-      await deleteTimeReturn(id).unwrap()
-      message.success('Xóa thành công!')
-    } catch (error: object) {
-      message.error(`Xóa thất bại: ${error.data?.message || 'Có lỗi xảy ra'}`)
+      await deleteSampleType(id).unwrap()
+      message.success('Xóa loại mẫu thành công!')
+    } catch (error) {
+      message.error('Xóa thất bại. Vui lòng thử lại.')
     }
   }
 
-  interface TimeReturnRecord {
-    _id: string
-    timeReturn: string
-    timeReturnFee: number
-    description: string
-  }
-
-  const columns: ColumnsType<TimeReturnRecord> = [
+  const columns: ColumnsType<SampleType> = [
     {
-      title: 'Thời Gian Trả (Ngày)',
-      dataIndex: 'timeReturn',
-      key: 'timeReturn',
-      align: 'center' as const,
+      title: 'Tên loại mẫu',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
-      title: 'Phí Trả Nhanh',
-      dataIndex: 'timeReturnFee',
-      key: 'timeReturnFee',
-      align: 'right' as const,
+      title: 'Phí',
+      dataIndex: 'sampleTypeFee',
+      key: 'sampleTypeFee',
+      align: 'right',
       render: (fee: number) =>
         fee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
     },
     {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
       title: 'Hành Động',
       key: 'actions',
-      align: 'center' as const,
+      align: 'center',
       render: (_, record) => (
         <Space size='middle'>
           <Button
@@ -109,7 +98,8 @@ export default function TimeReturnList() {
               borderColor: '#91caff',
               color: '#1677ff',
             }}
-            onClick={() => navigate(`/admin/time-returns/${record._id}`)}
+            // Sửa đường dẫn để đúng với sample-types
+            onClick={() => navigate(`/admin/sample-types/${record._id}`)}
           />
           <Popconfirm
             title='Xác nhận xóa?'
@@ -161,30 +151,29 @@ export default function TimeReturnList() {
           marginBottom: 16,
         }}
       >
-        <Title level={3}>Danh sách Thời Gian Trả Mẫu</Title>
+        <Title level={3}>Danh sách Kiểu Mẫu Xét Nghiệm</Title>
         <Button
           type='primary'
           icon={<PlusOutlined />}
-          onClick={showModal} // Thay đổi onClick để mở modal
+          onClick={showModal} // Mở modal
         >
           Tạo mới
         </Button>
       </div>
-
       <Table
         bordered
         columns={columns}
-        dataSource={response} // Lấy dữ liệu từ response.data
+        dataSource={response?.data || []}
         rowKey='_id'
-        pagination={false}
+        pagination={{ pageSize: 10, total: response?.total }}
       />
 
+      {/* === Modal và Form tạo mới === */}
       <Modal
-        title='Tạo mới Thời Gian Trả Mẫu'
+        title='Tạo mới Kiểu Mẫu'
         open={isModalOpen}
         onCancel={handleCancel}
         confirmLoading={isCreating}
-        // Dùng footer để các nút có thể tương tác với form
         footer={[
           <Button key='back' onClick={handleCancel}>
             Hủy
@@ -201,15 +190,15 @@ export default function TimeReturnList() {
       >
         <Form form={form} layout='vertical' onFinish={handleCreate}>
           <Form.Item
-            name='timeReturn'
-            label='Thời Gian Trả (Ngày)'
-            rules={[{ required: true, message: 'Vui lòng nhập thời gian' }]}
+            name='name'
+            label='Tên Loại Mẫu'
+            rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
           >
-            <InputNumber min={1} style={{ width: '100%' }} />
+            <Input />
           </Form.Item>
           <Form.Item
-            name='timeReturnFee'
-            label='Phí Trả Nhanh'
+            name='sampleTypeFee'
+            label='Phí'
             rules={[{ required: true, message: 'Vui lòng nhập phí' }]}
           >
             <InputNumber
@@ -222,13 +211,6 @@ export default function TimeReturnList() {
                 value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0
               }
             />
-          </Form.Item>
-          <Form.Item
-            name='description'
-            label='Mô tả'
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
-          >
-            <Input.TextArea rows={4} />
           </Form.Item>
         </Form>
       </Modal>
