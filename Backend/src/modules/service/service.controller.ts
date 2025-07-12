@@ -30,6 +30,7 @@ import { ServiceResponseDto } from './dto/serviceResponse.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
+import { FindAllServiceQueryDto } from './dto/find-all-service-query.dto'
 
 @ApiTags('services')
 @Controller('services')
@@ -59,18 +60,11 @@ export class ServiceController {
 
   @Get()
   @ApiOperation({ summary: 'Xem tất cả dịch vụ' })
-  @ApiQuery({
-    name: 'pageSize',
-    required: false,
-    type: Number,
-    description: 'Số lượng mục trên mỗi trang',
-  })
-  @ApiQuery({
-    name: 'pageNumber',
-    required: false,
-    type: Number,
-    description: 'Số trang',
-  })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, description: 'Số lượng mục trên mỗi trang' })
+  @ApiQuery({ name: 'pageNumber', required: false, type: Number, description: 'Số trang' })
+  @ApiQuery({ name: 'isAgnate', required: false, type: Boolean, description: 'Là quan hệ huyết thống' })
+  @ApiQuery({ name: 'isAdministration', required: false, type: Boolean, description: 'Là hành chính' })
+  @ApiQuery({ name: 'isSelfSampling', required: false, type: Boolean, description: 'Tự lấy mẫu' })
   @ApiResponse({ status: HttpStatus.OK, type: [ServiceResponseDto] })
   async findAll(
     @Query(
@@ -80,15 +74,17 @@ export class ServiceController {
         forbidNonWhitelisted: true,
       }),
     )
-    paginationQuery: PaginationQueryDto,
+    query: FindAllServiceQueryDto,
   ) {
-    const { pageNumber, pageSize } = paginationQuery
-    const result = await this.serviceService.findAllService(
+    const { pageNumber, pageSize, ...filters } = query;
+
+    return this.serviceService.findAllService(
       pageNumber || 1,
       pageSize || 10,
-    )
-    return result
+      filters,
+    );
   }
+
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth('bearer')

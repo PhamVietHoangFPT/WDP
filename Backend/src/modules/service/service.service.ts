@@ -12,6 +12,8 @@ import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { isMongoId } from 'class-validator'
+import { FilterServiceDto } from './dto/filter-service.dto'
+import { FindAllServiceQueryDto } from './dto/find-all-service-query.dto'
 
 @Injectable()
 export class ServiceService implements IServiceService {
@@ -75,9 +77,21 @@ export class ServiceService implements IServiceService {
   async findAllService(
     pageNumber: number,
     pageSize: number,
+    filters: Partial<FindAllServiceQueryDto>
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = {}
+    const filter: Record<string, any> = {};
+    if (filters.isAgnate !== undefined) {
+      filter.isAgnate = filters.isAgnate;
+    }
+    if (filters.isAdministration !== undefined) {
+      filter.isAdministration = filters.isAdministration;
+    }
+    if (filters.isSelfSampling !== undefined) {
+      filter.isSelfSampling = filters.isSelfSampling;
+    }
+    console.log('filters', filters);
+    console.log('Mongo query', filter);
     const [services, totalItems] = await Promise.all([
       this.serviceRepository
         .findWithQuery(filter) // Returns a query object
