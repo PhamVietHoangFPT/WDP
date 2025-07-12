@@ -18,7 +18,7 @@ export class ServiceService implements IServiceService {
   constructor(
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -28,6 +28,8 @@ export class ServiceService implements IServiceService {
       sample: service.sample,
       isAdministration: service.isAdministration,
       isAgnate: service.isAgnate,
+      name: service.name,
+      isSelfSampling: service.isSelfSampling,
       deleted_at: service.deleted_at,
       deleted_by: service.deleted_by,
     })
@@ -54,6 +56,10 @@ export class ServiceService implements IServiceService {
     userId: string,
     createServiceDto: CreateServiceDto,
   ): Promise<ServiceResponseDto> {
+    const existingService = await this.serviceRepository.findByName(createServiceDto.name)
+    if (existingService) {
+      throw new ConflictException('Tên dịch vụ đã tồn tại.')
+    }
     try {
       const newService = await this.serviceRepository.create(userId, {
         ...createServiceDto,
@@ -102,6 +108,7 @@ export class ServiceService implements IServiceService {
       }
     }
   }
+
   async updateService(
     id: string,
     userId: string,

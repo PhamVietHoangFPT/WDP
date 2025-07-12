@@ -37,7 +37,7 @@ export class ServiceController {
   constructor(
     @Inject(IServiceService)
     private readonly serviceService: IServiceService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -58,7 +58,7 @@ export class ServiceController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Xem tất cả loại của mẫu thử' })
+  @ApiOperation({ summary: 'Xem tất cả dịch vụ' })
   @ApiQuery({
     name: 'pageSize',
     required: false,
