@@ -60,4 +60,11 @@ export class AddressRepository implements IAddressRepository {
       )
       .exec()
   }
+
+  async findById(id: string): Promise<AddressDocument | null> {
+    return this.addressModel
+      .findOne({ _id: id, deleted_at: null })
+      .lean()
+      .exec()
+  }
 }

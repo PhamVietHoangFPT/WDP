@@ -19,5 +19,8 @@ export interface IFacilityRepository {
     filter: Record<string, unknown>,
   ): mongoose.Query<FacilityDocument[], FacilityDocument>
   countDocuments(filter: Record<string, unknown>): Promise<number>
+  getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  >
 }
 export const IFacilityRepository = Symbol('IFacilityRepository')

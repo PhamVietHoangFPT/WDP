@@ -75,4 +75,33 @@ export class FacilityRepository implements IFacilityRepository {
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.facilityModel.countDocuments(filter).exec()
   }
+
+  async getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  > {
+    return this.facilityModel.aggregate([
+      { $match: { deleted_at: null } },
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$address' },
+          pipeline: [{ $match: { $expr: { $eq: ['$_id', '$$addressId'] } } }],
+          as: 'address',
+        },
+      },
+      {
+        $unwind: {
+          path: '$address',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          facilityName: 1,
+          address: '$address.fullAddress',
+        },
+      },
+    ])
+  }
 }

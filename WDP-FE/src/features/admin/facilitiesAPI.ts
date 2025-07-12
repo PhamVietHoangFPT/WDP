@@ -39,6 +39,15 @@ const facilitiesApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['facilities'],
     }),
+
+    getFacilitiesNameAndAddress: builder.query({
+      query: () => ({
+        url: `/facilities/facilities-name-address`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['facilities'],
+    }),
   }),
 })
 
@@ -46,4 +55,5 @@ export const {
   useGetFacilitiesListQuery,
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
+  useGetFacilitiesNameAndAddressQuery,
 } = facilitiesApi

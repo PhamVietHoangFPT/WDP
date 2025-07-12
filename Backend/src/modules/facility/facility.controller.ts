@@ -55,6 +55,20 @@ export class FacilityController {
     return this.facilityService.create(createFacilityDto, req.user._id)
   }
 
+  @Get('facilities-name-address')
+  @ApiOperation({ summary: 'Lấy danh sách tên và địa chỉ cơ sở' })
+  async getFacilitiesNameAndAddress(): Promise<
+    ApiResponseDto<{ _id: string; facilityName: string; address: string }>
+  > {
+    const data = await this.facilityService.getFacilitiesNameAndAddress()
+    return {
+      data: data,
+      success: true,
+      message: 'Lấy danh sách tên và địa chỉ cơ sở thành công',
+      statusCode: HttpStatus.OK,
+    }
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin cơ sở theo ID' })
   findById(@Param('id') id: string): Promise<FacilityResponseDto | null> {
@@ -114,7 +128,7 @@ export class FacilityController {
   @Put(':id')
   @ApiBody({ type: UpdateFacilityDto })
   @ApiOperation({ summary: 'Cập nhật cơ sở theo ID' })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateFacilityDto: Partial<Facility>,
     @Req() req: any,

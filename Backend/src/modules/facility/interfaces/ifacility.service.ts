@@ -19,6 +19,9 @@ export interface IFacilityService {
     userId: string,
   ): Promise<FacilityResponseDto | null>
   delete(id: string, userId: string): Promise<FacilityResponseDto | null>
+  getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  >
 }
 
 export const IFacilityService = Symbol('IFacilityService')

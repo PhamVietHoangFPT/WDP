@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Form, Input, Button, Typography, message, Spin } from 'antd'
+import { Form, Input, Button, Typography, message, Spin, Select } from 'antd'
 import {
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
@@ -9,6 +9,12 @@ import {
   useCreateSlotTemplateMutation,
   useGetSlotTemplateForFacilityQuery,
 } from '../../features/admin/slotAPI'
+import {
+  useGetDistrictListQuery,
+  useGetProvinceListQuery,
+  useGetWardListQuery,
+} from '../../features/location/location'
+import type { District, Province, Ward } from '../../types/location'
 
 // Định nghĩa Interface cho Facility
 // Export lại để đảm bảo mọi nơi đều dùng đúng
@@ -29,6 +35,7 @@ interface SlotTemplate {
 }
 
 const { Title } = Typography
+const { Option } = Select
 
 const FacilityDetailAdmin: React.FC = () => {
   const { id } = useParams()
@@ -36,7 +43,7 @@ const FacilityDetailAdmin: React.FC = () => {
   const [form] = Form.useForm()
   const [workingForm] = Form.useForm()
   const [showWorkingTimeForm, setShowWorkingTimeForm] = useState(false)
-
+  const [showUpdateAddressForm, setShowUpdateAddressForm] = useState(false)
   // Lấy dữ liệu chi tiết cơ sở từ API
   const { data, isLoading } = useGetFacilityDetailQuery(id!)
   const { data: slotTemplate, isLoading: isLoadingForSlotTemplate } =
@@ -44,36 +51,63 @@ const FacilityDetailAdmin: React.FC = () => {
   // Hook để cập nhật cơ sở
   const [updateFacility] = useUpdateFacilityMutation()
   const [createSlotTemplate] = useCreateSlotTemplateMutation()
+  // State for cascading dropdowns
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(
+    null
+  )
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
+    null
+  )
+  const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
 
-  // useEffect(() => {
-  //   if (data) {
-  //     form.setFieldsValue({
-  //       facilityName: data.facilityName,
-  //       phoneNumber: data.phoneNumber,
-  //       address: {
-  //         fullAddress: data.address?.fullAddress,
-  //       },
-  //     })
+  // API queries - Remove generic types and access data directly
+  const { data: provincesData, isLoading: provincesLoading } =
+    useGetProvinceListQuery({})
 
-  //     // If working time exists, set form and show it
-  //     console.log(slotTemplate)
-  //     if (
-  //       slotTemplate.data[0].workTimeStart &&
-  //       slotTemplate.data[0].workTimeEnd &&
-  //       slotTemplate.data[0].slotDuration
-  //     ) {
-  //       workingForm.setFieldsValue({
-  //         workTimeStart: slotTemplate.data[0].workTimeStart,
-  //         workTimeEnd: slotTemplate.data[0].workTimeEnd,
-  //         slotDuration: slotTemplate.data[0].slotDuration,
-  //       })
-  //       setShowWorkingTimeForm(true)
-  //     }
-  //   }
-  // }, [data, form, workingForm, slotTemplate])
+  const { data: districtsData, isLoading: districtsLoading } =
+    useGetDistrictListQuery(
+      {
+        province_code: selectedProvince?.code,
+      },
+      {
+        skip: !selectedProvince?.code,
+      }
+    )
+
+  const { data: wardsData, isLoading: wardsLoading } = useGetWardListQuery(
+    {
+      district_code: selectedDistrict?.code,
+    },
+    {
+      skip: !selectedDistrict?.code,
+    }
+  )
+
+  const houseNumberValue = Form.useWatch('houseNumber')
+
+  const handleProvinceChange = (value: number) => {
+    const province = provincesData?.find((p: Province) => p.code === value)
+    setSelectedProvince(province || null)
+    setSelectedDistrict(null)
+    setSelectedWard(null)
+    form.setFieldsValue({ district: undefined, ward: undefined })
+  }
+
+  const handleDistrictChange = (value: number) => {
+    const district = districtsData?.find((d: District) => d.code === value)
+    setSelectedDistrict(district || null)
+    setSelectedWard(null)
+    form.setFieldsValue({ ward: undefined })
+  }
+
+  const handleWardChange = (value: number) => {
+    const ward = wardsData?.find((w: Ward) => w.code === value)
+    setSelectedWard(ward || null)
+  }
 
   useEffect(() => {
     if (data) {
+      console.log(data)
       form.setFieldsValue({
         facilityName: data.facilityName,
         phoneNumber: data.phoneNumber,
@@ -109,7 +143,7 @@ const FacilityDetailAdmin: React.FC = () => {
       const formData = new FormData()
       formData.append('facilityName', values.facilityName)
       formData.append('phoneNumber', values.phoneNumber)
-      formData.append('fullAddress', values.address.fullAddress)
+      formData.append('address', values.address._id)
 
       // Gửi yêu cầu cập nhật lên API
       await updateFacility({ id, data: formData }).unwrap()
@@ -152,13 +186,15 @@ const FacilityDetailAdmin: React.FC = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label='Địa chỉ đầy đủ'
-          name={['address', 'fullAddress']} // Ant Design sẽ tự động tạo cấu trúc { address: { fullAddress: value } }
-          rules={[{ required: true, message: 'Nhập địa chỉ' }]}
-        >
-          <Input />
-        </Form.Item>
+        {!showUpdateAddressForm && (
+          <Form.Item
+            label='Địa chỉ đầy đủ'
+            name={['address', 'fullAddress']} // Ant Design sẽ tự động tạo cấu trúc { address: { fullAddress: value } }
+            rules={[{ required: true, message: 'Nhập địa chỉ' }]}
+          >
+            <Input disabled />
+          </Form.Item>
+        )}
 
         <Form.Item>
           <Button type='primary' htmlType='submit'>
@@ -166,12 +202,99 @@ const FacilityDetailAdmin: React.FC = () => {
           </Button>
           <Button
             style={{ marginLeft: 8 }}
-            onClick={() => navigate('/admin/facilities')}
+            onClick={() => navigate('/admin/facility')}
           >
             Trở lại
           </Button>
         </Form.Item>
       </Form>
+      <Button
+        type='primary'
+        onClick={() => setShowUpdateAddressForm(!showUpdateAddressForm)}
+        style={{ marginTop: 20 }}
+      >
+        {showUpdateAddressForm ? 'Đóng cập nhật địa chỉ' : 'Cập nhật địa chỉ'}
+      </Button>
+      {showUpdateAddressForm && (
+        <div>
+          <Title level={3}>Cập nhật địa chỉ</Title>
+          <Form
+            layout='vertical'
+            style={{ marginTop: 20 }}
+            onFinish={() => setShowUpdateAddressForm(true)}
+          >
+            <Form.Item label='Tỉnh/Thành phố'>
+              <Select
+                placeholder='Chọn tỉnh/thành phố'
+                value={selectedProvince?.code}
+                onChange={handleProvinceChange}
+                loading={provincesLoading}
+              >
+                {provincesData?.map((province: Province) => (
+                  <Option key={province.code} value={province.code}>
+                    {province.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item label='Quận/Huyện'>
+              <Select
+                placeholder='Chọn quận/huyện'
+                value={selectedDistrict?.code}
+                onChange={handleDistrictChange}
+                disabled={!selectedProvince}
+                loading={districtsLoading}
+              >
+                {districtsData?.map((district: District) => (
+                  <Option key={district.code} value={district.code}>
+                    {district.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item label='Phường/Xã'>
+              <Select
+                placeholder='Chọn phường/xã'
+                value={selectedWard?.code}
+                onChange={handleWardChange}
+                disabled={!selectedDistrict}
+                loading={wardsLoading}
+              >
+                {wardsData?.map((ward: Ward) => (
+                  <Option key={ward.code} value={ward.code}>
+                    {ward.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label='Số nhà, tên đường'
+              name='houseNumber'
+              rules={[{ required: true, message: 'Nhập địa chỉ chi tiết' }]}
+            >
+              <Input placeholder='Địa chỉ chi tiết (số nhà, tên đường...)' />
+            </Form.Item>
+
+            {selectedProvince && selectedDistrict && selectedWard && (
+              <Form.Item label='Địa chỉ đầy đủ'>
+                <Input
+                  // 2. Sử dụng biến đã theo dõi ở đây
+                  value={`${houseNumberValue || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5' }}
+                />
+              </Form.Item>
+            )}
+
+            <Button type='primary' htmlType='submit'>
+              Lưu
+            </Button>
+          </Form>
+        </div>
+      )}
 
       {showWorkingTimeForm ? (
         <Form

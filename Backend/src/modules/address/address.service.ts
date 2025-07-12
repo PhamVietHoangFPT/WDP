@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { IAddressService } from './interfaces/iaddress.service'
 import { IAddressRepository } from './interfaces/iaddress.repository'
 import { Inject } from '@nestjs/common'
@@ -54,5 +54,11 @@ export class AddressService implements IAddressService {
     )
     if (!updatedAddress) return null
     return this.mapToResponseDto(updatedAddress)
+  }
+
+  async findById(id: string): Promise<AddressResponseDto> {
+    const address = await this.addressRepo.findById(id)
+    if (!address) throw new NotFoundException('Không tìm thấy địa chỉ')
+    return this.mapToResponseDto(address)
   }
 }

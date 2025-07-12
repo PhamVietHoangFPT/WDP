@@ -13,5 +13,6 @@ export interface IAddressService {
     data: Partial<CreateAddressDto>,
     userId: string,
   ): Promise<AddressResponseDto | null>
+  findById(id: string): Promise<AddressResponseDto>
 }
 export const IAddressService = Symbol('IAddressService')

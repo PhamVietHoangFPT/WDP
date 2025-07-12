@@ -14,5 +14,6 @@ export interface IAddressRepository {
     data: Partial<CreateAddressDto>,
     userId: string,
   ): Promise<AddressDocument | null>
+  findById(id: string): Promise<AddressDocument | null>
 }
 export const IAddressRepository = Symbol('IAddressRepository')

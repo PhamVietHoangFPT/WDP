@@ -117,4 +117,14 @@ export class FacilityService implements IFacilityService {
     }
     return this.mapToResponseDto(deletedFacility)
   }
+
+  async getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  > {
+    const data = await this.facilityRepository.getFacilitiesNameAndAddress()
+    if (!data || data.length === 0) {
+      throw new NotFoundException('Không tìm thấy cơ sở nào.')
+    }
+    return data
+  }
 }

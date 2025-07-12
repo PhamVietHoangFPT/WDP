@@ -85,12 +85,12 @@ const FacilityListAdmin: React.FC = () => {
       dataIndex: ['address', 'fullAddress'],
       key: 'address',
     },
-    // {
-    //   title: 'Số điện thoại',
-    //   dataIndex: 'phoneNumber',
-    //   key: 'phoneNumber',
-    //   render: (phone: string | null) => phone || 'Không có',
-    // },
+    {
+      title: 'Số điện thoại',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
+      render: (phone: string | null) => phone || 'Không có',
+    },
     {
       title: 'Hành động',
       key: 'actions',
@@ -103,15 +103,6 @@ const FacilityListAdmin: React.FC = () => {
               backgroundColor: '#e6f4ff',
               borderColor: '#91caff',
               color: '#1677ff',
-            }}
-            onClick={() => navigate(`/admin/facility/${record._id}`)}
-          />
-          <Button
-            icon={<EditOutlined />}
-            style={{
-              backgroundColor: '#faad14',
-              borderColor: '#faad14',
-              color: '#fff',
             }}
             onClick={() => navigate(`/admin/facility/${record._id}`)}
           />

@@ -32,16 +32,11 @@ const CreateFacilityForm: React.FC = () => {
 
   // API queries - Remove generic types and access data directly
   const { data: provincesData, isLoading: provincesLoading } =
-    useGetProvinceListQuery({
-      pageNumber: 1,
-      pageSize: 100,
-    })
+    useGetProvinceListQuery({})
 
   const { data: districtsData, isLoading: districtsLoading } =
     useGetDistrictListQuery(
       {
-        pageNumber: 1,
-        pageSize: 100,
         province_code: selectedProvince?.code,
       },
       {
@@ -51,8 +46,6 @@ const CreateFacilityForm: React.FC = () => {
 
   const { data: wardsData, isLoading: wardsLoading } = useGetWardListQuery(
     {
-      pageNumber: 1,
-      pageSize: 100,
       district_code: selectedDistrict?.code,
     },
     {
