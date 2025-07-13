@@ -44,8 +44,8 @@ export const SideBar = () => {
     const userId = userData?.id;
 
     // Sử dụng RTK Query để lấy danh sách người dùng và danh sách cơ sở
-    const { data: userListData, error: userListError } = useGetUserListQuery();
-    const { data: facilitiesListData, error: facilitiesListError } = useGetFacilitiesNameAndAddressQuery();
+    const { data: userListData, error: userListError } = useGetUserListQuery({});
+    const { data: facilitiesListData, error: facilitiesListError } = useGetFacilitiesNameAndAddressQuery({});
 
     useEffect(() => {
         const fetchAndSetFacility = async () => {
