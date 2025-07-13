@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsBoolean, IsOptional } from "class-validator";
+import { IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
 import { PaginationQueryDto } from "src/common/dto/pagination-query.dto";
 
 export class FindAllServiceQueryDto extends PaginationQueryDto {
@@ -41,4 +41,23 @@ export class FindAllServiceQueryDto extends PaginationQueryDto {
         return value;
     })
     isSelfSampling?: boolean;
+
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => value !== undefined ? Number(value) : undefined)
+    timeReturn?: number;
+
+
+    @IsOptional()
+    @IsString()
+    sampleName?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    sampleTypeId?: string;
+
+    @IsOptional()
+    @IsString()
+    name?: string;
+
 }

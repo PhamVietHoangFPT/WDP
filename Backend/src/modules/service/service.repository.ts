@@ -199,4 +199,11 @@ export class ServiceRepository implements IServiceRepository {
         populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
       })
   }
+  aggregate(pipeline: any[]): mongoose.Aggregate<any[]> {
+    return this.serviceModel.aggregate(pipeline);
+  }
+
+  aggregateOne(pipeline: any[]): mongoose.Aggregate<any> {
+    return this.serviceModel.aggregate(pipeline);
+  }
 }

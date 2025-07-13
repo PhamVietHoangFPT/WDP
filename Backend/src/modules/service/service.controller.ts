@@ -65,6 +65,31 @@ export class ServiceController {
   @ApiQuery({ name: 'isAgnate', required: false, type: Boolean, description: 'Là quan hệ huyết thống' })
   @ApiQuery({ name: 'isAdministration', required: false, type: Boolean, description: 'Là hành chính' })
   @ApiQuery({ name: 'isSelfSampling', required: false, type: Boolean, description: 'Tự lấy mẫu' })
+  @ApiQuery({
+    name: 'timeReturn',
+    required: false,
+    type: Number,
+    description: 'Thời gian trả kết quả',
+  })
+  @ApiQuery({
+    name: 'sampleName',
+    required: false,
+    type: String,
+    description: 'Tên mẫu (Sample)',
+  })
+  @ApiQuery({
+    name: 'sampleTypeId',
+    required: false,
+    type: String,
+    description: 'ID loại mẫu (SampleType)',
+  })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    description: 'Tên dịch vụ (Service.name)',
+  })
+
   @ApiResponse({ status: HttpStatus.OK, type: [ServiceResponseDto] })
   async findAll(
     @Query(

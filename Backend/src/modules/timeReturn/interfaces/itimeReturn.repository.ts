@@ -8,6 +8,7 @@ export interface ITimeReturnRepository {
     createTimeReturnDto: CreateTimeReturnDto,
   ): Promise<TimeReturnDocument>
   findOneById(id: string): Promise<TimeReturnDocument | null>
+  findOneByTimeReturn(timeReturn: number): Promise<TimeReturnDocument | null>
   findAll(): Promise<TimeReturnDocument[]>
   updateTimeReturnById(
     id: string,

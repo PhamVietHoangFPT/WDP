@@ -10,7 +10,10 @@ export class TimeReturnRepository implements ITimeReturnRepository {
   constructor(
     @InjectModel(TimeReturn.name)
     private timeReturnModel: Model<TimeReturnDocument>,
-  ) {}
+  ) { }
+  async findOneByTimeReturn(timeReturn: number): Promise<TimeReturnDocument | null> {
+    return await this.timeReturnModel.findOne({timeReturn}).exec()
+  }
 
   async create(
     userId: string,
