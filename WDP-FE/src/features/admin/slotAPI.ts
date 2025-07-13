@@ -44,7 +44,6 @@ const slotApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['slots'],
     }),
-
     getBlogsMinimalList: builder.query({
       query: ({ pageNumber, pageSize }) => ({
         url: '/blogs/minimal',
@@ -91,6 +90,15 @@ const slotApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['blogs'],
     }),
+    updateSlotTemplate: builder.mutation({
+      query: ({ data, id }) => ({
+        url: `/slot-templates/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['slot-templates'],
+    }),
   }),
 })
 
@@ -103,4 +111,5 @@ export const {
   useUpdateBlogsMutation,
   useDeleteBlogsMutation,
   useGetSlotTemplateForFacilityQuery,
+  useUpdateSlotTemplateMutation,
 } = slotApi

@@ -138,53 +138,13 @@ export default function TimeReturnList() {
     )
   }
 
-  if (isError) {
-    const errorMessage = error?.data?.message || 'Có lỗi xảy ra'
-    const errorStatus = error?.status || 'Lỗi'
-
+  const ModalEdit = () => {
     return (
-      <Result
-        status={errorStatus === 404 ? '404' : 'error'}
-        title={errorStatus}
-        subTitle={errorMessage}
-        style={{ marginTop: '20px' }}
-      />
-    )
-  }
-
-  return (
-    <Card>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 16,
-        }}
-      >
-        <Title level={3}>Danh sách Thời Gian Trả Mẫu</Title>
-        <Button
-          type='primary'
-          icon={<PlusOutlined />}
-          onClick={showModal} // Thay đổi onClick để mở modal
-        >
-          Tạo mới
-        </Button>
-      </div>
-
-      <Table
-        bordered
-        columns={columns}
-        dataSource={response} // Lấy dữ liệu từ response.data
-        rowKey='_id'
-        pagination={false}
-      />
-
       <Modal
         title='Tạo mới Thời Gian Trả Mẫu'
         open={isModalOpen}
         onCancel={handleCancel}
         confirmLoading={isCreating}
-        // Dùng footer để các nút có thể tương tác với form
         footer={[
           <Button key='back' onClick={handleCancel}>
             Hủy
@@ -232,6 +192,69 @@ export default function TimeReturnList() {
           </Form.Item>
         </Form>
       </Modal>
+    )
+  }
+
+  if (isError) {
+    const errorMessage = error?.data?.message || 'Có lỗi xảy ra'
+    const errorStatus = error?.status || 'Lỗi'
+
+    return (
+      <>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: 16,
+          }}
+        >
+          <Title level={3}>Danh sách Thời Gian Trả Mẫu</Title>
+          <Button
+            type='primary'
+            icon={<PlusOutlined />}
+            onClick={showModal} // Thay đổi onClick để mở modal
+          >
+            Tạo mới
+          </Button>
+        </div>
+        <Result
+          status={errorStatus === 404 ? '404' : 'error'}
+          title={errorStatus}
+          subTitle={errorMessage}
+          style={{ marginTop: '20px' }}
+        />
+        <ModalEdit />
+      </>
+    )
+  }
+
+  return (
+    <Card>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: 16,
+        }}
+      >
+        <Title level={3}>Danh sách Thời Gian Trả Mẫu</Title>
+        <Button
+          type='primary'
+          icon={<PlusOutlined />}
+          onClick={showModal} // Thay đổi onClick để mở modal
+        >
+          Tạo mới
+        </Button>
+      </div>
+
+      <Table
+        bordered
+        columns={columns}
+        dataSource={response?.data} // Lấy dữ liệu từ response.data
+        rowKey='_id'
+        pagination={false}
+      />
+      <ModalEdit />
     </Card>
   )
 }

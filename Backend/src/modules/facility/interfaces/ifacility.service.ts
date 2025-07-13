@@ -1,7 +1,8 @@
-import { FacilityDocument } from '../schemas/facility.schema'
 import { CreateFacilityDto } from '../dto/createFacility.dto'
 import { FacilityResponseDto } from '../dto/facilityResponse.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { UpdateFacilityDto } from '../dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from '../dto/updateAddressFacility.dto'
 
 export interface IFacilityService {
   create(
@@ -15,10 +16,17 @@ export interface IFacilityService {
   ): Promise<PaginatedResponse<FacilityResponseDto>>
   update(
     id: string,
-    updateFacilityDto: Partial<FacilityDocument>,
+    updateFacilityDto: UpdateFacilityDto,
     userId: string,
   ): Promise<FacilityResponseDto | null>
   delete(id: string, userId: string): Promise<FacilityResponseDto | null>
+  getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  >
+  updateAddressFacility(
+    id: string,
+    updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityResponseDto | null>
 }
 
 export const IFacilityService = Symbol('IFacilityService')

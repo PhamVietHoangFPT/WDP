@@ -15,9 +15,11 @@ import viVN from 'antd/locale/vi_VN'
 import isoWeek from 'dayjs/plugin/isoWeek' // Giữ lại isoWeek nếu bạn muốn tuần ISO (Thứ 2 - CN)
 import weekOfYear from 'dayjs/plugin/weekOfYear' // Thêm plugin này để đảm bảo 'startOf('week')' hoạt động tốt
 import isBetween from 'dayjs/plugin/isBetween'
-import { useGetFacilitiesListQuery } from '../../features/admin/facilitiesAPI'
+import {
+  useGetFacilitiesNameAndAddressQuery,
+  useGetFacilitiesListQuery,
+} from '../../features/admin/facilitiesAPI'
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
-import type { Facility } from '../../types/facilities'
 import type { Slot } from '../../types/slot'
 
 dayjs.locale('vi')
@@ -66,7 +68,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   const [selectedDisplayDate, setSelectedDisplayDate] =
     useState<dayjs.Dayjs | null>(dayjs().startOf('week'))
   const { data: facilitiesData, isLoading: facilitiesLoading } =
-    useGetFacilitiesListQuery({ pageNumber: 1, pageSize: 50 })
+    useGetFacilitiesNameAndAddressQuery({})
 
   const { data: slotsData, isLoading: slotsLoading } = useGetSlotsListQuery(
     {
@@ -134,9 +136,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
             value={facilityId}
             allowClear
           >
-            {facilitiesData?.data?.map((facility: Facility) => (
+            {facilitiesData?.data?.map((facility: any) => (
               <Option key={facility._id} value={facility._id}>
-                {facility.facilityName}
+                {facility.address} - {facility.facilityName}
               </Option>
             ))}
           </Select>

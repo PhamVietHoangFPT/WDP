@@ -4,6 +4,8 @@ import mongoose, { Model } from 'mongoose'
 import { Facility, FacilityDocument } from './schemas/facility.schema'
 import { IFacilityRepository } from './interfaces/ifacility.repository'
 import { CreateFacilityDto } from './dto/createFacility.dto'
+import { UpdateFacilityDto } from './dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from './dto/updateAddressFacility.dto'
 
 @Injectable()
 export class FacilityRepository implements IFacilityRepository {
@@ -37,7 +39,7 @@ export class FacilityRepository implements IFacilityRepository {
 
   async update(
     id: string,
-    updateFacilityDto: Partial<Facility>,
+    updateFacilityDto: UpdateFacilityDto,
     userId: string,
   ): Promise<FacilityDocument | null> {
     return this.facilityModel
@@ -74,5 +76,47 @@ export class FacilityRepository implements IFacilityRepository {
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.facilityModel.countDocuments(filter).exec()
+  }
+
+  async getFacilitiesNameAndAddress(): Promise<
+    { _id: string; facilityName: string; address: string }[]
+  > {
+    return this.facilityModel.aggregate([
+      { $match: { deleted_at: null } },
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$address' },
+          pipeline: [{ $match: { $expr: { $eq: ['$_id', '$$addressId'] } } }],
+          as: 'address',
+        },
+      },
+      {
+        $unwind: {
+          path: '$address',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          facilityName: 1,
+          address: '$address.fullAddress',
+        },
+      },
+    ])
+  }
+
+  async updateAddressFacility(
+    id: string,
+    updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityDocument | null> {
+    return this.facilityModel
+      .findByIdAndUpdate(
+        id,
+        { address: updateAddressFacilityDto.address },
+        { new: true },
+      )
+      .exec()
   }
 }

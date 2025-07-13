@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   useGetSampleDetailQuery,
@@ -45,10 +45,35 @@ export default function SampleDetail() {
     form.setFieldsValue({
       name: sampleData.name,
       fee: sampleData.fee,
-      sampleType: sampleData.sampleType._id, // Chỉ điền ID của sampleType
+      sampleType: sampleData.sampleType._id,
     })
     setIsModalOpen(true)
   }
+
+  const selectOptions = useMemo(() => {
+    // Lấy danh sách options từ API
+    const optionsFromAPI =
+      sampleTypes?.data?.map((type) => ({
+        value: type._id,
+        label: type.name,
+      })) || []
+
+    // Kiểm tra xem option hiện tại có trong danh sách chưa
+    const currentTypeInOptions = optionsFromAPI.some(
+      (opt) => opt.value === sampleData?.sampleType?._id
+    )
+
+    // Nếu chưa có (vì API chưa tải xong) VÀ chúng ta có dữ liệu chi tiết
+    // thì hãy tự thêm nó vào đầu danh sách
+    if (sampleData?.sampleType && !currentTypeInOptions) {
+      optionsFromAPI.unshift({
+        value: sampleData.sampleType._id,
+        label: sampleData.sampleType.name,
+      })
+    }
+
+    return optionsFromAPI
+  }, [sampleTypes, sampleData])
 
   const handleCancel = () => {
     setIsModalOpen(false)
@@ -81,6 +106,11 @@ export default function SampleDetail() {
   if (!sampleData)
     return (
       <Result status='404' title='404' subTitle='Không tìm thấy mẫu thử.' />
+    )
+
+  if (isLoadingTypes)
+    return (
+      <Spin size='large' style={{ display: 'block', margin: '40px auto' }} />
     )
 
   return (
@@ -161,7 +191,11 @@ export default function SampleDetail() {
             label='Kiểu Mẫu'
             rules={[{ required: true }]}
           >
-            <Select loading={isLoadingTypes} placeholder='Chọn một kiểu mẫu'>
+            <Select
+              loading={isLoadingTypes}
+              placeholder='Chọn một kiểu mẫu'
+              options={selectOptions}
+            >
               {sampleTypes?.data?.map((type) => (
                 <Option key={type._id} value={type._id}>
                   {type.name}

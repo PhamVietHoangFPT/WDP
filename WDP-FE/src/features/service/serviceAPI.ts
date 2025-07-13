@@ -22,6 +22,35 @@ export const serviceAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['services'],
     }),
+    deleteService: builder.mutation({
+      query: (id) => ({
+        url: `/services/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['services'],
+    }),
+    createService: builder.mutation({
+      query: (data) => ({
+        url: '/services',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['services'],
+    }),
+    updateService: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/services/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['services'],
+    }),
   }),
 })
-export const { useGetServiceListQuery, useGetServiceDetailQuery } = serviceAPI
+export const {
+  useGetServiceListQuery,
+  useGetServiceDetailQuery,
+  useDeleteServiceMutation,
+  useCreateServiceMutation,
+  useUpdateServiceMutation,
+} = serviceAPI
