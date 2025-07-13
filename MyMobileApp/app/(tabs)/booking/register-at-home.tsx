@@ -25,7 +25,7 @@ import { getSlots } from "@/service/adminApi.ts/slot-api";
 import { createBooking } from "@/service/customerApi/booking-api";
 import { createCaseMember } from "@/service/adminApi.ts/case-members";
 import { createServiceCase } from "@/service/service/service-case-api";
-import { createVNPayPayment } from "@/service/customerApi/vnpay-api";
+import { createVNPayServicePayment } from "@/service/customerApi/vnpay-api";
 
 // Define Token Payload interface
 interface TokenPayload {
@@ -218,12 +218,14 @@ export default function RegisterServiceAtHome() {
       const serviceCaseId = serviceCaseRes?.data?._id || serviceCaseRes?._id;
       if (!serviceCaseId) throw new Error("Không thể tạo đơn dịch vụ.");
 
-      const paymentResponse = await createVNPayPayment({
-        orderId: serviceCaseId,
-        amount: 10000,
-        description: "Thanh toán dịch vụ",
+      const paymentResponse = await createVNPayServicePayment({
+        serviceCaseId: serviceCaseId,
+        amount: 10000, // Hoặc lấy từ service nếu có
+        description: "Thanh toán dịch vụ tại nhà",
       });
-      const paymentUrl = paymentResponse?.paymentUrl;
+      const paymentUrl = paymentResponse?.redirectUrl;
+      console.log("Redirecting to:", paymentUrl);
+
       if (!paymentUrl) throw new Error("Không thể tạo liên kết thanh toán.");
 
       const supported = await Linking.canOpenURL(paymentUrl);

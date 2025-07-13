@@ -79,8 +79,6 @@ export default function BookingScreen() {
           />
         ) : services.length > 0 ? (
           services.map((item) => {
-            if (item.isAdministration) return null;
-
             const price =
               (item.fee || 0) +
               (item.timeReturn?.timeReturnFee || 0) +

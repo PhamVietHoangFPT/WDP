@@ -1,37 +1,76 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Lấy header có token
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 const getAuthHeader = async () => {
   const token = await AsyncStorage.getItem("userToken");
   if (!token) throw new Error("Không tìm thấy token!");
-  return { Authorization: `Bearer ${token}` };
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
 };
 
-export const createVNPayPayment = async (data: any) => {
+// 1. Lấy danh sách ngân hàng
+export const getVNPayBanks = async () => {
   const headers = await getAuthHeader();
-  const response = await fetch(`${API_BASE_URL}/payments/vnpay`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: JSON.stringify(data),
+  const response = await fetch(`${API_BASE_URL}/vnpay/banks`, {
+    method: "GET",
+    headers,
   });
 
-  if (!response.ok) throw new Error("Lỗi khi tạo thanh toán VNPay");
+  if (!response.ok) throw new Error("Không thể lấy danh sách ngân hàng");
   return response.json();
 };
 
+// 2. Tạo URL thanh toán (generic)
+export const createVNPayPaymentURL = async (data: {
+  amount: number;
+  description: string;
+  orderId: string;
+}) => {
+  const headers = await getAuthHeader();
+  const response = await fetch(`${API_BASE_URL}/vnpay/payment-url`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error("Không thể tạo liên kết thanh toán VNPay");
+  return response.json();
+};
+
+// 3. Tạo URL thanh toán cho đơn dịch vụ
+export const createVNPayServicePayment = async (data: {
+  serviceCaseId: string; // ✅ đổi tên từ orderId sang serviceCaseId
+  amount: number;
+  description?: string;
+}) => {
+  const headers = await getAuthHeader();
+  const response = await fetch(
+    `${API_BASE_URL}/vnpay/payment-for-service-case`,
+    {
+      method: "POST",
+      headers: {
+        ...headers, // Authorization trước
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) throw new Error("Không thể tạo thanh toán VNPay.");
+  return response.json();
+};
+
+// 4. Truy vấn trạng thái giao dịch VNPay
 export const getVNPayTransactionStatus = async (orderId: string) => {
   const headers = await getAuthHeader();
   const response = await fetch(
     `${API_BASE_URL}/payments/vnpay/status/${orderId}`,
     {
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
+      method: "GET",
+      headers,
     }
   );
 
