@@ -35,6 +35,9 @@ export default function BookingScreen() {
   const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [filterType, setFilterType] = useState<
+    "all" | "administration" | "civil"
+  >("all");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -57,13 +60,15 @@ export default function BookingScreen() {
   }, []);
 
   const handleRegister = (id: string) => {
-    // router.push(`/RegisterServiceAtHome?serviceId=${id}`);
     router.push(`/booking/register-at-home?serviceId=${id}`);
   };
 
-  // const handleViewDetail = (id: string) => {
-  //   router.push(`/ServiceDetail?serviceId=${id}`);
-  // };
+  const filteredServices = services.filter((item) => {
+    if (filterType === "all") return true;
+    if (filterType === "administration") return item.isAdministration;
+    if (filterType === "civil") return !item.isAdministration;
+    return true;
+  });
 
   return (
     <LinearGradient colors={["#001f3f", "#0074D9"]} style={styles.container}>
@@ -71,16 +76,51 @@ export default function BookingScreen() {
         <Text style={styles.title}>DỊCH VỤ CỦA CHÚNG TÔI</Text>
         <Text style={styles.subtitle}>Tổng hợp thông tin Dịch vụ 🧬</Text>
 
+        <Text style={styles.note}>
+          * Hành chính: phục vụ cơ quan nhà nước.{"\n"}* Dân sự: phục vụ mục
+          đích cá nhân, gia đình.
+        </Text>
+
+        <View style={styles.filterWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filterType === "all" && styles.activeFilter,
+            ]}
+            onPress={() => setFilterType("all")}
+          >
+            <Text style={styles.filterText}>Tất cả</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filterType === "administration" && styles.activeFilter,
+            ]}
+            onPress={() => setFilterType("administration")}
+          >
+            <Text style={styles.filterText}>Hành chính</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filterType === "civil" && styles.activeFilter,
+            ]}
+            onPress={() => setFilterType("civil")}
+          >
+            <Text style={styles.filterText}>Dân sự</Text>
+          </TouchableOpacity>
+        </View>
+
         {loading ? (
           <ActivityIndicator
             size="large"
             color="#fff"
             style={{ marginTop: 40 }}
           />
-        ) : services.length > 0 ? (
-          services.map((item) => {
-            if (item.isAdministration) return null;
-
+        ) : filteredServices.length > 0 ? (
+          filteredServices.map((item) => {
             const price =
               (item.fee || 0) +
               (item.timeReturn?.timeReturnFee || 0) +
@@ -127,10 +167,7 @@ export default function BookingScreen() {
                     <Text style={styles.registerText}>Đăng ký</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={styles.detailBtn}
-                    // onPress={() => handleViewDetail(item._id)}
-                  >
+                  <TouchableOpacity style={styles.detailBtn}>
                     <Text style={styles.detailText}>Xem chi tiết</Text>
                   </TouchableOpacity>
                 </View>
@@ -138,7 +175,7 @@ export default function BookingScreen() {
             );
           })
         ) : (
-          <Text style={styles.emptyText}>Không có dịch vụ nào.</Text>
+          <Text style={styles.emptyText}>Không có dịch vụ phù hợp.</Text>
         )}
       </ScrollView>
     </LinearGradient>
@@ -163,7 +200,35 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     color: "#BBDEFB",
+    marginBottom: 10,
+  },
+  note: {
+    color: "#FFDC00",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  filterWrapper: {
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 20,
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  filterButton: {
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  filterText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  activeFilter: {
+    backgroundColor: "#FF851B",
+    borderColor: "#FF851B",
   },
   card: {
     backgroundColor: "rgba(255,255,255,0.1)",

@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// caseMembers.ts - Phiên bản cho mobile (React Native)
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const getAuthHeader = async () => {
