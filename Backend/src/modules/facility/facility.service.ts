@@ -14,6 +14,8 @@ import { CreateFacilityDto } from './dto/createFacility.dto'
 import { FacilityResponseDto } from './dto/facilityResponse.dto'
 import { Facility } from './schemas/facility.schema'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { UpdateFacilityDto } from './dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from './dto/updateAddressFacility.dto'
 
 @Injectable()
 export class FacilityService implements IFacilityService {
@@ -93,18 +95,25 @@ export class FacilityService implements IFacilityService {
 
   async update(
     id: string,
-    updateFacilityDto: Partial<Facility>,
+    updateFacilityDto: UpdateFacilityDto,
     userId: string,
   ): Promise<FacilityResponseDto> {
-    const updatedFacility = await this.facilityRepository.update(
-      id,
-      updateFacilityDto,
-      userId, // Thêm tham số userId nếu cần thiết
-    )
-    if (!updatedFacility) {
-      throw new NotFoundException(`Không tìm thấy cơ sở với ID "${id}".`)
+    try {
+      const updatedFacility = await this.facilityRepository.update(
+        id,
+        updateFacilityDto,
+        userId, // Thêm tham số userId nếu cần thiết
+      )
+      if (!updatedFacility) {
+        throw new NotFoundException(`Không tìm thấy cơ sở với ID "${id}".`)
+      }
+      return this.mapToResponseDto(updatedFacility)
+    } catch (error) {
+      throw new ConflictException(
+        'Cập nhật cơ sở không thành công do trùng thông tin với cơ sở khác.',
+        error.message,
+      )
     }
-    return this.mapToResponseDto(updatedFacility)
   }
 
   async delete(
@@ -126,5 +135,19 @@ export class FacilityService implements IFacilityService {
       throw new NotFoundException('Không tìm thấy cơ sở nào.')
     }
     return data
+  }
+
+  async updateAddressFacility(
+    id: string,
+    updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    const updatedFacility = await this.facilityRepository.updateAddressFacility(
+      id,
+      updateAddressFacilityDto,
+    )
+    if (!updatedFacility) {
+      throw new NotFoundException(`Không tìm thấy cơ sở với ID "${id}".`)
+    }
+    return this.mapToResponseDto(updatedFacility)
   }
 }

@@ -26,7 +26,6 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger'
-import { Facility } from './schemas/facility.schema'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { RoleEnum } from 'src/common/enums/role.enum'
@@ -34,6 +33,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { UpdateFacilityDto } from './dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from './dto/updateAddressFacility.dto'
 
 @ApiTags('facilities')
 @Controller('facilities')
@@ -122,22 +122,19 @@ export class FacilityController {
     }
   }
 
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @Roles(RoleEnum.ADMIN)
   @Put(':id')
   @ApiBody({ type: UpdateFacilityDto })
   @ApiOperation({ summary: 'Cập nhật cơ sở theo ID' })
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
   async update(
     @Param('id') id: string,
-    @Body() updateFacilityDto: Partial<Facility>,
+    @Body() updateFacilityDto: UpdateFacilityDto,
     @Req() req: any,
   ): Promise<ApiResponseDto<FacilityResponseDto> | null> {
-    const result = this.facilityService.update(
-      id,
-      updateFacilityDto,
-      req.user._id,
-    )
+    const userId = req.user.id || req.user._id // Lấy userId từ request
+    const result = this.facilityService.update(id, updateFacilityDto, userId)
     return result.then((facility) => {
       if (!facility) {
         return null
@@ -149,6 +146,22 @@ export class FacilityController {
         statusCode: HttpStatus.OK,
       }
     })
+  }
+
+  @Put('address/:id')
+  @ApiOperation({ summary: 'Cập nhật địa chỉ cơ sở theo ID' })
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
+  @ApiBody({ type: UpdateAddressFacilityDto })
+  updateAddress(
+    @Param('id') id: string,
+    @Body() updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    return this.facilityService.updateAddressFacility(
+      id,
+      updateAddressFacilityDto,
+    )
   }
 
   @UseGuards(AuthGuard)

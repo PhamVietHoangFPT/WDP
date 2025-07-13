@@ -27,6 +27,7 @@ import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
 import { CreateAddressFacilityDto } from './dto/createAddressFacility.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { UpdateAddressFacilityForAddressDto } from './dto/updateFacilityAddress.dto'
 
 @ApiTags('address')
 @Controller('addresses')
@@ -83,6 +84,24 @@ export class AddressController {
       statusCode: HttpStatus.OK,
       message: 'Lấy địa chỉ thành công',
     }
+  }
+
+  @Put('/facility/:id')
+  @ApiParam({ name: 'id', type: String, description: 'ID của địa chỉ' })
+  @ApiBody({
+    type: UpdateAddressFacilityForAddressDto,
+    description: 'Cập nhật địa chỉ cho cơ sở',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'ID của địa chỉ' })
+  @ApiResponse({ status: HttpStatus.OK, type: AddressResponseDto })
+  @ApiOperation({ summary: 'Cập nhật địa chỉ theo ID' })
+  async updateFacilityAddress(
+    @Body() data: UpdateAddressFacilityForAddressDto,
+    @Req() user: any,
+    @Param('id') id: string,
+  ) {
+    const userId = user?.id || user?._id
+    return this.addressService.updateFacilityAddress(id, userId, data)
   }
 
   @Put(':id')

@@ -4,6 +4,8 @@ import mongoose, { Model } from 'mongoose'
 import { Facility, FacilityDocument } from './schemas/facility.schema'
 import { IFacilityRepository } from './interfaces/ifacility.repository'
 import { CreateFacilityDto } from './dto/createFacility.dto'
+import { UpdateFacilityDto } from './dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from './dto/updateAddressFacility.dto'
 
 @Injectable()
 export class FacilityRepository implements IFacilityRepository {
@@ -37,7 +39,7 @@ export class FacilityRepository implements IFacilityRepository {
 
   async update(
     id: string,
-    updateFacilityDto: Partial<Facility>,
+    updateFacilityDto: UpdateFacilityDto,
     userId: string,
   ): Promise<FacilityDocument | null> {
     return this.facilityModel
@@ -103,5 +105,18 @@ export class FacilityRepository implements IFacilityRepository {
         },
       },
     ])
+  }
+
+  async updateAddressFacility(
+    id: string,
+    updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityDocument | null> {
+    return this.facilityModel
+      .findByIdAndUpdate(
+        id,
+        { address: updateAddressFacilityDto.address },
+        { new: true },
+      )
+      .exec()
   }
 }

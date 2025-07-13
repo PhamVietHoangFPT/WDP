@@ -1,6 +1,8 @@
-import { Facility, FacilityDocument } from '../schemas/facility.schema'
+import { FacilityDocument } from '../schemas/facility.schema'
 import { CreateFacilityDto } from '../dto/createFacility.dto'
 import mongoose from 'mongoose'
+import { UpdateFacilityDto } from '../dto/updateFacility.dto'
+import { UpdateAddressFacilityDto } from '../dto/updateAddressFacility.dto'
 
 export interface IFacilityRepository {
   create(
@@ -11,7 +13,7 @@ export interface IFacilityRepository {
   findAll(): Promise<FacilityDocument[]>
   update(
     id: string,
-    updateFacilityDto: Partial<Facility>,
+    updateFacilityDto: UpdateFacilityDto,
     userId: string,
   ): Promise<FacilityDocument | null>
   delete(id: string, userId: string): Promise<FacilityDocument | null>
@@ -22,5 +24,9 @@ export interface IFacilityRepository {
   getFacilitiesNameAndAddress(): Promise<
     { _id: string; facilityName: string; address: string }[]
   >
+  updateAddressFacility(
+    id: string,
+    updateAddressFacilityDto: UpdateAddressFacilityDto,
+  ): Promise<FacilityDocument | null>
 }
 export const IFacilityRepository = Symbol('IFacilityRepository')
