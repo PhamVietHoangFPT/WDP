@@ -14,5 +14,6 @@ export interface ITimeReturnService {
     updateTimeReturnDto: UpdateTimeReturnDto,
   ): Promise<any>
   deleteTimeReturn(id: string, userId: string): Promise<any>
+  findById(id: string): Promise<TimeReturnResponseDto>
 }
 export const ITimeReturnService = Symbol('ITimeReturnService')

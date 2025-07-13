@@ -510,6 +510,53 @@ export class ManagerRepository implements IManagerRepository {
     ])
   }
 
+  async getAllDeliveryStaff(facilityId: string): Promise<AccountDocument[]> {
+    const deliveryStaffRole =
+      await this.roleRepository.getRoleIdByName('Delivery Staff')
+    const roleObjectId = new Types.ObjectId(deliveryStaffRole)
+    const facilityIdObject = new Types.ObjectId(facilityId)
+    return await this.accountModel.aggregate([
+      // Giai đoạn 1: Lọc tài khoản theo vai trò và cơ sở
+      {
+        $match: {
+          role: roleObjectId,
+          facility: facilityIdObject,
+        },
+      },
+      // Giai đoạn 2: Kết nối với collection 'addresses'
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { accountIdVar: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$account', '$$accountIdVar'],
+                },
+              },
+            },
+          ],
+          as: 'address',
+        },
+      },
+      // Giai đoạn 3: Mở mảng 'address'
+      {
+        $unwind: { path: '$address', preserveNullAndEmptyArrays: true },
+      },
+      // Giai đoạn 5: Chọn lọc và định dạng kết quả
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          name: 1,
+          phoneNumber: 1,
+          addressInfo: '$address.fullAddress', // Lấy toàn bộ thông tin địa chỉ
+        },
+      },
+    ])
+  }
+
   async managerCreateAccount(
     accountData: Partial<AccountDocument>,
     userId: string,

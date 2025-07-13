@@ -1,0 +1,32 @@
+/* Tùy chỉnh header của bảng */
+.service-table .ant-table-thead>tr>th {
+  background-color: #2c8ae1;
+  /* Màu nền header */
+  color: #fff;
+  /* Màu chữ header */
+  font-weight: bold;
+}
+
+/* Tùy chỉnh màu xen kẽ cho các hàng */
+.service-table .ant-table-tbody>tr:nth-child(even)>td {
+  background-color: #f5f5f5;
+  /* Màu cho hàng chẵn */
+}
+
+/* Hiệu ứng khi di chuột vào hàng */
+.service-table .ant-table-tbody>tr:hover>td {
+  background-color: #e6f7ff;
+  /* Màu khi hover */
+}
+
+/* Áp dụng màu nền cho hàng chẵn trong bảng chi tiết */
+.custom-detail-table .ant-table-tbody>tr:nth-child(even)>td {
+  background-color: #fafafa;
+  /* Màu xám nhạt tiêu chuẩn của Antd */
+}
+
+/* Tùy chọn: Thêm hiệu ứng khi di chuột qua bất kỳ hàng nào */
+.custom-detail-table .ant-table-tbody>tr:hover>td {
+  background-color: #f0f5ff;
+  /* Màu xanh dương rất nhạt khi hover */
+}

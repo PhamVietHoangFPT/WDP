@@ -23,18 +23,11 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/manager') return ['manager']
+    // If collapsed, return an empty array
+    if (collapsed) return []
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-    ]
+    const paths = items.map((item) => item.key)
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -71,17 +64,35 @@ export const SideBar = () => {
       label: 'Ca & Cơ sở',
       onClick: () => navigate('admin/slotsFacilitiesAdmin'),
     },
-    // {
-    //   key: 'admin/createFacility',
-    //   icon: <BarChartOutlined />,
-    //   label: 'Tạo cơ sở',
-    //   onClick: () => navigate('admin/createFacility'),
-    // },
     {
       key: 'admin/facility',
       icon: <BarChartOutlined />,
       label: 'Danh sách cơ sở',
       onClick: () => navigate('admin/facility'),
+    },
+    {
+      key: 'admin/service',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý dịch vụ',
+      onClick: () => navigate('admin/service?pageNumber=1&pageSize=10'),
+    },
+    {
+      key: 'admin/time-returns',
+      icon: <BarChartOutlined />,
+      label: 'Thời gian trả',
+      onClick: () => navigate('admin/time-returns'),
+    },
+    {
+      key: 'admin/sample',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý mẫu',
+      onClick: () => navigate('admin/samples'),
+    },
+    {
+      key: 'admin/sample-types',
+      icon: <BarChartOutlined />,
+      label: 'Chất lượng mẫu',
+      onClick: () => navigate('admin/sample-types'),
     },
   ]
 

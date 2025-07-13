@@ -28,6 +28,11 @@ export class ManagerCreateAccountDto {
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   role: mongoose.Schema.Types.ObjectId
 
+  @ApiProperty({ example: '0987654321' })
+  @IsString()
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  phoneNumber: string
+
   @ApiProperty({ example: true })
   @IsNotEmpty({ message: 'Giới tính không được để trống' })
   gender: boolean

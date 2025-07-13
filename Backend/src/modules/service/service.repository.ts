@@ -37,7 +37,11 @@ export class ServiceRepository implements IServiceRepository {
     return this.serviceModel
       .findOne({ _id: id, deleted_at: null })
       .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
-      .populate({ path: 'sample', select: '-_id name' })
+      .populate({
+        path: 'sample',
+        select: '-_id name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+      })
       .exec()
   }
 

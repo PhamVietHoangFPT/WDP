@@ -42,4 +42,22 @@ export class AddressRepository implements IAddressRepository {
       .lean()
       .exec()
   }
+
+  async updateAddressById(
+    id: string,
+    data: Partial<CreateAddressDto>,
+    userId: string,
+  ): Promise<AddressDocument | null> {
+    return this.addressModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...data,
+          updated_by: userId,
+          updated_at: new Date(),
+        },
+        { new: true },
+      )
+      .exec()
+  }
 }

@@ -1,0 +1,61 @@
+import { apiSlice } from '../../apis/apiSlice'
+
+const locationAPI = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getProvinceList: builder.query({
+      query: ({ pageNumber, pageSize, code }) => ({
+        url: '/location/provinces',
+        method: 'GET',
+        params: {
+          pageNumber,
+          pageSize,
+          code, // Thêm tham số lọc theo mã tỉnh
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['provinces'],
+    }),
+    getDistrictList: builder.query({
+      query: ({ pageNumber, pageSize, province_code }) => ({
+        url: `/location/districts/${province_code}`,
+        method: 'GET',
+        params: {
+          pageNumber,
+          pageSize,
+          province_code, // Thêm tham số lọc theo mã huyện
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['districts'],
+    }),
+    getWardList: builder.query({
+      query: ({ pageNumber, pageSize, district_code }) => ({
+        url: `/location/wards/${district_code}`,
+        method: 'GET',
+        params: {
+          pageNumber,
+          pageSize,
+          district_code, // Thêm tham số lọc theo mã xã
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['wards'],
+    }),
+    createFacilityAddress: builder.mutation({
+      query: ({ data }) => ({
+        url: `/addresses/for-facility`,
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['wards', 'districts', 'provinces'],
+    }),
+  }),
+})
+
+export const {
+  useGetProvinceListQuery,
+  useGetDistrictListQuery,
+  useGetWardListQuery,
+  useCreateFacilityAddressMutation,
+} = locationAPI

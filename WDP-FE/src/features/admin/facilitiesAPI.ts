@@ -4,12 +4,8 @@ const facilitiesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getFacilitiesList: builder.query({
       query: ({ pageNumber, pageSize }) => ({
-        url: '/facilities',
+        url: `/facilities?pageNumber=${pageNumber}&pageSize=${pageSize}`,
         method: 'GET',
-        params: {
-          pageNumber,
-          pageSize,
-        },
       }),
       transformResponse: (res) => res,
       providesTags: ['facilities'],
@@ -24,7 +20,7 @@ const facilitiesApi = apiSlice.injectEndpoints({
       providesTags: ['facilities'],
     }),
 
-    UpdateFacility: builder.mutation({
+    updateFacility: builder.mutation({
       query: ({ data, id }) => ({
         url: `/facilities/${id}`,
         method: 'PUT',
@@ -34,42 +30,15 @@ const facilitiesApi = apiSlice.injectEndpoints({
       invalidatesTags: ['facilities'],
     }),
 
-    //   providesTags: ['blogs'],
-    // }),
-    // createSlots: builder.mutation({
-    //   query: (data) => ({
-    //     url: '/admin/slot-generation/trigger',
-    //     method: 'POST',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    // getBlogsDetail: builder.query({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['blogs'],
-    // }),
-    // updateBlogs: builder.mutation({
-    //   query: ({ data, id }) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'PUT',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    // deleteBlogs: builder.mutation({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'DELETE',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
+    createFacility: builder.mutation({
+      query: ({ data }) => ({
+        url: `/facilities`,
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['facilities'],
+    }),
   }),
 })
 
@@ -77,8 +46,4 @@ export const {
   useGetFacilitiesListQuery,
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
-  //   useCreateSlotsMutation,
-  //   useGetBlogsDetailQuery,
-  //   useUpdateBlogsMutation,
-  //   useDeleteBlogsMutation,
 } = facilitiesApi

@@ -1,4 +1,3 @@
-import { TimeReturnRepository } from './timeReturn.repository'
 import {
   ConflictException,
   Inject,
@@ -101,6 +100,7 @@ export class TimeReturnService implements ITimeReturnService {
       )
     }
   }
+
   async deleteTimeReturn(id: string, userId: string): Promise<any> {
     //this variable is used to check if the condition already exists
     const existingTimeReturn = await this.findTimeReturnById(id)
@@ -124,5 +124,14 @@ export class TimeReturnService implements ITimeReturnService {
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi xóa ngày trả mẫu thử.')
     }
+  }
+
+  async findById(id: string): Promise<TimeReturnResponseDto> {
+    //this variable is used to check if the time return already exists
+    const existingTimeReturn = await this.timeReturnRepository.findOneById(id)
+    if (!existingTimeReturn) {
+      throw new ConflictException('Tình trạng mẫu thử không tồn tại')
+    }
+    return this.mapToResponseDto(existingTimeReturn)
   }
 }

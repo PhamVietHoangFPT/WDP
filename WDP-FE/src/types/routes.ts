@@ -10,4 +10,5 @@ export interface Route {
 export interface LayoutRoute {
   layout: React.ComponentType
   data: Route[]
+  role?: string[]
 }

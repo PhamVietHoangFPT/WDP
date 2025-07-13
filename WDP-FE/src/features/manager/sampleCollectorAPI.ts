@@ -3,10 +3,7 @@ import { apiSlice } from '../../apis/apiSlice'
 const sampleCollectorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSampleCollectorList: builder.query({
-      query: ({
-        pageNumber,
-        pageSize,
-      }) => ({
+      query: ({ pageNumber, pageSize }) => ({
         url: '/managers/sample-collectors',
         method: 'GET',
         params: {
@@ -25,6 +22,16 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       }),
       transformResponse: (res) => res,
       providesTags: ['sample-collectors'],
+    }),
+
+    addSampleCollectorToServiceCase: builder.mutation({
+      query: ({ data, serviceCaseId, sampleCollectorId }) => ({
+        url: `/managers/service-cases/${serviceCaseId}/sample-collector/${sampleCollectorId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['sample-collectors'],
     }),
 
     // createSlotTemplate: builder.mutation({
@@ -98,4 +105,5 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
 export const {
   useGetSampleCollectorListQuery,
   useGetServiceNoSampleCollectorListQuery,
+  useAddSampleCollectorToServiceCaseMutation,
 } = sampleCollectorAPI

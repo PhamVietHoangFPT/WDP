@@ -90,7 +90,6 @@ export class PaymentRepository implements IPaymentRepository {
         .populate({ path: 'paymentType', select: 'paymentType' })
       return query
     }
-    console.log(userId)
     const query = this.paymentModel
       .find({
         ...filter, // Thêm các điều kiện lọc khác nếu cần
