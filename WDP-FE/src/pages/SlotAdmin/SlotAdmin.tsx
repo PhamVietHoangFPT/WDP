@@ -5,7 +5,7 @@ import {
   DatePicker,
   Button,
   Typography,
-  message,
+  notification,
 } from 'antd'
 import 'dayjs/locale/vi'
 import locale from 'antd/es/locale/vi_VN'
@@ -46,11 +46,17 @@ const CreateSlot: React.FC = () => {
 
       const response = (await createSlots(formData).unwrap()) as {
         message: string
+        details: { message: string }
       }
-      message.success(response.message || 'Tạo slot thành công')
+      notification.success({
+        message: response.message,
+        description: response.details.message,
+      })
       // navigate('/admin/slots')
     } catch (error: any) {
-      message.error(error.message || 'Đã xảy ra lỗi khi tạo slot')
+      notification.error({
+        message: error.message || 'Đã xảy ra lỗi khi tạo slot',
+      })
     } finally {
       setLoading(false)
     }

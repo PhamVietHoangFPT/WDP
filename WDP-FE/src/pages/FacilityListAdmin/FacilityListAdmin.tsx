@@ -7,15 +7,12 @@ import {
   Spin,
   Pagination,
   Popconfirm,
-  message,
   Space,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
-  EyeOutlined,
   SearchOutlined,
   PlusOutlined,
-  EditOutlined,
   DeleteOutlined,
   EyeFilled,
 } from '@ant-design/icons'
@@ -24,6 +21,7 @@ import {
   useGetFacilitiesListQuery,
   //   useDeleteFacilityMutation,
 } from '../../features/admin/facilitiesAPI'
+import { useSearchParams } from 'react-router-dom'
 import type { Facility } from '../../types/facilities'
 
 const { Title } = Typography
@@ -43,25 +41,16 @@ interface FacilityResponse {
 const FacilityListAdmin: React.FC = () => {
   const navigate = useNavigate()
   const [searchText, setSearchText] = useState<string>('')
-  const [pageNumber, setPageNumber] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(10)
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-
+  const [searchParams] = useSearchParams()
+  const pageNumber = searchParams.get('pageNumber') || '1'
+  const pageSize = searchParams.get('pageSize') || '5'
   const { data, isLoading, isFetching } =
     useGetFacilitiesListQuery<FacilityResponse>({
-      pageNumber,
-      pageSize,
-      name: debouncedSearch,
+      pageNumber: Number(pageNumber),
+      pageSize: Number(pageSize),
     })
 
   //   const [deleteFacility, { isLoading: isDeleting }] = useDeleteFacilityMutation()
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchText)
-    }, 500)
-    return () => clearTimeout(handler)
-  }, [searchText])
 
   //   const handleDelete = async (id: string) => {
   //     try {
@@ -169,13 +158,23 @@ const FacilityListAdmin: React.FC = () => {
           />
 
           <Pagination
-            current={pageNumber}
-            pageSize={pageSize}
+            current={Number(pageNumber)}
+            pageSize={Number(pageSize)}
             total={data?.pagination.totalItems || 0}
-            style={{ textAlign: 'center', paddingTop: 20 }}
             onChange={(page, size) => {
-              setPageNumber(page)
-              setPageSize(size)
+              navigate(`/admin/facilities?pageNumber=${page}&pageSize=${size}`)
+            }}
+            showSizeChanger
+            showTotal={(total, range) =>
+              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} cơ sở`
+            }
+            pageSizeOptions={['5', '10', '20']}
+            style={{
+              marginTop: '20px',
+              textAlign: 'center',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'flex-end',
             }}
           />
         </>

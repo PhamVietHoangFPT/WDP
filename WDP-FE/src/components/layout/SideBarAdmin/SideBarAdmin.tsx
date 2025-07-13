@@ -71,7 +71,7 @@ export const SideBar = () => {
       key: 'admin/facility',
       icon: <BarChartOutlined />,
       label: 'Danh sách cơ sở',
-      onClick: () => navigate('admin/facility'),
+      onClick: () => navigate('/admin/facilities?pageNumber=1&pageSize=10'), // Sửa lại đường dẫn tuyệt đối
     },
     {
       key: 'service',
@@ -79,10 +79,10 @@ export const SideBar = () => {
       label: 'Quản lý dịch vụ',
       children: [
         {
-          key: 'admin/service',
+          key: 'admin/services',
           icon: <AppstoreOutlined />,
           label: 'Dịch vụ',
-          onClick: () => navigate('/admin/service'), // Sửa lại đường dẫn tuyệt đối
+          onClick: () => navigate('/admin/services?pageNumber=1&pageSize=10'), // Sửa lại đường dẫn tuyệt đối
         },
         {
           key: 'admin/time-returns',

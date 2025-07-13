@@ -48,7 +48,25 @@ const locationAPI = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['wards', 'districts', 'provinces'],
+      invalidatesTags: ['facilities', 'addresses'],
+    }),
+    updateAddressFacility: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/facilities/address/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['facilities', 'addresses'],
+    }),
+    updateFullAddressFacility: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/addresses/facility/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['facilities', 'addresses'],
     }),
   }),
 })
@@ -58,4 +76,6 @@ export const {
   useGetDistrictListQuery,
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
+  useUpdateAddressFacilityMutation,
+  useUpdateFullAddressFacilityMutation,
 } = locationAPI

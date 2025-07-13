@@ -261,7 +261,7 @@ const routes: LayoutRoute[] = [
         component: CreateFacilityAdmin,
       },
       {
-        path: '/admin/facility',
+        path: '/admin/facilities',
         component: FacilityListAdmin,
       },
       {
@@ -269,7 +269,7 @@ const routes: LayoutRoute[] = [
         component: FacilityDetailAdmin,
       },
       {
-        path: '/admin/service',
+        path: '/admin/services',
         component: AdminService,
       },
       {
