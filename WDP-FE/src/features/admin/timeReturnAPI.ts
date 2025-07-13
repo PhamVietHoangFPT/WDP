@@ -7,8 +7,8 @@ const timeReturnAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // 1. GET /time-return: Lấy danh sách
     getTimeReturns: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
-        url: `/time-return?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      query: () => ({
+        url: `/time-return`,
         method: 'GET',
       }),
       // Cung cấp tag cho danh sách và từng item để tự động cập nhật

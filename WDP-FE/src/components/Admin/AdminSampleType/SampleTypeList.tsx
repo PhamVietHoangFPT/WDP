@@ -34,7 +34,12 @@ export default function SampleTypeList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
 
-  const { data: response, isLoading, isError } = useGetSampleTypesQuery({})
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useGetSampleTypesQuery({})
   const [deleteSampleType, { isLoading: isDeleting }] =
     useDeleteSampleTypeMutation()
   const [createSampleType, { isLoading: isCreating }] =
@@ -72,7 +77,7 @@ export default function SampleTypeList() {
 
   const columns: ColumnsType<SampleType> = [
     {
-      title: 'Tên loại mẫu',
+      title: 'Chất lượng mẫu',
       dataIndex: 'name',
       key: 'name',
     },
@@ -128,38 +133,94 @@ export default function SampleTypeList() {
     )
   }
 
+  const ModalComponent = () => (
+    <Modal
+      title='Tạo mới Chất Lượng Mẫu'
+      open={isModalOpen}
+      onCancel={handleCancel}
+      confirmLoading={isCreating}
+      footer={[
+        <Button key='back' onClick={handleCancel}>
+          Hủy
+        </Button>,
+        <Button
+          key='submit'
+          type='primary'
+          loading={isCreating}
+          onClick={() => form.submit()}
+        >
+          Tạo
+        </Button>,
+      ]}
+    >
+      <Form form={form} layout='vertical' onFinish={handleCreate}>
+        <Form.Item
+          name='name'
+          label='Chất Lượng Mẫu'
+          rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name='sampleTypeFee'
+          label='Phí'
+          rules={[{ required: true, message: 'Vui lòng nhập phí' }]}
+        >
+          <InputNumber
+            min={0}
+            style={{ width: '100%' }}
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            }
+            parser={(value) =>
+              value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0
+            }
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
+
+  const SampleTypeHeader = () => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+      }}
+    >
+      <Title level={3}>Danh sách Chất Lượng Mẫu Xét Nghiệm</Title>
+      <Button
+        type='primary'
+        icon={<PlusOutlined />}
+        onClick={showModal} // Mở modal
+      >
+        Tạo mới
+      </Button>
+    </div>
+  )
+
   if (isError) {
     const errorMessage = error?.data?.message || 'Có lỗi xảy ra'
     const errorStatus = error?.status || 'Lỗi'
 
     return (
-      <Result
-        status={errorStatus === 404 ? '404' : 'error'}
-        title={errorStatus}
-        subTitle={errorMessage}
-        style={{ marginTop: '20px' }}
-      />
+      <>
+        <SampleTypeHeader />
+        <Result
+          status={errorStatus === 404 ? '404' : 'error'}
+          title={errorStatus}
+          subTitle={errorMessage}
+          style={{ marginTop: '20px' }}
+        />
+        <ModalComponent />
+      </>
     )
   }
 
   return (
     <Card>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 16,
-        }}
-      >
-        <Title level={3}>Danh sách Kiểu Mẫu Xét Nghiệm</Title>
-        <Button
-          type='primary'
-          icon={<PlusOutlined />}
-          onClick={showModal} // Mở modal
-        >
-          Tạo mới
-        </Button>
-      </div>
+      <SampleTypeHeader />
       <Table
         bordered
         columns={columns}
@@ -167,53 +228,7 @@ export default function SampleTypeList() {
         rowKey='_id'
         pagination={{ pageSize: 10, total: response?.total }}
       />
-
-      {/* === Modal và Form tạo mới === */}
-      <Modal
-        title='Tạo mới Kiểu Mẫu'
-        open={isModalOpen}
-        onCancel={handleCancel}
-        confirmLoading={isCreating}
-        footer={[
-          <Button key='back' onClick={handleCancel}>
-            Hủy
-          </Button>,
-          <Button
-            key='submit'
-            type='primary'
-            loading={isCreating}
-            onClick={() => form.submit()}
-          >
-            Tạo
-          </Button>,
-        ]}
-      >
-        <Form form={form} layout='vertical' onFinish={handleCreate}>
-          <Form.Item
-            name='name'
-            label='Tên Loại Mẫu'
-            rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name='sampleTypeFee'
-            label='Phí'
-            rules={[{ required: true, message: 'Vui lòng nhập phí' }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: '100%' }}
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-              }
-              parser={(value) =>
-                value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0
-              }
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <ModalComponent />
     </Card>
   )
 }

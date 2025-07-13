@@ -8,6 +8,7 @@ import {
   Empty,
   Card,
   ConfigProvider,
+  Button,
 } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
@@ -23,6 +24,7 @@ dayjs.locale('vi')
 dayjs.extend(isoWeek)
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
+import { useSearchParams, useNavigate } from 'react-router-dom'
 
 const { Title } = Typography
 const { Option } = Select
@@ -54,12 +56,22 @@ const DAYS_OF_WEEK = [
 ]
 
 const SlotsFacilitiesCalendar: React.FC = () => {
-  const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
   const [isAvailable, setIsAvailable] = useState<boolean>(true)
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().startOf('week'),
-    dayjs().endOf('week'),
-  ])
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const initialFacilityId = searchParams.get('facilityId') || undefined
+  const [facilityId, setFacilityId] = useState<string | undefined>(
+    initialFacilityId
+  )
+  const dateRangeParam = searchParams.get('dateRange') || null
+  const initialDateRange: [dayjs.Dayjs, dayjs.Dayjs] = dateRangeParam
+    ? (() => {
+        const [start, end] = dateRangeParam.split(',')
+        return [dayjs(start), dayjs(end)]
+      })()
+    : [dayjs().startOf('week'), dayjs().endOf('week')]
+  const [dateRange, setDateRange] =
+    useState<[dayjs.Dayjs, dayjs.Dayjs]>(initialDateRange)
   const [selectedDisplayDate, setSelectedDisplayDate] =
     useState<dayjs.Dayjs | null>(dayjs().startOf('week'))
 
@@ -116,6 +128,11 @@ const SlotsFacilitiesCalendar: React.FC = () => {
 
       setDateRange([startOfWeek, endOfWeek]) // Cập nhật state dateRange với cả tuần
       setSelectedDisplayDate(value) // Cập nhật ngày hiển thị trong input của DatePicker
+      navigate(
+        `/admin/slotsFacilitiesAdmin?facilityId=${facilityId}&dateRange=${startOfWeek.format(
+          'YYYY-MM-DD'
+        )},${endOfWeek.format('YYYY-MM-DD')}`
+      )
     } else {
       // Xử lý khi người dùng xóa lựa chọn (clear)
       setDateRange([null, null])
@@ -147,8 +164,15 @@ const SlotsFacilitiesCalendar: React.FC = () => {
             placeholder='Chọn cơ sở'
             style={{ width: 250 }}
             loading={facilitiesLoading}
-            onChange={(value) => setFacilityId(value)}
-            value={facilityId}
+            onChange={(value) => {
+              setFacilityId(value)
+              navigate(
+                `/admin/slotsFacilitiesAdmin?facilityId=${value}&dateRange=${dateRange[0]?.format(
+                  'YYYY-MM-DD'
+                )},${dateRange[1]?.format('YYYY-MM-DD')}`
+              )
+            }}
+            value={initialFacilityId}
             allowClear
           >
             {facilitiesData?.data?.map((facility) => (
@@ -206,7 +230,7 @@ const SlotsFacilitiesCalendar: React.FC = () => {
               }}
             />
 
-            <button
+            <Button
               onClick={() =>
                 setDateRange(([start, end]) => [
                   start?.add(1, 'week') ?? null,
@@ -221,7 +245,7 @@ const SlotsFacilitiesCalendar: React.FC = () => {
               }}
             >
               →
-            </button>
+            </Button>
           </div>
 
           <div>
@@ -333,7 +357,14 @@ const SlotsFacilitiesCalendar: React.FC = () => {
                             bodyStyle={{ padding: '4px 8px' }}
                           >
                             <div
-                              style={{ fontSize: '12px', fontWeight: '500' }}
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '100%',
+                              }}
                             >
                               {slot.startTime} - {slot.endTime}
                             </div>

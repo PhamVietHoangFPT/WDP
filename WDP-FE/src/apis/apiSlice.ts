@@ -44,6 +44,7 @@ export const apiSlice = createApi({
     'time-return',
     'sample-type',
     'sample',
+    'slot-templates',
   ],
 
   endpoints: () => ({}),

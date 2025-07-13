@@ -36,11 +36,11 @@ export class ServiceRepository implements IServiceRepository {
   async findOneById(id: string): Promise<ServiceDocument | null> {
     return this.serviceModel
       .findOne({ _id: id, deleted_at: null })
-      .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
+      .populate({ path: 'timeReturn', select: 'timeReturn timeReturnFee' })
       .populate({
         path: 'sample',
-        select: '-_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+        select: ' name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -48,11 +48,11 @@ export class ServiceRepository implements IServiceRepository {
   async findAll(): Promise<ServiceDocument[] | null> {
     return await this.serviceModel
       .find({ deleted_at: null })
-      .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
+      .populate({ path: 'timeReturn', select: 'timeReturn timeReturnFee' })
       .populate({
         path: 'sample',
-        select: '-_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+        select: 'name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -111,7 +111,7 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: '_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+        populate: { path: 'sampleType', select: 'name sampleTypeFee _id' },
       })
       .exec()
   }
@@ -181,11 +181,11 @@ export class ServiceRepository implements IServiceRepository {
     return this.serviceModel
       .find(filter)
       .lean()
-      .populate({ path: 'timeReturn', select: '-_id timeReturn timeReturnFee' })
+      .populate({ path: 'timeReturn', select: ' timeReturn timeReturnFee' })
       .populate({
         path: 'sample',
-        select: '-_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+        select: ' name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee ' },
       })
   }
 }

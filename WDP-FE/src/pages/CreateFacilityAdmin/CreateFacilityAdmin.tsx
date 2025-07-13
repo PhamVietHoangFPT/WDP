@@ -30,18 +30,15 @@ const CreateFacilityForm: React.FC = () => {
   )
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
 
+  const [houseNumberValue, setHouseNumberValue] = useState<string>('')
+
   // API queries - Remove generic types and access data directly
   const { data: provincesData, isLoading: provincesLoading } =
-    useGetProvinceListQuery({
-      pageNumber: 1,
-      pageSize: 100,
-    })
+    useGetProvinceListQuery({})
 
   const { data: districtsData, isLoading: districtsLoading } =
     useGetDistrictListQuery(
       {
-        pageNumber: 1,
-        pageSize: 100,
         province_code: selectedProvince?.code,
       },
       {
@@ -51,8 +48,6 @@ const CreateFacilityForm: React.FC = () => {
 
   const { data: wardsData, isLoading: wardsLoading } = useGetWardListQuery(
     {
-      pageNumber: 1,
-      pageSize: 100,
       district_code: selectedDistrict?.code,
     },
     {
@@ -246,13 +241,16 @@ const CreateFacilityForm: React.FC = () => {
           name='houseNumber'
           rules={[{ required: true, message: 'Vui lòng nhập số nhà' }]}
         >
-          <Input placeholder='Nhập số nhà' />
+          <Input
+            placeholder='Nhập số nhà'
+            onChange={(e) => setHouseNumberValue(e.target.value)}
+          />
         </Form.Item>
 
         {selectedProvince && selectedDistrict && selectedWard && (
           <Form.Item label='Địa chỉ đầy đủ'>
             <Input
-              value={`${form.getFieldValue('houseNumber') || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
+              value={`${houseNumberValue || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
               disabled
               style={{ backgroundColor: '#f5f5f5' }}
             />
