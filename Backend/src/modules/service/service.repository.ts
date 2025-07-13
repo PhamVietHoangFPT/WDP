@@ -17,7 +17,7 @@ export class ServiceRepository implements IServiceRepository {
     private readonly timeReturnRepository: ITimeReturnRepository,
     @Inject(ISampleRepository)
     private readonly sampleRepository: ISampleRepository,
-  ) {}
+  ) { }
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.serviceModel.countDocuments(filter).exec()
@@ -115,6 +115,16 @@ export class ServiceRepository implements IServiceRepository {
       })
       .exec()
   }
+  async findByName(name: string): Promise<(ServiceDocument | null)> {
+    return this.serviceModel.findOne({ name, deleted_at: null })
+      .populate({ path: 'timeReturn', select: '_id timeReturn timeReturnFee' })
+      .populate({
+        path: 'sample',
+        select: '_id name fee',
+        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
+      })
+      .exec()
+  }
 
   async getSampleId(id: string): Promise<string | null> {
     const service = await this.serviceModel
@@ -175,6 +185,7 @@ export class ServiceRepository implements IServiceRepository {
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return service?.timeReturn ? service.timeReturn.toString() : null
   }
+
   findWithQuery(
     filter: Record<string, unknown>,
   ): mongoose.Query<ServiceDocument[], ServiceDocument> {
@@ -187,5 +198,12 @@ export class ServiceRepository implements IServiceRepository {
         select: ' name fee',
         populate: { path: 'sampleType', select: 'name sampleTypeFee ' },
       })
+  }
+  aggregate(pipeline: any[]): mongoose.Aggregate<any[]> {
+    return this.serviceModel.aggregate(pipeline);
+  }
+
+  aggregateOne(pipeline: any[]): mongoose.Aggregate<any> {
+    return this.serviceModel.aggregate(pipeline);
   }
 }

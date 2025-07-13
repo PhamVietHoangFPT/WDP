@@ -34,5 +34,8 @@ export interface IServiceRepository {
     filter: Record<string, unknown>,
   ): mongoose.Query<Service[], Service>
   countDocuments(filter: Record<string, unknown>): Promise<number>
+  findByName(name: string): Promise<ServiceDocument | null>
+  aggregate(pipeline: any[]): mongoose.Aggregate<any[]>;
+  aggregateOne(pipeline: any[]): mongoose.Aggregate<any>;
 }
 export const IServiceRepository = Symbol('IServiceRepository')
