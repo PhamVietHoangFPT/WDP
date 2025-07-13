@@ -50,7 +50,7 @@ export const StaffLayout = () => {
           }}
         >
           <Title level={4} style={{ margin: 0 }}>
-            Quản Lý Tiêm Chủng
+            Quản Lý Tiêm Chủng Staff
           </Title>
         </Header>
 
