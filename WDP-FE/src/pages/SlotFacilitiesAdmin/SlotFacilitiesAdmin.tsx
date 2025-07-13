@@ -9,6 +9,7 @@ import {
   Card,
   ConfigProvider,
   Button,
+  Result,
 } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
@@ -81,20 +82,24 @@ const SlotsFacilitiesCalendar: React.FC = () => {
       pageSize: 50,
     })
 
-  const { data: slotsData, isLoading: slotsLoading } =
-    useGetSlotsListQuery<SlotListResponse>(
-      {
-        pageNumber: 1,
-        pageSize: 100,
-        facilityId,
-        startDate: dateRange[0]?.format('YYYY-MM-DD'),
-        endDate: dateRange[1]?.format('YYYY-MM-DD'),
-        isAvailable,
-      },
-      {
-        skip: !facilityId,
-      }
-    )
+  const {
+    data: slotsData,
+    isLoading: slotsLoading,
+    isError: slotsError,
+    error: slotsErrorDetail,
+  } = useGetSlotsListQuery(
+    {
+      pageNumber: 1,
+      pageSize: 100,
+      facilityId,
+      startDate: dateRange[0]?.format('YYYY-MM-DD'),
+      endDate: dateRange[1]?.format('YYYY-MM-DD'),
+      isAvailable,
+    },
+    {
+      skip: !facilityId,
+    }
+  )
 
   const getWeekDates = () => {
     if (!dateRange[0]) return []
@@ -103,7 +108,7 @@ const SlotsFacilitiesCalendar: React.FC = () => {
   }
 
   const getSlotsForDayAndTime = (dayDate: dayjs.Dayjs, timeSlot: any) => {
-    if (!slotsData) return []
+    if (!slotsData || slotsData.length === 0) return []
     return slotsData.filter((slot: any) => {
       const slotDate = dayjs(slot.slotDate)
       return (
@@ -165,15 +170,15 @@ const SlotsFacilitiesCalendar: React.FC = () => {
             style={{ width: 250 }}
             loading={facilitiesLoading}
             onChange={(value) => {
-              setFacilityId(value)
+              setFacilityId(value) // Cập nhật state
+              // Cập nhật URL để đồng bộ
               navigate(
-                `/admin/slotsFacilitiesAdmin?facilityId=${value}&dateRange=${dateRange[0]?.format(
-                  'YYYY-MM-DD'
-                )},${dateRange[1]?.format('YYYY-MM-DD')}`
+                `/admin/slotsFacilitiesAdmin?facilityId=${value}&dateRange=${dateRange[0]?.format('YYYY-MM-DD')},${dateRange[1]?.format('YYYY-MM-DD')}`
               )
             }}
-            value={initialFacilityId}
+            value={facilityId} // ✅ Đúng: value giờ đây nhận giá trị từ state `facilityId`
             allowClear
+            onClear={() => setFacilityId(undefined)} // Xử lý khi người dùng xóa lựa chọn
           >
             {facilitiesData?.data?.map((facility) => (
               <Option key={facility._id} value={facility._id}>
@@ -263,6 +268,14 @@ const SlotsFacilitiesCalendar: React.FC = () => {
           <div style={{ textAlign: 'center', marginTop: '50px' }}>
             <Spin size='large' />
           </div>
+        ) : slotsError ? (
+          <Result
+            status={slotsErrorDetail?.data?.status || 'error'}
+            title={
+              slotsErrorDetail?.data?.statusCode || 'Lỗi khi tải dữ liệu slot'
+            }
+            subTitle='Không tìm thấy slot nào tương ứng với yêu cầu của bạn.'
+          />
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <div
