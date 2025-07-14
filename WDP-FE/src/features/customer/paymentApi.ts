@@ -59,7 +59,12 @@ export const paymentApi = apiSlice.injectEndpoints({
       providesTags: ['PaymentHistory'],
     }),
 
-    
+    getTestRequestHistory: builder.query({
+      query: ({ accountId, serviceCaseId }) => ({
+        url: `/test-request-histories?accountId=${accountId}&serviceCaseId=${serviceCaseId}`,
+        method: 'GET',
+      }),
+    }),
 
     // ✅ Lấy lịch sử thanh toán theo nhân viên
     getPaymentByStaff: builder.query({
@@ -79,4 +84,5 @@ export const {
   useGetPaymentByIdQuery,
   useGetPaymentByStaffQuery,
   useGetServiceCasesListQuery,
+  useGetTestRequestHistoryQuery,
 } = paymentApi
