@@ -192,7 +192,7 @@ export const SideBar = () => {
                                 {userData?.email || 'samplecollector@vaccitrack.com'}
                             </div>
                             <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
-                                {userData?.facility?.facilityName || '???'}
+                                {userData?.facility?.facilityName || 'No Facility'}
                             </div>
                         </div>
                     )}
