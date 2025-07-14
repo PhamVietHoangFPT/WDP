@@ -205,6 +205,12 @@ export default function ServiceList() {
 
   const columns = [
     {
+      title: 'Tên Dịch Vụ',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string) => <span>{text}</span>,
+    },
+    {
       title: 'Phí Dịch Vụ',
       dataIndex: 'fee',
       key: 'fee',

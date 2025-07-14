@@ -13,7 +13,7 @@ export interface IServiceService {
   findAllService(
     pageNumber: number,
     pageSize: number,
-    filters: Partial<FilterServiceDto>
+    filters: Partial<FilterServiceDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>>
   findServiceById(id: string): Promise<ServiceResponseDto>
 

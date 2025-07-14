@@ -22,8 +22,8 @@ export class ServiceService implements IServiceService {
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
     @Inject(ITimeReturnRepository)
-    private readonly timeReturnRepository: ITimeReturnRepository
-  ) { }
+    private readonly timeReturnRepository: ITimeReturnRepository,
+  ) {}
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -61,7 +61,9 @@ export class ServiceService implements IServiceService {
     userId: string,
     createServiceDto: CreateServiceDto,
   ): Promise<ServiceResponseDto> {
-    const existingService = await this.serviceRepository.findByName(createServiceDto.name)
+    const existingService = await this.serviceRepository.findByName(
+      createServiceDto.name,
+    )
     if (existingService) {
       throw new ConflictException('Tên dịch vụ đã tồn tại.')
     }
@@ -82,45 +84,37 @@ export class ServiceService implements IServiceService {
     pageSize: number,
     filters: Partial<FindAllServiceQueryDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
-    const skip = (pageNumber - 1) * pageSize;
+    const skip = (pageNumber - 1) * pageSize
 
     // Buildup match condition
-    const matchStage: any = {};
+    const matchStage: any = {}
 
     if (filters.isAgnate !== undefined) {
-      matchStage.isAgnate = filters.isAgnate;
+      matchStage.isAgnate = filters.isAgnate
     }
     if (filters.isAdministration !== undefined) {
-      matchStage.isAdministration = filters.isAdministration;
+      matchStage.isAdministration = filters.isAdministration
     }
     if (filters.isSelfSampling !== undefined) {
-      matchStage.isSelfSampling = filters.isSelfSampling;
+      matchStage.isSelfSampling = filters.isSelfSampling
     }
     if (filters.name !== undefined) {
       matchStage.name = {
         $regex: filters.name,
         $options: 'i',
-      };
+      }
     }
 
     // timeReturn
     if (filters.timeReturn !== undefined) {
       const timeReturnDoc = await this.timeReturnRepository.findOneByTimeReturn(
         filters.timeReturn,
-      );
+      )
       if (timeReturnDoc) {
-        matchStage.timeReturn = timeReturnDoc._id;
+        matchStage.timeReturn = timeReturnDoc._id
       } else {
         // Không có timeReturn phù hợp => empty result
-        return {
-          data: [],
-          pagination: {
-            totalItems: 0,
-            totalPages: 0,
-            currentPage: pageNumber,
-            pageSize,
-          },
-        };
+        throw new ConflictException('Không tìm thấy dịch vụ nào.')
       }
     }
 
@@ -168,37 +162,41 @@ export class ServiceService implements IServiceService {
           preserveNullAndEmptyArrays: true,
         },
       },
-    ];
+    ]
 
     // Gộp filter sampleName và sampleTypeId
-    const nestedMatch: any = {};
+    const nestedMatch: any = {}
 
     if (filters.sampleName) {
       nestedMatch['sample.name'] = {
         $regex: filters.sampleName,
         $options: 'i',
-      };
+      }
     }
 
     if (filters.sampleTypeId) {
-      nestedMatch['sample.sampleType._id'] = new mongoose.Types.ObjectId(filters.sampleTypeId);
+      nestedMatch['sample.sampleType._id'] = new mongoose.Types.ObjectId(
+        filters.sampleTypeId,
+      )
     }
 
     // Push nested match if exists
     if (Object.keys(nestedMatch).length > 0) {
-      pipeline.push({ $match: nestedMatch });
+      pipeline.push({ $match: nestedMatch })
     }
 
     // Push root match
     if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage });
+      pipeline.push({ $match: matchStage })
     }
 
     // Count total documents
-    const totalPipeline = [...pipeline, { $count: 'total' }];
-    const [totalResult] = await this.serviceRepository.aggregate(totalPipeline).exec();
-    const totalItems = totalResult?.total || 0;
-    const totalPages = Math.ceil(totalItems / pageSize);
+    const totalPipeline = [...pipeline, { $count: 'total' }]
+    const [totalResult] = await this.serviceRepository
+      .aggregate(totalPipeline)
+      .exec()
+    const totalItems = totalResult?.total || 0
+    const totalPages = Math.ceil(totalItems / pageSize)
 
     // Projection để bỏ các field không mong muốn
     pipeline.push({
@@ -222,18 +220,18 @@ export class ServiceService implements IServiceService {
           },
         },
       },
-    });
+    })
 
-    pipeline.push({ $skip: skip });
-    pipeline.push({ $limit: pageSize });
+    pipeline.push({ $skip: skip })
+    pipeline.push({ $limit: pageSize })
 
-    const services = await this.serviceRepository.aggregate(pipeline).exec();
+    const services = await this.serviceRepository.aggregate(pipeline).exec()
 
     if (!services || services.length === 0) {
-      throw new ConflictException('Không tìm thấy dịch vụ nào.');
+      throw new ConflictException('Không tìm thấy dịch vụ nào.')
     }
 
-    const data = services.map((service: any) => this.mapToResponseDto(service));
+    const data = services.map((service: any) => this.mapToResponseDto(service))
 
     return {
       data,
@@ -243,10 +241,8 @@ export class ServiceService implements IServiceService {
         currentPage: pageNumber,
         pageSize,
       },
-    };
+    }
   }
-
-
 
   async updateService(
     id: string,

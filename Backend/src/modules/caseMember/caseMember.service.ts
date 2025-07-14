@@ -128,11 +128,10 @@ export class CaseMemberService implements ICaseMemberService {
     }
 
     // Kiểm tra xem dịch vụ này có được sử dụng tại nhà không
-    const isServiceAtHome = await this.serviceRepository.checkIsAdministration(
-      dto.service,
-    )
+    const isServiceNotAtHome =
+      await this.serviceRepository.checkIsAdministration(dto.service)
 
-    if (isServiceAtHome === true && dto.isAtHome === true) {
+    if (isServiceNotAtHome === true && dto.isAtHome === true) {
       throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
 

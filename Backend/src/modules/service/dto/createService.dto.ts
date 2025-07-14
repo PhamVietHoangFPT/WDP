@@ -43,7 +43,7 @@ export class CreateServiceDto {
   isAdministration: boolean
 
   @ApiProperty({
-    example: "Blood",
+    example: 'Blood',
     description: 'Tên của dịch vụ',
   })
   @IsNotEmpty()
@@ -55,7 +55,7 @@ export class CreateServiceDto {
   })
   @IsBoolean()
   isSelfSampling: boolean
-  
+
   constructor(partial: Partial<CreateServiceDto>) {
     Object.assign(this, partial)
   }

@@ -44,7 +44,7 @@ export class UpdateServiceDto {
   isAdministration: boolean
 
   @ApiProperty({
-    example: "Blood",
+    example: 'Blood',
     description: 'Tên của dịch vụ',
   })
   @IsNotEmpty()
