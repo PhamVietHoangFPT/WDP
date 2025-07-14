@@ -40,6 +40,7 @@ export class SamplingKitInventoryService
       inventory: samplingKitInventory.inventory,
       facility: samplingKitInventory.facility,
       sample: samplingKitInventory.sample,
+      deleted_at: samplingKitInventory.deleted_at,
     })
   }
 
@@ -147,9 +148,14 @@ export class SamplingKitInventoryService
     facilityId: string,
     pageNumber: number,
     pageSize: number,
+    sampleId?: string,
   ): Promise<PaginatedResponse<SamplingKitInventoryResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = {}
+    const filter = {
+      facility: facilityId,
+      deleted_at: null,
+      sample: sampleId ? sampleId : { $exists: true },
+    }
 
     const [sampling, totalItems] = await Promise.all([
       this.samplingKitInventoryRepository
@@ -185,5 +191,41 @@ export class SamplingKitInventoryService
       return null
     }
     return this.mapToResponseDto(deletedSamplingKitInventory)
+  }
+
+  async findAllExpiredKits(
+    facilityId: string,
+    pageNumber: number,
+    pageSize: number,
+    sampleId?: string,
+  ): Promise<PaginatedResponse<SamplingKitInventoryResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+    const filter = {
+      facility: facilityId,
+      delete_at: { $exists: true },
+      sample: sampleId ? sampleId : { $exists: true },
+    }
+    const [sampling, totalItems] = await Promise.all([
+      this.samplingKitInventoryRepository
+        .findAllExpiredKits(facilityId, filter)
+        .skip(skip)
+        .limit(pageSize)
+        .exec(),
+      this.samplingKitInventoryRepository.countDocuments(filter, facilityId),
+    ])
+    const totalPages = Math.ceil(totalItems / pageSize)
+    const paginatedItems = sampling.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize,
+    )
+    return {
+      data: paginatedItems.map((kit) => this.mapToResponseDto(kit)),
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize,
+      },
+    }
   }
 }

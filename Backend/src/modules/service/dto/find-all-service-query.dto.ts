@@ -59,9 +59,5 @@ export class FindAllServiceQueryDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsString()
-  sampleTypeName?: string
-
-  @IsOptional()
-  @IsString()
   name?: string
 }

@@ -91,6 +91,7 @@ export class SamplingKitInventoryRepository
         deleted_at: null,
         ...filter,
       })
+      .populate({ path: 'sample', select: 'name' })
       .lean()
   }
 
@@ -147,5 +148,23 @@ export class SamplingKitInventoryRepository
       .exec()
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return samplingKitInventory ? samplingKitInventory._id.toString() : null
+  }
+
+  findAllExpiredKits(
+    facilityId: string,
+    filter: Record<string, unknown>,
+  ): mongoose.Query<
+    SamplingKitInventoryDocument[],
+    SamplingKitInventoryDocument
+  > {
+    return this.samplingKitInventoryModel
+      .find({
+        facility: facilityId,
+        expDate: { $lt: new Date() },
+        deleted_at: { $exists: true },
+        ...filter,
+      })
+      .populate({ path: 'sample', select: 'name' })
+      .lean()
   }
 }
