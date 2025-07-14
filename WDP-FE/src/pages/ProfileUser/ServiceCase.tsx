@@ -65,7 +65,7 @@ export default function ServiceCase() {
     <div>
       <HeaderCus />
       <Card style={{ margin: '40px auto' }}>
-        <Title level={3}>Lịch sử hồ sơ dịch vụ</Title>
+        <Title level={3}>Lịch sử trường hợp dịch vụ</Title>
         <Table
           loading={isLoading}
           rowKey="_id"

@@ -1,6 +1,7 @@
 import React from 'react'
 import type { LayoutRoute } from '../types/routes'
 import ServiceCase from '../pages/ProfileUser/ServiceCase'
+import ServiceCaseDetail from '../pages/ProfileUser/ServiceCaseDetail'
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = React.lazy(() =>
   import('../components/layout/AdminLayout').then((module) => ({
@@ -228,11 +229,11 @@ const routes: LayoutRoute[] = [
         component: ServiceCase,
         role: ['Customer'],
       },
-      // {
-      //   path: '/service-case-customer/:id',
-      //   component: PaymentDetail,
-      //   role: ['Customer'],
-      // },
+      {
+        path: '/service-case-customer/:id',
+        component: ServiceCaseDetail,
+        role: ['Customer'],
+      },
       {
         path: '/home-registeration',
         component: HomeRegisteration,
