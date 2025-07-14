@@ -18,7 +18,7 @@ import {
 } from 'antd'
 
 export default function SampleTypeDetail() {
-  const { sampleTypeId } = useParams() 
+  const { sampleTypeId } = useParams()
   const [form] = Form.useForm()
   const [isEditing, setIsEditing] = useState(false)
 

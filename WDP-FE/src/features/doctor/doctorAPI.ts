@@ -4,7 +4,7 @@ const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getServiceCaseWithoutResultsList: builder.query({
       query: ({ currentStatus, resultExists }) => ({
-        url: `doctors/service-cases-without-results?currentStatus=${currentStatus}&resultExists=${resultExists}`, 
+        url: `doctors/service-cases-without-results?currentStatus=${currentStatus}&resultExists=${resultExists}`,
         method: 'GET',
       }),
       transformResponse: (res) => res,
@@ -57,8 +57,8 @@ const doctorAPI = apiSlice.injectEndpoints({
 
 export const {
   useGetServiceCaseWithoutResultsListQuery,
-    useGetAllRequestStatusListQuery,
-    useUpdateServiceCaseStatusMutation,
+  useGetAllRequestStatusListQuery,
+  useUpdateServiceCaseStatusMutation,
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
 } = doctorAPI
