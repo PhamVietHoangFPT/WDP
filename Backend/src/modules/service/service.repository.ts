@@ -40,7 +40,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: ' name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -52,7 +51,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: 'name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -111,7 +109,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: '_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee _id' },
       })
       .exec()
   }
@@ -122,7 +119,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: '_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee -_id' },
       })
       .exec()
   }
@@ -158,20 +154,15 @@ export class ServiceRepository implements IServiceRepository {
       await this.timeReturnRepository.getTimeReturnFeeById(timeReturnId)
 
     const sampleId = await this.getSampleId(id)
-    const sampleTypeId =
-      await this.sampleRepository.getSampleTypeIdBySampleId(sampleId)
 
-    const sampleAndSampleTypeFee =
-      await this.sampleRepository.getSampleTotalPrice(sampleId, sampleTypeId)
+    const sampleFee = await this.sampleRepository.getSampleTotalPrice(sampleId)
     let totalFee: number
     if (numberOfTestTaker === 2) {
-      totalFee = serviceFee
-        ? serviceFee.fee + timeReturnFee + sampleAndSampleTypeFee
-        : null
+      totalFee = serviceFee ? serviceFee.fee + timeReturnFee + sampleFee : null
     }
     if (numberOfTestTaker === 3) {
       totalFee = serviceFee
-        ? serviceFee.fee * 1.5 + timeReturnFee + sampleAndSampleTypeFee
+        ? serviceFee.fee * 1.5 + timeReturnFee + sampleFee
         : null
     }
 
@@ -197,7 +188,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: ' name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee ' },
       })
   }
   aggregate(pipeline: any[]): mongoose.Aggregate<any[]> {

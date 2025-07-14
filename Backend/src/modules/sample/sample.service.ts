@@ -11,14 +11,11 @@ import { ISampleRepository } from './interfaces/isample.repository'
 import { Sample } from './schemas/sample.schema'
 import { SampleResponseDto } from './dto/sample-response.dto'
 import { CreateSampleDto } from './dto/create-sample.dto'
-import { ISampleTypeRepository } from '../sampleType/interfaces/isampleType.repository'
 @Injectable()
 export class SampleService implements ISampleService {
   constructor(
     @Inject(ISampleRepository)
     private readonly sampleRepository: ISampleRepository,
-    @Inject(ISampleTypeRepository)
-    private readonly sampleTypeRepository: ISampleTypeRepository,
   ) {}
 
   private mapToResponseDto(sample: Sample): SampleResponseDto {
@@ -26,7 +23,6 @@ export class SampleService implements ISampleService {
       _id: sample._id,
       name: sample.name,
       fee: sample.fee,
-      sampleType: sample.sampleType,
       deleted_at: sample.deleted_at,
       deleted_by: sample.deleted_by,
     })
@@ -65,7 +61,6 @@ export class SampleService implements ISampleService {
           existingSample.id,
           userId,
           {
-            sampleType: createSampleDto.sampleType,
             fee: createSampleDto.fee,
           },
         )
@@ -73,18 +68,9 @@ export class SampleService implements ISampleService {
       }
     }
 
-    const existingSampleType = await this.sampleTypeRepository.findById(
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      createSampleDto.sampleType.toString(),
-    )
-    if (!existingSampleType) {
-      throw new ConflictException('Loại mẫu thử không tồn tại.')
-    }
-
     try {
       const newSample = await this.sampleRepository.create(userId, {
         name: createSampleDto.name,
-        sampleType: createSampleDto.sampleType,
         fee: createSampleDto.fee,
       })
       return this.mapToResponseDto(newSample)
@@ -116,7 +102,6 @@ export class SampleService implements ISampleService {
     const existingSample = await this.findSampleById(id)
     if (
       existingSample.name === updateSampleDto.name &&
-      existingSample.sampleType === updateSampleDto.sampleType &&
       existingSample.fee === updateSampleDto.fee
     ) {
       throw new ConflictException('Không có thay đổi nào để cập nhật.')

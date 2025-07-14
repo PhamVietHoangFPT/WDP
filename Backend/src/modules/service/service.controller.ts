@@ -103,12 +103,6 @@ export class ServiceController {
     description: 'Tên mẫu (Sample)',
   })
   @ApiQuery({
-    name: 'sampleTypeName',
-    required: false,
-    type: String,
-    description: 'Tên loại mẫu (SampleType)',
-  })
-  @ApiQuery({
     name: 'name',
     required: false,
     type: String,
