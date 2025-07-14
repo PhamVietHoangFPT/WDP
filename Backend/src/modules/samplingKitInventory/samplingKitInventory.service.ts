@@ -166,12 +166,9 @@ export class SamplingKitInventoryService
       this.samplingKitInventoryRepository.countDocuments(filter, facilityId),
     ])
     const totalPages = Math.ceil(totalItems / pageSize)
-    const paginatedItems = sampling.slice(
-      (pageNumber - 1) * pageSize,
-      pageNumber * pageSize,
-    )
+
     return {
-      data: paginatedItems.map((kit) => this.mapToResponseDto(kit)),
+      data: sampling.map((kit) => this.mapToResponseDto(kit)),
       pagination: {
         totalItems,
         totalPages,
@@ -214,12 +211,8 @@ export class SamplingKitInventoryService
       this.samplingKitInventoryRepository.countDocuments(filter, facilityId),
     ])
     const totalPages = Math.ceil(totalItems / pageSize)
-    const paginatedItems = sampling.slice(
-      (pageNumber - 1) * pageSize,
-      pageNumber * pageSize,
-    )
     return {
-      data: paginatedItems.map((kit) => this.mapToResponseDto(kit)),
+      data: sampling.map((kit) => this.mapToResponseDto(kit)),
       pagination: {
         totalItems,
         totalPages,

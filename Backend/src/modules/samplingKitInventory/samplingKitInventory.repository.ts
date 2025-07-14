@@ -34,7 +34,13 @@ export class SamplingKitInventoryRepository
   }
 
   async findById(id: string): Promise<SamplingKitInventoryDocument | null> {
-    return this.samplingKitInventoryModel.findOne({ _id: id }).exec()
+    return this.samplingKitInventoryModel
+      .findOne({ _id: id })
+      .populate([
+        { path: 'sample', select: 'name' },
+        { path: 'facility', select: 'facilityName' },
+      ])
+      .exec()
   }
 
   async update(
@@ -88,7 +94,6 @@ export class SamplingKitInventoryRepository
     return this.samplingKitInventoryModel
       .find({
         facility: facilityId,
-        deleted_at: null,
         ...filter,
       })
       .populate({ path: 'sample', select: 'name' })
