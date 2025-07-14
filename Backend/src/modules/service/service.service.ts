@@ -23,7 +23,7 @@ export class ServiceService implements IServiceService {
     private readonly serviceRepository: IServiceRepository,
     @Inject(ITimeReturnRepository)
     private readonly timeReturnRepository: ITimeReturnRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -105,18 +105,7 @@ export class ServiceService implements IServiceService {
       }
     }
 
-    // timeReturn
-    if (filters.timeReturn !== undefined) {
-      const timeReturnDoc = await this.timeReturnRepository.findOneByTimeReturn(
-        filters.timeReturn,
-      )
-      if (timeReturnDoc) {
-        matchStage.timeReturn = timeReturnDoc._id
-      } else {
-        // Không có timeReturn phù hợp => empty result
-        throw new ConflictException('Không tìm thấy dịch vụ nào.')
-      }
-    }
+
 
     // Build aggregation pipeline
     const pipeline: any[] = [
@@ -179,7 +168,13 @@ export class ServiceService implements IServiceService {
         filters.sampleTypeId,
       )
     }
-
+    if (filters.timeReturn !== undefined) {
+      pipeline.push({
+        $match: {
+          'timeReturn.timeReturn': filters.timeReturn,
+        },
+      });
+    }
     // Push nested match if exists
     if (Object.keys(nestedMatch).length > 0) {
       pipeline.push({ $match: nestedMatch })
@@ -224,7 +219,6 @@ export class ServiceService implements IServiceService {
 
     pipeline.push({ $skip: skip })
     pipeline.push({ $limit: pageSize })
-
     const services = await this.serviceRepository.aggregate(pipeline).exec()
 
     if (!services || services.length === 0) {
