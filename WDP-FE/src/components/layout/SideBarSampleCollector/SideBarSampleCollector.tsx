@@ -1,9 +1,8 @@
 import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
+import { Layout, Menu, Input, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,

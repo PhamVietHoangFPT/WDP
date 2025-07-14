@@ -1,7 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGetSamplingKitInventoryDetailQuery } from '../../features/samplingKitInventory/samplingKitInventoryAPI'
-import { useGetFacilityDetailQuery } from '../../features/admin/facilitiesAPI' // Hook lấy chi tiết cơ sở
-import { useGetSampleDetailQuery } from '../../features/admin/sampleAPI' // Hook lấy chi tiết mẫu
 import { Card, Spin, Descriptions, Result, Button, Space, Tag } from 'antd'
 import { EditOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
