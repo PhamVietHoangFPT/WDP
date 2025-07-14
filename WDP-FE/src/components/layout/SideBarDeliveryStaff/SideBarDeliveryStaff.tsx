@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react' // Thêm useEffect
+import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider, Spin } from 'antd' // Thêm Spin
+import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
     SearchOutlined,
     UserOutlined,
@@ -12,7 +12,6 @@ import {
     // Thêm các icon khác nếu cần cho các mục menu khác của Delivery
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
-import { useGetUserListQuery, useGetFacilitiesNameAndAddressQuery } from '../../../features/admin/facilitiesAPI' // Đảm bảo đường dẫn đúng đến API slice của mày
 
 const { Sider } = Layout
 const { Search } = Input
@@ -21,8 +20,7 @@ export const SideBar = () => {
     const location = useLocation()
     const navigate = useNavigate()
     const [collapsed, setCollapsed] = useState(false)
-    const [userFacilityName, setUserFacilityName] = useState('N/A') // State để lưu tên cơ sở
-    const [isLoadingFacility, setIsLoadingFacility] = useState(false) // State loading cho facility
+
 
     // Lấy userData từ cookie và decode nó
     const userDataString = Cookies.get('userData');
@@ -36,52 +34,7 @@ export const SideBar = () => {
         }
     }
 
-    // Lấy userId từ userData
-    const userId = userData?.id;
 
-    // Sử dụng RTK Query để lấy danh sách người dùng và danh sách cơ sở
-    const { data: userListData, error: userListError } = useGetUserListQuery({});
-    const { data: facilitiesListData, error: facilitiesListError } = useGetFacilitiesNameAndAddressQuery({});
-
-    useEffect(() => {
-        const fetchAndSetFacility = async () => {
-            if (userId && userListData && facilitiesListData) {
-                setIsLoadingFacility(true);
-                try {
-                    // 1. Tìm user trong userListData dựa trên userId từ cookie
-                    const currentUser = userListData.data.find(user => user._id === userId);
-
-                    if (currentUser && currentUser.facility) {
-                        // 2. Nếu user có facility ID, tìm facility tương ứng trong facilitiesListData
-                        const facilityInfo = facilitiesListData.data.find(
-                            facility => facility._id === currentUser.facility
-                        );
-                        if (facilityInfo) {
-                            setUserFacilityName(facilityInfo.facilityName);
-                        } else {
-                            setUserFacilityName('Không tìm thấy cơ sở');
-                        }
-                    } else if (currentUser && currentUser.role?.role === 'Admin') {
-                         setUserFacilityName('Toàn quyền'); // Admin không thuộc cơ sở cụ thể
-                    }
-                    else {
-                        setUserFacilityName('Không có cơ sở');
-                    }
-                } catch (e) {
-                    console.error("Lỗi khi tìm thông tin cơ sở:", e);
-                    setUserFacilityName('Lỗi tải cơ sở');
-                } finally {
-                    setIsLoadingFacility(false);
-                }
-            } else if (!userId) {
-                setUserFacilityName('Chưa đăng nhập');
-            } else if (userListError || facilitiesListError) {
-                setUserFacilityName('Lỗi tải dữ liệu');
-            }
-        };
-
-        fetchAndSetFacility();
-    }, [userId, userListData, facilitiesListData, userListError, facilitiesListError]); // Dependencies cho useEffect
 
 
     // Get the current selected keys based on the pathname
@@ -241,7 +194,7 @@ export const SideBar = () => {
                                 {userData?.email || 'delivery@vaccitrack.com'}
                             </div>
                             <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
-                                {isLoadingFacility ? <Spin size="small" /> : `Cơ sở: ${userFacilityName}`}
+                                {userData?.facility?.facilityName || '???'}
                             </div>
                         </div>
                     )}
