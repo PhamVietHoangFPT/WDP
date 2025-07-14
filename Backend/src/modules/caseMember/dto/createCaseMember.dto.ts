@@ -42,4 +42,8 @@ export class CreateCaseMemberDto {
   @ApiProperty({ example: true, description: 'Trạng thái có mặt tại nhà' })
   @IsBoolean()
   isAtHome: boolean
+
+  @ApiProperty({ example: true, description: 'Trạng thái tự lấy mẫu tại nhà' })
+  @IsBoolean()
+  isSelfSampling: boolean
 }
