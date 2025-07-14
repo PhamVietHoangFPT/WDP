@@ -86,7 +86,6 @@ export class ServiceService implements IServiceService {
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
 
-    // Buildup match condition
     const matchStage: any = {}
 
     if (filters.isAgnate !== undefined) {
@@ -105,20 +104,6 @@ export class ServiceService implements IServiceService {
       }
     }
 
-    // timeReturn
-    if (filters.timeReturn !== undefined) {
-      const timeReturnDoc = await this.timeReturnRepository.findOneByTimeReturn(
-        filters.timeReturn,
-      )
-      if (timeReturnDoc) {
-        matchStage.timeReturn = timeReturnDoc._id
-      } else {
-        // Không có timeReturn phù hợp => empty result
-        throw new ConflictException('Không tìm thấy dịch vụ nào.')
-      }
-    }
-
-    // Build aggregation pipeline
     const pipeline: any[] = [
       {
         $lookup: {
@@ -148,49 +133,29 @@ export class ServiceService implements IServiceService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      {
-        $lookup: {
-          from: 'sampletypes',
-          localField: 'sample.sampleType',
-          foreignField: '_id',
-          as: 'sample.sampleType',
-        },
-      },
-      {
-        $unwind: {
-          path: '$sample.sampleType',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
     ]
 
-    // Gộp filter sampleName và sampleTypeId
-    const nestedMatch: any = {}
+    // ✅ GOM HẾT FILTER
+    const finalMatchStage: any = { ...matchStage }
 
     if (filters.sampleName) {
-      nestedMatch['sample.name'] = {
+      finalMatchStage['sample.name'] = {
         $regex: filters.sampleName,
         $options: 'i',
       }
     }
 
-    if (filters.sampleTypeId) {
-      nestedMatch['sample.sampleType._id'] = new mongoose.Types.ObjectId(
-        filters.sampleTypeId,
-      )
+    if (filters.timeReturn !== undefined) {
+      finalMatchStage['timeReturn.timeReturn'] = filters.timeReturn
     }
 
-    // Push nested match if exists
-    if (Object.keys(nestedMatch).length > 0) {
-      pipeline.push({ $match: nestedMatch })
+    if (Object.keys(finalMatchStage).length > 0) {
+      pipeline.push({
+        $match: finalMatchStage,
+      })
     }
 
-    // Push root match
-    if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage })
-    }
-
-    // Count total documents
+    // Đếm total trước skip
     const totalPipeline = [...pipeline, { $count: 'total' }]
     const [totalResult] = await this.serviceRepository
       .aggregate(totalPipeline)
@@ -198,7 +163,6 @@ export class ServiceService implements IServiceService {
     const totalItems = totalResult?.total || 0
     const totalPages = Math.ceil(totalItems / pageSize)
 
-    // Projection để bỏ các field không mong muốn
     pipeline.push({
       $project: {
         _id: 1,
@@ -214,10 +178,6 @@ export class ServiceService implements IServiceService {
         sample: {
           name: '$sample.name',
           fee: '$sample.fee',
-          sampleType: {
-            name: '$sample.sampleType.name',
-            sampleTypeFee: '$sample.sampleType.sampleTypeFee',
-          },
         },
       },
     })

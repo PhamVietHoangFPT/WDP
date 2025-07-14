@@ -38,7 +38,7 @@ export class ServiceController {
   constructor(
     @Inject(IServiceService)
     private readonly serviceService: IServiceService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -101,12 +101,6 @@ export class ServiceController {
     required: false,
     type: String,
     description: 'Tên mẫu (Sample)',
-  })
-  @ApiQuery({
-    name: 'sampleTypeId',
-    required: false,
-    type: String,
-    description: 'ID loại mẫu (SampleType)',
   })
   @ApiQuery({
     name: 'name',

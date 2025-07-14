@@ -55,6 +55,14 @@ export interface ISamplingKitInventoryRepository {
     quantity: number,
     facilityId: string,
   ): Promise<string | null>
+
+  findAllExpiredKits(
+    facilityId: string,
+    filter: Record<string, unknown>,
+  ): mongoose.Query<
+    SamplingKitInventoryDocument[],
+    SamplingKitInventoryDocument
+  >
 }
 export const ISamplingKitInventoryRepository = Symbol(
   'ISamplingKitInventoryRepository',

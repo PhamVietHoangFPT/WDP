@@ -28,6 +28,7 @@ export interface ISamplingKitInventoryService {
     facilityId: string,
     pageNumber: number,
     pageSize: number,
+    sampleId?: string,
   ): Promise<PaginatedResponse<SamplingKitInventoryResponseDto>>
 
   delete(
@@ -36,6 +37,13 @@ export interface ISamplingKitInventoryService {
   ): Promise<SamplingKitInventoryResponseDto | null>
 
   deleteExpiredSamplingKits(): Promise<void>
+
+  findAllExpiredKits(
+    facilityId: string,
+    pageNumber: number,
+    pageSize: number,
+    sampleId?: string,
+  ): Promise<PaginatedResponse<SamplingKitInventoryResponseDto>>
 }
 
 export const ISamplingKitInventoryService = Symbol(

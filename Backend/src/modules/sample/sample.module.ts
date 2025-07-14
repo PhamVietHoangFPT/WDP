@@ -8,14 +8,12 @@ import { SampleController } from './sample.controller'
 import { SampleService } from './sample.service'
 import { SampleRepository } from './sample.repository'
 import { AccountModule } from '../account/account.module'
-import { SampleTypeModule } from '../sampleType/sampleType.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }]),
     AuthModule,
     AccountModule,
-    SampleTypeModule,
   ],
   controllers: [SampleController],
   providers: [

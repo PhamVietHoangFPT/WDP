@@ -22,11 +22,6 @@ export class SampleResponseDto {
   fee: number
 
   @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  sampleType: mongoose.Schema.Types.ObjectId
-
-  @Expose()
   @ApiProperty({
     example: '2023-10-01T00:00:00.000Z',
     type: Date,

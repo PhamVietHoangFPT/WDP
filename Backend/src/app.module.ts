@@ -21,7 +21,6 @@ import { SampleModule } from './modules/sample/sample.module'
 import { BlogModule } from './modules/blog/blog.module'
 import { TimeReturnModule } from './modules/timeReturn/timeReturn.module'
 import { SamplingKitInventoryModule } from './modules/samplingKitInventory/samplingKitInventory.module'
-import { SampleTypeModule } from './modules/sampleType/sampleType.module'
 import { CaseMemberModule } from './modules/caseMember/caseMember.module'
 import { ServiceModule } from './modules/service/service.module'
 import { TestRequestStatusModule } from './modules/testRequestStatus/testRequestStatus.module'
@@ -59,7 +58,6 @@ import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector
     SampleModule,
     TimeReturnModule,
     SamplingKitInventoryModule,
-    SampleTypeModule,
     CaseMemberModule,
     ServiceModule,
     TestRequestStatusModule,

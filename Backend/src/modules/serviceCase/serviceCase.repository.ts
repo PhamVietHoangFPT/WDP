@@ -24,6 +24,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   ): mongoose.Query<ServiceCaseDocument[], ServiceCaseDocument> {
     return this.serviceCaseModel
       .find(filter)
+      .sort({ created_at: -1 })
       .populate({ path: 'currentStatus', select: 'testRequestStatus -_id' })
       .lean()
   }

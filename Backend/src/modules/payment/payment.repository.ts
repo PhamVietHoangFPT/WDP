@@ -8,7 +8,9 @@ import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { IPaymentTypeRepository } from '../paymentType/interfaces/ipaymentType.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
-
+import * as dayjs from 'dayjs'
+import * as customParseFormat from 'dayjs/plugin/customParseFormat'
+;(dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -29,7 +31,13 @@ export class PaymentRepository implements IPaymentRepository {
     userId: string,
     currentServiceCasePayment: string,
   ): Promise<PaymentDocument> {
-    const newPayment = new this.paymentModel(createPaymentHistoryDto)
+    const correctFormat = 'YYYYMMDDHHmmss'
+    const payDate = dayjs(createPaymentHistoryDto.payDate, correctFormat)
+    const dataSend = {
+      ...createPaymentHistoryDto,
+      payDate: payDate.isValid() ? payDate.toDate() : new Date(),
+    }
+    const newPayment = new this.paymentModel(dataSend)
     const paymentType = await this.paymentTypeRepository.findByPaymentType(
       'Trường hợp xét nghiệm',
     )

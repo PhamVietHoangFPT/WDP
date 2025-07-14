@@ -58,10 +58,6 @@ export class FindAllServiceQueryDto extends PaginationQueryDto {
   sampleName?: string
 
   @IsOptional()
-  @IsMongoId()
-  sampleTypeId?: string
-
-  @IsOptional()
   @IsString()
   name?: string
 }

@@ -47,6 +47,9 @@ export class CaseMember extends BaseEntity {
 
   @Prop({ type: Boolean, required: true })
   isAtHome: boolean
+
+  @Prop({ type: Boolean, required: true })
+  isSelfSampling: boolean
 }
 
 export const CaseMemberSchema = SchemaFactory.createForClass(CaseMember)
