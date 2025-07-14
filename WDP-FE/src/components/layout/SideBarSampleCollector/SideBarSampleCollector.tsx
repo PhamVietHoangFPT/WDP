@@ -1,9 +1,8 @@
 import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
+import { Layout, Menu, Input, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -22,8 +21,16 @@ export const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   // Lấy userData từ cookie và decode nó
+  interface Facility {
+    facilityName?: string
+  }
+  interface UserData {
+    name?: string
+    email?: string
+    facility?: Facility
+  }
   const userDataString = Cookies.get('userData')
-  let userData = {}
+  let userData: UserData = {}
   if (userDataString) {
     try {
       // Decode URI component trước khi parse JSON
@@ -86,7 +93,6 @@ export const SideBar = () => {
     //   onClick: () => navigate('manager/create-account'),
     // },
   ]
-
   return (
     <Sider
       width={250}
@@ -160,7 +166,6 @@ export const SideBar = () => {
         style={{ borderRight: 0 }}
         items={items}
       />
-
       {/* User Profile */}
       <div
         style={{
@@ -172,22 +177,13 @@ export const SideBar = () => {
           backgroundColor: '#fff',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: collapsed ? 0 : 12,
-          }}
-        >
-          <Avatar icon={<UserOutlined />} />
+        <div>
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {/* Sửa userData?.Name thành userData?.name để khớp với cookie */}
                 {userData?.name || 'Sample Collector User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {/* Sửa userData?.Email thành userData?.email để khớp với cookie */}
                 {userData?.email || 'samplecollector@vaccitrack.com'}
               </div>
               <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>

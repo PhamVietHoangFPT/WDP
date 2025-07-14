@@ -51,6 +51,21 @@ export const paymentApi = apiSlice.injectEndpoints({
       }),
     }),
 
+    getServiceCasesList: builder.query({
+      query: ({ pageSize, pageNumber }) => ({
+        url: `/service-cases?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        method: 'GET',
+      }),
+      providesTags: ['PaymentHistory'],
+    }),
+
+    getTestRequestHistory: builder.query({
+      query: ({ accountId, serviceCaseId }) => ({
+        url: `/test-request-histories?accountId=${accountId}&serviceCaseId=${serviceCaseId}`,
+        method: 'GET',
+      }),
+    }),
+
     // ✅ Lấy lịch sử thanh toán theo nhân viên
     getPaymentByStaff: builder.query({
       query: () => ({
@@ -68,4 +83,6 @@ export const {
   useGetPaymentListQuery,
   useGetPaymentByIdQuery,
   useGetPaymentByStaffQuery,
+  useGetServiceCasesListQuery,
+  useGetTestRequestHistoryQuery,
 } = paymentApi
