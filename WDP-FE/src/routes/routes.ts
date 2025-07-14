@@ -346,14 +346,15 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: SampleCollectorLayout,
+    role: ['Sample Collector'],
     data: [
       {
-        path: '/sample collector',
+        path: '/sample-collector',
         component: SampleCollectorHomePage,
         // role: ['admin'],
       },
       {
-        path: '/sample collector/service-cases',
+        path: '/sample-collector/service-cases',
         component: SampleCollectorServiceCase,
         // role: ['admin'],
       },
