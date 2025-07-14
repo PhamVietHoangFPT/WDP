@@ -27,7 +27,7 @@ export class ServiceResponseDto {
   isSelfSampling: boolean
 
   @Expose()
-  @ApiProperty({ example: "Blood" })
+  @ApiProperty({ example: 'Blood' })
   name: string
 
   @Expose()

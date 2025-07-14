@@ -38,7 +38,7 @@ export class ServiceController {
   constructor(
     @Inject(IServiceService)
     private readonly serviceService: IServiceService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.ADMIN)
@@ -60,11 +60,36 @@ export class ServiceController {
 
   @Get()
   @ApiOperation({ summary: 'Xem tất cả dịch vụ' })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number, description: 'Số lượng mục trên mỗi trang' })
-  @ApiQuery({ name: 'pageNumber', required: false, type: Number, description: 'Số trang' })
-  @ApiQuery({ name: 'isAgnate', required: false, type: Boolean, description: 'Là quan hệ huyết thống' })
-  @ApiQuery({ name: 'isAdministration', required: false, type: Boolean, description: 'Là hành chính' })
-  @ApiQuery({ name: 'isSelfSampling', required: false, type: Boolean, description: 'Tự lấy mẫu' })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+    description: 'Số trang',
+  })
+  @ApiQuery({
+    name: 'isAgnate',
+    required: false,
+    type: Boolean,
+    description: 'Là quan hệ huyết thống',
+  })
+  @ApiQuery({
+    name: 'isAdministration',
+    required: false,
+    type: Boolean,
+    description: 'Là hành chính',
+  })
+  @ApiQuery({
+    name: 'isSelfSampling',
+    required: false,
+    type: Boolean,
+    description: 'Tự lấy mẫu',
+  })
   @ApiQuery({
     name: 'timeReturn',
     required: false,
@@ -89,7 +114,6 @@ export class ServiceController {
     type: String,
     description: 'Tên dịch vụ (Service.name)',
   })
-
   @ApiResponse({ status: HttpStatus.OK, type: [ServiceResponseDto] })
   async findAll(
     @Query(
@@ -101,13 +125,13 @@ export class ServiceController {
     )
     query: FindAllServiceQueryDto,
   ) {
-    const { pageNumber, pageSize, ...filters } = query;
+    const { pageNumber, pageSize, ...filters } = query
 
     return this.serviceService.findAllService(
       pageNumber || 1,
       pageSize || 10,
       filters,
-    );
+    )
   }
 
   @UseGuards(AuthGuard)
