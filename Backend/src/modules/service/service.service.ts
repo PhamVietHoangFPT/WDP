@@ -84,30 +84,26 @@ export class ServiceService implements IServiceService {
     pageSize: number,
     filters: Partial<FindAllServiceQueryDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
-    const skip = (pageNumber - 1) * pageSize
+    const skip = (pageNumber - 1) * pageSize;
 
-    // Buildup match condition
-    const matchStage: any = {}
+    const matchStage: any = {};
 
     if (filters.isAgnate !== undefined) {
-      matchStage.isAgnate = filters.isAgnate
+      matchStage.isAgnate = filters.isAgnate;
     }
     if (filters.isAdministration !== undefined) {
-      matchStage.isAdministration = filters.isAdministration
+      matchStage.isAdministration = filters.isAdministration;
     }
     if (filters.isSelfSampling !== undefined) {
-      matchStage.isSelfSampling = filters.isSelfSampling
+      matchStage.isSelfSampling = filters.isSelfSampling;
     }
     if (filters.name !== undefined) {
       matchStage.name = {
         $regex: filters.name,
         $options: 'i',
-      }
+      };
     }
 
-
-
-    // Build aggregation pipeline
     const pipeline: any[] = [
       {
         $lookup: {
@@ -151,49 +147,41 @@ export class ServiceService implements IServiceService {
           preserveNullAndEmptyArrays: true,
         },
       },
-    ]
+    ];
 
-    // Gộp filter sampleName và sampleTypeId
-    const nestedMatch: any = {}
+    // ✅ GOM HẾT FILTER
+    const finalMatchStage: any = { ...matchStage };
 
     if (filters.sampleName) {
-      nestedMatch['sample.name'] = {
+      finalMatchStage['sample.name'] = {
         $regex: filters.sampleName,
         $options: 'i',
-      }
+      };
     }
 
-    if (filters.sampleTypeId) {
-      nestedMatch['sample.sampleType._id'] = new mongoose.Types.ObjectId(
-        filters.sampleTypeId,
-      )
+    if (filters.sampleTypeName) {
+      finalMatchStage['sample.sampleType.name'] = {
+        $regex: filters.sampleTypeName,
+        $options: 'i',
+      };
     }
+
     if (filters.timeReturn !== undefined) {
+      finalMatchStage['timeReturn.timeReturn'] = filters.timeReturn;
+    }
+
+    if (Object.keys(finalMatchStage).length > 0) {
       pipeline.push({
-        $match: {
-          'timeReturn.timeReturn': filters.timeReturn,
-        },
+        $match: finalMatchStage,
       });
     }
-    // Push nested match if exists
-    if (Object.keys(nestedMatch).length > 0) {
-      pipeline.push({ $match: nestedMatch })
-    }
 
-    // Push root match
-    if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage })
-    }
+    // Đếm total trước skip
+    const totalPipeline = [...pipeline, { $count: 'total' }];
+    const [totalResult] = await this.serviceRepository.aggregate(totalPipeline).exec();
+    const totalItems = totalResult?.total || 0;
+    const totalPages = Math.ceil(totalItems / pageSize);
 
-    // Count total documents
-    const totalPipeline = [...pipeline, { $count: 'total' }]
-    const [totalResult] = await this.serviceRepository
-      .aggregate(totalPipeline)
-      .exec()
-    const totalItems = totalResult?.total || 0
-    const totalPages = Math.ceil(totalItems / pageSize)
-
-    // Projection để bỏ các field không mong muốn
     pipeline.push({
       $project: {
         _id: 1,
@@ -215,17 +203,18 @@ export class ServiceService implements IServiceService {
           },
         },
       },
-    })
+    });
 
-    pipeline.push({ $skip: skip })
-    pipeline.push({ $limit: pageSize })
-    const services = await this.serviceRepository.aggregate(pipeline).exec()
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: pageSize });
+
+    const services = await this.serviceRepository.aggregate(pipeline).exec();
 
     if (!services || services.length === 0) {
-      throw new ConflictException('Không tìm thấy dịch vụ nào.')
+      throw new ConflictException('Không tìm thấy dịch vụ nào.');
     }
 
-    const data = services.map((service: any) => this.mapToResponseDto(service))
+    const data = services.map((service: any) => this.mapToResponseDto(service));
 
     return {
       data,
@@ -235,8 +224,9 @@ export class ServiceService implements IServiceService {
         currentPage: pageNumber,
         pageSize,
       },
-    }
+    };
   }
+
 
   async updateService(
     id: string,
