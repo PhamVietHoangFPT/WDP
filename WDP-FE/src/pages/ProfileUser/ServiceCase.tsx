@@ -41,9 +41,9 @@ export default function ServiceCase() {
 
         if (lowerStatus.includes('thất bại') || lowerStatus.includes('hủy')) {
           color = 'red'
-        } else if (lowerStatus.includes('chờ')) {
+        } else if (status?.includes('Chờ thanh toán')) {
           color = 'orange'
-        } else if (lowerStatus.includes('thành công') || lowerStatus.includes('hoàn thành')) {
+        } else if (lowerStatus.includes('đã') ) {
           color = 'green'
         }
 
