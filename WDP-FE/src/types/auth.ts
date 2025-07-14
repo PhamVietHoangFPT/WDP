@@ -5,7 +5,10 @@ export interface UserToken {
 export interface UserData {
   email: string
   id: string
-  facility: string
+  facility: {
+    _id: string
+    facilityName: string
+  }
   role: string
   name: string
   phoneNumber: string
