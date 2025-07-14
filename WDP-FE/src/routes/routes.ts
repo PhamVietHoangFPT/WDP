@@ -151,6 +151,10 @@ const SamplingKitInventoryList = React.lazy(
   () => import('../components/Staff/SamplingKitInventoryList')
 )
 
+const SamplingKitInventoryDetail = React.lazy(
+  () => import('../components/Staff/SamplingKitInventoryDetail')
+)
+
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
@@ -376,6 +380,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/sampling-kit-inventory',
         component: SamplingKitInventoryList,
+      },
+      {
+        path: '/staff/sampling-kit-inventory/:samplingKitInventoryId',
+        component: SamplingKitInventoryDetail,
       },
     ],
   },

@@ -67,7 +67,8 @@ export const SideBar = () => {
       key: 'staff/sampling-kit-inventory',
       icon: <BarChartOutlined />,
       label: 'Quản lý kho',
-      onClick: () => navigate('/staff/sampling-kit-inventory'),
+      onClick: () =>
+        navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
     },
     // {
     //   key: 'patients',
