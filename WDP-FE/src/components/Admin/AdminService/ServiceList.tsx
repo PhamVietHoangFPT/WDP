@@ -360,7 +360,7 @@ export default function ServiceList() {
             pageSize={Number(pageSize)}
             total={data?.pagination?.totalItems || 0}
             onChange={(page, size) => {
-              navigate(`/admin/service?pageNumber=${page}&pageSize=${size}`)
+              navigate(`/admin/services?pageNumber=${page}&pageSize=${size}`)
             }}
             showSizeChanger
             showTotal={(total, range) =>

@@ -188,7 +188,7 @@ export const SideBar = () => {
                                 {userData?.name || 'Sample Collector User'}
                             </div>
                             <div style={{ fontSize: 12, color: 'black' }}>
-                                {/* Sửa userData?.Email thành userData?.email để khớp với cookie */}
+                                {/* Sửa userData?.Email thành userData?.email để khớp với cookie */}                                 
                                 {userData?.email || 'samplecollector@vaccitrack.com'}
                             </div>
                             <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>

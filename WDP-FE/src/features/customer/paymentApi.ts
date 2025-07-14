@@ -51,6 +51,14 @@ export const paymentApi = apiSlice.injectEndpoints({
       }),
     }),
 
+    getServiceCasesList: builder.query({
+      query: ({ pageSize, pageNumber }) => ({
+        url: `/service-cases?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        method: 'GET',
+      }),
+      providesTags: ['PaymentHistory'],
+    }),
+
     // ✅ Lấy lịch sử thanh toán theo nhân viên
     getPaymentByStaff: builder.query({
       query: () => ({
@@ -68,4 +76,5 @@ export const {
   useGetPaymentListQuery,
   useGetPaymentByIdQuery,
   useGetPaymentByStaffQuery,
+  useGetServiceCasesListQuery,
 } = paymentApi

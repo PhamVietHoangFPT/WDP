@@ -65,6 +65,11 @@ export default function HeaderCus() {
       label: 'Lịch sử thanh toán',
       onClick: () => navigate('/payment-history?pageNumber=1&pageSize=5'),
     },
+    {
+      key: 'service-case-customer',
+      label: 'Lịch sử trường hợp dịch vụ',
+      onClick: () => navigate('/service-case-customer?pageNumber=1&pageSize=5'),
+    },
   ]
   return (
     <Header style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
