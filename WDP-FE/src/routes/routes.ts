@@ -328,7 +328,7 @@ const routes: LayoutRoute[] = [
     layout: DeliveryStaffLayout,
     data: [
       {
-        path: '/delivery',
+        path: '/delivery staff',
         component: DeliveryStaffHomePage,
         // role: ['admin'],
       },

@@ -69,7 +69,7 @@ export const AdminLayout = () => {
 
         <Footer style={{ textAlign: 'center', padding: '12px 50px' }}>
           <Text type='secondary'>
-            © 2025 VacciTrack Admin Portal. All rights reserved.
+            © 2025 GeneXis Admin Portal. All rights reserved.
           </Text>
         </Footer>
       </Layout>
