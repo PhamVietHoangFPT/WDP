@@ -98,10 +98,17 @@ export default function RegisterServiceAtHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const accountId = await getAccountIdFromToken(); // Lấy user đang đăng nhập
+        if (!accountId) {
+          Alert.alert("Lỗi", "Không xác định được người dùng.");
+          return;
+        }
+
         const [facilitiesRes, testTakersRes] = await Promise.all([
           getFacilities(),
-          getTestTakers(),
+          getTestTakers(accountId), // CHỈ lấy test-taker thuộc user
         ]);
+
         setFacilities(facilitiesRes.data || []);
         setAvailableTestTakers(testTakersRes.data || []);
       } catch (error) {
@@ -109,6 +116,7 @@ export default function RegisterServiceAtHome() {
         Alert.alert("Lỗi", "Không thể tải dữ liệu cần thiết.");
       }
     };
+
     fetchData();
   }, []);
 
