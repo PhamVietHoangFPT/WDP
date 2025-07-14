@@ -29,7 +29,7 @@ export class CaseMemberService implements ICaseMemberService {
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(caseMember: CaseMember): CaseMemberResponseDto {
     return new CaseMemberResponseDto({
@@ -134,7 +134,9 @@ export class CaseMemberService implements ICaseMemberService {
     if (isServiceNotAtHome === true && dto.isAtHome === true) {
       throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
-
+    if (isServiceNotAtHome === true && dto.isSelfSampling === true) {
+      throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
+    }
     // Lấy sample để tìm sampling kit
     const sampleId = await this.serviceRepository.getSampleId(dto.service)
 
@@ -219,12 +221,17 @@ export class CaseMemberService implements ICaseMemberService {
     )
 
     const oldCaseMemberIsAtHome =
-      await this.caseMemberRepository.getIsAtHome(id)
+      await this.caseMemberRepository.getIsSelfSampling(id)
 
     if (isServiceAtHome && oldCaseMemberIsAtHome === true) {
       throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
+    const oldCaseMemberIsSelfSampling =
+      await this.caseMemberRepository.getIsAtHome(id)
 
+    if (isServiceAtHome && oldCaseMemberIsSelfSampling === true) {
+      throw new ConflictException('Dịch vụ này không được tự lấy mẫu')
+    }
     // Lấy số lượng nhóm người cần xét nghiệm
     const oldCaseMember = await this.caseMemberRepository.findById(id)
     if (!oldCaseMember) {
