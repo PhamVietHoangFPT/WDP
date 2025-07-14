@@ -20,7 +20,6 @@ const facilitiesApi = apiSlice.injectEndpoints({
       providesTags: ['facilities'],
     }),
 
-
     getUserList: builder.query({
       query: () => ({
         url: `/accounts`,
@@ -29,7 +28,6 @@ const facilitiesApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['facilities'],
     }),
-
 
     updateFacility: builder.mutation({
       query: ({ data, id }) => ({
@@ -67,5 +65,5 @@ export const {
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
   useGetFacilitiesNameAndAddressQuery,
-  useGetUserListQuery
+  useGetUserListQuery,
 } = facilitiesApi

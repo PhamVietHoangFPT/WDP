@@ -23,7 +23,7 @@ export class ServiceService implements IServiceService {
     private readonly serviceRepository: IServiceRepository,
     @Inject(ITimeReturnRepository)
     private readonly timeReturnRepository: ITimeReturnRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
     return new ServiceResponseDto({
@@ -84,24 +84,24 @@ export class ServiceService implements IServiceService {
     pageSize: number,
     filters: Partial<FindAllServiceQueryDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
-    const skip = (pageNumber - 1) * pageSize;
+    const skip = (pageNumber - 1) * pageSize
 
-    const matchStage: any = {};
+    const matchStage: any = {}
 
     if (filters.isAgnate !== undefined) {
-      matchStage.isAgnate = filters.isAgnate;
+      matchStage.isAgnate = filters.isAgnate
     }
     if (filters.isAdministration !== undefined) {
-      matchStage.isAdministration = filters.isAdministration;
+      matchStage.isAdministration = filters.isAdministration
     }
     if (filters.isSelfSampling !== undefined) {
-      matchStage.isSelfSampling = filters.isSelfSampling;
+      matchStage.isSelfSampling = filters.isSelfSampling
     }
     if (filters.name !== undefined) {
       matchStage.name = {
         $regex: filters.name,
         $options: 'i',
-      };
+      }
     }
 
     const pipeline: any[] = [
@@ -133,54 +133,35 @@ export class ServiceService implements IServiceService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      {
-        $lookup: {
-          from: 'sampletypes',
-          localField: 'sample.sampleType',
-          foreignField: '_id',
-          as: 'sample.sampleType',
-        },
-      },
-      {
-        $unwind: {
-          path: '$sample.sampleType',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-    ];
+    ]
 
     // ✅ GOM HẾT FILTER
-    const finalMatchStage: any = { ...matchStage };
+    const finalMatchStage: any = { ...matchStage }
 
     if (filters.sampleName) {
       finalMatchStage['sample.name'] = {
         $regex: filters.sampleName,
         $options: 'i',
-      };
-    }
-
-    if (filters.sampleTypeName) {
-      finalMatchStage['sample.sampleType.name'] = {
-        $regex: filters.sampleTypeName,
-        $options: 'i',
-      };
+      }
     }
 
     if (filters.timeReturn !== undefined) {
-      finalMatchStage['timeReturn.timeReturn'] = filters.timeReturn;
+      finalMatchStage['timeReturn.timeReturn'] = filters.timeReturn
     }
 
     if (Object.keys(finalMatchStage).length > 0) {
       pipeline.push({
         $match: finalMatchStage,
-      });
+      })
     }
 
     // Đếm total trước skip
-    const totalPipeline = [...pipeline, { $count: 'total' }];
-    const [totalResult] = await this.serviceRepository.aggregate(totalPipeline).exec();
-    const totalItems = totalResult?.total || 0;
-    const totalPages = Math.ceil(totalItems / pageSize);
+    const totalPipeline = [...pipeline, { $count: 'total' }]
+    const [totalResult] = await this.serviceRepository
+      .aggregate(totalPipeline)
+      .exec()
+    const totalItems = totalResult?.total || 0
+    const totalPages = Math.ceil(totalItems / pageSize)
 
     pipeline.push({
       $project: {
@@ -197,24 +178,20 @@ export class ServiceService implements IServiceService {
         sample: {
           name: '$sample.name',
           fee: '$sample.fee',
-          sampleType: {
-            name: '$sample.sampleType.name',
-            sampleTypeFee: '$sample.sampleType.sampleTypeFee',
-          },
         },
       },
-    });
+    })
 
-    pipeline.push({ $skip: skip });
-    pipeline.push({ $limit: pageSize });
+    pipeline.push({ $skip: skip })
+    pipeline.push({ $limit: pageSize })
 
-    const services = await this.serviceRepository.aggregate(pipeline).exec();
+    const services = await this.serviceRepository.aggregate(pipeline).exec()
 
     if (!services || services.length === 0) {
-      throw new ConflictException('Không tìm thấy dịch vụ nào.');
+      throw new ConflictException('Không tìm thấy dịch vụ nào.')
     }
 
-    const data = services.map((service: any) => this.mapToResponseDto(service));
+    const data = services.map((service: any) => this.mapToResponseDto(service))
 
     return {
       data,
@@ -224,9 +201,8 @@ export class ServiceService implements IServiceService {
         currentPage: pageNumber,
         pageSize,
       },
-    };
+    }
   }
-
 
   async updateService(
     id: string,

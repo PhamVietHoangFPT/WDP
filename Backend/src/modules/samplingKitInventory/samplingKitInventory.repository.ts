@@ -34,7 +34,13 @@ export class SamplingKitInventoryRepository
   }
 
   async findById(id: string): Promise<SamplingKitInventoryDocument | null> {
-    return this.samplingKitInventoryModel.findOne({ _id: id }).exec()
+    return this.samplingKitInventoryModel
+      .findOne({ _id: id })
+      .populate([
+        { path: 'sample', select: 'name' },
+        { path: 'facility', select: 'facilityName' },
+      ])
+      .exec()
   }
 
   async update(
@@ -88,9 +94,9 @@ export class SamplingKitInventoryRepository
     return this.samplingKitInventoryModel
       .find({
         facility: facilityId,
-        deleted_at: null,
         ...filter,
       })
+      .populate({ path: 'sample', select: 'name' })
       .lean()
   }
 
@@ -147,5 +153,23 @@ export class SamplingKitInventoryRepository
       .exec()
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return samplingKitInventory ? samplingKitInventory._id.toString() : null
+  }
+
+  findAllExpiredKits(
+    facilityId: string,
+    filter: Record<string, unknown>,
+  ): mongoose.Query<
+    SamplingKitInventoryDocument[],
+    SamplingKitInventoryDocument
+  > {
+    return this.samplingKitInventoryModel
+      .find({
+        facility: facilityId,
+        expDate: { $lt: new Date() },
+        deleted_at: { $exists: true },
+        ...filter,
+      })
+      .populate({ path: 'sample', select: 'name' })
+      .lean()
   }
 }

@@ -93,6 +93,12 @@ export class SamplingKitInventoryController {
     type: String,
     description: 'ID cơ sở y tế để lọc mẫu kit',
   })
+  @ApiQuery({
+    name: 'sampleId',
+    required: false,
+    type: String,
+    description: 'ID mẫu để lọc các mẫu kit',
+  })
   @ApiResponse({
     status: 200,
     description: 'Danh sách mẫu kit.',
@@ -108,6 +114,7 @@ export class SamplingKitInventoryController {
     )
     paginationQuery: PaginationQueryDto,
     @Query('facilityId') facilityId: string,
+    @Query('sampleId') sampleId?: string,
   ): Promise<PaginatedResponseDto<SamplingKitInventoryResponseDto>> {
     const { pageSize, pageNumber } = paginationQuery
 
@@ -116,6 +123,7 @@ export class SamplingKitInventoryController {
         facilityId,
         pageNumber || 1,
         pageSize || 10,
+        sampleId,
       )
     return {
       ...samplingKitInventories,
@@ -127,6 +135,121 @@ export class SamplingKitInventoryController {
       ),
       success: true,
       message: 'Lấy danh sách mẫu kit thành công',
+      statusCode: 200,
+    }
+  }
+
+  @Get('lot-number')
+  @UseGuards(AuthGuard, RolesGuard, FacilityAccessGuard)
+  @Roles(RoleEnum.MANAGER, RoleEnum.STAFF)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy mẫu kit theo lot number và cơ sở' })
+  @ApiQuery({
+    name: 'lotNumber',
+    required: true,
+    type: String,
+    description: 'Số lot của mẫu kit',
+  })
+  @ApiQuery({
+    name: 'facilityId',
+    required: true,
+    type: String,
+    description: 'ID cơ sở y tế để lọc mẫu kit',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin mẫu kit theo lot number và cơ sở.',
+    type: ApiResponseDto<SamplingKitInventoryResponseDto>,
+  })
+  async findByLotNumberAndFacility(
+    @Query('lotNumber') lotNumber: string,
+    @Query('facilityId') facilityId: string,
+  ): Promise<ApiResponseDto<SamplingKitInventoryResponseDto | null>> {
+    const samplingKitInventory =
+      await this.samplingKitInventoryService.findByLotNumberAndFacility(
+        lotNumber,
+        facilityId,
+      )
+    if (!samplingKitInventory) {
+      return new ApiResponseDto<SamplingKitInventoryResponseDto | null>({
+        data: null,
+        message: 'Không tìm thấy mẫu kit với lot number và cơ sở đã cho',
+        statusCode: 404,
+      })
+    }
+    return new ApiResponseDto<SamplingKitInventoryResponseDto>({
+      data: [samplingKitInventory],
+      message: 'Lấy thông tin mẫu kit theo lot number và cơ sở thành công',
+      statusCode: 200,
+    })
+  }
+
+  @Get('expired-kits')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RoleEnum.STAFF, RoleEnum.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Lấy danh sách các mẫu kit đã hết hạn',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách các mẫu kit đã hết hạn.',
+    type: PaginatedResponseDto<SamplingKitInventoryResponseDto>,
+  })
+  @ApiQuery({
+    name: 'facilityId',
+    required: true,
+    type: String,
+    description: 'ID cơ sở y tế để lọc mẫu kit đã hết hạn',
+  })
+  @ApiQuery({
+    name: 'sampleId',
+    required: false,
+    type: String,
+    description: 'ID mẫu để lọc các mẫu kit đã hết hạn',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+    description: 'Số trang',
+  })
+  async findAllExpiredKits(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        forbidNonWhitelisted: true,
+      }),
+    )
+    paginationQuery: PaginationQueryDto,
+    @Query('facilityId') facilityId: string,
+    @Query('sampleId') sampleId?: string,
+  ): Promise<PaginatedResponseDto<SamplingKitInventoryResponseDto>> {
+    const { pageSize, pageNumber } = paginationQuery
+    const samplingKitInventories =
+      await this.samplingKitInventoryService.findAllExpiredKits(
+        facilityId,
+        pageNumber || 1,
+        pageSize || 10,
+        sampleId,
+      )
+    return {
+      ...samplingKitInventories,
+      data: samplingKitInventories.data.map(
+        (samplingKitInventory) =>
+          new SamplingKitInventoryResponseDto({
+            ...samplingKitInventory,
+          }),
+      ),
+      success: true,
+      message: 'Lấy danh sách các mẫu kit đã hết hạn thành công',
       statusCode: 200,
     }
   }
@@ -184,9 +307,9 @@ export class SamplingKitInventoryController {
 
   @Delete('expired')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.ADMIN, RoleEnum.STAFF)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Xóa các mẫu kit đã hết hạn (chỉ dành cho admin)' })
+  @ApiOperation({ summary: 'Xóa các mẫu kit đã hết hạn' })
   @ApiResponse({
     status: 204,
     description: 'Xóa các mẫu kit đã hết hạn thành công',

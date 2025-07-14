@@ -147,7 +147,6 @@ export default function ServiceDetail() {
   const totalFee =
     (data.fee || 0) +
     (data.sample?.fee || 0) +
-    (data.sample?.sampleType?.sampleTypeFee || 0) +
     (data.timeReturn?.timeReturnFee || 0)
 
   const formatCurrency = (value: number | undefined) => {
@@ -161,6 +160,12 @@ export default function ServiceDetail() {
   }
 
   const columns = [
+    {
+      title: 'Tên Dịch Vụ',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
     {
       title: 'Phí Dịch Vụ',
       dataIndex: 'fee',
@@ -176,17 +181,6 @@ export default function ServiceDetail() {
       title: 'Phí Lấy Mẫu',
       dataIndex: ['sample', 'fee'],
       key: 'sampleFee',
-      render: (value: number) => formatCurrency(value),
-    },
-    {
-      title: 'Kiểu Mẫu',
-      dataIndex: ['sample', 'sampleType', 'name'],
-      key: 'sampleTypeName',
-    },
-    {
-      title: 'Phí Kiểu Mẫu',
-      dataIndex: ['sample', 'sampleType', 'sampleTypeFee'],
-      key: 'sampleTypeFee',
       render: (value: number) => formatCurrency(value),
     },
     {
@@ -219,6 +213,17 @@ export default function ServiceDetail() {
         isAgnate ? <Tag color='green'>Có</Tag> : <Tag color='red'>Không</Tag>,
     },
     {
+      title: 'Tự Lấy Mẫu',
+      dataIndex: 'isSelfSampling',
+      key: 'isSelfSampling',
+      render: (isSelfSampling: boolean) =>
+        isSelfSampling ? (
+          <Tag color='green'>Có</Tag>
+        ) : (
+          <Tag color='red'>Không</Tag>
+        ),
+    },
+    {
       title: 'Tổng Phí Dịch Vụ',
       key: 'totalFee',
       render: () => formatCurrency(totalFee),
@@ -240,8 +245,45 @@ export default function ServiceDetail() {
     </div>
   )
 
+  const handleFormChange = (changedValues) => {
+    // Trường hợp 1: Nếu 'Tự Lấy Mẫu' thay đổi
+    if ('isSelfSampling' in changedValues) {
+      // Nếu nó được BẬT
+      if (changedValues.isSelfSampling === true) {
+        // Tự động TẮT 'Hành Chính'
+        form.setFieldsValue({
+          isAdministration: false,
+        })
+      }
+    }
+
+    // Trường hợp 2: Nếu 'Hành Chính' thay đổi
+    if ('isAdministration' in changedValues) {
+      // Nếu nó được BẬT
+      if (changedValues.isAdministration === true) {
+        // Tự động TẮT 'Tự Lấy Mẫu'
+        form.setFieldsValue({
+          isSelfSampling: false,
+        })
+      }
+    }
+  }
+
   const EditView = (
-    <Form form={form} layout='vertical' onFinish={handleFinish}>
+    <Form
+      form={form}
+      layout='vertical'
+      onFinish={handleFinish}
+      onValuesChange={handleFormChange}
+      initialValues={{ isAdministration: false, isAgnate: false }}
+    >
+      <Form.Item
+        name='name'
+        label='Tên Dịch Vụ'
+        rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ!' }]}
+      >
+        <Input placeholder='Nhập tên dịch vụ' />
+      </Form.Item>
       <Form.Item name='fee' label='Phí Dịch Vụ' rules={[{ required: true }]}>
         <InputNumber
           style={{ width: '100%' }}
@@ -273,16 +315,29 @@ export default function ServiceDetail() {
         />
       </Form.Item>
       <Space>
-        <Form.Item
-          label='Hành Chính'
-          name='isAdministration'
-          valuePropName='checked'
-        >
-          <Switch />
-        </Form.Item>
-        <Form.Item label='Theo Họ Nội' name='isAgnate' valuePropName='checked'>
-          <Switch />
-        </Form.Item>
+        <Space>
+          <Form.Item
+            label='Hành Chính'
+            name='isAdministration'
+            valuePropName='checked'
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            label='Theo Họ Nội'
+            name='isAgnate'
+            valuePropName='checked'
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            label='Tự Lấy Mẫu'
+            name='isSelfSampling'
+            valuePropName='checked'
+          >
+            <Switch />
+          </Form.Item>
+        </Space>
       </Space>
       <Form.Item>
         <Space>
