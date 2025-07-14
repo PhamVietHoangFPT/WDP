@@ -140,17 +140,15 @@ const TimeReturnList = React.lazy(
 const TimeReturnDetail = React.lazy(
   () => import('../components/Admin/AdminTimeReturn/TimeReturnDetail')
 )
-const SampleTypeList = React.lazy(
-  () => import('../components/Admin/AdminSampleType/SampleTypeList')
-)
-const SampleTypeDetail = React.lazy(
-  () => import('../components/Admin/AdminSampleType/SampleTypeDetail')
-)
 const SampleList = React.lazy(
   () => import('../components/Admin/AdminSample/SampleList')
 )
 const SampleDetail = React.lazy(
   () => import('../components/Admin/AdminSample/SampleDetail')
+)
+
+const SamplingKitInventoryList = React.lazy(
+  () => import('../components/Staff/SamplingKitInventoryList')
 )
 
 const routes: LayoutRoute[] = [
@@ -285,14 +283,6 @@ const routes: LayoutRoute[] = [
         component: TimeReturnDetail,
       },
       {
-        path: '/admin/sample-types',
-        component: SampleTypeList,
-      },
-      {
-        path: '/admin/sample-types/:sampleTypeId',
-        component: SampleTypeDetail,
-      },
-      {
         path: '/admin/samples',
         component: SampleList,
       },
@@ -377,11 +367,15 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: StaffLayout,
+    role: ['Staff'],
     data: [
       {
         path: '/staff',
         component: StaffHomePage,
-        role: ['Staff'],
+      },
+      {
+        path: '/staff/sampling-kit-inventory',
+        component: SamplingKitInventoryList,
       },
     ],
   },

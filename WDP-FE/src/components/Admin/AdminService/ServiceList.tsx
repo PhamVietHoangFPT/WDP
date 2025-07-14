@@ -106,6 +106,30 @@ export default function ServiceList() {
     }
   }
 
+  const handleFormChange = (changedValues) => {
+    // Trường hợp 1: Nếu 'Tự Lấy Mẫu' thay đổi
+    if ('isSelfSampling' in changedValues) {
+      // Nếu nó được BẬT
+      if (changedValues.isSelfSampling === true) {
+        // Tự động TẮT 'Hành Chính'
+        form.setFieldsValue({
+          isAdministration: false,
+        })
+      }
+    }
+
+    // Trường hợp 2: Nếu 'Hành Chính' thay đổi
+    if ('isAdministration' in changedValues) {
+      // Nếu nó được BẬT
+      if (changedValues.isAdministration === true) {
+        // Tự động TẮT 'Tự Lấy Mẫu'
+        form.setFieldsValue({
+          isSelfSampling: false,
+        })
+      }
+    }
+  }
+
   const CreateServiceModelComponent = () => (
     <Modal
       title='Tạo Dịch Vụ Mới'
@@ -130,8 +154,16 @@ export default function ServiceList() {
         form={form}
         layout='vertical'
         onFinish={handleCreate}
+        onValuesChange={handleFormChange}
         initialValues={{ isAdministration: false, isAgnate: false }}
       >
+        <Form.Item
+          name='name'
+          label='Tên Dịch Vụ'
+          rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ!' }]}
+        >
+          <Input placeholder='Nhập tên dịch vụ' />
+        </Form.Item>
         {/* Sử dụng InputNumber cho các trường số */}
         <Form.Item
           label='Phí Dịch Vụ'
@@ -196,6 +228,13 @@ export default function ServiceList() {
           >
             <Switch />
           </Form.Item>
+          <Form.Item
+            label='Tự Lấy Mẫu'
+            name='isSelfSampling'
+            valuePropName='checked'
+          >
+            <Switch />
+          </Form.Item>
         </Space>
 
         {/* ... Nút submit của bạn ... */}
@@ -228,17 +267,6 @@ export default function ServiceList() {
       render: (value: number) => formatCurrency(value),
     },
     {
-      title: 'Kiểu Mẫu',
-      dataIndex: ['sample', 'sampleType', 'name'],
-      key: 'sampleTypeName',
-    },
-    {
-      title: 'Phí Kiểu Mẫu',
-      dataIndex: ['sample', 'sampleType', 'sampleTypeFee'],
-      key: 'sampleTypeFee',
-      render: (value: number) => formatCurrency(value),
-    },
-    {
       title: 'Thời Gian Trả (Ngày)',
       dataIndex: ['timeReturn', 'timeReturn'],
       key: 'timeReturn',
@@ -266,6 +294,17 @@ export default function ServiceList() {
       key: 'isAgnate',
       render: (isAgnate: boolean) =>
         isAgnate ? <Tag color='green'>Có</Tag> : <Tag color='red'>Không</Tag>,
+    },
+    {
+      title: 'Tự Lấy Mẫu',
+      dataIndex: 'isSelfSampling',
+      key: 'isSelfSampling',
+      render: (isSelfSampling: boolean) =>
+        isSelfSampling ? (
+          <Tag color='green'>Có</Tag>
+        ) : (
+          <Tag color='red'>Không</Tag>
+        ),
     },
     {
       title: 'Hành Động',

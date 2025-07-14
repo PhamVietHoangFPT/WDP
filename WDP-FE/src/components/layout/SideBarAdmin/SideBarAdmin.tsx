@@ -100,19 +100,8 @@ export const SideBar = () => {
         {
           key: 'admin/sample-management',
           icon: <ExperimentOutlined />,
-          label: 'Quản lý Mẫu',
-          children: [
-            {
-              key: 'admin/samples',
-              label: 'Loại mẫu thử',
-              onClick: () => navigate('/admin/samples'),
-            },
-            {
-              key: 'admin/sample-types',
-              label: 'Chất lượng mẫu thử',
-              onClick: () => navigate('/admin/sample-types'),
-            },
-          ],
+          label: 'Quản lý Mẫu Thử',
+          onClick: () => navigate('/admin/samples'),
         },
       ],
     },

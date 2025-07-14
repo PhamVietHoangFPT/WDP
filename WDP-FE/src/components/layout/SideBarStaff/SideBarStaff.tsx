@@ -35,19 +35,10 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/manager') return ['manager']
+    if (pathname === '/staff') return ['staff']
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-      'staff', // Thêm 'staff' vào đây nếu muốn nó được highlight
-    ]
+    const paths = ['manage-inventory', 'staff']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -72,12 +63,12 @@ export const SideBar = () => {
       onClick: () => navigate('staff'),
     },
     // Thêm các mục menu khác của Staff/Manager vào đây nếu có
-    // {
-    //   key: 'appointments',
-    //   icon: <CalendarOutlined />,
-    //   label: 'Lịch hẹn',
-    //   onClick: () => navigate('appointments'),
-    // },
+    {
+      key: 'staff/sampling-kit-inventory',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý kho',
+      onClick: () => navigate('/staff/sampling-kit-inventory'),
+    },
     // {
     //   key: 'patients',
     //   icon: <TeamOutlined />,
