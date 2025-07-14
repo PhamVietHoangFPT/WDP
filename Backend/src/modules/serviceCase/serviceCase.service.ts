@@ -45,6 +45,7 @@ export class ServiceCaseService implements IServiceCaseService {
       totalFee: serviceCase.totalFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
+      created_at: serviceCase.created_at,
     })
   }
 
