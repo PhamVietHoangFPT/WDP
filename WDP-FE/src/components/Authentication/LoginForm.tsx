@@ -10,17 +10,6 @@ export const LoginForm = () => {
   const [, setInputType] = useState<'email' | null>(null)
   const navigate = useNavigate()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim()
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setInputType('email')
-      form.setFieldsValue({ email: value })
-    } else {
-      setInputType(null)
-      form.setFieldsValue({ email: '' })
-    }
-  }
-
   const validateInput = (value: string) => {
     if (!value) return Promise.reject('Vui lòng nhập email!')
     if (/^\d{10}$/.test(value)) return Promise.resolve()
@@ -39,7 +28,6 @@ export const LoginForm = () => {
 
       if (token) {
         Cookies.set('userToken', token, { expires: 7 })
-        navigate('/')
       } else {
         notification.error({
           message: 'Lỗi phản hồi',

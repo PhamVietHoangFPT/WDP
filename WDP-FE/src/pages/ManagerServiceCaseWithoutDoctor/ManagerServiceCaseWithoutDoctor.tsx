@@ -1,15 +1,33 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useState } from "react"
-import { Table, Button, Typography, Spin, Pagination, message, Space, Dropdown, Menu, Tag, Modal } from "antd"
-import type { ColumnsType } from "antd/es/table"
-import { UserAddOutlined, DownOutlined, HomeOutlined, ShopOutlined, ExclamationCircleOutlined } from "@ant-design/icons"
+import type React from 'react'
+import { useState } from 'react'
+import {
+  Table,
+  Button,
+  Typography,
+  Spin,
+  Pagination,
+  message,
+  Space,
+  Dropdown,
+  Menu,
+  Tag,
+  Modal,
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
+import {
+  UserAddOutlined,
+  DownOutlined,
+  HomeOutlined,
+  ShopOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons'
 import {
   useGetDoctorListQuery,
   useGetServiceCaseNoDoctorListQuery,
   useAddDoctorToServiceCaseMutation,
-} from "../../features/manager/doctorAPI"
+} from '../../features/manager/doctorAPI'
 
 const { Title } = Typography
 
@@ -44,7 +62,8 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const [confirmModalVisible, setConfirmModalVisible] = useState(false)
-  const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
+  const [selectedServiceCase, setSelectedServiceCase] =
+    useState<ServiceCase | null>(null)
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
 
   // Fetch danh sách service cases chưa có bác sĩ
@@ -59,13 +78,15 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   })
 
   // Fetch danh sách bác sĩ
-  const { data: doctorsData, isLoading: isLoadingDoctors } = useGetDoctorListQuery({
-    pageNumber: 1,
-    pageSize: 100, // Get all doctors for dropdown
-  })
+  const { data: doctorsData, isLoading: isLoadingDoctors } =
+    useGetDoctorListQuery({
+      pageNumber: 1,
+      pageSize: 100, // Get all doctors for dropdown
+    })
 
   // Mutation để gán bác sĩ cho service case
-  const [addDoctorToServiceCase, { isLoading: isAssigning }] = useAddDoctorToServiceCaseMutation()
+  const [addDoctorToServiceCase, { isLoading: isAssigning }] =
+    useAddDoctorToServiceCaseMutation()
 
   // Xử lý gán bác sĩ cho service case
   const handleAssignDoctor = (serviceCase: ServiceCase, doctor: Doctor) => {
@@ -85,13 +106,15 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
         data: {}, // Empty data object as required by API
       }).unwrap()
 
-      message.success(`Đã gán bác sĩ ${selectedDoctor.name} cho dịch vụ thành công!`)
+      message.success(
+        `Đã gán bác sĩ ${selectedDoctor.name} cho dịch vụ thành công!`
+      )
       setConfirmModalVisible(false)
       setSelectedServiceCase(null)
       setSelectedDoctor(null)
     } catch (error: any) {
-      console.error("Error assigning doctor:", error)
-      message.error(error?.data?.message || "Gán bác sĩ thất bại!")
+      console.error('Error assigning doctor:', error)
+      message.error(error?.data?.message || 'Gán bác sĩ thất bại!')
     }
   }
 
@@ -110,8 +133,8 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
         <Menu
           items={[
             {
-              key: "no-doctors",
-              label: <span style={{ color: "#999" }}>Không có bác sĩ nào</span>,
+              key: 'no-doctors',
+              label: <span style={{ color: '#999' }}>Không có bác sĩ nào</span>,
               disabled: true,
             },
           ]}
@@ -126,17 +149,25 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
           label: (
             <div
               onClick={() => {
-                const serviceCase = serviceCases.find((sc) => sc._id === serviceCaseId)
+                const serviceCase = serviceCases.find(
+                  (sc) => sc._id === serviceCaseId
+                )
                 if (serviceCase) {
                   handleAssignDoctor(serviceCase, doctor)
                 }
               }}
             >
-              <div style={{ fontWeight: "bold" }}>{doctor.name}</div>
-              <div style={{ fontSize: "12px", color: "#666" }}>{doctor.email}</div>
-              <div style={{ fontSize: "12px", color: "#666" }}>{doctor.phoneNumber}</div>
+              <div style={{ fontWeight: 'bold' }}>{doctor.name}</div>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                {doctor.email}
+              </div>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                {doctor.phoneNumber}
+              </div>
               {doctor.specialization && (
-                <div style={{ fontSize: "11px", color: "#999" }}>Chuyên khoa: {doctor.specialization}</div>
+                <div style={{ fontSize: '11px', color: '#999' }}>
+                  Chuyên khoa: {doctor.specialization}
+                </div>
               )}
             </div>
           ),
@@ -147,56 +178,72 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
 
   const columns: ColumnsType<ServiceCase> = [
     {
-      title: "Khách hàng",
-      key: "customer",
+      title: 'Khách hàng',
+      key: 'customer',
       render: (_, record) => (
         <div>
-          <div style={{ fontWeight: "bold" }}>{record.account.name}</div>
-          <div style={{ fontSize: "12px", color: "#666" }}>{record.account.email}</div>
-          <div style={{ fontSize: "12px", color: "#666" }}>{record.phoneNumber}</div>
+          <div style={{ fontWeight: 'bold' }}>{record.account.name}</div>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            {record.account.email}
+          </div>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            {record.phoneNumber}
+          </div>
         </div>
       ),
     },
     {
-      title: "Loại dịch vụ",
-      key: "serviceType",
+      title: 'Loại dịch vụ',
+      key: 'serviceType',
       render: (_, record) => (
-        <Tag icon={record.isAtHome ? <HomeOutlined /> : <ShopOutlined />} color={record.isAtHome ? "green" : "blue"}>
-          {record.isAtHome ? "Tại nhà" : "Tại cơ sở"}
+        <Tag
+          icon={record.isAtHome ? <HomeOutlined /> : <ShopOutlined />}
+          color={record.isAtHome ? 'green' : 'blue'}
+        >
+          {record.isAtHome ? 'Tại nhà' : 'Tại cơ sở'}
         </Tag>
       ),
     },
     {
-      title: "Ngày đặt",
-      dataIndex: "bookingDate",
-      key: "bookingDate",
-      render: (date: string) => new Date(date).toLocaleDateString("vi-VN"),
-      sorter: (a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
+      title: 'Ngày đặt',
+      dataIndex: 'bookingDate',
+      key: 'bookingDate',
+      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
+      sorter: (a, b) =>
+        new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
     },
     {
-      title: "Tổng phí",
-      dataIndex: "totalFee",
-      key: "totalFee",
-      render: (fee: number) => `${fee.toLocaleString("vi-VN")} VNĐ`,
+      title: 'Tổng phí',
+      dataIndex: 'totalFee',
+      key: 'totalFee',
+      render: (fee: number) => `${fee.toLocaleString('vi-VN')} VNĐ`,
       sorter: (a, b) => a.totalFee - b.totalFee,
     },
     {
-      title: "Cơ sở",
-      key: "facility",
-      render: (_, record) => record.facility?.name || "N/A",
+      title: 'Cơ sở',
+      key: 'facility',
+      render: (_, record) => record.facility?.name || 'N/A',
     },
     {
-      title: "Trạng thái",
-      key: "status",
-      render: (_, record) => <Tag color="orange">Chưa có bác sĩ</Tag>,
+      title: 'Trạng thái',
+      key: 'status',
+      render: (_, record) => <Tag color='orange'>Chưa có bác sĩ</Tag>,
     },
     {
-      title: "Hành động",
-      key: "actions",
+      title: 'Hành động',
+      key: 'actions',
       render: (_, record) => (
-        <Space size="middle">
-          <Dropdown overlay={getDoctorMenu(record._id)} trigger={["click"]} disabled={isLoadingDoctors}>
-            <Button type="primary" icon={<UserAddOutlined />} loading={isLoadingDoctors}>
+        <Space size='middle'>
+          <Dropdown
+            overlay={getDoctorMenu(record._id)}
+            trigger={['click']}
+            disabled={isLoadingDoctors}
+          >
+            <Button
+              type='primary'
+              icon={<UserAddOutlined />}
+              loading={isLoadingDoctors}
+            >
               Gán bác sĩ <DownOutlined />
             </Button>
           </Dropdown>
@@ -219,38 +266,45 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
       <div
         style={{
           marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           gap: 8,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: "16px", fontWeight: "500" }}>Danh sách dịch vụ chưa được gán bác sĩ</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '16px', fontWeight: '500' }}>
+            Danh sách dịch vụ chưa được gán bác sĩ
+          </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: "14px", color: "#666" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '14px', color: '#666' }}>
             Tổng: {serviceCasesError?.status === 404 ? 0 : totalItems} dịch vụ
           </span>
         </div>
       </div>
 
       {isLoadingServices ? (
-        <div style={{ textAlign: "center", padding: "50px 0" }}>
-          <Spin size="large" />
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <Spin size='large' />
         </div>
       ) : serviceCasesError && serviceCasesError.status === 404 ? (
-        <div style={{ textAlign: "center", padding: "50px 0" }}>
-          <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <div
+            style={{ fontSize: '16px', color: '#666', marginBottom: '16px' }}
+          >
             Không có dịch vụ nào chưa được gán bác sĩ
           </div>
-          <div style={{ fontSize: "14px", color: "#999" }}>Tất cả dịch vụ đã được phân công bác sĩ phụ trách</div>
+          <div style={{ fontSize: '14px', color: '#999' }}>
+            Tất cả dịch vụ đã được phân công bác sĩ phụ trách
+          </div>
         </div>
       ) : serviceCasesError ? (
-        <div style={{ textAlign: "center", padding: "50px 0" }}>
-          <div style={{ fontSize: "16px", color: "#ff4d4f" }}>
-            Có lỗi xảy ra khi tải dữ liệu: {serviceCasesError.data?.message || "Unknown error"}
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <div style={{ fontSize: '16px', color: '#ff4d4f' }}>
+            Có lỗi xảy ra khi tải dữ liệu:{' '}
+            {serviceCasesError.data?.message || 'Unknown error'}
           </div>
         </div>
       ) : (
@@ -258,11 +312,11 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
           <Table
             dataSource={paginatedData}
             columns={columns}
-            rowKey="_id"
+            rowKey='_id'
             pagination={false}
             loading={isFetchingServices}
             locale={{
-              emptyText: "Không có dịch vụ nào chưa được gán bác sĩ",
+              emptyText: 'Không có dịch vụ nào chưa được gán bác sĩ',
             }}
           />
 
@@ -271,14 +325,16 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
               current={pageNumber}
               pageSize={pageSize}
               total={totalItems}
-              style={{ textAlign: "center", paddingTop: 20 }}
+              style={{ textAlign: 'center', paddingTop: 20 }}
               onChange={(page, size) => {
                 setPageNumber(page)
                 setPageSize(size || 10)
               }}
               showSizeChanger
               showQuickJumper
-              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} dịch vụ`}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} của ${total} dịch vụ`
+              }
             />
           )}
         </>
@@ -287,8 +343,8 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
       {/* Confirmation Modal */}
       <Modal
         title={
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ExclamationCircleOutlined style={{ color: "#faad14" }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: '#faad14' }} />
             <span>Xác nhận gán bác sĩ</span>
           </div>
         }
@@ -296,52 +352,59 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
         onOk={handleConfirmAssignment}
         onCancel={handleCancelAssignment}
         confirmLoading={isAssigning}
-        okText="Xác nhận gán"
-        cancelText="Hủy"
-        okButtonProps={{ type: "primary" }}
+        okText='Xác nhận gán'
+        cancelText='Hủy'
+        okButtonProps={{ type: 'primary' }}
       >
-        <div style={{ padding: "16px 0" }}>
-          <div style={{ marginBottom: "16px" }}>
+        <div style={{ padding: '16px 0' }}>
+          <div style={{ marginBottom: '16px' }}>
             <strong>Thông tin dịch vụ:</strong>
-            <div style={{ marginLeft: "16px", marginTop: "8px" }}>
+            <div style={{ marginLeft: '16px', marginTop: '8px' }}>
               <div>• Khách hàng: {selectedServiceCase?.account.name}</div>
               <div>• Email: {selectedServiceCase?.account.email}</div>
               <div>• Số điện thoại: {selectedServiceCase?.phoneNumber}</div>
               <div>
-                • Ngày đặt:{" "}
+                • Ngày đặt:{' '}
                 {selectedServiceCase?.bookingDate
-                  ? new Date(selectedServiceCase.bookingDate).toLocaleDateString("vi-VN")
-                  : "N/A"}
+                  ? new Date(
+                      selectedServiceCase.bookingDate
+                    ).toLocaleDateString('vi-VN')
+                  : 'N/A'}
               </div>
               <div>
-                • Tổng phí:{" "}
-                {selectedServiceCase?.totalFee ? `${selectedServiceCase.totalFee.toLocaleString("vi-VN")} VNĐ` : "N/A"}
+                • Tổng phí:{' '}
+                {selectedServiceCase?.totalFee
+                  ? `${selectedServiceCase.totalFee.toLocaleString('vi-VN')} VNĐ`
+                  : 'N/A'}
               </div>
             </div>
           </div>
 
-          <div style={{ marginBottom: "16px" }}>
+          <div style={{ marginBottom: '16px' }}>
             <strong>Bác sĩ được chọn:</strong>
-            <div style={{ marginLeft: "16px", marginTop: "8px" }}>
+            <div style={{ marginLeft: '16px', marginTop: '8px' }}>
               <div>• Tên: {selectedDoctor?.name}</div>
               <div>• Email: {selectedDoctor?.email}</div>
               <div>• Số điện thoại: {selectedDoctor?.phoneNumber}</div>
-              {selectedDoctor?.specialization && <div>• Chuyên khoa: {selectedDoctor.specialization}</div>}
+              {selectedDoctor?.specialization && (
+                <div>• Chuyên khoa: {selectedDoctor.specialization}</div>
+              )}
             </div>
           </div>
 
           <div
             style={{
-              marginTop: "20px",
-              padding: "12px",
-              backgroundColor: "#fff7e6",
-              borderRadius: "6px",
-              border: "1px solid #ffd591",
+              marginTop: '20px',
+              padding: '12px',
+              backgroundColor: '#fff7e6',
+              borderRadius: '6px',
+              border: '1px solid #ffd591',
             }}
           >
-            <strong style={{ color: "#d46b08" }}>⚠️ Lưu ý:</strong>
-            <div style={{ color: "#d46b08", marginTop: "4px" }}>
-              Sau khi gán bác sĩ, dịch vụ sẽ được chuyển sang trạng thái "Đã có bác sĩ phụ trách" và không thể hoàn tác.
+            <strong style={{ color: '#d46b08' }}>⚠️ Lưu ý:</strong>
+            <div style={{ color: '#d46b08', marginTop: '4px' }}>
+              Sau khi gán bác sĩ, dịch vụ sẽ được chuyển sang trạng thái "Đã có
+              bác sĩ phụ trách" và không thể hoàn tác.
             </div>
           </div>
         </div>

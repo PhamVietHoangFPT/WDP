@@ -40,7 +40,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: ' name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -52,7 +51,6 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: 'name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee' },
       })
       .exec()
   }
@@ -111,7 +109,16 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: '_id name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee _id' },
+      })
+      .exec()
+  }
+  async findByName(name: string): Promise<ServiceDocument | null> {
+    return this.serviceModel
+      .findOne({ name, deleted_at: null })
+      .populate({ path: 'timeReturn', select: '_id timeReturn timeReturnFee' })
+      .populate({
+        path: 'sample',
+        select: '_id name fee',
       })
       .exec()
   }
@@ -147,20 +154,15 @@ export class ServiceRepository implements IServiceRepository {
       await this.timeReturnRepository.getTimeReturnFeeById(timeReturnId)
 
     const sampleId = await this.getSampleId(id)
-    const sampleTypeId =
-      await this.sampleRepository.getSampleTypeIdBySampleId(sampleId)
 
-    const sampleAndSampleTypeFee =
-      await this.sampleRepository.getSampleTotalPrice(sampleId, sampleTypeId)
+    const sampleFee = await this.sampleRepository.getSampleTotalPrice(sampleId)
     let totalFee: number
     if (numberOfTestTaker === 2) {
-      totalFee = serviceFee
-        ? serviceFee.fee + timeReturnFee + sampleAndSampleTypeFee
-        : null
+      totalFee = serviceFee ? serviceFee.fee + timeReturnFee + sampleFee : null
     }
     if (numberOfTestTaker === 3) {
       totalFee = serviceFee
-        ? serviceFee.fee * 1.5 + timeReturnFee + sampleAndSampleTypeFee
+        ? serviceFee.fee * 1.5 + timeReturnFee + sampleFee
         : null
     }
 
@@ -175,6 +177,7 @@ export class ServiceRepository implements IServiceRepository {
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return service?.timeReturn ? service.timeReturn.toString() : null
   }
+
   findWithQuery(
     filter: Record<string, unknown>,
   ): mongoose.Query<ServiceDocument[], ServiceDocument> {
@@ -185,7 +188,13 @@ export class ServiceRepository implements IServiceRepository {
       .populate({
         path: 'sample',
         select: ' name fee',
-        populate: { path: 'sampleType', select: 'name sampleTypeFee ' },
       })
+  }
+  aggregate(pipeline: any[]): mongoose.Aggregate<any[]> {
+    return this.serviceModel.aggregate(pipeline)
+  }
+
+  aggregateOne(pipeline: any[]): mongoose.Aggregate<any> {
+    return this.serviceModel.aggregate(pipeline)
   }
 }

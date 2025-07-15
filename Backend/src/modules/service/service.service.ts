@@ -12,12 +12,17 @@ import { CreateServiceDto } from './dto/createService.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { isMongoId } from 'class-validator'
+import { FindAllServiceQueryDto } from './dto/find-all-service-query.dto'
+import { ITimeReturnRepository } from '../timeReturn/interfaces/itimeReturn.repository'
+import mongoose from 'mongoose'
 
 @Injectable()
 export class ServiceService implements IServiceService {
   constructor(
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
+    @Inject(ITimeReturnRepository)
+    private readonly timeReturnRepository: ITimeReturnRepository,
   ) {}
 
   private mapToResponseDto(service: Service): ServiceResponseDto {
@@ -28,6 +33,8 @@ export class ServiceService implements IServiceService {
       sample: service.sample,
       isAdministration: service.isAdministration,
       isAgnate: service.isAgnate,
+      name: service.name,
+      isSelfSampling: service.isSelfSampling,
       deleted_at: service.deleted_at,
       deleted_by: service.deleted_by,
     })
@@ -54,6 +61,12 @@ export class ServiceService implements IServiceService {
     userId: string,
     createServiceDto: CreateServiceDto,
   ): Promise<ServiceResponseDto> {
+    const existingService = await this.serviceRepository.findByName(
+      createServiceDto.name,
+    )
+    if (existingService) {
+      throw new ConflictException('Tên dịch vụ đã tồn tại.')
+    }
     try {
       const newService = await this.serviceRepository.create(userId, {
         ...createServiceDto,
@@ -69,39 +82,128 @@ export class ServiceService implements IServiceService {
   async findAllService(
     pageNumber: number,
     pageSize: number,
+    filters: Partial<FindAllServiceQueryDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = {}
-    const [services, totalItems] = await Promise.all([
-      this.serviceRepository
-        .findWithQuery(filter) // Returns a query object
-        .skip(skip)
-        .limit(pageSize)
-        .exec(), // Execute the query
-      this.serviceRepository.countDocuments(filter), // Use repository for count
-    ])
-    if (!services || services.length == 0) {
-      throw new ConflictException('Không tìm thấy dịch vụ nào.')
-    } else {
-      try {
-        const totalPages = Math.ceil(totalItems / pageSize)
-        const data = services.map((service: Service) =>
-          this.mapToResponseDto(service),
-        ) // Explicitly type `user`
-        return {
-          data,
-          pagination: {
-            totalItems,
-            totalPages,
-            currentPage: pageNumber,
-            pageSize,
-          },
-        }
-      } catch (error) {
-        throw new InternalServerErrorException('Lỗi khi lấy danh sách dịch vụ.')
+
+    const matchStage: any = {}
+
+    if (filters.isAgnate !== undefined) {
+      matchStage.isAgnate = filters.isAgnate
+    }
+    if (filters.isAdministration !== undefined) {
+      matchStage.isAdministration = filters.isAdministration
+    }
+    if (filters.isSelfSampling !== undefined) {
+      matchStage.isSelfSampling = filters.isSelfSampling
+    }
+    if (filters.name !== undefined) {
+      matchStage.name = {
+        $regex: filters.name,
+        $options: 'i',
       }
     }
+
+    const pipeline: any[] = [
+      {
+        $lookup: {
+          from: 'timereturns',
+          localField: 'timeReturn',
+          foreignField: '_id',
+          as: 'timeReturn',
+        },
+      },
+      {
+        $unwind: {
+          path: '$timeReturn',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'samples',
+          localField: 'sample',
+          foreignField: '_id',
+          as: 'sample',
+        },
+      },
+      {
+        $unwind: {
+          path: '$sample',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]
+
+    // ✅ GOM HẾT FILTER
+    const finalMatchStage: any = { ...matchStage }
+
+    if (filters.sampleName) {
+      finalMatchStage['sample.name'] = {
+        $regex: filters.sampleName,
+        $options: 'i',
+      }
+    }
+
+    if (filters.timeReturn !== undefined) {
+      finalMatchStage['timeReturn.timeReturn'] = filters.timeReturn
+    }
+
+    if (Object.keys(finalMatchStage).length > 0) {
+      pipeline.push({
+        $match: finalMatchStage,
+      })
+    }
+
+    // Đếm total trước skip
+    const totalPipeline = [...pipeline, { $count: 'total' }]
+    const [totalResult] = await this.serviceRepository
+      .aggregate(totalPipeline)
+      .exec()
+    const totalItems = totalResult?.total || 0
+    const totalPages = Math.ceil(totalItems / pageSize)
+
+    pipeline.push({
+      $project: {
+        _id: 1,
+        name: 1,
+        fee: 1,
+        isAgnate: 1,
+        isAdministration: 1,
+        isSelfSampling: 1,
+        timeReturn: {
+          timeReturn: '$timeReturn.timeReturn',
+          timeReturnFee: '$timeReturn.timeReturnFee',
+        },
+        sample: {
+          name: '$sample.name',
+          fee: '$sample.fee',
+        },
+      },
+    })
+
+    pipeline.push({ $skip: skip })
+    pipeline.push({ $limit: pageSize })
+
+    const services = await this.serviceRepository.aggregate(pipeline).exec()
+
+    if (!services || services.length === 0) {
+      throw new ConflictException('Không tìm thấy dịch vụ nào.')
+    }
+
+    const data = services.map((service: any) => this.mapToResponseDto(service))
+
+    return {
+      data,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize,
+      },
+    }
   }
+
   async updateService(
     id: string,
     userId: string,

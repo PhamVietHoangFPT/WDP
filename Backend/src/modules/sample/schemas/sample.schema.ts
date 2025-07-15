@@ -17,13 +17,6 @@ export class Sample extends BaseEntity {
 
   @Prop({ type: Number, required: true })
   fee: number
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'SampleType',
-  })
-  sampleType: mongoose.Schema.Types.ObjectId
 }
 
 export const SampleSchema = SchemaFactory.createForClass(Sample)

@@ -36,7 +36,10 @@ const authSlice = createSlice({
         name: decodedToken.name,
         phoneNumber: decodedToken.phoneNumber,
         exp: decodedToken.exp,
-        facility: decodedToken.facilityId,
+        facility: {
+          _id: decodedToken.facility?._id || '',
+          facilityName: decodedToken.facility?.facilityName || '',
+        },
         gender: decodedToken.gender,
       }
 
@@ -50,10 +53,8 @@ const authSlice = createSlice({
       Cookies.set('userToken', token, { expires: expirationDate })
       if (state.userData.role === 'Customer') {
         window.location.href = '/'
-      } else if (state.userData.role === 'Staff') {
-        window.location.href = '/staff'
       } else {
-        window.location.href = `/${state.userData.role.toLowerCase()}`
+        window.location.href = `/${state.userData.role.toLowerCase().replace(/ /g, '-')}`
       }
     },
     logout: (state) => {

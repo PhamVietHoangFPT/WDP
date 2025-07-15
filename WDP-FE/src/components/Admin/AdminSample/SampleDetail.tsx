@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   useGetSampleDetailQuery,
   useUpdateSampleMutation,
 } from '../../../features/admin/sampleAPI'
-import { useGetSampleTypesQuery } from '../../../features/admin/sampleTypeAPI'
 import {
   Card,
   Descriptions,
@@ -15,12 +14,9 @@ import {
   Form,
   Input,
   InputNumber,
-  Select,
   message,
 } from 'antd'
 import { EditOutlined } from '@ant-design/icons'
-
-const { Option } = Select
 
 export default function SampleDetail() {
   const { sampleId } = useParams()
@@ -34,8 +30,6 @@ export default function SampleDetail() {
     isError,
     error,
   } = useGetSampleDetailQuery(sampleId)
-  const { data: sampleTypes, isLoading: isLoadingTypes } =
-    useGetSampleTypesQuery({})
   const [updateSample, { isLoading: isUpdating }] = useUpdateSampleMutation()
 
   const sampleData = response
@@ -45,35 +39,9 @@ export default function SampleDetail() {
     form.setFieldsValue({
       name: sampleData.name,
       fee: sampleData.fee,
-      sampleType: sampleData.sampleType._id,
     })
     setIsModalOpen(true)
   }
-
-  const selectOptions = useMemo(() => {
-    // Lấy danh sách options từ API
-    const optionsFromAPI =
-      sampleTypes?.data?.map((type) => ({
-        value: type._id,
-        label: type.name,
-      })) || []
-
-    // Kiểm tra xem option hiện tại có trong danh sách chưa
-    const currentTypeInOptions = optionsFromAPI.some(
-      (opt) => opt.value === sampleData?.sampleType?._id
-    )
-
-    // Nếu chưa có (vì API chưa tải xong) VÀ chúng ta có dữ liệu chi tiết
-    // thì hãy tự thêm nó vào đầu danh sách
-    if (sampleData?.sampleType && !currentTypeInOptions) {
-      optionsFromAPI.unshift({
-        value: sampleData.sampleType._id,
-        label: sampleData.sampleType.name,
-      })
-    }
-
-    return optionsFromAPI
-  }, [sampleTypes, sampleData])
 
   const handleCancel = () => {
     setIsModalOpen(false)
@@ -108,11 +76,6 @@ export default function SampleDetail() {
       <Result status='404' title='404' subTitle='Không tìm thấy mẫu thử.' />
     )
 
-  if (isLoadingTypes)
-    return (
-      <Spin size='large' style={{ display: 'block', margin: '40px auto' }} />
-    )
-
   return (
     <div style={{ padding: '24px' }}>
       <Card
@@ -133,15 +96,6 @@ export default function SampleDetail() {
               style: 'currency',
               currency: 'VND',
             }).format(sampleData.fee)}
-          </Descriptions.Item>
-          <Descriptions.Item label='Kiểu Mẫu'>
-            {sampleData.sampleType.name}
-          </Descriptions.Item>
-          <Descriptions.Item label='Phí Kiểu Mẫu'>
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-            }).format(sampleData.sampleType.sampleTypeFee)}
           </Descriptions.Item>
         </Descriptions>
       </Card>
@@ -185,23 +139,6 @@ export default function SampleDetail() {
                 value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0
               }
             />
-          </Form.Item>
-          <Form.Item
-            name='sampleType'
-            label='Kiểu Mẫu'
-            rules={[{ required: true }]}
-          >
-            <Select
-              loading={isLoadingTypes}
-              placeholder='Chọn một kiểu mẫu'
-              options={selectOptions}
-            >
-              {sampleTypes?.data?.map((type) => (
-                <Option key={type._id} value={type._id}>
-                  {type.name}
-                </Option>
-              ))}
-            </Select>
           </Form.Item>
         </Form>
       </Modal>

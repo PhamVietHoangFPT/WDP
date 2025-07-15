@@ -80,9 +80,6 @@ const AdnRegisteration: React.FC = () => {
                             Xét nghiệm huyết thống bên{' '}
                             {service.isAgnate ? 'nội' : 'ngoại'}
                           </p>
-                          <p style={{ fontStyle: 'italic' }}>
-                            Loại mẫu: {service.sample.sampleType.name}
-                          </p>
                           <p
                             style={{ fontWeight: 'bold', fontStyle: 'italic' }}
                           >
@@ -90,13 +87,11 @@ const AdnRegisteration: React.FC = () => {
                             {service.fee &&
                             service.timeReturn &&
                             service.timeReturn.timeReturnFee &&
-                            service.sample.fee &&
-                            service.sample.sampleType.sampleTypeFee
+                            service.sample.fee
                               ? (
                                   service.fee +
                                   service.timeReturn.timeReturnFee +
-                                  service.sample.fee +
-                                  service.sample.sampleType.sampleTypeFee
+                                  service.sample.fee
                                 ).toLocaleString('vi-VN') + '₫'
                               : 'Contact for pricing'}
                           </p>

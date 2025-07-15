@@ -1,5 +1,7 @@
 import React from 'react'
 import type { LayoutRoute } from '../types/routes'
+import ServiceCase from '../pages/ProfileUser/ServiceCase'
+import ServiceCaseDetail from '../pages/ProfileUser/ServiceCaseDetail'
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = React.lazy(() =>
   import('../components/layout/AdminLayout').then((module) => ({
@@ -140,17 +142,19 @@ const TimeReturnList = React.lazy(
 const TimeReturnDetail = React.lazy(
   () => import('../components/Admin/AdminTimeReturn/TimeReturnDetail')
 )
-const SampleTypeList = React.lazy(
-  () => import('../components/Admin/AdminSampleType/SampleTypeList')
-)
-const SampleTypeDetail = React.lazy(
-  () => import('../components/Admin/AdminSampleType/SampleTypeDetail')
-)
 const SampleList = React.lazy(
   () => import('../components/Admin/AdminSample/SampleList')
 )
 const SampleDetail = React.lazy(
   () => import('../components/Admin/AdminSample/SampleDetail')
+)
+
+const SamplingKitInventoryList = React.lazy(
+  () => import('../components/Staff/SamplingKitInventoryList')
+)
+
+const SamplingKitInventoryDetail = React.lazy(
+  () => import('../components/Staff/SamplingKitInventoryDetail')
 )
 
 const routes: LayoutRoute[] = [
@@ -223,6 +227,16 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
+        path: '/service-case-customer',
+        component: ServiceCase,
+        role: ['Customer'],
+      },
+      {
+        path: '/service-case-customer/:id',
+        component: ServiceCaseDetail,
+        role: ['Customer'],
+      },
+      {
         path: '/home-registeration',
         component: HomeRegisteration,
       },
@@ -285,14 +299,6 @@ const routes: LayoutRoute[] = [
         component: TimeReturnDetail,
       },
       {
-        path: '/admin/sample-types',
-        component: SampleTypeList,
-      },
-      {
-        path: '/admin/sample-types/:sampleTypeId',
-        component: SampleTypeDetail,
-      },
-      {
         path: '/admin/samples',
         component: SampleList,
       },
@@ -328,7 +334,7 @@ const routes: LayoutRoute[] = [
     layout: DeliveryStaffLayout,
     data: [
       {
-        path: '/delivery',
+        path: '/delivery-staff',
         component: DeliveryStaffHomePage,
         // role: ['admin'],
       },
@@ -346,14 +352,15 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: SampleCollectorLayout,
+    role: ['Sample Collector'],
     data: [
       {
-        path: '/sample collector',
+        path: '/sample-collector',
         component: SampleCollectorHomePage,
         // role: ['admin'],
       },
       {
-        path: '/sample collector/service-cases',
+        path: '/sample-collector/service-cases',
         component: SampleCollectorServiceCase,
         // role: ['admin'],
       },
@@ -376,11 +383,19 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: StaffLayout,
+    role: ['Staff'],
     data: [
       {
         path: '/staff',
         component: StaffHomePage,
-        role: ['Staff'],
+      },
+      {
+        path: '/staff/sampling-kit-inventory',
+        component: SamplingKitInventoryList,
+      },
+      {
+        path: '/staff/sampling-kit-inventory/:samplingKitInventoryId',
+        component: SamplingKitInventoryDetail,
       },
     ],
   },

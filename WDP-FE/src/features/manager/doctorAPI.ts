@@ -3,10 +3,7 @@ import { apiSlice } from '../../apis/apiSlice'
 const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getDoctorList: builder.query({
-      query: ({
-        pageNumber,
-        pageSize,
-      }) => ({
+      query: ({ pageNumber, pageSize }) => ({
         url: '/managers/doctors',
         method: 'GET',
         params: {
@@ -19,10 +16,7 @@ const doctorAPI = apiSlice.injectEndpoints({
     }),
 
     getServiceCaseNoDoctorList: builder.query({
-      query: ({
-        pageNumber,
-        pageSize,
-      }) => ({
+      query: ({ pageNumber, pageSize }) => ({
         url: '/managers/service-cases-without-doctor',
         method: 'GET',
         params: {
@@ -43,7 +37,6 @@ const doctorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['doctor'],
     }),
-
 
     // createSlotTemplate: builder.mutation({
     //   query: (data) => ({
@@ -114,7 +107,7 @@ const doctorAPI = apiSlice.injectEndpoints({
 })
 
 export const {
-    useGetDoctorListQuery,
-    useGetServiceCaseNoDoctorListQuery,
-    useAddDoctorToServiceCaseMutation,
+  useGetDoctorListQuery,
+  useGetServiceCaseNoDoctorListQuery,
+  useAddDoctorToServiceCaseMutation,
 } = doctorAPI

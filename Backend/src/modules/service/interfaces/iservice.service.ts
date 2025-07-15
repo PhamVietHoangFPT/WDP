@@ -2,6 +2,7 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { CreateServiceDto } from '../dto/createService.dto'
 import { ServiceResponseDto } from '../dto/serviceResponse.dto'
 import { UpdateServiceDto } from '../dto/updateService.dto'
+import { FilterServiceDto } from '../dto/filter-service.dto'
 
 export interface IServiceService {
   createService(
@@ -12,6 +13,7 @@ export interface IServiceService {
   findAllService(
     pageNumber: number,
     pageSize: number,
+    filters: Partial<FilterServiceDto>,
   ): Promise<PaginatedResponse<ServiceResponseDto>>
   findServiceById(id: string): Promise<ServiceResponseDto>
 

@@ -1,6 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd'
+import {
+  Layout,
+  Menu,
+  Input,
+  Avatar,
+  Button,
+  Tooltip,
+  Divider,
+  Spin,
+} from 'antd' // Thêm Spin
 import {
   SearchOutlined,
   UserOutlined,
@@ -8,7 +17,9 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
-  BarChartOutlined,
+  BarChartOutlined, // Giữ nguyên hoặc thay đổi icon phù hợp hơn nếu có
+  // Thêm các icon khác nếu cần cho các mục menu khác của Doctor
+  // Ví dụ: FileSearchOutlined, ReadOutlined
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -20,10 +31,30 @@ export const SideBar = () => {
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  // Lấy userData từ cookie và decode nó
+  const userDataString = Cookies.get('userData')
+  let userData = {}
+  if (userDataString) {
+    try {
+      // Decode URI component trước khi parse JSON
+      userData = JSON.parse(decodeURIComponent(userDataString))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ cookie:', error)
+    }
+  }
+
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/manager') return ['manager']
+    // Điều chỉnh để khớp với path của Doctor
+    if (pathname.startsWith('/doctor')) {
+      const segments = pathname.split('/').filter(Boolean)
+      if (segments.length > 1) {
+        // Ví dụ: '/doctor/service-cases-without-results' sẽ trả về ['doctor/service-cases-without-results']
+        return [pathname.substring(1)] // Lấy key đầy đủ sau dấu '/' đầu tiên
+      }
+      return ['doctor'] // Nếu chỉ có '/doctor'
+    }
 
     // Check if pathname includes any of these paths
     const paths = [
@@ -34,6 +65,9 @@ export const SideBar = () => {
       'reports',
       'documents',
       'settings',
+      // Thêm các path của doctor vào đây
+      'doctor',
+      'doctor/service-cases-without-results',
     ]
 
     for (const path of paths) {
@@ -49,16 +83,16 @@ export const SideBar = () => {
 
     return []
   }
-  const userDataString = Cookies.get('userData')
-  const userData = userDataString ? JSON.parse(userDataString) : {}
+
   // Define the menu items
   const items = [
     {
-      key: 'doctor',
-      icon: <BarChartOutlined />,
+      key: 'doctor/service-cases-without-results', // Đảm bảo key khớp với path
+      icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
       label: 'Hồ sơ chưa có kết quả',
       onClick: () => navigate('doctor/service-cases-without-results'),
     },
+    // Thêm các mục menu khác của Doctor vào đây nếu có
   ]
 
   return (
@@ -157,10 +191,15 @@ export const SideBar = () => {
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Manager User'}
+                {/* Sửa userData?.Name thành userData?.name để khớp với cookie */}
+                {userData?.name || 'Doctor User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'manager@vaccitrack.com'}
+                {/* Sửa userData?.Email thành userData?.email để khớp với cookie */}
+                {userData?.email || 'doctor@vaccitrack.com'}
+              </div>
+              <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
+                {userData?.facility.facilityName || 'No Facility'}
               </div>
             </div>
           )}

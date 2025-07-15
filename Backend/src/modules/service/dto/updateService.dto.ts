@@ -43,6 +43,19 @@ export class UpdateServiceDto {
   @IsBoolean()
   isAdministration: boolean
 
+  @ApiProperty({
+    example: 'Blood',
+    description: 'Tên của dịch vụ',
+  })
+  @IsNotEmpty()
+  @IsString()
+  name: string
+
+  @ApiProperty({
+    example: true,
+  })
+  @IsBoolean()
+  isSelfSampling: boolean
   constructor(partial: Partial<CreateServiceDto>) {
     Object.assign(this, partial)
   }
