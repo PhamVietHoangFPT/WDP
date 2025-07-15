@@ -1,162 +1,152 @@
-import React from 'react'
+import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
-import ServiceCase from '../pages/ProfileUser/ServiceCase'
-import ServiceCaseDetail from '../pages/ProfileUser/ServiceCaseDetail'
+
 // Các layout này được export dưới dạng named export { LayoutName }
-const AdminLayout = React.lazy(() =>
+const AdminLayout = lazy(() =>
   import('../components/layout/AdminLayout').then((module) => ({
     default: module.AdminLayout,
   }))
 )
-const DeliveryStaffLayout = React.lazy(() =>
+const DeliveryStaffLayout = lazy(() =>
   import('../components/layout/DeliveryStaffLayout').then((module) => ({
     default: module.DeliveryStaffLayout,
   }))
 )
-const DoctorLayout = React.lazy(() =>
+const DoctorLayout = lazy(() =>
   import('../components/layout/DoctorLayout').then((module) => ({
     default: module.DoctorLayout,
   }))
 )
-const ManagerLayout = React.lazy(() =>
+const ManagerLayout = lazy(() =>
   import('../components/layout/ManagerLayout').then((module) => ({
     default: module.ManagerLayout,
   }))
 )
-const StaffLayout = React.lazy(() =>
+const StaffLayout = lazy(() =>
   import('../components/layout/StaffLayout').then((module) => ({
     default: module.StaffLayout,
   }))
 )
-const SampleCollectorLayout = React.lazy(() =>
+const SampleCollectorLayout = lazy(() =>
   import('../components/layout/SampleCollectorLayout').then((module) => ({
     default: module.SampleCollectorLayout,
   }))
 )
 
 // Các layout này được export dưới dạng export default
-const LoginRegisterLayout = React.lazy(
+const LoginRegisterLayout = lazy(
   () => import('../components/layout/LoginRegisterLayout')
 )
-const MainLayout = React.lazy(() => import('../components/layout/MainLayout'))
+const MainLayout = lazy(() => import('../components/layout/MainLayout'))
 
 // --- Các Trang (tải lười - lazy loading) ---
-const Homepage = React.lazy(() => import('../components/Home/HomePage'))
-const AdminHomePage = React.lazy(
-  () => import('../pages/AdminHomePage/AdminHomePage')
-)
-const CreateFacilityAdmin = React.lazy(
+const Homepage = lazy(() => import('../components/Home/HomePage'))
+const AdminHomePage = lazy(() => import('../pages/AdminHomePage/AdminHomePage'))
+const CreateFacilityAdmin = lazy(
   () => import('../pages/CreateFacilityAdmin/CreateFacilityAdmin')
 )
-const Blog = React.lazy(() => import('../pages/Blogs/Blog'))
-const BlogDetail = React.lazy(() => import('../pages/Blogs/BlogDetail'))
-const DeliveryStaffHomePage = React.lazy(
+const Blog = lazy(() => import('../pages/Blogs/Blog'))
+const BlogDetail = lazy(() => import('../pages/Blogs/BlogDetail'))
+const DeliveryStaffHomePage = lazy(
   () => import('../pages/DeliveryStaffHomePage/DeliveryStaffHomePage')
 )
-const DoctorHomePage = React.lazy(
+const DoctorHomePage = lazy(
   () => import('../pages/DoctorHomePage/DoctorHomePage')
 )
-const FacilityDetailAdmin = React.lazy(
+const FacilityDetailAdmin = lazy(
   () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
 )
-const FacilityListAdmin = React.lazy(
+const FacilityListAdmin = lazy(
   () => import('../pages/FacilityListAdmin/FacilityListAdmin')
 )
-const Login = React.lazy(() => import('../pages/Login/Login'))
-const ManagerHomePage = React.lazy(
+const Login = lazy(() => import('../pages/Login/Login'))
+const ManagerHomePage = lazy(
   () => import('../pages/ManagerHomePage/ManagerHomePage')
 )
-const CreateTesteeForm = React.lazy(
+const CreateTesteeForm = lazy(
   () => import('../pages/ProfileUser/CreateTestTaker')
 )
-const ProfileUser = React.lazy(() => import('../pages/ProfileUser/ProfileUser'))
-const TestTakerEditForm = React.lazy(
+const ProfileUser = lazy(() => import('../pages/ProfileUser/ProfileUser'))
+const TestTakerEditForm = lazy(
   () => import('../pages/ProfileUser/TestTakerEditForm')
 )
-const TestTakerList = React.lazy(
-  () => import('../pages/ProfileUser/TestTakerList')
-)
-const Register = React.lazy(() => import('../pages/Register/Register'))
-const CreateSlot = React.lazy(() => import('../pages/SlotAdmin/SlotAdmin'))
-const SlotsFacilitiesList = React.lazy(
+const TestTakerList = lazy(() => import('../pages/ProfileUser/TestTakerList'))
+const Register = lazy(() => import('../pages/Register/Register'))
+const CreateSlot = lazy(() => import('../pages/SlotAdmin/SlotAdmin'))
+const SlotsFacilitiesList = lazy(
   () => import('../pages/SlotFacilitiesAdmin/SlotFacilitiesAdmin')
 )
-const StaffHomePage = React.lazy(
-  () => import('../pages/StaffHomePage/StaffHomePage')
-)
-const PaymentPage = React.lazy(() => import('../pages/Payment/PaymentPage'))
-const PaymentSuccessPage = React.lazy(
+const StaffHomePage = lazy(() => import('../pages/StaffHomePage/StaffHomePage'))
+const PaymentPage = lazy(() => import('../pages/Payment/PaymentPage'))
+const PaymentSuccessPage = lazy(
   () => import('../pages/Payment/PaymentSuccessPage')
 )
-const PaymentHistory = React.lazy(
-  () => import('../pages/ProfileUser/PaymentHistory')
-)
-const PaymentDetail = React.lazy(
-  () => import('../pages/ProfileUser/PaymentDetail')
-)
-const HomeRegisteration = React.lazy(
+const PaymentHistory = lazy(() => import('../pages/ProfileUser/PaymentHistory'))
+const PaymentDetail = lazy(() => import('../pages/ProfileUser/PaymentDetail'))
+const HomeRegisteration = lazy(
   () => import('../pages/HomeRegisteration/homeRegisteration')
 )
-const ServiceAtHome = React.lazy(
-  () => import('../pages/ServiceAtHome/serviceAtHome')
-)
-const ManagerCreateAccount = React.lazy(
+const ServiceAtHome = lazy(() => import('../pages/ServiceAtHome/serviceAtHome'))
+const ManagerCreateAccount = lazy(
   () => import('../pages/ManagerCreateAccount/ManagerCreateAccount')
 )
-const SampleCollectorHomePage = React.lazy(
+const SampleCollectorHomePage = lazy(
   () => import('../pages/SampleCollectorHomePage/SampleCollectorHomePage')
 )
-const SampleCollectorServiceCase = React.lazy(
+const SampleCollectorServiceCase = lazy(
   () => import('../pages/SampleCollectorServiceCase/SampleCollectorServiceCase')
 )
-const ServiceAtFacility = React.lazy(
+const ServiceAtFacility = lazy(
   () => import('../pages/ServiceAtFacility/ServiceAtFacility')
 )
-const AdnFacilityRegisteration = React.lazy(
+const AdnFacilityRegisteration = lazy(
   () => import('../pages/AdnFacilityRegisteration/AdnFacilityRegisteration')
 )
-const DoctorServiceCaseWithoutResult = React.lazy(
+const DoctorServiceCaseWithoutResult = lazy(
   () =>
     import(
       '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
     )
 )
-const AdminService = React.lazy(
-  () => import('../pages/AdminService/AdminService')
-)
-const ServiceDetail = React.lazy(
+const AdminService = lazy(() => import('../pages/AdminService/AdminService'))
+const ServiceDetail = lazy(
   () => import('../components/Admin/AdminService/ServiceDetail')
 )
-const ManagerServiceCaseWithoutDoctor = React.lazy(
+const ManagerServiceCaseWithoutDoctor = lazy(
   () =>
     import(
       '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
     )
 )
-const ManagerServiceCaseWithoutSampleCollector = React.lazy(
+const ManagerServiceCaseWithoutSampleCollector = lazy(
   () => import('../pages/Sample/Sample')
 )
-const TimeReturnList = React.lazy(
+const TimeReturnList = lazy(
   () => import('../components/Admin/AdminTimeReturn/TimeReturnList')
 )
-const TimeReturnDetail = React.lazy(
+const TimeReturnDetail = lazy(
   () => import('../components/Admin/AdminTimeReturn/TimeReturnDetail')
 )
-const SampleList = React.lazy(
+const SampleList = lazy(
   () => import('../components/Admin/AdminSample/SampleList')
 )
-const SampleDetail = React.lazy(
+const SampleDetail = lazy(
   () => import('../components/Admin/AdminSample/SampleDetail')
 )
 
-const SamplingKitInventoryList = React.lazy(
+const SamplingKitInventoryList = lazy(
   () => import('../components/Staff/SamplingKitInventoryList')
 )
 
-const SamplingKitInventoryDetail = React.lazy(
+const SamplingKitInventoryDetail = lazy(
   () => import('../components/Staff/SamplingKitInventoryDetail')
 )
 
+const ServiceCase = lazy(() => import('../pages/ProfileUser/ServiceCase'))
+
+const ServiceCaseDetail = lazy(
+  () => import('../pages/ProfileUser/ServiceCaseDetail')
+)
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
