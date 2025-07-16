@@ -27,9 +27,16 @@ export default function ServiceCase() {
       dataIndex: 'totalFee',
       key: 'totalFee',
       render: (amount: number) =>
-        typeof amount === 'number'
-          ? amount.toLocaleString('vi-VN')
-          : '—',
+        typeof amount === 'number' ? amount.toLocaleString('vi-VN') : '—',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => {
+        const d = new Date(date)
+        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString('vi-VN')}`
+      },
     },
     {
       title: 'Trạng thái',
@@ -43,7 +50,7 @@ export default function ServiceCase() {
           color = 'red'
         } else if (status?.includes('Chờ thanh toán')) {
           color = 'orange'
-        } else if (lowerStatus.includes('đã') ) {
+        } else if (lowerStatus.includes('đã')) {
           color = 'green'
         }
 
@@ -54,7 +61,9 @@ export default function ServiceCase() {
       title: 'Chi tiết',
       key: 'action',
       render: (_: any, record: any) => (
-        <Button onClick={() => navigate(`/service-case-customer/${record._id}`)}>
+        <Button
+          onClick={() => navigate(`/service-case-customer/${record._id}`)}
+        >
           Xem chi tiết
         </Button>
       ),
@@ -68,7 +77,7 @@ export default function ServiceCase() {
         <Title level={3}>Lịch sử trường hợp dịch vụ</Title>
         <Table
           loading={isLoading}
-          rowKey="_id"
+          rowKey='_id'
           dataSource={data?.data || []}
           columns={columns}
           pagination={false}
@@ -78,7 +87,9 @@ export default function ServiceCase() {
           pageSize={Number(pageSize)}
           total={data?.pagination?.totalItems || 0}
           onChange={(page, size) => {
-            navigate(`/service-case-customer?pageNumber=${page}&pageSize=${size}`)
+            navigate(
+              `/service-case-customer?pageNumber=${page}&pageSize=${size}`
+            )
           }}
           showSizeChanger
           showTotal={(total, range) =>

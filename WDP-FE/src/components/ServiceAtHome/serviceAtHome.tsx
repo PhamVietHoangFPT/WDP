@@ -103,6 +103,7 @@ const ServiceAtHomeForm: React.FC = () => {
         service: id,
         note: '',
         isAtHome: true,
+        isSelfSampling: false,
       }
       const caseMember = await createCaseMember({ data }).unwrap()
       const caseMemberId = caseMember?.data?._id || caseMember?._id
