@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd'
+import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
   UserOutlined,
@@ -20,21 +20,25 @@ export const SideBar = () => {
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  // Lấy userData từ cookie và decode nó
+  const userDataString = Cookies.get('userData')
+  let userData = {}
+  if (userDataString) {
+    try {
+      // Decode URI component trước khi parse JSON
+      userData = JSON.parse(decodeURIComponent(userDataString))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ cookie:', error)
+    }
+  }
+
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/manager') return ['manager']
+    if (pathname === '/staff') return ['staff']
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-    ]
+    const paths = ['manage-inventory', 'staff']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -49,8 +53,7 @@ export const SideBar = () => {
 
     return []
   }
-  const userDataString = Cookies.get('userData')
-  const userData = userDataString ? JSON.parse(userDataString) : {}
+
   // Define the menu items
   const items = [
     {
@@ -59,6 +62,21 @@ export const SideBar = () => {
       label: 'Quản trị',
       onClick: () => navigate('staff'),
     },
+    // Thêm các mục menu khác của Staff/Manager vào đây nếu có
+    {
+      key: 'staff/sampling-kit-inventory',
+      icon: <BarChartOutlined />,
+      label: 'Quản lý kho',
+      onClick: () =>
+        navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
+    },
+    // {
+    //   key: 'patients',
+    //   icon: <TeamOutlined />,
+    //   label: 'Bệnh nhân',
+    //   onClick: () => navigate('patients'),
+    // },
+    // ...
   ]
 
   return (
@@ -157,10 +175,13 @@ export const SideBar = () => {
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Manager User'}
+                {userData?.name || 'Manager User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'manager@vaccitrack.com'}
+                {userData?.email || 'manager@vaccitrack.com'}
+              </div>
+              <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
+                {userData?.facility?.facilityName || 'No Facility'}
               </div>
             </div>
           )}

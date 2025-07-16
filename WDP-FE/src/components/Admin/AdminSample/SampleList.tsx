@@ -3,7 +3,6 @@ import {
   useDeleteSampleMutation,
   useCreateSampleMutation,
 } from '../../../features/admin/sampleAPI'
-import { useGetSampleTypesQuery } from '../../../features/admin/sampleTypeAPI'
 import {
   Table,
   Spin,
@@ -23,7 +22,7 @@ import {
 } from 'antd'
 import { EyeOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 const { Title } = Typography
 
@@ -32,8 +31,6 @@ export default function SampleList() {
   const { data: response, isLoading, isError, error } = useGetSamplesQuery({})
   const [deleteSample, { isLoading: isDeleting }] = useDeleteSampleMutation()
   const [createSample, { isLoading: isCreating }] = useCreateSampleMutation()
-  const { data: sampleTypes, isLoading: isLoadingTypes } =
-    useGetSampleTypesQuery({})
   const [isModalOpen, setIsModalOpen] = useState(false)
   const navigate = useNavigate()
   const [form] = Form.useForm()
@@ -51,12 +48,11 @@ export default function SampleList() {
     form.resetFields()
   }
 
-  const handleCreate = async ({ name, fee, sampleType }) => {
+  const handleCreate = async ({ name, fee }) => {
     try {
       const newSample = await createSample({
         name,
         fee,
-        sampleType,
       }).unwrap()
       notification.success({
         message: 'Tạo mẫu thử thành công!',
@@ -85,25 +81,6 @@ export default function SampleList() {
       title: 'Phí',
       dataIndex: 'fee',
       key: 'fee',
-      render: (text) => (
-        <span>
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-          }).format(text)}
-        </span>
-      ),
-    },
-    {
-      title: 'Kiểu Mẫu',
-      // Sử dụng mảng để truy cập dữ liệu lồng nhau
-      dataIndex: ['sampleType', 'name'],
-      key: 'sampleType',
-    },
-    {
-      title: 'Phí Kiểu Mẫu',
-      dataIndex: ['sampleType', 'sampleTypeFee'],
-      key: 'sampleTypeFee',
       render: (text) => (
         <span>
           {new Intl.NumberFormat('vi-VN', {
@@ -197,19 +174,6 @@ export default function SampleList() {
               value ? Number(value.replace(/\$\s?|(,*)/g, '')) : 0
             }
           />
-        </Form.Item>
-        <Form.Item
-          name='sampleType'
-          label='Kiểu Mẫu'
-          rules={[{ required: true }]}
-        >
-          <Select loading={isLoadingTypes} placeholder='Chọn một kiểu mẫu'>
-            {sampleTypes?.data?.map((type) => (
-              <Option key={type._id} value={type._id}>
-                {type.name}
-              </Option>
-            ))}
-          </Select>
         </Form.Item>
       </Form>
     </Modal>

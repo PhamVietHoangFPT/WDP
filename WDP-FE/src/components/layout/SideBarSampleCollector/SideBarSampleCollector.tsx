@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd'
+import { Layout, Menu, Input, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
+  // Thêm các icon khác nếu cần cho các mục menu khác
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -20,10 +20,30 @@ export const SideBar = () => {
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  // Lấy userData từ cookie và decode nó
+  interface Facility {
+    facilityName?: string
+  }
+  interface UserData {
+    name?: string
+    email?: string
+    facility?: Facility
+  }
+  const userDataString = Cookies.get('userData')
+  let userData: UserData = {}
+  if (userDataString) {
+    try {
+      // Decode URI component trước khi parse JSON
+      userData = JSON.parse(decodeURIComponent(userDataString))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ cookie:', error)
+    }
+  }
+
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/sa') return ['manager']
+    if (pathname === '/sa') return ['sample-collector'] // Điều chỉnh để khớp với path của Sample Collector
 
     // Check if pathname includes any of these paths
     const paths = [
@@ -34,6 +54,8 @@ export const SideBar = () => {
       'reports',
       'documents',
       'settings',
+      'sample-collector', // Thêm 'sample-collector' vào đây để highlight menu
+      'service-cases', // Thêm path con của sample-collector
     ]
 
     for (const path of paths) {
@@ -49,15 +71,14 @@ export const SideBar = () => {
 
     return []
   }
-  const userDataString = Cookies.get('userData')
-  const userData = userDataString ? JSON.parse(userDataString) : {}
+
   // Define the menu items
   const items = [
     {
       key: 'sample-collector',
       icon: <BarChartOutlined />,
       label: 'Quản trị mẫu thu',
-      onClick: () => navigate('sample collector/service-cases'),
+      onClick: () => navigate('sample-collector/service-cases'), // Đảm bảo đường dẫn đúng
     },
     // {
     //   key: 'manager/samples',
@@ -72,7 +93,6 @@ export const SideBar = () => {
     //   onClick: () => navigate('manager/create-account'),
     // },
   ]
-
   return (
     <Sider
       width={250}
@@ -146,7 +166,6 @@ export const SideBar = () => {
         style={{ borderRight: 0 }}
         items={items}
       />
-
       {/* User Profile */}
       <div
         style={{
@@ -158,21 +177,17 @@ export const SideBar = () => {
           backgroundColor: '#fff',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: collapsed ? 0 : 12,
-          }}
-        >
-          <Avatar icon={<UserOutlined />} />
+        <div>
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Manager User'}
+                {userData?.name || 'Sample Collector User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'manager@vaccitrack.com'}
+                {userData?.email || 'samplecollector@vaccitrack.com'}
+              </div>
+              <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
+                {userData?.facility?.facilityName || 'No Facility'}
               </div>
             </div>
           )}

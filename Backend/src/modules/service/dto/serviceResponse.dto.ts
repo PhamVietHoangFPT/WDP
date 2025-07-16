@@ -23,6 +23,14 @@ export class ServiceResponseDto {
   isAdministration: boolean
 
   @Expose()
+  @ApiProperty({ example: true })
+  isSelfSampling: boolean
+
+  @Expose()
+  @ApiProperty({ example: 'Blood' })
+  name: string
+
+  @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   timeReturn: mongoose.Schema.Types.ObjectId

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd'
+import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
   UserOutlined,
@@ -23,30 +23,37 @@ export const SideBar = () => {
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  // Lấy userData từ cookie và decode nó
+  const userDataString = Cookies.get('userData')
+  let userData = {}
+  if (userDataString) {
+    try {
+      // Decode URI component trước khi parse JSON
+      userData = JSON.parse(decodeURIComponent(userDataString))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ cookie:', error)
+    }
+  }
+
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    // If collapsed, return an empty array
     if (collapsed) return []
 
-    // Check if pathname includes any of these paths
     const paths = items.map((item) => item.key)
 
     for (const path of paths) {
       if (pathname.includes(path)) {
-        // If it's a sub-path, return both parent and child keys
         const segments = pathname.split('/').filter(Boolean)
         if (segments.length > 1) {
-          return [path, pathname.substring(1)] // Remove leading slash
+          return [path, pathname.substring(1)]
         }
         return [path]
       }
     }
-
     return []
   }
-  const userDataString = Cookies.get('userData')
-  const userData = userDataString ? JSON.parse(userDataString) : {}
+
   // Define the menu items
   const items = [
     {
@@ -71,7 +78,7 @@ export const SideBar = () => {
       key: 'admin/facility',
       icon: <BarChartOutlined />,
       label: 'Danh sách cơ sở',
-      onClick: () => navigate('/admin/facilities?pageNumber=1&pageSize=10'), // Sửa lại đường dẫn tuyệt đối
+      onClick: () => navigate('/admin/facilities?pageNumber=1&pageSize=10'),
     },
     {
       key: 'service',
@@ -82,7 +89,7 @@ export const SideBar = () => {
           key: 'admin/services',
           icon: <AppstoreOutlined />,
           label: 'Dịch vụ',
-          onClick: () => navigate('/admin/services?pageNumber=1&pageSize=10'), // Sửa lại đường dẫn tuyệt đối
+          onClick: () => navigate('/admin/services?pageNumber=1&pageSize=10'),
         },
         {
           key: 'admin/time-returns',
@@ -91,23 +98,10 @@ export const SideBar = () => {
           onClick: () => navigate('/admin/time-returns'),
         },
         {
-          // Đây là mục cha, đóng vai trò là một nhóm
-          key: 'admin/sample-management', // Key cho nhóm submenu
+          key: 'admin/sample-management',
           icon: <ExperimentOutlined />,
-          label: 'Quản lý Mẫu',
-          // Các mục con được đặt trong mảng 'children'
-          children: [
-            {
-              key: 'admin/samples',
-              label: 'Loại mẫu thử',
-              onClick: () => navigate('/admin/samples'),
-            },
-            {
-              key: 'admin/sample-types',
-              label: 'Chất lượng mẫu thử',
-              onClick: () => navigate('/admin/sample-types'),
-            },
-          ],
+          label: 'Quản lý Mẫu Thử',
+          onClick: () => navigate('/admin/samples'),
         },
       ],
     },
@@ -209,10 +203,13 @@ export const SideBar = () => {
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.Name || 'Admin User'}
+                {userData?.name || 'Admin User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.Email || 'admin@vaccitrack.com'}
+                {userData?.email || 'admin@vaccitrack.com'}
+              </div>
+              <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
+                {userData?.facility?.facilityName || 'No Facility'}
               </div>
             </div>
           )}

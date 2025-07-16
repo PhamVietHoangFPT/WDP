@@ -15,7 +15,11 @@ export class CreateSamplingKitInventoryDto {
   @IsNotEmpty()
   kitAmount: number
 
-  @ApiProperty({ description: 'ID loại mẫu kit', type: String })
+  @ApiProperty({
+    description: 'ID loại mẫu kit',
+    type: String,
+    example: '60c72b2f9b1e8d001c8e4f3a',
+  })
   @IsNotEmpty()
   @IsMongoId()
   sample: string

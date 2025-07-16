@@ -58,4 +58,28 @@ export class VnpayController {
     )
     return { redirectUrl: paymentUrl }
   }
+
+  @Post('payment-for-service-case-mobile')
+  @ApiOperation({ summary: 'Xây dựng URL thanh toán cho dịch vụ' })
+  @ApiBody({ type: PaymentServiceCaseDto })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Yêu cầu không hợp lệ, vui lòng cung cấp thông tin thanh toán đầy đủ',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'URL thanh toán được xây dựng thành công',
+  })
+  async getPaymentUrlForServiceCaseMobile(
+    @Body() PaymentServiceCaseDto: PaymentServiceCaseDto,
+    @Req() req: Request,
+  ) {
+    req.session.currentServiceCasePayment = PaymentServiceCaseDto.serviceCaseId
+    const paymentUrl =
+      await this.vnpayService.getPaymentUrlForServiceCaseMobile(
+        PaymentServiceCaseDto,
+      )
+    return { redirectUrl: paymentUrl }
+  }
 }
