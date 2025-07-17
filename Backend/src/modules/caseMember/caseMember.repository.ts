@@ -14,7 +14,7 @@ export class CaseMemberRepository implements ICaseMemberRepository {
     private readonly model: Model<CaseMemberDocument>,
     @Inject(IBookingRepository)
     private readonly bookingRepository: IBookingRepository,
-  ) { }
+  ) {}
   async getIsSelfSampling(caseMemberId: string): Promise<boolean | null> {
     const caseMember = await this.model
       .findById(caseMemberId)

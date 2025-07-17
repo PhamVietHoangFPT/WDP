@@ -29,7 +29,7 @@ export class CaseMemberService implements ICaseMemberService {
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(caseMember: CaseMember): CaseMemberResponseDto {
     return new CaseMemberResponseDto({

@@ -71,9 +71,9 @@ import { ConditionModule } from './modules/condition/condition.module'
     KitShipmentModule,
     DoctorModule,
     SampleCollectorModule,
-    ConditionModule
+    ConditionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
