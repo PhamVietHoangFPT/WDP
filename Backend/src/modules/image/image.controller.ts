@@ -24,6 +24,10 @@ import { ImageUploadService } from './imageUpload.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IImageUploadService } from './interfaces/iImageUpload.service'
+import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
+import { CreateImageResultDto } from './dto/createResult.dto'
+import { RolesGuard } from 'src/common/guard/roles.guard'
+import { Roles } from 'src/common/decorators/roles.decorator'
 
 @ApiTags('Images')
 @Controller('images')
@@ -31,7 +35,7 @@ export class ImageController {
   constructor(
     @Inject(IImageUploadService)
     private readonly uploadService: ImageUploadService,
-  ) {}
+  ) { }
 
   @Post('uploadForBlog')
   @UseGuards(AuthGuard)
@@ -66,6 +70,72 @@ export class ImageController {
     }
   }
 
+  @Post('uploadForKitShipment')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        kitShipment: { type: 'string' },
+      },
+    },
+  })
+  async uploadKitShipment(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: CreateImageKitShipmentDto,
+    @Req() req: any,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded')
+    const userId = req.user.id
+    const result = await this.uploadService.uploadFileForShipment(
+      file,
+      body,
+      userId,
+    )
+    return {
+      message: 'File uploaded successfully',
+      fileName: file.originalname,
+      imageUrl: result.url,
+    }
+  }
+
+  @Post('uploadForResult')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        result: { type: 'string' },
+      },
+    },
+  })
+  async uploadResult(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: CreateImageResultDto,
+    @Req() req: any,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded')
+    const userId = req.user.id
+    const result = await this.uploadService.uploadFileForResult(
+      file,
+      body,
+      userId,
+    )
+    return {
+      message: 'File uploaded successfully',
+      fileName: file.originalname,
+      imageUrl: result.url,
+    }
+  }
+
   @Get(':id')
   @ApiParam({ name: 'id', required: true })
   async findById(@Param('id') id: string) {
@@ -76,6 +146,18 @@ export class ImageController {
   @Get('findForBlog/:blogId')
   async findAllForBlog(@Param('blogId') blogId: string) {
     return this.uploadService.findAllForBlog(blogId)
+  }
+
+  @Get('findForKitShipment/:kitShipmentId')
+  async findAllForKitShipment(@Param('kitShipmentId') kitShipmentId: string) {
+    return this.uploadService.findAllForKitShipment(kitShipmentId)
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @Get('findForResult/:resultId')
+  async findAllForResult(@Param('resultId') resultId: string) {
+    return this.uploadService.findAllForResult(resultId)
   }
 
   @Delete(':id')
