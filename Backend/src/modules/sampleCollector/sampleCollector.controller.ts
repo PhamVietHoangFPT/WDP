@@ -1,9 +1,10 @@
-import { Get, Controller, Inject, Param, Req, UseGuards } from '@nestjs/common'
+import { Get, Controller, Inject, Req, UseGuards, Query } from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger'
 
 import { ISampleCollectorService } from './interfaces/isampleCollector.service'
@@ -25,11 +26,23 @@ export class SampleCollectorController {
     private readonly sampleCollectorService: ISampleCollectorService,
   ) {}
 
-  @Get('service-cases/:serviceCaseStatus')
+  @Get('service-cases')
   @ApiBearerAuth('bearer')
   @Roles(RoleEnum.SAMPLE_COLLECTOR)
   @ApiOperation({
     summary: 'Lấy tất cả trường hợp dịch vụ cho nhân viên lấy mẫu',
+  })
+  @ApiQuery({
+    name: 'serviceCaseStatus',
+    required: true,
+    description: 'Trạng thái của trường hợp dịch vụ',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'isAtHome',
+    required: true,
+    description: 'Lọc theo trường hợp dịch vụ tại nhà',
+    type: Boolean,
   })
   @ApiResponse({
     status: 200,
@@ -37,7 +50,8 @@ export class SampleCollectorController {
     type: ApiResponseDto<ServiceCaseDocument>,
   })
   async getAllServiceCaseForSampleCollector(
-    @Param('serviceCaseStatus') serviceCaseStatus: string,
+    @Query('serviceCaseStatus') serviceCaseStatus: string,
+    @Query('isAtHome') isAtHome: boolean,
     @Req() req: any,
   ): Promise<ApiResponseDto<ServiceCaseDocument>> {
     const sampleCollectorId = req.user.id
@@ -45,6 +59,7 @@ export class SampleCollectorController {
       await this.sampleCollectorService.getAllServiceCaseForSampleCollector(
         sampleCollectorId,
         serviceCaseStatus,
+        isAtHome,
       )
     return new ApiResponseDto<ServiceCaseDocument>({
       data,

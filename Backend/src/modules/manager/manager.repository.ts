@@ -36,11 +36,13 @@ export class ManagerRepository implements IManagerRepository {
     sampleCollectorId: string,
     userId: string,
   ): Promise<ServiceCaseDocument> {
+    const sampleCollectorIdObjectId = new Types.ObjectId(sampleCollectorId)
+    const userIdObjectId = new Types.ObjectId(userId)
     const data = await this.serviceCaseModel.findByIdAndUpdate(
       serviceCaseId,
       {
-        sampleCollector: sampleCollectorId,
-        updated_by: userId,
+        sampleCollector: sampleCollectorIdObjectId,
+        updated_by: userIdObjectId,
         updated_at: Date.now(),
       },
       { new: true },
@@ -53,11 +55,13 @@ export class ManagerRepository implements IManagerRepository {
     doctorId: string,
     userId: string,
   ): Promise<ServiceCaseDocument> {
+    const doctorIdObjectId = new Types.ObjectId(doctorId)
+    const updated_byObjectId = new Types.ObjectId(userId)
     const data = await this.serviceCaseModel.findByIdAndUpdate(
       serviceCaseId,
       {
-        doctor: doctorId,
-        updated_by: userId,
+        doctor: doctorIdObjectId,
+        updated_by: updated_byObjectId,
         updated_at: Date.now(),
       },
       { new: true },

@@ -13,11 +13,13 @@ export class SampleCollectorService implements ISampleCollectorService {
   async getAllServiceCaseForSampleCollector(
     sampleCollectorId: string,
     serviceCaseStatus: string,
+    isAtHome: boolean,
   ): Promise<ServiceCaseDocument[]> {
     const data =
       await this.sampleCollectorRepository.getAllServiceCaseForSampleCollector(
         sampleCollectorId,
         serviceCaseStatus,
+        isAtHome,
       )
     if (!data || data.length === 0) {
       throw new NotFoundException('Không tìm thấy trường hợp dịch vụ nào')

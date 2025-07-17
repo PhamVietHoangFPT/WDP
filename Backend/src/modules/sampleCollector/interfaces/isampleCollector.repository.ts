@@ -4,6 +4,7 @@ export interface ISampleCollectorRepository {
   getAllServiceCaseForSampleCollector(
     sampleCollectorId: string,
     serviceCaseStatus: string,
+    isAtHome: boolean,
   ): Promise<ServiceCaseDocument[]>
   getAllServiceCaseStatusForSampleCollector(): Promise<
     TestRequestStatusDocument[]
