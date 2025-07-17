@@ -7,6 +7,7 @@ import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IBlogRepository } from '../blog/interfaces/iblog.repository'
 import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
+import { CreateImageResultDto } from './dto/createResult.dto'
 
 @Injectable()
 export class ImageUploadRepository implements IImageUploadRepository {
@@ -17,6 +18,17 @@ export class ImageUploadRepository implements IImageUploadRepository {
     private blogRepository: IBlogRepository,
 
   ) { }
+  async createImageForResult(url: string, createImageDto: CreateImageResultDto, userId: string): Promise<ImageDocument> {
+    const createdByUser = new mongoose.Types.ObjectId(userId) as any
+    const newImage = new this.imageModel({
+      ...createImageDto,
+      url,
+      created_by: createdByUser,
+      created_at: new Date(),
+    })
+    return await newImage.save()
+  }
+
   async createImageForKitShipmemt(url: string, createImageDto: CreateImageKitShipmentDto, userId: string): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
@@ -53,6 +65,11 @@ export class ImageUploadRepository implements IImageUploadRepository {
   async findAllImageForKitShipment(kitShipmentId: string): Promise<ImageDocument[]> {
     return await this.imageModel.find({ kitShipment: kitShipmentId, deleted_at: null }).exec()
   }
+
+  async findAllImageForResult(resultId: string): Promise<ImageDocument[]> {
+    return await this.imageModel.find({ result: resultId, deleted_at: null }).exec()
+  }
+
   async deleteById(id: string, userId: string): Promise<ImageDocument | null> {
     const result = await this.imageModel
       .findOneAndUpdate(

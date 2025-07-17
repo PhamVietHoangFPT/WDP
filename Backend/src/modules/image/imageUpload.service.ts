@@ -10,6 +10,7 @@ import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { IBlogRepository } from '../blog/interfaces/iblog.repository'
 import { IKitShipmentRepository } from '../KitShipment/interfaces/ikitShipment.repository'
 import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
+import { CreateImageResultDto } from './dto/createResult.dto'
 
 @Injectable()
 export class ImageUploadService implements IImageUploadService {
@@ -53,6 +54,7 @@ export class ImageUploadService implements IImageUploadService {
       _id: saved.id.toString(),
     }
   }
+
   async uploadFileForShipment(
     file: Express.Multer.File,
     createImageKitShipmentDto: CreateImageKitShipmentDto,
@@ -85,13 +87,47 @@ export class ImageUploadService implements IImageUploadService {
     }
   }
 
+  async uploadFileForResult(
+    file: Express.Multer.File,
+    createImageResultDto: CreateImageResultDto,
+    userId: string,
+  ): Promise<{ url: string; _id: string }> {
+    const kitShipment = await this.kitShipmentRepository.findById(createImageResultDto.result)
+    if (!kitShipment) {
+      throw new NotFoundException('Result không tồn tại')
+    }
+    const uploadDir = path.join(process.cwd(), 'uploads')
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir)
+    }
+
+    const fileName = `${uuidv4()}-${file.originalname}`
+    const filePath = path.join(uploadDir, fileName)
+    fs.writeFileSync(filePath, file.buffer)
+
+    const url = `/uploads/${fileName}`
+
+    const saved: ImageDocument = await this.imageModel.createImageForResult(
+      url,
+      createImageResultDto,
+      userId,
+    )
+
+    return {
+      url: saved.url,
+      _id: saved.id.toString(),
+    }
+  }
+
   async findAllForBlog(blogId: string): Promise<Image[]> {
     return this.imageModel.findAllImageForBlog(blogId)
   }
   async findAllForKitShipment(kitShipmentId: string): Promise<Image[]> {
     return this.imageModel.findAllImageForKitShipment(kitShipmentId)
   }
-
+  async findAllForResult(resultId: string): Promise<Image[]> {
+    return this.imageModel.findAllImageForResult(resultId)
+  }
   async findById(id: string): Promise<Image | null> {
     const data = await this.imageModel.findById(id)
     if (!data) {
