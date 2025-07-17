@@ -23,6 +23,7 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
   async getAllServiceCaseForSampleCollector(
     sampleCollectorId: string,
     serviceCaseStatus: string,
+    isAtHome: boolean,
   ): Promise<ServiceCaseDocument[]> {
     return this.serviceCaseModel.aggregate([
       {
@@ -73,6 +74,11 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
         $unwind: {
           path: '$caseMemberDetails',
           preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          'caseMemberDetails.isAtHome': isAtHome, // Lọc chính xác các serviceCase có casemember isAtHome mong muốn
         },
       },
       // Mo bang bookings
@@ -163,7 +169,7 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
   > {
     return this.testRequestStatusModel
       .find({
-        order: { $in: [4, 5, 6] },
+        order: { $in: [2, 3, 4, 5, 6] },
       })
       .sort({ order: 1 })
       .lean()
