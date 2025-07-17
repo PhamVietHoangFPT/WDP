@@ -34,6 +34,7 @@ import { KitShipmentModule } from './modules/KitShipment/kitShipment.module'
 import { DoctorModule } from './modules/doctor/doctor.module'
 import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector.module'
 import { ConditionModule } from './modules/condition/condition.module'
+import { StaffModule } from './modules/staff/staff.module'
 @Module({
   imports: [
     databaseConfig,
@@ -72,8 +73,9 @@ import { ConditionModule } from './modules/condition/condition.module'
     DoctorModule,
     SampleCollectorModule,
     ConditionModule,
+    StaffModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
