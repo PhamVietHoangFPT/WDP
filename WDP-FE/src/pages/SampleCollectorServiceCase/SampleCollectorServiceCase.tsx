@@ -38,6 +38,7 @@ interface ServiceCaseStatus {
 }
 
 const SampleCollectorServiceCase: React.FC = () => {
+  const [isAtHome, setIsAtHome] = useState<boolean>(true)
   const [selectedStatus, setSelectedStatus] = useState<string>('')
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
@@ -59,9 +60,12 @@ const SampleCollectorServiceCase: React.FC = () => {
     isLoading: isLoadingServices,
     isFetching: isFetchingServices,
     error: serviceCasesError,
-  } = useGetAllServiceCasesQuery(selectedStatus, {
-    skip: !selectedStatus,
-  })
+  } = useGetAllServiceCasesQuery(
+    { serviceCaseStatus: selectedStatus || '', isAtHome: isAtHome },
+    {
+      skip: !selectedStatus,
+    }
+  )
 
   // Update service case status mutation
   const [updateServiceCaseStatus, { isLoading: isUpdating }] =
@@ -304,6 +308,16 @@ const SampleCollectorServiceCase: React.FC = () => {
                 </Select.Option>
               ))}
           </Select>
+
+          <Select
+            value={isAtHome}
+            onChange={setIsAtHome}
+            style={{ width: 200 }}
+            options={[
+              { value: true, label: '🏠 Dịch vụ tại nhà' },
+              { value: false, label: '🏥 Dịch vụ tại cơ sở' },
+            ]}
+          />
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
