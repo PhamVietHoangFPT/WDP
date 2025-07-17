@@ -30,7 +30,6 @@ import {
   useGetServiceNoSampleCollectorListQuery,
   useAddSampleCollectorToServiceCaseMutation,
 } from '../../features/manager/sampleCollectorAPI'
-
 const { Title } = Typography
 
 interface ServiceCase {
@@ -234,21 +233,19 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
       key: 'actions',
       render: (_, record) => (
         <Space size='middle'>
-          {isAtHome && (
-            <Dropdown
-              overlay={getSampleCollectorMenu(record._id)}
-              trigger={['click']}
-              disabled={isLoadingSampleCollectors}
+          <Dropdown
+            overlay={getSampleCollectorMenu(record._id)}
+            trigger={['click']}
+            disabled={isLoadingSampleCollectors}
+          >
+            <Button
+              type='primary'
+              icon={<UserAddOutlined />}
+              loading={isLoadingSampleCollectors}
             >
-              <Button
-                type='primary'
-                icon={<UserAddOutlined />}
-                loading={isLoadingSampleCollectors}
-              >
-                Gán nhân viên <DownOutlined />
-              </Button>
-            </Dropdown>
-          )}
+              Gán nhân viên <DownOutlined />
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
