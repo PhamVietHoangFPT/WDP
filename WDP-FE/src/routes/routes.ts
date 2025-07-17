@@ -358,16 +358,15 @@ const routes: LayoutRoute[] = [
   },
   {
     layout: DoctorLayout,
+    role: ['Doctor'],
     data: [
       {
         path: '/doctor',
         component: DoctorHomePage,
-        // role: ['admin'],
       },
       {
         path: '/doctor/service-cases-without-results',
         component: DoctorServiceCaseWithoutResult,
-        // role: ['admin'],
       },
     ],
   },

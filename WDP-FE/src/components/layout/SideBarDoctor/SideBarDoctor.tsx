@@ -46,29 +46,11 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    // Điều chỉnh để khớp với path của Doctor
-    if (pathname.startsWith('/doctor')) {
-      const segments = pathname.split('/').filter(Boolean)
-      if (segments.length > 1) {
-        // Ví dụ: '/doctor/service-cases-without-results' sẽ trả về ['doctor/service-cases-without-results']
-        return [pathname.substring(1)] // Lấy key đầy đủ sau dấu '/' đầu tiên
-      }
-      return ['doctor'] // Nếu chỉ có '/doctor'
-    }
+    // Điều chỉnh để khớp với path của Delivery
+    if (pathname === '/doctor') return ['doctor']
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-      // Thêm các path của doctor vào đây
-      'doctor',
-      'doctor/service-cases-without-results',
-    ]
+    const paths = ['service-cases-without-results']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -86,6 +68,12 @@ export const SideBar = () => {
 
   // Define the menu items
   const items = [
+    {
+      key: 'doctor', // Đảm bảo key khớp với path
+      icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
+      label: 'Trang chủ',
+      onClick: () => navigate('doctor'),
+    },
     {
       key: 'doctor/service-cases-without-results', // Đảm bảo key khớp với path
       icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có

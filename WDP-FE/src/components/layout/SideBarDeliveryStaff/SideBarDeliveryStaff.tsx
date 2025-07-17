@@ -38,14 +38,6 @@ export const SideBar = () => {
     const pathname = location.pathname
     // Điều chỉnh để khớp với path của Delivery
     if (pathname === '/delivery-staff') return ['delivery-staff']
-    // Hoặc nếu có các sub-path cho delivery, thêm vào đây
-    // if (pathname.startsWith('/delivery')) {
-    //     const segments = pathname.split('/').filter(Boolean);
-    //     if (segments.length > 1) {
-    //         return [pathname.substring(1)];
-    //     }
-    //     return ['delivery'];
-    // }
 
     // Check if pathname includes any of these paths
     const paths = ['delivery-staff']
