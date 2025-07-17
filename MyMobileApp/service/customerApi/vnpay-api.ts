@@ -48,7 +48,7 @@ export const createVNPayServicePayment = async (data: {
 }) => {
   const headers = await getAuthHeader();
   const response = await fetch(
-    `${API_BASE_URL}/vnpay/payment-for-service-case`,
+    `${API_BASE_URL}/vnpay/payment-for-service-case-mobile`,
     {
       method: "POST",
       headers: {

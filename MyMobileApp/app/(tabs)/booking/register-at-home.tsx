@@ -26,6 +26,8 @@ import { createBooking } from "@/service/customerApi/booking-api";
 import { createCaseMember } from "@/service/adminApi.ts/case-members";
 import { createServiceCase } from "@/service/service/service-case-api";
 import { createVNPayServicePayment } from "@/service/customerApi/vnpay-api";
+import { getServiceById } from "@/service/service/service-api";
+import { Ionicons } from "@expo/vector-icons";
 
 // Define Token Payload interface
 interface TokenPayload {
@@ -210,13 +212,20 @@ export default function RegisterServiceAtHome() {
       const bookingId = bookingRes?.data?._id || bookingRes?._id;
       if (!bookingId) throw new Error("Không thể tạo lịch hẹn.");
 
+      // 🔍 Lấy thông tin dịch vụ để kiểm tra isAdministration
+      const serviceInfo = await getServiceById(serviceId);
+      const isAdministration = serviceInfo?.data?.isAdministration ?? false;
+
+      // ✅ Nếu là hành chính, vẫn cho booking nhưng hiện thông báo sau
       const caseMemberRes = await createCaseMember({
         testTaker: finalTestTakers,
         booking: bookingId,
         service: serviceId,
         note: "",
-        isAtHome: true,
+        isAtHome: !isAdministration, // false nếu là hành chính
+        isSelfSampling: false,
       });
+
       const caseMemberId = caseMemberRes?.data?._id || caseMemberRes?._id;
       if (!caseMemberId) throw new Error("Không thể tạo hồ sơ xét nghiệm.");
 
@@ -227,20 +236,27 @@ export default function RegisterServiceAtHome() {
       if (!serviceCaseId) throw new Error("Không thể tạo đơn dịch vụ.");
 
       const paymentResponse = await createVNPayServicePayment({
-        serviceCaseId: serviceCaseId,
-        amount: 10000, // Hoặc lấy từ service nếu có
+        serviceCaseId,
+        amount: 10000,
         description: "Thanh toán dịch vụ tại nhà",
       });
-      const paymentUrl = paymentResponse?.redirectUrl;
-      console.log("Redirecting to:", paymentUrl);
 
+      const paymentUrl = paymentResponse?.redirectUrl;
       if (!paymentUrl) throw new Error("Không thể tạo liên kết thanh toán.");
 
       const supported = await Linking.canOpenURL(paymentUrl);
       if (supported) {
         await Linking.openURL(paymentUrl);
-        Alert.alert("Thành công", "Đang chuyển bạn đến trang thanh toán...");
-        router.back(); // Use router.back() to go back
+
+        // ⚠️ Hiện cảnh báo nếu là hành chính
+        if (isAdministration) {
+          Alert.alert(
+            "Lưu ý",
+            "Dịch vụ hành chính yêu cầu bạn phải đến cơ sở gần nhất để xét nghiệm."
+          );
+        }
+
+        router.back();
       } else {
         throw new Error("Không thể mở liên kết thanh toán.");
       }
@@ -267,6 +283,9 @@ export default function RegisterServiceAtHome() {
             { paddingBottom: styles.scroll.paddingBottom + tabBarHeight },
           ]}
         >
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={26} color="#fff" />
+          </TouchableOpacity>
           <Text style={styles.title}>Đăng Ký Dịch Vụ Tại Nhà</Text>
 
           <Text style={styles.section}>1. Chọn cơ sở</Text>
