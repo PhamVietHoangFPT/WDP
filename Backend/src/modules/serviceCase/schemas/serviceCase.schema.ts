@@ -65,6 +65,13 @@ export class ServiceCase extends BaseEntity {
     ref: 'Account',
   })
   sampleCollector: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Condition',
+  })
+  condition: mongoose.Schema.Types.ObjectId
+
 }
 
 export const ServiceCaseSchema = SchemaFactory.createForClass(ServiceCase)

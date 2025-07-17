@@ -7,6 +7,7 @@ import { CreateServiceCaseDto } from './dto/createServiceCase.dto'
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { ITestRequestHistoryRepository } from '../testRequestHistory/interfaces/itestRequestHistory.repository'
+import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
 
 @Injectable()
 export class ServiceCaseRepository implements IServiceCaseRepository {
@@ -17,7 +18,22 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     private testRequestStatusRepository: ITestRequestStatusRepository,
     @Inject(ITestRequestHistoryRepository)
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
-  ) {}
+  ) { }
+  async findOneById(id: string): Promise<ServiceCaseDocument | null> {
+    return await this.serviceCaseModel.findOne({ _id: id, deleted_at: null }).exec()
+  }
+
+  async updateCondition(id: string, condition: string, doctorId?: string): Promise<ServiceCaseDocument | null> {
+    const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
+      id,
+      {
+        condition: condition ? new mongoose.Types.ObjectId(condition) : null,
+        doctor: doctorId ? new mongoose.Types.ObjectId(doctorId) : null,
+      },
+      { new: true },
+    )
+    return updatedServiceCase
+  }
 
   findAllServiceCases(
     filter: Record<string, unknown>,

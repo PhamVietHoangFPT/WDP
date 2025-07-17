@@ -44,9 +44,11 @@ export default function TestTakerList() {
       if (!token) return;
 
       const decoded: UserPayload = jwtDecode(token);
+      const accountId = decoded.id;
+
       try {
-        const res = await getTestTakers();
-        setTestTakers(res.data);
+        const res = await getTestTakers(accountId);
+        setTestTakers(res.data || []);
       } catch (error) {
         console.error("Lỗi load test takers:", error);
       }

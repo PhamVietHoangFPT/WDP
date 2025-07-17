@@ -6,4 +6,5 @@ export class CreateBlogImageDto {
   @IsOptional()
   @IsMongoId()
   blog?: string
+  
 }

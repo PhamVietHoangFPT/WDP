@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -51,7 +52,7 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     await AsyncStorage.removeItem("userToken");
     Alert.alert("Đăng xuất", "Bạn đã đăng xuất thành công.");
-    router.replace("/(auth)/login"); // chuyển đến trang đăng nhập
+    router.replace("/(auth)/login");
   };
 
   const handleLoginRedirect = () => {
@@ -69,14 +70,34 @@ export default function ProfileScreen() {
     router.push("/profile/test-taker-list");
   };
 
+  const handleViewServiceHistory = () => {
+    router.push("/profile/service-history");
+  };
+
+  const handleViewPayments = () => {
+    router.push("/profile/payment-history");
+  };
+
   return (
     <LinearGradient colors={["#001f3f", "#0074D9"]} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Thông tin người dùng</Text>
+        <View style={styles.avatarContainer}>
+          <Image
+            source={{
+              uri: "https://tse3.mm.bing.net/th/id/OIP._Z-nVr4Y_E2EmJQFOuFr9AHaHa?r=0&w=512&h=512&rs=1&pid=ImgDetMain&o=7&rm=3https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg", // Ảnh avatar cố định
+            }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+          {hasToken && user ? (
+            <Text style={styles.name}>{user.name}</Text>
+          ) : (
+            <Text style={styles.name}>Guest</Text>
+          )}
+        </View>
 
         {hasToken && user ? (
           <View style={styles.infoBox}>
-            <InfoItem label="Tên" value={user.name} />
             <InfoItem label="Email" value={user.email} />
             <InfoItem label="SĐT" value={user.phoneNumber} />
             <InfoItem label="Giới tính" value={user.gender ? "Nam" : "Nữ"} />
@@ -104,6 +125,27 @@ export default function ProfileScreen() {
               >
                 <Ionicons name="people-outline" size={20} color="#fff" />
                 <Text style={styles.buttonText}>Người xét nghiệm</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.historyButton}
+                onPress={handleViewServiceHistory}
+              >
+                <Ionicons name="albums-outline" size={20} color="#fff" />
+                <Text style={styles.buttonText}>
+                  Lịch sử trường hợp dịch vụ
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.paymentButton}
+                onPress={handleViewPayments}
+              >
+                <Ionicons name="card-outline" size={20} color="#fff" />
+                <Text style={styles.buttonText}>Lịch sử thanh toán</Text>
               </TouchableOpacity>
             </View>
 
@@ -145,14 +187,31 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     padding: 30,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
-  title: {
-    fontSize: 28,
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 30,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 10,
+    resizeMode: "cover",
+  },
+  name: {
+    fontSize: 26,
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
-    marginBottom: 30,
+  },
+  subText: {
+    color: "#BBDEFB",
+    marginBottom: 20,
+    fontSize: 16,
+    textAlign: "center",
   },
   infoBox: {
     backgroundColor: "rgba(255,255,255,0.1)",
@@ -180,8 +239,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
-    marginBottom: 10,
+    marginVertical: 10,
   },
   editButton: {
     flexDirection: "row",
@@ -195,6 +253,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#2ECC40",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  historyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3A9AD9",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  paymentButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#8763FF",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,

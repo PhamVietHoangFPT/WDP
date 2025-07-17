@@ -5,6 +5,7 @@ import {
   // NotFoundException,
   // BadRequestException,
   Logger,
+  InternalServerErrorException,
 } from '@nestjs/common'
 
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
@@ -21,6 +22,7 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { Cron } from '@nestjs/schedule'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
+import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
 @Injectable()
 export class ServiceCaseService implements IServiceCaseService {
   private readonly logger = new Logger(ServiceCaseService.name)
@@ -37,7 +39,8 @@ export class ServiceCaseService implements IServiceCaseService {
     private slotRepository: ISlotRepository,
     @Inject(IBookingRepository)
     private bookingRepository: IBookingRepository,
-  ) {}
+  ) { }
+
 
   private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
     return new ServiceCaseResponseDto({
@@ -45,6 +48,7 @@ export class ServiceCaseService implements IServiceCaseService {
       totalFee: serviceCase.totalFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
+      condition: serviceCase.condition,
       created_at: serviceCase.created_at,
     })
   }
@@ -181,6 +185,37 @@ export class ServiceCaseService implements IServiceCaseService {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')
     }
     return this.mapToResponseDto(updatedServiceCase)
+  }
+
+  async updateCondition(id: string, condition: string, doctorId?: string): Promise<ServiceCaseResponseDto | null> {
+    const existingServiceCase = await this.serviceCaseRepository.findOneById(id)
+    if (!existingServiceCase) {
+      throw new ConflictException("Không tìm thấy service case")
+    }
+
+    const serviceCaseStatusId =
+      await this.serviceCaseRepository.getCurrentStatusId(id)
+    const serviceCaseStatusOrder =
+      await this.testRequestStatusRepository.getTestRequestStatusOrder(
+        serviceCaseStatusId,
+      )
+    if (serviceCaseStatusOrder !== 8) {
+      throw new ConflictException("Không thể thay đổi chất lượng của mẫu thử")
+    }
+
+    try {
+      const updated = await this.serviceCaseRepository.updateCondition(
+        id,
+        condition,
+        doctorId,
+      )
+      if (!updated) {
+        throw new ConflictException('Không thể cập nhật service case.')
+      }
+      return this.mapToResponseDto(updated)
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi khi thay đổi service case.')
+    }
   }
 
   @Cron('0 */3 * * * *')

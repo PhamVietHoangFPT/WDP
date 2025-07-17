@@ -24,15 +24,16 @@ export const createTestTaker = async (data: any) => {
 };
 
 // Lấy danh sách test takers
-export const getTestTakers = async () => {
+export const getTestTakers = async (accountId: string) => {
   const headers = await getAuthHeader();
-  const response = await fetch(`${API_BASE_URL}/test-takers`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-  });
-  if (!response.ok) throw new Error("Lỗi khi lấy danh sách test takers");
+  const response = await fetch(
+    `${API_BASE_URL}/test-takers?accountId=${accountId}`,
+    {
+      method: "GET",
+      headers,
+    }
+  );
+  if (!response.ok) throw new Error("Lỗi khi lấy danh sách test-takers");
   return response.json();
 };
 
