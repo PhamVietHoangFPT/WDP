@@ -38,7 +38,7 @@ export const SideBar = () => {
     if (pathname === '/staff') return ['staff']
 
     // Check if pathname includes any of these paths
-    const paths = ['manage-inventory', 'staff']
+    const paths = ['manage-inventory']
 
     for (const path of paths) {
       if (pathname.includes(path)) {

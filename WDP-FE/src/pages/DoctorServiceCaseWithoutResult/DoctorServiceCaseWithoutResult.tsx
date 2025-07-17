@@ -446,9 +446,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     statusListData?.data?.find((s) => s._id === selectedStatus)
       ?.testRequestStatus || ''
 
-  return (
-    <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý dịch vụ chưa có kết quả</Title>
+  const SelectionComponent = () => {
+    return (
       <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
         <Select
           value={selectedStatus}
@@ -481,8 +480,14 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           <Select.Option value={true}>Đã có</Select.Option>
         </Select>
       </div>
+    )
+  }
 
-      {fetchError && (
+  if (fetchError) {
+    return (
+      <div>
+        <Title level={2}>Quản lý dịch vụ chưa có kết quả</Title>
+        <SelectionComponent />
         <Alert
           message='Lỗi tải dữ liệu'
           description={`Đã xảy ra lỗi khi tải dữ liệu: ${(fetchError as any)?.status || 'Không xác định'} - ${
@@ -499,7 +504,15 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           }
           style={{ marginBottom: 16 }}
         />
-      )}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ padding: 24 }}>
+      <Title level={2}>Quản lý dịch vụ chưa có kết quả</Title>
+
+      <SelectionComponent />
 
       {!selectedStatus && (
         <Alert
@@ -550,7 +563,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           }}
         />
       </div>
-
       {/* Update Status Modal */}
       <Modal
         title='⚠️ Xác nhận cập nhật trạng thái'

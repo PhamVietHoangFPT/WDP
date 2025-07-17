@@ -43,18 +43,11 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/sa') return ['sample-collector'] // Điều chỉnh để khớp với path của Sample Collector
+    if (pathname === '/sample-collector') return ['sample-collector'] // Điều chỉnh để khớp với path của Sample Collector
 
     // Check if pathname includes any of these paths
     const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-      'sample-collector', // Thêm 'sample-collector' vào đây để highlight menu
+      // 'sample-collector', // Thêm 'sample-collector' vào đây để highlight menu
       'service-cases', // Thêm path con của sample-collector
     ]
 
@@ -77,15 +70,15 @@ export const SideBar = () => {
     {
       key: 'sample-collector',
       icon: <BarChartOutlined />,
-      label: 'Quản trị mẫu thu',
-      onClick: () => navigate('sample-collector/service-cases'), // Đảm bảo đường dẫn đúng
+      label: 'Trang chủ',
+      onClick: () => navigate('sample-collector'), // Đảm bảo đường dẫn đúng
     },
-    // {
-    //   key: 'manager/samples',
-    //   icon: <BarChartOutlined />,
-    //   label: 'Quản trị mẫu thu ',
-    //   onClick: () => navigate('manager/samples'),
-    // },
+    {
+      key: 'sample-collector/service-cases',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị mẫu thu ',
+      onClick: () => navigate('sample-collector/service-cases'),
+    },
     // {
     //   key: 'manager/create-account',
     //   icon: <BarChartOutlined />,

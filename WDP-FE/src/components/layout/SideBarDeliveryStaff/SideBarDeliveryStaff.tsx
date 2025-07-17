@@ -37,28 +37,10 @@ export const SideBar = () => {
   const getSelectedKeys = () => {
     const pathname = location.pathname
     // Điều chỉnh để khớp với path của Delivery
-    if (pathname === '/delivery') return ['delivery']
-    // Hoặc nếu có các sub-path cho delivery, thêm vào đây
-    // if (pathname.startsWith('/delivery')) {
-    //     const segments = pathname.split('/').filter(Boolean);
-    //     if (segments.length > 1) {
-    //         return [pathname.substring(1)];
-    //     }
-    //     return ['delivery'];
-    // }
+    if (pathname === '/delivery-staff') return ['delivery-staff']
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-      // Thêm các path của delivery vào đây
-      'delivery',
-    ]
+    const paths = ['delivery-staff']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -77,10 +59,10 @@ export const SideBar = () => {
   // Define the menu items
   const items = [
     {
-      key: 'delivery', // Đảm bảo key khớp với path
+      key: 'delivery-staff', // Đảm bảo key khớp với path
       icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
       label: 'Quản trị',
-      onClick: () => navigate('delivery'),
+      onClick: () => navigate('delivery-staff'),
     },
     // Thêm các mục menu khác của Delivery vào đây nếu có
   ]
