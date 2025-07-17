@@ -24,7 +24,7 @@ const PermissionCheck: React.FC<Props> = ({ children, protectedRole }) => {
     return <DoesnotLoginYet />
   }
   try {
-    const decoded = jwtDecode<DecodedToken>(token)
+    const decoded = jwtDecode<DecodedToken>(token || '')
 
     // ✅ Nếu token hết hạn → vẫn không redirect
     if (decoded.exp && Date.now() >= decoded.exp * 1000) {
