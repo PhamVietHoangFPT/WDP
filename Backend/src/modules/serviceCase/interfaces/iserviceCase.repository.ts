@@ -1,3 +1,4 @@
+import { UpdateConditionDto } from './../../condition/dto/updateCondition.dto';
 import { ServiceCaseDocument } from '../schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from '../dto/createServiceCase.dto'
 import mongoose from 'mongoose'
@@ -14,6 +15,7 @@ export interface IServiceCaseRepository {
   ): mongoose.Query<ServiceCaseDocument[], ServiceCaseDocument>
 
   countDocuments(filter: Record<string, unknown>): Promise<number>
+  findOneById(id: string): Promise<ServiceCaseDocument | null>
 
   updatePayment(
     id: string,
@@ -26,6 +28,12 @@ export interface IServiceCaseRepository {
     currentStatus: string,
     staffId?: string,
     sampleCollectorId?: string,
+    doctorId?: string,
+  ): Promise<ServiceCaseDocument | null>
+
+  updateCondition(
+    id: string,
+    condition: string,
     doctorId?: string,
   ): Promise<ServiceCaseDocument | null>
 
