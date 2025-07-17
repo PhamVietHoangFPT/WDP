@@ -38,27 +38,14 @@ export const SideBar = () => {
     if (pathname === '/manager') return ['manager'] // Điều chỉnh để khớp với path chính của Manager
 
     // Check if pathname includes any of these paths
-    const paths = [
-      'appointments',
-      'patients',
-      'inventory',
-      'vaccinations',
-      'reports',
-      'documents',
-      'settings',
-      'manager', // Thêm 'manager' vào đây để highlight menu
-      'manager/samples',
-      'manager/service-cases-without-doctor',
-      'manager/create-account',
-    ]
+    const paths = ['samples', 'service-cases-without-doctor', 'create-account']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
         // If it's a sub-path, return both parent and child keys
         const segments = pathname.split('/').filter(Boolean)
-        // Đảm bảo path con cũng được highlight
-        if (segments.length > 1 && segments[0] === 'manager') {
-          return [`manager/${segments[1]}`, 'manager'] // Trả về key của path con và path cha
+        if (segments.length > 1) {
+          return [path, pathname.substring(1)] // Remove leading slash
         }
         return [path]
       }
