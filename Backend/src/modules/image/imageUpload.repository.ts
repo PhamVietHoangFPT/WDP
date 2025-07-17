@@ -6,6 +6,7 @@ import { Image, ImageDocument } from './schemas/image.schemas'
 import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IBlogRepository } from '../blog/interfaces/iblog.repository'
+import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
 
 @Injectable()
 export class ImageUploadRepository implements IImageUploadRepository {
@@ -14,7 +15,18 @@ export class ImageUploadRepository implements IImageUploadRepository {
     private imageModel: Model<ImageDocument>,
     @Inject(IBlogRepository)
     private blogRepository: IBlogRepository,
-  ) {}
+
+  ) { }
+  async createImageForKitShipmemt(url: string, createImageDto: CreateImageKitShipmentDto, userId: string): Promise<ImageDocument> {
+    const createdByUser = new mongoose.Types.ObjectId(userId) as any
+    const newImage = new this.imageModel({
+      ...createImageDto,
+      url,
+      created_by: createdByUser,
+      created_at: new Date(),
+    })
+    return await newImage.save()
+  }
 
   async createForBlog(
     url: string,
@@ -38,7 +50,9 @@ export class ImageUploadRepository implements IImageUploadRepository {
   async findAllImageForBlog(blogId: string): Promise<ImageDocument[]> {
     return await this.imageModel.find({ blog: blogId, deleted_at: null }).exec()
   }
-
+  async findAllImageForKitShipment(kitShipmentId: string): Promise<ImageDocument[]> {
+    return await this.imageModel.find({ kitShipment: kitShipmentId, deleted_at: null }).exec()
+  }
   async deleteById(id: string, userId: string): Promise<ImageDocument | null> {
     const result = await this.imageModel
       .findOneAndUpdate(

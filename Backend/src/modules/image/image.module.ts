@@ -9,6 +9,7 @@ import { IImageUploadService } from './interfaces/iImageUpload.service'
 import { BlogModule } from '../blog/blog.module'
 import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { ImageUploadRepository } from './imageUpload.repository'
+import { KitShipmentModule } from '../KitShipment/kitShipment.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ImageUploadRepository } from './imageUpload.repository'
     MongooseModule.forFeature([{ name: Image.name, schema: ImageSchema }]),
     AuthModule,
     BlogModule,
+    KitShipmentModule
   ],
   controllers: [ImageController],
   providers: [
@@ -30,4 +32,4 @@ import { ImageUploadRepository } from './imageUpload.repository'
   ],
   exports: [IImageUploadService],
 })
-export class ImageModule {}
+export class ImageModule { }

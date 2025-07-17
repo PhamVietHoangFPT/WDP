@@ -8,6 +8,8 @@ import { IImageUploadService } from './interfaces/iImageUpload.service'
 import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { IBlogRepository } from '../blog/interfaces/iblog.repository'
+import { IKitShipmentRepository } from '../KitShipment/interfaces/ikitShipment.repository'
+import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
 
 @Injectable()
 export class ImageUploadService implements IImageUploadService {
@@ -16,7 +18,9 @@ export class ImageUploadService implements IImageUploadService {
     private readonly imageModel: IImageUploadRepository,
     @Inject(IBlogRepository)
     private readonly blogRepository: IBlogRepository,
-  ) {}
+    @Inject(IKitShipmentRepository)
+    private readonly kitShipmentRepository: IKitShipmentRepository,
+  ) { }
 
   async uploadFileForBlog(
     file: Express.Multer.File,
@@ -49,9 +53,43 @@ export class ImageUploadService implements IImageUploadService {
       _id: saved.id.toString(),
     }
   }
+  async uploadFileForShipment(
+    file: Express.Multer.File,
+    createImageKitShipmentDto: CreateImageKitShipmentDto,
+    userId: string,
+  ): Promise<{ url: string; _id: string }> {
+    const kitShipment = await this.kitShipmentRepository.findById(createImageKitShipmentDto.kitShipment)
+    if (!kitShipment) {
+      throw new NotFoundException('Kit shipment không tồn tại')
+    }
+    const uploadDir = path.join(process.cwd(), 'uploads')
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir)
+    }
+
+    const fileName = `${uuidv4()}-${file.originalname}`
+    const filePath = path.join(uploadDir, fileName)
+    fs.writeFileSync(filePath, file.buffer)
+
+    const url = `/uploads/${fileName}`
+
+    const saved: ImageDocument = await this.imageModel.createImageForKitShipmemt(
+      url,
+      createImageKitShipmentDto,
+      userId,
+    )
+
+    return {
+      url: saved.url,
+      _id: saved.id.toString(),
+    }
+  }
 
   async findAllForBlog(blogId: string): Promise<Image[]> {
     return this.imageModel.findAllImageForBlog(blogId)
+  }
+  async findAllForKitShipment(kitShipmentId: string): Promise<Image[]> {
+    return this.imageModel.findAllImageForKitShipment(kitShipmentId)
   }
 
   async findById(id: string): Promise<Image | null> {

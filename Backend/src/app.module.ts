@@ -76,4 +76,4 @@ import { ConditionModule } from './modules/condition/condition.module'
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
