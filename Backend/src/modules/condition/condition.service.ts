@@ -1,17 +1,21 @@
-import { IConditionRepository } from './interfaces/icondition.repository';
-import { IConditionService } from './interfaces/icondition.service';
-import { ConflictException, Inject, Injectable, InternalServerErrorException } from "@nestjs/common"
-import { Condition } from './schemas/Condition.schema';
-import { ConditionResponseDto } from './dto/conditionResponse.dto';
-import { isMongoId } from 'class-validator';
+import { IConditionRepository } from './interfaces/icondition.repository'
+import { IConditionService } from './interfaces/icondition.service'
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common'
+import { Condition } from './schemas/Condition.schema'
+import { ConditionResponseDto } from './dto/conditionResponse.dto'
+import { isMongoId } from 'class-validator'
 
 @Injectable()
 export class ConditionService implements IConditionService {
   constructor(
     @Inject(IConditionRepository)
     private readonly conditionRepository: IConditionRepository,
-
-  ) { }
+  ) {}
 
   private mapToResponseDto(condition: Condition): ConditionResponseDto {
     return new ConditionResponseDto({
@@ -36,11 +40,9 @@ export class ConditionService implements IConditionService {
     return this.mapToResponseDto(existingCondition)
   }
 
-
   // this function returns all Services
   // if there are no Services, it throws an ConflictException
-  async findAllCondition(
-  ): Promise<ConditionResponseDto[]> {
+  async findAllCondition(): Promise<ConditionResponseDto[]> {
     const conditions = await this.conditionRepository.findAll()
     if (!conditions || conditions.length == 0) {
       throw new ConflictException('Không tìm thấy condition nào.')
@@ -49,9 +51,9 @@ export class ConditionService implements IConditionService {
       this.mapToResponseDto(condition),
     )
     try {
-      return data;
+      return data
     } catch (error) {
-      throw new InternalServerErrorException("Failed to find condition")
+      throw new InternalServerErrorException('Failed to find condition')
     }
   }
 }
