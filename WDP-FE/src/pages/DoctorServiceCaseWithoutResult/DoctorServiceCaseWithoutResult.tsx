@@ -263,8 +263,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       console.error('Lỗi khi parse userData từ Cookie:', error)
     }
   }
-  const doctorId = (doctorData as any).id
-  console.log(doctorId)
+  const doctorId = doctorData.id
+  // console.log(doctorId)
 
 
   const handleCreateResultSubmit = async () => {
