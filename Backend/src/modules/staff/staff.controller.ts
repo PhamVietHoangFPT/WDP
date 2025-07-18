@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard'
 import { RolesGuard } from 'src/common/guard/roles.guard'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
+import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 @ApiTags('staff')
 @Controller('staff')
 @ApiBearerAuth()
@@ -26,7 +27,7 @@ export class StaffController {
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ theo email khách hàng' })
   @ApiResponse({
     status: 200,
-    type: [ServiceCaseResponseDto],
+    type: [ApiResponseDto<ServiceCaseResponseDto>],
     description: 'Danh sách hồ sơ dịch vụ theo email khách hàng',
   })
   @ApiQuery({ name: 'facilityId', required: true, type: String })
@@ -36,11 +37,17 @@ export class StaffController {
     @Query('facilityId') facilityId: string,
     @Query('email') email: string,
     @Query('currentStatus') currentStatus: string,
-  ): Promise<ServiceCaseResponseDto[]> {
-    return this.staffService.getServiceCasesByCustomerEmail(
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const data = await this.staffService.getServiceCasesByCustomerEmail(
       facilityId,
       email,
       currentStatus,
     )
+    return {
+      data,
+      success: true,
+      message: 'Lấy danh sách hồ sơ thành công',
+      statusCode: 200,
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
+  TeamOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -70,12 +71,12 @@ export const SideBar = () => {
       onClick: () =>
         navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
     },
-    // {
-    //   key: 'patients',
-    //   icon: <TeamOutlined />,
-    //   label: 'Bệnh nhân',
-    //   onClick: () => navigate('patients'),
-    // },
+    {
+      key: 'patients',
+      icon: <TeamOutlined />,
+      label: 'Cập nhật tình trạng',
+      onClick: () => navigate('/staff/update-status'),
+    },
     // ...
   ]
 
