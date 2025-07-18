@@ -254,24 +254,22 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     setTestTakerNames(names)
   }
 
-const userData = Cookies.get('userData')
-      let doctorData = {}
-      if (userData) {
-        try {
-        doctorData = JSON.parse(decodeURIComponent(userData))
-      } catch (error) {
-        console.error('Lỗi khi parse userData từ Cookie:', error)
-      }     
+  const userData = Cookies.get('userData')
+  let doctorData = {}
+  if (userData) {
+    try {
+      doctorData = JSON.parse(decodeURIComponent(userData))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ Cookie:', error)
     }
-    const doctorId = doctorData.id
-    console.log(doctorId)
+  }
+  const doctorId = (doctorData as any).id
+  console.log(doctorId)
 
 
   const handleCreateResultSubmit = async () => {
     try {
         const values = await form.validateFields();
-
-        // const doctorId = '682dbf1e3ecf256c0683b4d8';
 
         const adnPercentage = parseFloat(values.adnPercentage);
 
@@ -281,18 +279,16 @@ const userData = Cookies.get('userData')
         if (testTakerNames.length === 0) {
             conclusion = "Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.";
         } else if (testTakerNames.length === 1) {
-            conclusion = `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentage}%`;
+            conclusion = `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentage}%.`;
         } else if (testTakerNames.length >= 2) {
-            if (adnPercentage >= 99.9) {
-                if (adnPercentage === 100) {
-                    conclusion = `${testTakerNamesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
-                } else {
-                    conclusion = `${testTakerNamesString} có quan hệ huyết thống trực hệ (cha/mẹ - con) với xác suất ${adnPercentage}%.`;
-                }
+            if (adnPercentage === 100) {
+                conclusion = `${testTakerNamesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
+            } else if (adnPercentage >= 99.9) {
+                conclusion = `${testTakerNamesString} có quan hệ huyết thống trực hệ (cha/mẹ - con) với xác suất ${adnPercentage}%.`;
             } else if (adnPercentage >= 90) {
                 conclusion = `${testTakerNamesString} có quan hệ anh chị em ruột với xác suất ${adnPercentage}%.`;
             } else if (adnPercentage >= 70) {
-                conclusion = `${testTakerNamesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác mẹ) với xác suất ${adnPercentage}%.`;
+                conclusion = `${testTakerNamesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha) với xác suất ${adnPercentage}%.`;
             } else if (adnPercentage >= 50) {
                 conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ nhất với xác suất ${adnPercentage}%.`;
             } else if (adnPercentage >= 30) {
@@ -301,7 +297,7 @@ const userData = Cookies.get('userData')
                 conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ ba với xác suất ${adnPercentage}%.`;
             } else if (adnPercentage > 0.1) {
                 conclusion = `${testTakerNamesString} có quan hệ họ hàng rất xa hoặc không đáng kể với xác suất ${adnPercentage}%.`;
-            } else {
+            } else { // 0% hoặc dưới 0.1%
                 conclusion = `${testTakerNamesString} không có quan hệ huyết thống với xác suất ${adnPercentage}%.`;
             }
         }
@@ -717,13 +713,42 @@ const userData = Cookies.get('userData')
                   )
                 )}
               </p>
+              {/* Cập nhật phần hiển thị kết luận sẽ được tạo */}
               {testTakerNames.length > 0 && (
                 <p>
                   <strong>Kết luận sẽ được tạo:</strong>{' '}
-                  <em>
-                    {testTakerNames.length >= 2
-                      ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-                      : `${testTakerNames.join(' và ')} có quan hệ huyết thống`}
+                  <em id="predicted-conclusion">
+                    {(() => {
+                      // Logic để hiển thị kết luận dựa trên giá trị ADN hiện tại của form
+                      const adnPercentagePreview = form.getFieldValue('adnPercentage');
+                      const namesString = testTakerNames.join(' và ');
+
+                      if (testTakerNames.length === 0) {
+                          return "Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.";
+                      } else if (testTakerNames.length === 1) {
+                          return `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentagePreview || '...'}%.`;
+                      } else if (adnPercentagePreview === undefined || adnPercentagePreview === null) {
+                          return `${namesString} có quan hệ huyết thống... (vui lòng nhập tỷ lệ ADN)`;
+                      } else if (adnPercentagePreview === 100) {
+                          return `${namesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
+                      } else if (adnPercentagePreview >= 99.9) {
+                          return `${namesString} có quan hệ huyết thống trực hệ (cha/mẹ - con).`;
+                      } else if (adnPercentagePreview >= 90) {
+                          return `${namesString} có quan hệ anh chị em ruột.`;
+                      } else if (adnPercentagePreview >= 70) {
+                          return `${namesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha).`;
+                      } else if (adnPercentagePreview >= 50) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ nhất.`;
+                      } else if (adnPercentagePreview >= 30) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ hai.`;
+                      } else if (adnPercentagePreview >= 10) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ ba.`;
+                      } else if (adnPercentagePreview > 0.1) {
+                          return `${namesString} có quan hệ họ hàng rất xa hoặc không đáng kể.`;
+                      } else { // 0% hoặc dưới 0.1%
+                          return `${namesString} không có quan hệ huyết thống.`;
+                      }
+                    })()}
                   </em>
                 </p>
               )}
@@ -743,6 +768,8 @@ const userData = Cookies.get('userData')
                   max={100}
                   step={0.001}
                   precision={3}
+                  // Thêm onChange để cập nhật conclusion ngay lập tức
+                  onChange={() => form.validateFields(['adnPercentage'])}
                 />
               </Form.Item>
             </Form>
@@ -778,4 +805,4 @@ const userData = Cookies.get('userData')
   )
 }
 
-export default DoctorServiceCaseWithoutResult
+export default DoctorServiceCaseWithoutResult;
