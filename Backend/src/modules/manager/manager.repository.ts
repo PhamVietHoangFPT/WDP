@@ -509,6 +509,7 @@ export class ManagerRepository implements IManagerRepository {
             _id: '$facilities._id',
             name: '$facilities.facilityName',
           },
+          created_at: 1,
         },
       },
     ])

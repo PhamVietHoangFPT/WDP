@@ -205,7 +205,13 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
       ),
     },
     {
-      title: 'Ngày đặt',
+      title: 'Ngày tạo',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
+    },
+    {
+      title: 'Ngày hẹn',
       dataIndex: 'bookingDate',
       key: 'bookingDate',
       render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),

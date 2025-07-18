@@ -172,9 +172,7 @@ const SampleCollectorServiceCase: React.FC = () => {
       dataIndex: '_id',
       key: '_id',
       render: (id: string) => (
-        <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-          {id.slice(-8).toUpperCase()}
-        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{id}</div>
       ),
     },
     {
