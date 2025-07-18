@@ -174,7 +174,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   useEffect(() => {
     if (statusListData?.data && !selectedStatus) {
       const defaultStatus = statusListData.data.find(
-        (status: RequestStatus) => status.order === 7
+        (status: RequestStatus) => status.order === 6
       )
       if (defaultStatus) setSelectedStatus(defaultStatus._id)
     }
@@ -208,9 +208,18 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   const handleStatusUpdate = async () => {
     if (!selectedServiceCase) return
     try {
-      const nextStatus = statusListData?.data?.find(
-        (status: RequestStatus) => status.order === 8
-      )
+      let nextStatus
+      if (selectedServiceCase.currentStatus.order === 6) {
+        nextStatus = statusListData?.data?.find(
+          (status: RequestStatus) => status.order === 7
+        )
+      } else if (selectedServiceCase.currentStatus.order === 7) {
+        nextStatus = statusListData?.data?.find(
+          (status: RequestStatus) => status.order === 8
+        )
+      } else {
+        return message.error('Trạng thái hiện tại không thể cập nhật!')
+      }
       if (!nextStatus)
         return message.error('Không tìm thấy trạng thái tiếp theo!')
 
@@ -398,7 +407,10 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       title: 'Hành động',
       key: 'actions',
       render: (_, record) => {
-        if (record.currentStatus.order === 7) {
+        if (
+          record.currentStatus.order === 7 ||
+          record.currentStatus.order === 6
+        ) {
           return (
             <Button
               type='primary'
@@ -461,7 +473,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           disabled={isLoadingStatus}
         >
           {statusListData?.data
-            ?.filter((s) => s.order >= 7 && s.order <= 9)
+            ?.filter((s) => s.order >= 6 && s.order <= 9)
             ?.map((s) => (
               <Select.Option key={s._id} value={s._id}>
                 {s.testRequestStatus}
@@ -588,7 +600,22 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         </p>
         <p>
           <strong>Trạng thái mới:</strong>{' '}
-          <Tag color='orange'>Chờ duyệt kết quả</Tag>
+          <Tag color='orange'>
+            {(() => {
+              if (!selectedServiceCase || !statusListData?.data) return ''
+              let nextStatus: RequestStatus | undefined
+              if (selectedServiceCase.currentStatus.order === 6) {
+                nextStatus = statusListData.data.find(
+                  (status: RequestStatus) => status.order === 7
+                )
+              } else if (selectedServiceCase.currentStatus.order === 7) {
+                nextStatus = statusListData.data.find(
+                  (status: RequestStatus) => status.order === 8
+                )
+              }
+              return nextStatus?.testRequestStatus || ''
+            })()}
+          </Tag>
         </p>
         <div
           style={{
