@@ -24,6 +24,7 @@ import {
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
 } from '../../features/doctor/doctorAPI'
+import Cookies from 'js-cookie'
 
 const { Title } = Typography
 
@@ -253,39 +254,78 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     setTestTakerNames(names)
   }
 
-  const handleCreateResultSubmit = async () => {
+  const userData = Cookies.get('userData')
+  let doctorData = {}
+  if (userData) {
     try {
-      const values = await form.validateFields()
-
-      // Get doctor ID from cookie (you'll need to implement this based on your auth system)
-      const doctorId = '682dbf1e3ecf256c0683b4d8' // Replace with actual cookie value
-
-      // Create conclusion from test taker names
-      const conclusion =
-        testTakerNames.length >= 2
-          ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-          : `${testTakerNames.join(' và ')} có quan hệ huyết thống`
-
-      const resultData = {
-        adnPercentage: values.adnPercentage.toString(), // Convert number to string
-        doctorId: doctorId,
-        conclusion: conclusion,
-        serviceCase: selectedServiceCase?._id,
-      }
-
-      await createServiceCaseResult(resultData).unwrap()
-
-      message.success('Tạo kết quả thành công!')
-      setCreateResultModalVisible(false)
-      setSelectedServiceCase(null)
-      setTestTakerNames([])
-      form.resetFields()
-      refetchServiceCases()
-    } catch (error: any) {
-      console.error('Create result error:', error)
-      message.error(error?.data?.message || 'Tạo kết quả thất bại!')
+      doctorData = JSON.parse(decodeURIComponent(userData))
+    } catch (error) {
+      console.error('Lỗi khi parse userData từ Cookie:', error)
     }
   }
+  const doctorId = (doctorData as any).id
+  console.log(doctorId)
+
+
+  const handleCreateResultSubmit = async () => {
+    try {
+        const values = await form.validateFields();
+
+        const adnPercentage = parseFloat(values.adnPercentage);
+
+        let conclusion = "";
+        const testTakerNamesString = testTakerNames.join(" và ");
+
+        if (testTakerNames.length === 0) {
+            conclusion = "Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.";
+        } else if (testTakerNames.length === 1) {
+            conclusion = `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentage}%.`;
+        } else if (testTakerNames.length >= 2) {
+            if (adnPercentage === 100) {
+                conclusion = `${testTakerNamesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
+            } else if (adnPercentage >= 99.9) {
+                conclusion = `${testTakerNamesString} có quan hệ huyết thống trực hệ (cha/mẹ - con) với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 90) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em ruột với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 70) {
+                conclusion = `${testTakerNamesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha) với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 50) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ nhất với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 30) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ hai với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 10) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ ba với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage > 0.1) {
+                conclusion = `${testTakerNamesString} có quan hệ họ hàng rất xa hoặc không đáng kể với xác suất ${adnPercentage}%.`;
+            } else { // 0% hoặc dưới 0.1%
+                conclusion = `${testTakerNamesString} không có quan hệ huyết thống với xác suất ${adnPercentage}%.`;
+            }
+        }
+
+        const resultData = {
+            adnPercentage: values.adnPercentage.toString(),
+            doctorId: doctorId,
+            conclusion: conclusion,
+            serviceCase: selectedServiceCase?._id,
+        };
+
+        await createServiceCaseResult(resultData).unwrap();
+
+        message.success('Tạo kết quả thành công!');
+        setCreateResultModalVisible(false);
+        setSelectedServiceCase(null);
+        setTestTakerNames([]);
+        form.resetFields();
+        refetchServiceCases();
+    } catch (error: any) {
+        console.error('Create result error:', error);
+        if (error.errorFields) {
+            message.error('Vui lòng kiểm tra lại các trường nhập liệu.');
+        } else {
+            message.error(error?.data?.message || 'Tạo kết quả thất bại!');
+        }
+    }
+};
 
   const handleViewDetails = (id: string) => {
     message.info('Xem chi tiết: ' + id)
@@ -673,13 +713,42 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
                   )
                 )}
               </p>
+              {/* Cập nhật phần hiển thị kết luận sẽ được tạo */}
               {testTakerNames.length > 0 && (
                 <p>
                   <strong>Kết luận sẽ được tạo:</strong>{' '}
-                  <em>
-                    {testTakerNames.length >= 2
-                      ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-                      : `${testTakerNames.join(' và ')} có quan hệ huyết thống`}
+                  <em id="predicted-conclusion">
+                    {(() => {
+                      // Logic để hiển thị kết luận dựa trên giá trị ADN hiện tại của form
+                      const adnPercentagePreview = form.getFieldValue('adnPercentage');
+                      const namesString = testTakerNames.join(' và ');
+
+                      if (testTakerNames.length === 0) {
+                          return "Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.";
+                      } else if (testTakerNames.length === 1) {
+                          return `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentagePreview || '...'}%.`;
+                      } else if (adnPercentagePreview === undefined || adnPercentagePreview === null) {
+                          return `${namesString} có quan hệ huyết thống... (vui lòng nhập tỷ lệ ADN)`;
+                      } else if (adnPercentagePreview === 100) {
+                          return `${namesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
+                      } else if (adnPercentagePreview >= 99.9) {
+                          return `${namesString} có quan hệ huyết thống trực hệ (cha/mẹ - con).`;
+                      } else if (adnPercentagePreview >= 90) {
+                          return `${namesString} có quan hệ anh chị em ruột.`;
+                      } else if (adnPercentagePreview >= 70) {
+                          return `${namesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha).`;
+                      } else if (adnPercentagePreview >= 50) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ nhất.`;
+                      } else if (adnPercentagePreview >= 30) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ hai.`;
+                      } else if (adnPercentagePreview >= 10) {
+                          return `${namesString} có quan hệ anh chị em họ đời thứ ba.`;
+                      } else if (adnPercentagePreview > 0.1) {
+                          return `${namesString} có quan hệ họ hàng rất xa hoặc không đáng kể.`;
+                      } else { // 0% hoặc dưới 0.1%
+                          return `${namesString} không có quan hệ huyết thống.`;
+                      }
+                    })()}
                   </em>
                 </p>
               )}
@@ -699,6 +768,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
                   max={100}
                   step={0.001}
                   precision={3}
+                  // Thêm onChange để cập nhật conclusion ngay lập tức
+                  onChange={() => form.validateFields(['adnPercentage'])}
                 />
               </Form.Item>
             </Form>
@@ -734,4 +805,4 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   )
 }
 
-export default DoctorServiceCaseWithoutResult
+export default DoctorServiceCaseWithoutResult;
