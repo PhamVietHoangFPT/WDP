@@ -269,38 +269,67 @@ const userData = Cookies.get('userData')
 
   const handleCreateResultSubmit = async () => {
     try {
-      const values = await form.validateFields()
+        const values = await form.validateFields();
 
-      // Get doctor ID from cookie (you'll need to implement this based on your auth system)
-      const doctorIds = '682dbf1e3ecf256c0683b4d8' // Replace with actual cookie value
+        // const doctorId = '682dbf1e3ecf256c0683b4d8';
 
-      
-      // Create conclusion from test taker names
-      const conclusion =
-        testTakerNames.length >= 2
-          ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-          : `${testTakerNames.join(' và ')} có quan hệ huyết thống`
+        const adnPercentage = parseFloat(values.adnPercentage);
 
-      const resultData = {
-        adnPercentage: values.adnPercentage.toString(), // Convert number to string
-        doctorId: doctorId,
-        conclusion: conclusion,
-        serviceCase: selectedServiceCase?._id,
-      }
+        let conclusion = "";
+        const testTakerNamesString = testTakerNames.join(" và ");
 
-      await createServiceCaseResult(resultData).unwrap()
+        if (testTakerNames.length === 0) {
+            conclusion = "Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.";
+        } else if (testTakerNames.length === 1) {
+            conclusion = `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentage}%`;
+        } else if (testTakerNames.length >= 2) {
+            if (adnPercentage >= 99.9) {
+                if (adnPercentage === 100) {
+                    conclusion = `${testTakerNamesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`;
+                } else {
+                    conclusion = `${testTakerNamesString} có quan hệ huyết thống trực hệ (cha/mẹ - con) với xác suất ${adnPercentage}%.`;
+                }
+            } else if (adnPercentage >= 90) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em ruột với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 70) {
+                conclusion = `${testTakerNamesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác mẹ) với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 50) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ nhất với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 30) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ hai với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage >= 10) {
+                conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ ba với xác suất ${adnPercentage}%.`;
+            } else if (adnPercentage > 0.1) {
+                conclusion = `${testTakerNamesString} có quan hệ họ hàng rất xa hoặc không đáng kể với xác suất ${adnPercentage}%.`;
+            } else {
+                conclusion = `${testTakerNamesString} không có quan hệ huyết thống với xác suất ${adnPercentage}%.`;
+            }
+        }
 
-      message.success('Tạo kết quả thành công!')
-      setCreateResultModalVisible(false)
-      setSelectedServiceCase(null)
-      setTestTakerNames([])
-      form.resetFields()
-      refetchServiceCases()
+        const resultData = {
+            adnPercentage: values.adnPercentage.toString(),
+            doctorId: doctorId,
+            conclusion: conclusion,
+            serviceCase: selectedServiceCase?._id,
+        };
+
+        await createServiceCaseResult(resultData).unwrap();
+
+        message.success('Tạo kết quả thành công!');
+        setCreateResultModalVisible(false);
+        setSelectedServiceCase(null);
+        setTestTakerNames([]);
+        form.resetFields();
+        refetchServiceCases();
     } catch (error: any) {
-      console.error('Create result error:', error)
-      message.error(error?.data?.message || 'Tạo kết quả thất bại!')
+        console.error('Create result error:', error);
+        if (error.errorFields) {
+            message.error('Vui lòng kiểm tra lại các trường nhập liệu.');
+        } else {
+            message.error(error?.data?.message || 'Tạo kết quả thất bại!');
+        }
     }
-  }
+};
 
   const handleViewDetails = (id: string) => {
     message.info('Xem chi tiết: ' + id)
