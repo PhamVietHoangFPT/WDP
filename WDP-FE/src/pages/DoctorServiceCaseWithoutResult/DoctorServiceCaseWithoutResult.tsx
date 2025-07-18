@@ -24,6 +24,7 @@ import {
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
 } from '../../features/doctor/doctorAPI'
+import Cookies from 'js-cookie'
 
 const { Title } = Typography
 
@@ -253,13 +254,27 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     setTestTakerNames(names)
   }
 
+const userData = Cookies.get('userData')
+      let doctorData = {}
+      if (userData) {
+        try {
+        doctorData = JSON.parse(decodeURIComponent(userData))
+      } catch (error) {
+        console.error('Lỗi khi parse userData từ Cookie:', error)
+      }     
+    }
+    const doctorId = doctorData.id
+    console.log(doctorId)
+
+
   const handleCreateResultSubmit = async () => {
     try {
       const values = await form.validateFields()
 
       // Get doctor ID from cookie (you'll need to implement this based on your auth system)
-      const doctorId = '682dbf1e3ecf256c0683b4d8' // Replace with actual cookie value
+      const doctorIds = '682dbf1e3ecf256c0683b4d8' // Replace with actual cookie value
 
+      
       // Create conclusion from test taker names
       const conclusion =
         testTakerNames.length >= 2
