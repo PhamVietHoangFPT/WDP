@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Address, AddressDocument } from './schemas/address.schema'
-import { IAddressRepository } from './interfaces/iaddress.repository'
-import { CreateAddressDto } from './dto/create-address.dto'
-import { CreateAddressFacilityDto } from './dto/createAddressFacility.dto'
-import { UpdateAddressFacilityForAddressDto } from './dto/updateFacilityAddress.dto'
+import {
+  IAddressRepository,
+  CreateCompleteAddressData,
+  UpdateCompleteAddressData,
+} from './interfaces/iaddress.repository'
 
 @Injectable()
 export class AddressRepository implements IAddressRepository {
@@ -14,28 +15,37 @@ export class AddressRepository implements IAddressRepository {
     private readonly addressModel: Model<AddressDocument>,
   ) {}
 
-  async create(
-    data: CreateAddressDto,
-    userId: string,
-  ): Promise<AddressDocument> {
-    const address = new this.addressModel({
-      ...data,
-      created_by: userId,
-    })
-    return address.save()
+  // Đã đúng với interface
+  async create(data: CreateCompleteAddressData): Promise<AddressDocument> {
+    const newAddress = new this.addressModel(data)
+    return newAddress.save()
   }
 
+  // Đã đúng với interface
   async createForFacility(
-    data: CreateAddressFacilityDto,
-    userId: string,
+    data: CreateCompleteAddressData,
   ): Promise<AddressDocument> {
-    const address = new this.addressModel({
-      ...data,
-      created_by: userId,
-    })
-    return address.save()
+    const newAddress = new this.addressModel(data)
+    return newAddress.save()
   }
 
+  // Đã đúng với interface
+  async updateAddressById(
+    id: string,
+    data: UpdateCompleteAddressData,
+  ): Promise<AddressDocument | null> {
+    return this.addressModel.findByIdAndUpdate(id, data, { new: true }).exec()
+  }
+
+  // Đã đúng với interface
+  async updateFacilityAddress(
+    id: string,
+    data: UpdateCompleteAddressData,
+  ): Promise<AddressDocument | null> {
+    return this.addressModel.findByIdAndUpdate(id, data, { new: true }).exec()
+  }
+
+  // Các hàm không thay đổi, đã đúng
   async findAll(): Promise<AddressDocument[]> {
     return this.addressModel
       .find({ deleted_at: null })
@@ -43,47 +53,10 @@ export class AddressRepository implements IAddressRepository {
       .lean()
       .exec()
   }
-
-  async updateAddressById(
-    id: string,
-    data: Partial<CreateAddressDto>,
-    userId: string,
-  ): Promise<AddressDocument | null> {
-    return this.addressModel
-      .findByIdAndUpdate(
-        id,
-        {
-          ...data,
-          updated_by: userId,
-          updated_at: new Date(),
-        },
-        { new: true },
-      )
-      .exec()
-  }
-
   async findById(id: string): Promise<AddressDocument | null> {
     return this.addressModel
       .findOne({ _id: id, deleted_at: null })
       .lean()
-      .exec()
-  }
-
-  async updateFacilityAddress(
-    id: string,
-    userId: string,
-    data: UpdateAddressFacilityForAddressDto,
-  ): Promise<AddressDocument | null> {
-    return this.addressModel
-      .findByIdAndUpdate(
-        id,
-        {
-          ...data,
-          updated_by: userId,
-          updated_at: new Date(),
-        },
-        { new: true },
-      )
       .exec()
   }
 }
