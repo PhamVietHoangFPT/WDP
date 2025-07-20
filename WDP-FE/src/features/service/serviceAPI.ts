@@ -3,10 +3,25 @@ import { apiSlice } from '../../apis/apiSlice'
 export const serviceAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getServiceList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
+      query: ({
+        name,
+        sampleName,
+        timeReturn,
+        isSelfSampling,
+        isAdministration,
+        isAgnate,
+        pageNumber,
+        pageSize,
+      }) => ({
         url: '/services',
         method: 'GET',
         params: {
+          name,
+          sampleName,
+          timeReturn,
+          isSelfSampling,
+          isAdministration,
+          isAgnate,
           pageNumber,
           pageSize,
         },
