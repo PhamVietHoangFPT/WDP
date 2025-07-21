@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   DatePicker,
   Select,
@@ -15,6 +15,10 @@ import {
   Col,
   Row,
   Table,
+  Divider,
+  Statistic,
+  List,
+  Space,
 } from 'antd'
 import dayjs from 'dayjs'
 import viVN from 'antd/locale/vi_VN'
@@ -25,13 +29,13 @@ import { useGetFacilitiesNameAndAddressQuery } from '../../features/admin/facili
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import { useGetSlotTemplateForFacilityQuery } from '../../features/admin/slotAPI'
 import type { Slot } from '../../types/slot'
-import { AimOutlined } from '@ant-design/icons'
+import { AimOutlined, CalculatorOutlined } from '@ant-design/icons'
 dayjs.locale('vi')
 dayjs.extend(isoWeek)
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
 
-const { Title, Text } = Typography
+const { Title, Text, Paragraph } = Typography
 const generateTimeSlots = (workTimeStart, workTimeEnd, slotDuration) => {
   const slots = []
   // Sử dụng một ngày giả để thực hiện các phép toán thời gian
@@ -86,8 +90,19 @@ const DAYS_OF_WEEK = [
 ]
 
 interface BookingComponentProps {
-  onSelectBooking: (slotId: string) => void
+  onConfirmBooking: (details: { slotId: string; shippingFee: number }) => void
+  onSelectSlot: (slotId: string | null) => void
   selectedSlotId: string | null
+  serviceDetail: {
+    name: string
+    fee: number
+    timeReturn: {
+      timeReturnFee: number
+    }
+    sample: {
+      fee: number
+    }
+  }
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -105,16 +120,70 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return d
 }
 
+const getLocationPromise = (
+  callId: number
+): Promise<{ lat: number; lon: number }> => {
+  return new Promise(async (resolve, reject) => {
+    if (!navigator.permissions || !navigator.geolocation) {
+      return reject(
+        new Error(
+          'Trình duyệt của bạn không hỗ trợ định vị hoặc Permissions API.'
+        )
+      )
+    }
+
+    try {
+      const permissionStatus = await navigator.permissions.query({
+        name: 'geolocation',
+      })
+      if (permissionStatus.state === 'denied') {
+        return reject(
+          new Error(
+            'Bạn đã từ chối quyền truy cập vị trí. Vui lòng kiểm tra cài đặt của trình duyệt.'
+          )
+        )
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        // Success Callback
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          })
+        }
+        // ✅ THÊM ERROR CALLBACK VÀO ĐÂY
+      )
+    } catch (error) {
+      reject(new Error('Không thể kiểm tra quyền truy cập vị trí.'))
+    }
+  })
+}
+
 const BookingComponent: React.FC<BookingComponentProps> = ({
-  onSelectBooking,
+  onConfirmBooking,
+  onSelectSlot,
   selectedSlotId,
+  serviceDetail,
 }) => {
   const [userLocation, setUserLocation] = useState<{
     lat: number
     lon: number
   } | null>(null)
-  const [isFindingLocation, setIsFindingLocation] = useState(false)
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
+
+  // Hợp nhất các state loading
+  const [isFindingLocation, setIsFindingLocation] = useState(false)
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+  const isProcessingRef = useRef(false)
+
+  // State cho việc tính toán và hiển thị
+  const [shippingFee, setShippingFee] = useState<number | null>(null)
+  const [totalPrice, setTotalPrice] = useState<number | null>(null)
+  const [userLocationForSorting, setUserLocationForSorting] = useState<{
+    lat: number
+    lon: number
+  } | null>(null)
   const [isAvailable, setIsAvailable] = useState(true)
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
     dayjs().startOf('isoWeek'),
@@ -199,33 +268,113 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     }
   }
 
-  const handleFindNearest = () => {
-    if (!navigator.geolocation) {
-      message.error('Trình duyệt của bạn không hỗ trợ định vị.')
+  const handleCalculateShipping = useCallback(async () => {
+    // Dùng ref để kiểm tra, an toàn hơn
+    if (isProcessingRef.current) {
+      return
+    }
+    // Các guard-clause kiểm tra điều kiện
+    if (!facilityId) {
+      message.error('Vui lòng chọn một cơ sở trước.')
+      return
+    }
+    if (!serviceDetail) {
+      message.error('Chưa có thông tin dịch vụ để tính phí.')
       return
     }
 
-    setIsFindingLocation(true)
-    message.loading({ content: 'Đang tìm vị trí của bạn...', key: 'location' })
+    // Bắt đầu quá trình
+    isProcessingRef.current = true
+    setIsCalculatingFee(true) // Chỉ state này dùng để cập nhật UI (spinner)
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        setUserLocation({ lat: latitude, lon: longitude })
-        setIsFindingLocation(false)
-        message.success({
-          content: 'Đã tìm thấy vị trí và sắp xếp lại các cơ sở!',
-          key: 'location',
+    try {
+      let locationToUse = userLocation
+
+      // Nếu chưa có vị trí, lấy mới
+      if (!locationToUse) {
+        message.loading({
+          content: 'Đang yêu cầu vị trí của bạn...',
+          key: 'shipping',
         })
-      },
-      (error) => {
-        let errorMessage = 'Không thể lấy vị trí.'
-        if (error.code === 1)
-          errorMessage = 'Bạn đã từ chối quyền truy cập vị trí.'
-        message.error({ content: errorMessage, key: 'location' })
-        setIsFindingLocation(false)
+        const newLocation = await getLocationPromise(Date.now())
+        locationToUse = newLocation
+        setUserLocation(newLocation) // Cập nhật vào state chung
       }
-    )
+
+      if (!locationToUse) {
+        throw new Error('Không thể xác định vị trí để tiếp tục tính toán.')
+      }
+
+      message.loading({ content: 'Đang tính toán chi phí...', key: 'shipping' })
+
+      // Lấy dữ liệu cơ sở
+      const facilityRawData = facilitiesData?.data?.find(
+        (f) => f._id === facilityId
+      )
+      const coordinates = facilityRawData?.address?.location?.coordinates
+      if (!coordinates) {
+        throw new Error('Cơ sở này không có thông tin tọa độ.')
+      }
+      const [facilityLon, facilityLat] = coordinates
+
+      // Tính toán
+      const serviceFee =
+        (serviceDetail?.fee || 0) +
+        (serviceDetail?.timeReturn?.timeReturnFee || 0) +
+        (serviceDetail?.sample?.fee || 0)
+      const distance = getDistanceFromLatLonInKm(
+        locationToUse.lat,
+        locationToUse.lon,
+        facilityLat,
+        facilityLon
+      )
+
+      let calculatedShippingFee = 0
+      if (distance > 5) {
+        calculatedShippingFee = (distance - 5) * 10000
+      }
+      calculatedShippingFee = Math.ceil(calculatedShippingFee / 1000) * 1000
+      const calculatedTotalPrice = serviceFee + calculatedShippingFee
+
+      // Cập nhật state kết quả
+      setShippingFee(calculatedShippingFee)
+      setTotalPrice(calculatedTotalPrice)
+
+      message.success({ content: 'Đã tính xong!', key: 'shipping' })
+    } catch (error) {
+      console.error('ĐÃ XẢY RA LỖI TRONG KHỐI TRY:', error)
+      message.error({
+        content: error instanceof Error ? error.message : String(error),
+        key: 'shipping',
+        duration: 3,
+      })
+      setShippingFee(null)
+      setTotalPrice(null)
+    } finally {
+      // Kết thúc quá trình
+      isProcessingRef.current = false
+      setIsCalculatingFee(false)
+    }
+  }, [facilityId, serviceDetail, userLocation, facilitiesData])
+
+  const handleFindNearest = async () => {
+    if (isProcessingRef.current) return
+
+    setIsFindingLocation(true)
+    isProcessingRef.current = true
+    onSelectSlot(null)
+
+    try {
+      const location = await getLocationPromise(Date.now())
+      setUserLocation(location)
+      setUserLocationForSorting(location)
+      message.success('Đã tìm thấy vị trí và sắp xếp lại các cơ sở!')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : String(error))
+    } finally {
+      setIsFindingLocation(false)
+      isProcessingRef.current = false
+    }
   }
 
   const selectOptions = useMemo(() => {
@@ -239,11 +388,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
       let distance
       // 2. Tính khoảng cách nếu có vị trí người dùng và cơ sở có tọa độ
-      if (userLocation && location?.coordinates) {
+      if (userLocationForSorting && location?.coordinates) {
         const [lon, lat] = location.coordinates
         distance = getDistanceFromLatLonInKm(
-          userLocation.lat,
-          userLocation.lon,
+          userLocationForSorting.lat,
+          userLocationForSorting.lon,
           lat,
           lon
         )
@@ -261,7 +410,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     })
 
     // Sắp xếp lại mảng nếu có thông tin vị trí người dùng
-    if (userLocation) {
+    if (userLocationForSorting) {
       mappedFacilities.sort((a, b) => {
         if (a.distance === undefined) return 1
         if (b.distance === undefined) return -1
@@ -270,12 +419,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     }
 
     return mappedFacilities
-  }, [facilitiesData, userLocation]) // `useMemo` giờ phụ thuộc vào cả `userLocation`
+  }, [facilitiesData, userLocationForSorting]) // `useMemo` giờ phụ thuộc vào cả `userLocation`
 
   // === 7. TỰ ĐỘNG CHỌN CƠ SỞ GẦN NHẤT SAU KHI TÌM THẤY VỊ TRÍ ===
   useEffect(() => {
     // Chỉ chạy khi đã có vị trí VÀ danh sách đã được sắp xếp
-    if (userLocation && selectOptions.length > 0) {
+    if (userLocationForSorting && selectOptions.length > 0) {
       const nearestFacility = selectOptions.find(
         (opt) => opt.distance !== undefined
       )
@@ -283,7 +432,20 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
         setFacilityId(nearestFacility.value)
       }
     }
-  }, [selectOptions, userLocation])
+  }, [selectOptions, userLocationForSorting])
+
+  const handleConfirmBooking = () => {
+    if (selectedSlotId && shippingFee !== null) {
+      // Gọi prop từ component cha với đầy đủ dữ liệu
+      onConfirmBooking({
+        slotId: selectedSlotId,
+        shippingFee: shippingFee,
+      })
+      message.success('Đã gửi thông tin đặt lịch!')
+    } else {
+      message.error('Vui lòng tính phí vận chuyển trước khi xác nhận.')
+    }
+  }
 
   return (
     <ConfigProvider locale={viVN}>
@@ -477,7 +639,15 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                               key={slot._id}
                               type={isSelected ? 'primary' : 'default'}
                               block
-                              onClick={() => onSelectBooking(slot._id)}
+                              onClick={() => {
+                                // ✅ SỬA LỖI TẠI ĐÂY:
+                                // Gọi hàm onSelectSlot mà component cha đã truyền xuống
+                                onSelectSlot(slot._id)
+
+                                // Đồng thời reset các giá trị phí để bắt người dùng tính lại
+                                setShippingFee(null)
+                                setTotalPrice(null)
+                              }}
                               style={{ height: 'auto', padding: '4px 8px' }}
                             >
                               <Text
@@ -497,6 +667,96 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
               ))}
             </Table>
           </div>
+        )}
+        {selectedSlotId && (
+          <Card style={{ marginTop: 24 }}>
+            <Title level={5}>Tổng hợp chi phí (Ước tính)</Title>
+            <Flex justify='space-between' align='center'>
+              <Text>Dịch vụ:</Text>
+              <Text strong>{serviceDetail.name}</Text>
+            </Flex>
+            <Space direction='vertical' style={{ width: '100%' }}>
+              <List
+                size='small'
+                dataSource={[
+                  {
+                    label: 'Phí dịch vụ',
+                    value:
+                      serviceDetail.fee +
+                      serviceDetail.timeReturn.timeReturnFee +
+                      serviceDetail.sample.fee,
+                    isFee: true,
+                  },
+                  {
+                    label: 'Phí vận chuyển',
+                    value: shippingFee,
+                    isFee: true,
+                    color: '#52c41a',
+                  },
+                ]}
+                renderItem={(item) => (
+                  <List.Item style={{ padding: '8px 0', border: 'none' }}>
+                    <List.Item.Meta
+                      title={<Text type='secondary'>{item.label}</Text>}
+                    />
+                    {item.value !== null ? (
+                      <Text strong style={{ color: item.color }}>
+                        {item.value === 0
+                          ? 'Miễn phí'
+                          : `${item.value.toLocaleString('vi-VN')} ₫`}
+                      </Text>
+                    ) : (
+                      <Text type='secondary'>_</Text>
+                    )}
+                  </List.Item>
+                )}
+              />
+
+              <Divider style={{ margin: '0' }} />
+
+              <Statistic
+                title={
+                  <Title level={5} style={{ color: 'inherit' }}>
+                    Tổng cộng
+                  </Title>
+                }
+                value={totalPrice !== null ? totalPrice : undefined}
+                precision={0}
+                suffix='₫'
+                loading={totalPrice === null}
+                valueStyle={{ color: '#1677ff', fontSize: '24px' }}
+                style={{ textAlign: 'right', marginTop: '8px' }}
+              />
+            </Space>
+            {shippingFee === null ? (
+              <>
+                <Button
+                  type='primary'
+                  icon={<CalculatorOutlined />}
+                  loading={isCalculatingFee}
+                  onClick={handleCalculateShipping}
+                  style={{ width: '100%', marginTop: 24 }}
+                  disabled={!facilityId}
+                >
+                  Bắt buộc: Yêu cầu vị trí & Tính phí vận chuyển
+                </Button>
+                <Paragraph
+                  type='secondary'
+                  style={{ textAlign: 'center', marginTop: 8, fontSize: 12 }}
+                >
+                  Bạn cần thực hiện bước này để ước tính tổng chi phí.
+                </Paragraph>
+              </>
+            ) : (
+              <Button
+                type='primary'
+                onClick={handleConfirmBooking}
+                style={{ width: '100%', marginTop: 24, background: '#52c41a' }}
+              >
+                Xác nhận Đặt lịch
+              </Button>
+            )}
+          </Card>
         )}
       </div>
     </ConfigProvider>

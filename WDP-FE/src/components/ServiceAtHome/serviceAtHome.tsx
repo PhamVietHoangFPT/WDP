@@ -28,7 +28,7 @@ const ServiceAtHomeForm: React.FC = () => {
     ? JSON.parse(Cookies.get('userData') as string).id
     : undefined
   const [form] = Form.useForm()
-  const [selectedBooking, setSelectedBooking] = useState<string | null>(null)
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
   const [testTakerCount, setTestTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
     accountId: accountId,
@@ -45,10 +45,15 @@ const ServiceAtHomeForm: React.FC = () => {
   const dataTestTaker = data?.data || []
   const selectedTestTakers = Form.useWatch([], form)
 
-  const handleSelectBooking = (slotId: string) => {
+  const handleConfirmBooking = ({
+    slotId,
+    shippingFee,
+  }: {
+    slotId: string
+    shippingFee: number
+  }) => {
     form.setFieldsValue({ slot: slotId })
-    setSelectedBooking(slotId)
-    console.log(slotId)
+    form.setFieldsValue({ extraPrice: shippingFee })
   }
 
   const addTestTaker = () => {
@@ -85,11 +90,15 @@ const ServiceAtHomeForm: React.FC = () => {
       values.testTaker3,
     ].filter((id) => id)
 
-    console.log('Dữ liệu gửi đi cho createCaseMember:', { data })
+    const { slot } = values
+
+    if (!slot) {
+      return message.error('Vui lòng chọn và xác nhận lịch hẹn.')
+    }
 
     try {
       const bookingRes = await createBooking({
-        slot: selectedBooking,
+        slot: slot,
         account: String(accountId),
         note: 'Đặt lịch hẹn xét nghiệm ADN',
       }).unwrap()
@@ -212,8 +221,10 @@ const ServiceAtHomeForm: React.FC = () => {
                 style={{ placeSelf: 'center' }}
               >
                 <BookingComponent
-                  onSelectBooking={handleSelectBooking}
-                  selectedSlotId={selectedBooking}
+                  onConfirmBooking={handleConfirmBooking} // Hàm xác nhận cuối cùng
+                  onSelectSlot={setSelectedSlotId} // ✅ Hàm để chọn slot
+                  selectedSlotId={selectedSlotId} // ✅ Giá trị slot đang được chọn
+                  serviceDetail={serviceDetail}
                 />
               </Form.Item>
             </Col>
