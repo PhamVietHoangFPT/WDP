@@ -69,7 +69,6 @@ export default function CreateTesteeForm() {
 
   return (
     <div>
-      <HeaderCus />
       <Card
         style={{
           maxWidth: 900,

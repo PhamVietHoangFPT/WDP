@@ -48,8 +48,6 @@ export default function TestTakerList() {
     }
   }
 
-  console.log(list)
-
   const columns = [
     {
       title: 'Họ và Tên',
@@ -110,7 +108,6 @@ export default function TestTakerList() {
 
   return (
     <div>
-      <HeaderCus />
       <Title level={3}>Danh sách Người Test ADN</Title>
       <Table
         rowKey='_id'
@@ -126,13 +123,21 @@ export default function TestTakerList() {
         </div>
       ) : (
         <Pagination
-          style={{ marginTop: 20, textAlign: 'center' }}
+          style={{
+            marginTop: 20,
+            textAlign: 'center',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
           total={data?.pagination?.totalItems || 0}
           pageSize={Number(pageSize)}
           current={Number(pageNumber)}
           onChange={(page, size) => {
             navigate(`/list-testee?pageNumber=${page}&pageSize=${size}`)
           }}
+          showSizeChanger
+          pageSizeOptions={['10', '20', '50']}
+          showTotal={(total) => `Tổng số: ${total}`}
         />
       )}
     </div>

@@ -51,6 +51,11 @@ export default function HeaderCus() {
       onClick: () => navigate('/profile'),
     },
     {
+      key: 'manage-address',
+      label: 'Quản lý địa chỉ',
+      onClick: () => navigate('/manage-address'),
+    },
+    {
       key: 'create-testee',
       label: 'Tạo người test ADN',
       onClick: () => navigate('/create-testee'),
