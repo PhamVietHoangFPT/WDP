@@ -55,5 +55,8 @@ export interface IServiceCaseRepository {
   findByCurrentStatusId(currentStatusId: string): Promise<string[] | null>
 
   getServiceCaseCheckinTime(serviceCaseId: string): Promise<Date | null>
+
+  getConditionFeeById(id: string): Promise<number | null>
+
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

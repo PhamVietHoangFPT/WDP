@@ -19,6 +19,18 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     @Inject(ITestRequestHistoryRepository)
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
   ) { }
+
+  async getConditionFeeById(id: string): Promise<number | null> {
+    type ConditionPopulated = { condition: { conditionFee?: number } };
+
+    const serviceCase = await this.serviceCaseModel
+      .findById(id)
+      .populate({ path: 'condition', select: "conditionFee" })
+      .lean<ConditionPopulated>();
+
+    return serviceCase?.condition?.conditionFee ?? null;
+  }
+
   async findOneById(id: string): Promise<ServiceCaseDocument | null> {
     return await this.serviceCaseModel.findOne({ _id: id, deleted_at: null }).exec()
   }

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yêu Cầu Thanh Toán - {{appName}}</title>
+    <style>
+        body {
+            font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .content {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: #fff !important;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #eaeaea;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Yêu Cầu Thanh Toán</h1>
+        </div>
+        <div class="content">
+            <p>Kính gửi Quý khách {{customerName}},</p>
+
+            <p>{{message}}</p>
+
+            <p>Thông tin chi tiết:</p>
+            <ul>
+                <li><strong>Bác sĩ phụ trách:</strong> {{doctorName}}</li>
+                <li><strong>Cơ sở thực hiện:</strong> {{facilityName}}</li>
+            </ul>
+
+            <div class="button-container">
+                <a href="{{paymentUrl}}" class="button">Thanh toán ngay</a>
+            </div>
+
+            <p>Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi.</p>
+
+            <p>Trân trọng,<br />
+                Đội ngũ {{appName}}</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; {{currentYear}} {{appName}}. Mọi quyền được bảo lưu.</p>
+            <p>Đây là email tự động. Vui lòng không trả lời email này.</p>
+        </div>
+    </div>
+</body>
+
+</html>

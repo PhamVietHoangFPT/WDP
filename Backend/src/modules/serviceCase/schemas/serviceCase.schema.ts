@@ -71,7 +71,11 @@ export class ServiceCase extends BaseEntity {
     ref: 'Condition',
   })
   condition: mongoose.Schema.Types.ObjectId
-
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payment',
+  })
+  paymentForCondition?: mongoose.Schema.Types.ObjectId
 }
 
 export const ServiceCaseSchema = SchemaFactory.createForClass(ServiceCase)
