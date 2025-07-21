@@ -39,8 +39,7 @@ export class ServiceCaseService implements IServiceCaseService {
     private slotRepository: ISlotRepository,
     @Inject(IBookingRepository)
     private bookingRepository: IBookingRepository,
-  ) { }
-
+  ) {}
 
   private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
     return new ServiceCaseResponseDto({
@@ -187,10 +186,14 @@ export class ServiceCaseService implements IServiceCaseService {
     return this.mapToResponseDto(updatedServiceCase)
   }
 
-  async updateCondition(id: string, condition: string, doctorId?: string): Promise<ServiceCaseResponseDto | null> {
+  async updateCondition(
+    id: string,
+    condition: string,
+    doctorId?: string,
+  ): Promise<ServiceCaseResponseDto | null> {
     const existingServiceCase = await this.serviceCaseRepository.findOneById(id)
     if (!existingServiceCase) {
-      throw new ConflictException("Không tìm thấy service case")
+      throw new ConflictException('Không tìm thấy service case')
     }
 
     const serviceCaseStatusId =
@@ -200,7 +203,7 @@ export class ServiceCaseService implements IServiceCaseService {
         serviceCaseStatusId,
       )
     if (serviceCaseStatusOrder !== 8) {
-      throw new ConflictException("Không thể thay đổi chất lượng của mẫu thử")
+      throw new ConflictException('Không thể thay đổi chất lượng của mẫu thử')
     }
 
     try {
@@ -265,19 +268,7 @@ export class ServiceCaseService implements IServiceCaseService {
         bookingIdToRemove.toString(),
       )
       if (slotId) {
-        const updateBookingStatus = await this.slotRepository.setBookingStatus(
-          slotId.toString(),
-          false,
-        )
-        if (!updateBookingStatus) {
-          this.logger.log(
-            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${bookingIdToRemove.toString()}`,
-          )
-        }
-      } else {
-        this.logger.log(
-          `Không tìm thấy slot cho booking ID: ${bookingIdToRemove.toString()}`,
-        )
+        await this.slotRepository.setBookingStatus(slotId.toString(), false)
       }
     }
     // Cập nhật trạng thái đặt chỗ cho các bookingIds
@@ -297,19 +288,7 @@ export class ServiceCaseService implements IServiceCaseService {
         bookingId.toString(),
       )
       if (slotId) {
-        const updateBookingStatus = await this.slotRepository.setBookingStatus(
-          slotId.toString(),
-          false,
-        )
-        if (!updateBookingStatus) {
-          this.logger.log(
-            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${bookingId.toString()}`,
-          )
-        }
-      } else {
-        this.logger.log(
-          `Không tìm thấy slot cho booking ID: ${bookingId.toString()}`,
-        )
+        await this.slotRepository.setBookingStatus(slotId.toString(), false)
       }
     }
 
@@ -318,17 +297,7 @@ export class ServiceCaseService implements IServiceCaseService {
         failedPaymentStatusBookingId.toString(),
       )
       if (slotId) {
-        const updateFailedPaymentStatus =
-          await this.slotRepository.setBookingStatus(slotId.toString(), false)
-        if (!updateFailedPaymentStatus) {
-          this.logger.log(
-            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${failedPaymentStatusBookingId.toString()}`,
-          )
-        }
-      } else {
-        this.logger.log(
-          `Không tìm thấy slot cho booking ID: ${failedPaymentStatusBookingId.toString()}`,
-        )
+        await this.slotRepository.setBookingStatus(slotId.toString(), false)
       }
     }
 
@@ -337,17 +306,7 @@ export class ServiceCaseService implements IServiceCaseService {
         unpaidBookingId.toString(),
       )
       if (slotId) {
-        const updateUnpaidBookingStatus =
-          await this.slotRepository.setBookingStatus(slotId.toString(), false)
-        if (!updateUnpaidBookingStatus) {
-          this.logger.log(
-            `Cập nhật trạng thái đặt chỗ không thành công cho ID: ${unpaidBookingId.toString()}`,
-          )
-        }
-      } else {
-        this.logger.log(
-          `Không tìm thấy slot cho booking ID: ${unpaidBookingId.toString()}`,
-        )
+        await this.slotRepository.setBookingStatus(slotId.toString(), false)
       }
     }
 
