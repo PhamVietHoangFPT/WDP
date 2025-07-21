@@ -17,6 +17,7 @@ import {
   TestRequestStatus,
   TestRequestStatusSchema,
 } from '../testRequestStatus/schemas/testRequestStatus.schema'
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -33,6 +34,7 @@ import {
     AuthModule,
     ResultModule,
     TestRequestStatusModule,
+    ServiceCaseModule
   ],
   controllers: [DoctorController],
   providers: [
@@ -47,4 +49,4 @@ import {
   ],
   exports: [IDoctorService, IDoctorRepository],
 })
-export class DoctorModule {}
+export class DoctorModule { }
