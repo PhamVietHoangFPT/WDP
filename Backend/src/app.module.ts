@@ -35,6 +35,8 @@ import { DoctorModule } from './modules/doctor/doctor.module'
 import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector.module'
 import { ConditionModule } from './modules/condition/condition.module'
 import { StaffModule } from './modules/staff/staff.module'
+import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.modules'
+import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
 @Module({
   imports: [
     databaseConfig,
@@ -74,8 +76,10 @@ import { StaffModule } from './modules/staff/staff.module'
     SampleCollectorModule,
     ConditionModule,
     StaffModule,
+    ShipmentStatusModule,
+    TestResultShipmentModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
