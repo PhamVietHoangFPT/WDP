@@ -36,6 +36,7 @@ import { SampleCollectorModule } from './modules/sampleCollector/sampleCollector
 import { ConditionModule } from './modules/condition/condition.module'
 import { StaffModule } from './modules/staff/staff.module'
 import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.modules'
+import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
 @Module({
   imports: [
     databaseConfig,
@@ -75,7 +76,8 @@ import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.mo
     SampleCollectorModule,
     ConditionModule,
     StaffModule,
-    ShipmentStatusModule
+    ShipmentStatusModule,
+    TestResultShipmentModule
   ],
   controllers: [AppController],
   providers: [AppService],
