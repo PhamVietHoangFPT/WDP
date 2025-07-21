@@ -87,7 +87,9 @@ export default function TestTakerList() {
         <Space>
           <Button
             type='link'
-            onClick={() => navigate(`/test-takers/edit/${record.id}`)}
+            onClick={() => {
+              navigate(`/test-takers/edit/${record._id}`)
+            }}
           >
             Sửa
           </Button>
