@@ -37,6 +37,7 @@ import { ConditionModule } from './modules/condition/condition.module'
 import { StaffModule } from './modules/staff/staff.module'
 import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.modules'
 import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
+import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHistory/testResultShipmentHIstory.module'
 @Module({
   imports: [
     databaseConfig,
@@ -77,7 +78,8 @@ import { TestResultShipmentModule } from './modules/testResultShipment/testResul
     ConditionModule,
     StaffModule,
     ShipmentStatusModule,
-    TestResultShipmentModule
+    TestResultShipmentModule,
+    TestResultShipmentHistoryModule
   ],
   controllers: [AppController],
   providers: [AppService],
