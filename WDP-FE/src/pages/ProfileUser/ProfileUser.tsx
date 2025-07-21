@@ -66,22 +66,7 @@ export default function ProfileUser() {
   //   ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* <Header style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
-        <div
-          style={{
-            float: 'left',
-            marginRight: 30,
-            fontWeight: 'bold',
-            fontSize: 18,
-          }}
-        >
-          👤 Khách hàng: {decoded.name}
-        </div>
-        <Menu mode='horizontal' items={items} style={{ lineHeight: '64px' }} />
-      </Header> */}
-      <HeaderCus />
-
+    <Layout>
       <Content style={{ padding: '40px 24px' }}>
         <Card
           style={{

@@ -58,7 +58,6 @@ export default function TestTakerEditForm() {
 
   return (
     <div>
-      <HeaderCus />
       <Card style={{ maxWidth: 600, margin: '40px auto' }}>
         <Title level={3}>Chỉnh sửa Người Test ADN</Title>
         <Form form={form} layout='vertical' onFinish={handleSubmit}>

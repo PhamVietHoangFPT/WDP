@@ -72,7 +72,6 @@ export default function ServiceCase() {
 
   return (
     <div>
-      <HeaderCus />
       <Card style={{ margin: '40px auto' }}>
         <Title level={3}>Lịch sử trường hợp dịch vụ</Title>
         <Table
