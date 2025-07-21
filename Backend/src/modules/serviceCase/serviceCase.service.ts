@@ -23,6 +23,8 @@ import { Cron } from '@nestjs/schedule'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
+import { VnpayService } from '../vnpay/vnpay.service'
+import { IEmailService } from '../email/interfaces/iemail.service'
 @Injectable()
 export class ServiceCaseService implements IServiceCaseService {
   private readonly logger = new Logger(ServiceCaseService.name)
@@ -39,6 +41,9 @@ export class ServiceCaseService implements IServiceCaseService {
     private slotRepository: ISlotRepository,
     @Inject(IBookingRepository)
     private bookingRepository: IBookingRepository,
+    @Inject(VnpayService)
+    private readonly VnpayService: VnpayService,
+    @Inject(IEmailService) private emailService: IEmailService,
   ) {}
 
   private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
@@ -206,19 +211,25 @@ export class ServiceCaseService implements IServiceCaseService {
       throw new ConflictException('Không thể thay đổi chất lượng của mẫu thử')
     }
 
-    try {
-      const updated = await this.serviceCaseRepository.updateCondition(
-        id,
-        condition,
-        doctorId,
-      )
-      if (!updated) {
-        throw new ConflictException('Không thể cập nhật service case.')
-      }
-      return this.mapToResponseDto(updated)
-    } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi thay đổi service case.')
+    const updated = await this.serviceCaseRepository.updateCondition(
+      id,
+      condition,
+      doctorId,
+    )
+    if (!updated) {
+      throw new ConflictException('Không thể cập nhật service case.')
     }
+    // Gọi VnPayService để lấy URL thanh toán
+    const paymentUrl = await this.VnpayService.getPaymentUrlForCondition({
+      serviceCaseId: id,
+    })
+    await this.emailService.sendPaymentRequestForCondition(
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      updated.account.toString(),
+      doctorId,
+      paymentUrl,
+    )
+    return this.mapToResponseDto(updated)
   }
 
   @Cron('0 */3 * * * *')

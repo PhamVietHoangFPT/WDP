@@ -8,10 +8,12 @@ import 'express-session' // Quan trọng: import để module augmentation hoạ
 declare module 'express-session' {
   interface SessionData {
     currentBookingPayment?: string // Hoặc PaymentBookingDto nếu bạn lưu cả object
-    currentServiceCasePayment?: string // Hoặc PaymentServiceCaseDto nếu bạn lưu cả object
+    currentServiceCasePayment?: string
+    currentConditionPayment?: string // Hoặc PaymentConditionCaseDto nếu bạn lưu cả object
+    // Hoặc PaymentServiceCaseDto nếu bạn lưu cả object
   }
 }
 
 // Nếu file này được coi là một module (ví dụ có các import/export khác),
 // bạn có thể cần thêm dòng này để đảm bảo augmentation hoạt động đúng:
-export {}
+export { }

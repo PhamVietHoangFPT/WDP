@@ -141,49 +141,6 @@ export class ServiceCaseController {
     }
   }
 
-  @Patch(':id/condition/:condition')
-  // @Roles(
-  //   RoleEnum.DELIVERY_STAFF,
-  //   RoleEnum.DOCTOR,
-  //   RoleEnum.SAMPLE_COLLECTOR,
-  //   RoleEnum.STAFF,
-  // )
-  @ApiOperation({ summary: 'Cập nhật condition của hồ sơ dịch vụ' })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    type: String,
-    description: 'ID của hồ sơ dịch vụ cần cập nhật',
-  })
-  @ApiParam({
-    name: 'condition',
-    required: true,
-    type: String,
-    description: 'Condition mới của hồ sơ dịch vụ',
-  })
-  @ApiResponse({ status: 200, type: ApiResponseDto<ServiceCaseResponseDto> })
-  async updateCondition(
-    @Param('id') id: string,
-    @Param('condition') condition: string,
-    @Req() req: any,
-  ): Promise<ApiResponseDto<ServiceCaseResponseDto> | null> {
-    const doctorId = req.user.id
-    const updatedServiceCase =
-      await this.serviceCaseService.updateCondition(
-        id,
-        condition,
-        doctorId
-      )
-    if (!updatedServiceCase) {
-      return null
-    }
-    return {
-      message: 'Cập nhật trạng thái hiện tại thành công',
-      data: [updatedServiceCase],
-      statusCode: 200,
-      success: true,
-    }
-  }
 
   @Post('Test')
   test(): Promise<void> {

@@ -12,6 +12,11 @@ export interface IEmailService {
     customerId: string,
     bookingId: string,
   ): Promise<void>
-}
 
+  sendPaymentRequestForCondition(
+    customerId: string,
+    doctorId: string,
+    paymentUrl: string
+  ): Promise<void>
+}
 export const IEmailService = Symbol('IEmailService')
