@@ -23,6 +23,15 @@ export class AddressResponseDto {
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   account: mongoose.Schema.Types.ObjectId
 
+  @ApiProperty({
+    type: Object,
+    description: 'Location coordinates in GeoJSON format',
+  })
+  location: {
+    type: string
+    coordinates: number[]
+  }
+
   constructor(partial: Partial<Address>) {
     Object.assign(this, partial)
   }

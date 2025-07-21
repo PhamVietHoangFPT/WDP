@@ -3,6 +3,7 @@ import type { TimeReturn } from './timeReturn'
 
 export interface Service {
   _id: string
+  name: string
   fee: number
   timeReturn: TimeReturn
   sample: Sample

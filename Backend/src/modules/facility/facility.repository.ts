@@ -26,14 +26,15 @@ export class FacilityRepository implements IFacilityRepository {
   async findById(id: string): Promise<FacilityDocument | null> {
     return this.facilityModel
       .findById(id)
-      .populate({ path: 'address', select: 'fullAddress _id' })
+      .populate({ path: 'address' })
+      .populate({ path: 'address', select: '_id fullAddress location' })
       .exec()
   }
 
   async findAll(): Promise<FacilityDocument[]> {
     return this.facilityModel
       .find()
-      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .populate({ path: 'address', select: '_id fullAddress location' })
       .exec()
   }
 
@@ -70,7 +71,8 @@ export class FacilityRepository implements IFacilityRepository {
   ): mongoose.Query<FacilityDocument[], FacilityDocument> {
     return this.facilityModel
       .find(filter)
-      .populate({ path: 'address', select: 'fullAddress -_id' })
+      .populate({ path: 'address' })
+      .populate({ path: 'address', select: '_id fullAddress location' })
       .lean()
   }
 
@@ -101,7 +103,11 @@ export class FacilityRepository implements IFacilityRepository {
         $project: {
           _id: 1,
           facilityName: 1,
-          address: '$address.fullAddress',
+          address: {
+            _id: '$address._id',
+            fullAddress: '$address.fullAddress',
+            location: '$address.location',
+          },
         },
       },
     ])

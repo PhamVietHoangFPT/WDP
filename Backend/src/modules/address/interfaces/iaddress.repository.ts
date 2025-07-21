@@ -1,25 +1,34 @@
-import { AddressDocument } from '../schemas/address.schema'
-import { CreateAddressDto } from '../dto/create-address.dto'
-import { CreateAddressFacilityDto } from '../dto/createAddressFacility.dto'
-import { UpdateAddressFacilityForAddressDto } from '../dto/updateFacilityAddress.dto'
+import { AddressDocument, Point } from '../schemas/address.schema'
+
+export interface CreateCompleteAddressData {
+  fullAddress: string
+  location: Point
+  created_by: string
+  isKitShippingAddress?: boolean
+  account?: string
+}
+
+export interface UpdateCompleteAddressData {
+  fullAddress?: string
+  location?: Point
+  updated_by: string
+  isKitShippingAddress?: boolean
+  account?: string
+}
 
 export interface IAddressRepository {
-  create(data: CreateAddressDto, userId: string): Promise<AddressDocument>
+  create(data: CreateCompleteAddressData): Promise<AddressDocument>
   findAll(): Promise<AddressDocument[]>
-  createForFacility(
-    data: CreateAddressFacilityDto,
-    userId: string,
-  ): Promise<AddressDocument>
+  createForFacility(data: CreateCompleteAddressData): Promise<AddressDocument>
   updateAddressById(
     id: string,
-    data: Partial<CreateAddressDto>,
-    userId: string,
+    data: UpdateCompleteAddressData,
   ): Promise<AddressDocument | null>
   findById(id: string): Promise<AddressDocument | null>
   updateFacilityAddress(
     id: string,
-    userId: string,
-    data: UpdateAddressFacilityForAddressDto,
+    data: UpdateCompleteAddressData,
   ): Promise<AddressDocument | null>
 }
+
 export const IAddressRepository = Symbol('IAddressRepository')

@@ -1,7 +1,8 @@
 'use client'
 
 import type React from 'react'
-import { useState, useEffect } from 'react'
+
+import { useState, useEffect, useMemo } from 'react'
 import {
   Table,
   Typography,
@@ -24,6 +25,7 @@ import {
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
 } from '../../features/doctor/doctorAPI'
+import Cookies from 'js-cookie'
 
 const { Title } = Typography
 
@@ -88,47 +90,6 @@ const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
   return <span>{testTaker?.name || id.slice(-8).toUpperCase()}</span>
 }
 
-// Component to get test taker names for result creation
-interface TestTakerNamesProps {
-  testTakerIds: string[]
-  onNamesLoaded: (names: string[]) => void
-}
-
-const TestTakerNames: React.FC<TestTakerNamesProps> = ({
-  testTakerIds,
-  onNamesLoaded,
-}) => {
-  const [names, setNames] = useState<string[]>([])
-  const [loadingCount, setLoadingCount] = useState(0)
-
-  // Create queries for each test taker
-  const testTakerQueries = testTakerIds.map((id) => useGetTestTakerQuery(id))
-
-  useEffect(() => {
-    const loadedNames: string[] = []
-    let loading = 0
-
-    testTakerQueries.forEach((query, index) => {
-      if (query.isLoading) {
-        loading++
-      } else if (query.data?.name) {
-        loadedNames[index] = query.data.name
-      } else {
-        loadedNames[index] = testTakerIds[index].slice(-8).toUpperCase()
-      }
-    })
-
-    setLoadingCount(loading)
-    setNames(loadedNames)
-
-    if (loading === 0 && loadedNames.length === testTakerIds.length) {
-      onNamesLoaded(loadedNames.filter(Boolean))
-    }
-  }, [testTakerQueries, testTakerIds, onNamesLoaded])
-
-  return null // This component doesn't render anything
-}
-
 const DoctorServiceCaseWithoutResult: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
@@ -141,6 +102,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     useState<ServiceCase | null>(null)
   const [testTakerNames, setTestTakerNames] = useState<string[]>([])
   const [form] = Form.useForm()
+
+  // THÊM STATE NÀY ĐỂ LƯU TRỮ TỶ LỆ ADN CHO VIỆC HIỂN THỊ PREVIEW
+  const [adnPercentagePreview, setAdnPercentagePreview] = useState<
+    number | null
+  >(null)
 
   const { data: statusListData, isLoading: isLoadingStatus } =
     useGetAllRequestStatusListQuery({
@@ -166,6 +132,20 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     }
   )
 
+  const doctorId = useMemo(() => {
+    const userData = Cookies.get('userData')
+    if (userData) {
+      try {
+        const doctorData = JSON.parse(decodeURIComponent(userData))
+        return (doctorData as any).id
+      } catch (error) {
+        console.error('Lỗi khi parse userData từ Cookie:', error)
+        return null
+      }
+    }
+    return null
+  }, [])
+
   const [updateServiceCaseStatus, { isLoading: isUpdating }] =
     useUpdateServiceCaseStatusMutation()
   const [createServiceCaseResult, { isLoading: isCreatingResult }] =
@@ -179,6 +159,40 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       if (defaultStatus) setSelectedStatus(defaultStatus._id)
     }
   }, [statusListData, selectedStatus])
+
+  // Fetch test taker names when selectedServiceCase changes
+  useEffect(() => {
+    if (selectedServiceCase?.caseMember?.testTaker.length) {
+      const fetchNames = async () => {
+        const namesPromises = selectedServiceCase.caseMember.testTaker.map(
+          async (id) => {
+            const { data: testTaker, error } = await useGetTestTakerQuery(
+              id
+            ).unwrap() // Using unwrap() to get the actual data or throw error
+            if (error) {
+              console.error(`Error fetching test taker ${id}:`, error)
+              return id.slice(-8).toUpperCase()
+            }
+            return testTaker?.name || id.slice(-8).toUpperCase()
+          }
+        )
+        try {
+          const fetchedNames = await Promise.all(namesPromises)
+          setTestTakerNames(fetchedNames)
+        } catch (err) {
+          console.error('Failed to fetch all test taker names:', err)
+          setTestTakerNames(
+            selectedServiceCase.caseMember.testTaker.map((id) =>
+              id.slice(-8).toUpperCase()
+            )
+          ) // Fallback to IDs
+        }
+      }
+      fetchNames()
+    } else {
+      setTestTakerNames([])
+    }
+  }, [selectedServiceCase]) // Dependency on selectedServiceCase
 
   const calculateDaysLeft = (bookingDate: string, timeReturn: number) => {
     const booking = new Date(bookingDate)
@@ -247,27 +261,49 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     setSelectedServiceCase(serviceCase)
     setCreateResultModalVisible(true)
     form.resetFields()
-  }
-
-  const handleTestTakerNamesLoaded = (names: string[]) => {
-    setTestTakerNames(names)
+    setAdnPercentagePreview(null) // Reset preview state
+    setTestTakerNames([]) // Reset names to avoid stale data
   }
 
   const handleCreateResultSubmit = async () => {
     try {
       const values = await form.validateFields()
 
-      // Get doctor ID from cookie (you'll need to implement this based on your auth system)
-      const doctorId = '682dbf1e3ecf256c0683b4d8' // Replace with actual cookie value
+      const adnPercentage = parseFloat(values.adnPercentage)
 
-      // Create conclusion from test taker names
-      const conclusion =
-        testTakerNames.length >= 2
-          ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-          : `${testTakerNames.join(' và ')} có quan hệ huyết thống`
+      let conclusion = ''
+      const testTakerNamesString = testTakerNames.join(' và ')
+
+      if (testTakerNames.length === 0) {
+        conclusion =
+          'Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.'
+      } else if (testTakerNames.length === 1) {
+        conclusion = `${testTakerNames[0]} có kết quả xét nghiệm ADN là ${adnPercentage}%.`
+      } else if (testTakerNames.length >= 2) {
+        if (adnPercentage === 100) {
+          conclusion = `${testTakerNamesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`
+        } else if (adnPercentage >= 99.9) {
+          conclusion = `${testTakerNamesString} có quan hệ huyết thống trực hệ (cha/mẹ - con) với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage >= 90) {
+          conclusion = `${testTakerNamesString} có quan hệ anh chị em ruột với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage >= 70) {
+          conclusion = `${testTakerNamesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha) với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage >= 50) {
+          conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ nhất với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage >= 30) {
+          conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ hai với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage >= 10) {
+          conclusion = `${testTakerNamesString} có quan hệ anh chị em họ đời thứ ba với xác suất ${adnPercentage}%.`
+        } else if (adnPercentage > 0.1) {
+          conclusion = `${testTakerNamesString} có quan hệ họ hàng rất xa hoặc không đáng kể với xác suất ${adnPercentage}%.`
+        } else {
+          // 0% hoặc dưới 0.1%
+          conclusion = `${testTakerNamesString} không có quan hệ huyết thống với xác suất ${adnPercentage}%.`
+        }
+      }
 
       const resultData = {
-        adnPercentage: values.adnPercentage.toString(), // Convert number to string
+        adnPercentage: values.adnPercentage.toString(),
         doctorId: doctorId,
         conclusion: conclusion,
         serviceCase: selectedServiceCase?._id,
@@ -279,11 +315,16 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       setCreateResultModalVisible(false)
       setSelectedServiceCase(null)
       setTestTakerNames([])
+      setAdnPercentagePreview(null) // Reset preview state after successful creation
       form.resetFields()
       refetchServiceCases()
     } catch (error: any) {
       console.error('Create result error:', error)
-      message.error(error?.data?.message || 'Tạo kết quả thất bại!')
+      if (error.errorFields) {
+        message.error('Vui lòng kiểm tra lại các trường nhập liệu.')
+      } else {
+        message.error(error?.data?.message || 'Tạo kết quả thất bại!')
+      }
     }
   }
 
@@ -299,13 +340,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
 
     const stringValue = String(value)
 
-    // Bắt đầu thêm kiểm tra dấu phẩy ở đây
     if (stringValue.includes(',')) {
       return Promise.reject(
         new Error('Vui lòng sử dụng dấu chấm (.) làm dấu thập phân!')
       )
     }
-    // Kết thúc kiểm tra dấu phẩy
 
     const numericValue = parseFloat(stringValue)
 
@@ -317,15 +356,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       return Promise.reject(new Error('Tỷ lệ ADN phải từ 0 đến 100!'))
     }
 
-    // Kiểm tra số chữ số thập phân
-    // Sử dụng toFixed(3) để đảm bảo không có lỗi làm tròn số khi kiểm tra độ chính xác
-    // Sau đó chuyển về string để split và kiểm tra
     const fixedValueString = numericValue.toFixed(3)
     const decimalPart = fixedValueString.split('.')[1]
     const decimalPlaces = decimalPart ? decimalPart.length : 0
 
     if (decimalPlaces > 3) {
-      // Điều này sẽ không xảy ra nếu InputNumber có precision={3} nhưng vẫn giữ để an toàn
       return Promise.reject(
         new Error('Tỷ lệ ADN chỉ được có tối đa 3 chữ số thập phân!')
       )
@@ -502,7 +537,9 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         <SelectionComponent />
         <Alert
           message='Lỗi tải dữ liệu'
-          description={`Đã xảy ra lỗi khi tải dữ liệu: ${(fetchError as any)?.status || 'Không xác định'} - ${
+          description={`Đã xảy ra lỗi khi tải dữ liệu: ${
+            (fetchError as any)?.status || 'Không xác định'
+          } - ${
             (fetchError as any)?.data?.message ||
             (fetchError as any)?.error ||
             'Vui lòng thử lại sau.'
@@ -641,6 +678,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           setCreateResultModalVisible(false)
           setSelectedServiceCase(null)
           setTestTakerNames([])
+          setAdnPercentagePreview(null) // Reset preview state on cancel
           form.resetFields()
         }}
         confirmLoading={isCreatingResult}
@@ -650,12 +688,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       >
         {selectedServiceCase && (
           <>
-            {/* Hidden component to load test taker names */}
-            <TestTakerNames
-              testTakerIds={selectedServiceCase.caseMember.testTaker}
-              onNamesLoaded={handleTestTakerNamesLoaded}
-            />
-
             <div style={{ marginBottom: 20 }}>
               <p>
                 <strong>Mã dịch vụ:</strong> {selectedServiceCase._id}
@@ -673,19 +705,60 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
                   )
                 )}
               </p>
+              {/* Cập nhật phần hiển thị kết luận sẽ được tạo */}
               {testTakerNames.length > 0 && (
                 <p>
                   <strong>Kết luận sẽ được tạo:</strong>{' '}
-                  <em>
-                    {testTakerNames.length >= 2
-                      ? `${testTakerNames[0]} và ${testTakerNames[1]} có quan hệ huyết thống`
-                      : `${testTakerNames.join(' và ')} có quan hệ huyết thống`}
+                  <em id='predicted-conclusion'>
+                    {(() => {
+                      // Sử dụng adnPercentagePreview thay vì form.getFieldValue
+                      const adnValue = adnPercentagePreview
+                      const namesString = testTakerNames.join(' và ')
+
+                      if (testTakerNames.length === 0) {
+                        return 'Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.'
+                      } else if (testTakerNames.length === 1) {
+                        return `${
+                          testTakerNames[0]
+                        } có kết quả xét nghiệm ADN là ${
+                          adnValue !== null ? adnValue : '...'
+                        }%.`
+                      } else if (adnValue === null) {
+                        return `${namesString} có quan hệ huyết thống... (vui lòng nhập tỷ lệ ADN)`
+                      } else if (adnValue === 100) {
+                        return `${namesString} là song sinh cùng trứng và có quan hệ huyết thống tuyệt đối.`
+                      } else if (adnValue >= 99.9) {
+                        return `${namesString} có quan hệ huyết thống trực hệ (cha/mẹ - con).`
+                      } else if (adnValue >= 90) {
+                        return `${namesString} có quan hệ anh chị em ruột.`
+                      } else if (adnValue >= 70) {
+                        return `${namesString} có quan hệ họ hàng gần (như ông bà-cháu, cô/chú/bác-cháu, hoặc anh chị em cùng cha/mẹ khác cha).`
+                      } else if (adnValue >= 50) {
+                        return `${namesString} có quan hệ anh chị em họ đời thứ nhất.`
+                      } else if (adnValue >= 30) {
+                        return `${namesString} có quan hệ anh chị em họ đời thứ hai.`
+                      } else if (adnValue >= 10) {
+                        return `${namesString} có quan hệ anh chị em họ đời thứ ba.`
+                      } else if (adnValue > 0.1) {
+                        return `${namesString} có quan hệ họ hàng rất xa hoặc không đáng kể.`
+                      } else {
+                        // 0% hoặc dưới 0.1%
+                        return `${namesString} không có quan hệ huyết thống.`
+                      }
+                    })()}
                   </em>
                 </p>
               )}
             </div>
 
-            <Form form={form} layout='vertical'>
+            <Form
+              form={form}
+              layout='vertical'
+              onValuesChange={(_, allValues) => {
+                // CẬP NHẬT STATE adnPercentagePreview MỖI KHI GIÁ TRỊ THAY ĐỔI
+                setAdnPercentagePreview(allValues.adnPercentage)
+              }}
+            >
               <Form.Item
                 label='Tỷ lệ ADN (%)'
                 name='adnPercentage'

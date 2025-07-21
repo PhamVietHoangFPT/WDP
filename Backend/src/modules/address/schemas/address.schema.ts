@@ -4,6 +4,14 @@ import mongoose from 'mongoose'
 import { BaseEntity } from 'src/common/schema/baseEntity.schema'
 
 export type AddressDocument = HydratedDocument<Address>
+@Schema({ _id: false })
+export class Point {
+  @Prop({ type: String, enum: ['Point'], required: true, default: 'Point' })
+  type: string
+
+  @Prop({ type: [Number], required: true })
+  coordinates: number[] // [longitude, latitude] - LƯU Ý THỨ TỰ!
+}
 
 @Schema()
 export class Address extends BaseEntity {
@@ -15,6 +23,9 @@ export class Address extends BaseEntity {
 
   @Prop({ type: String, required: true, trim: true })
   fullAddress: string
+
+  @Prop({ type: Point, index: '2dsphere' }) // <-- Thêm chỉ mục 2dsphere
+  location: Point
 
   @Prop({ type: Boolean, trim: true })
   isKitShippingAddress: boolean

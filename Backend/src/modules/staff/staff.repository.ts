@@ -38,7 +38,7 @@ export class StaffRepository implements IStaffRepository {
           let: { customerEmail: email },
           pipeline: [
             { $match: { $expr: { $eq: ['$email', '$$customerEmail'] } } },
-            { $project: { _id: 1 } },
+            { $project: { _id: 1, email: 1 } },
           ],
           as: 'customerInfo',
         },
@@ -46,6 +46,14 @@ export class StaffRepository implements IStaffRepository {
       {
         // Nếu không tìm thấy customer nào với email này, sẽ không có kết quả nào
         $unwind: '$customerInfo',
+      },
+      {
+        $match: {
+          $expr: {
+            // So sánh giá trị của trường 'account' với trường 'customerInfo._id'
+            $eq: ['$account', '$customerInfo._id'],
+          },
+        },
       },
       {
         $lookup: {
@@ -64,7 +72,7 @@ export class StaffRepository implements IStaffRepository {
         },
       },
       {
-        $unwind: '$casemembersInfo',
+        $unwind: { path: '$casemembersInfo', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -91,7 +99,7 @@ export class StaffRepository implements IStaffRepository {
           as: 'slot',
         },
       },
-      { $unwind: '$slot' },
+      { $unwind: { path: '$slot', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'slottemplates',
@@ -100,14 +108,13 @@ export class StaffRepository implements IStaffRepository {
           as: 'slotTemplate',
         },
       },
-      { $unwind: '$slotTemplate' },
+      { $unwind: { path: '$slotTemplate', preserveNullAndEmptyArrays: true } },
       {
         // Lọc các case thuộc về cơ sở của staff
         $match: {
           'slotTemplate.facility': new Types.ObjectId(facilityId),
         },
       },
-
       // =================================================================
       // Giai đoạn 4: Lấy thêm thông tin phụ và định dạng đầu ra
       // =================================================================
@@ -122,17 +129,11 @@ export class StaffRepository implements IStaffRepository {
       {
         $project: {
           _id: 1,
-          customer: '$customerInfo._id',
-          // Sử dụng $arrayElemAt để lấy object status thay vì mảng
+          created_at: 1,
           currentStatus: {
             $arrayElemAt: ['$currentStatusInfo.testRequestStatus', 0],
           },
           bookingDate: '$booking.bookingDate',
-          // Lưu ý: 'timeReturns' không được join trong câu lệnh của bạn
-          // timeReturn: '$timeReturns.timeReturn',
-          caseMember: {
-            testTaker: '$casemembersInfo.testTaker',
-          },
         },
       },
     ])

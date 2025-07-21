@@ -43,7 +43,7 @@ const FacilityListAdmin: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('')
   const [searchParams] = useSearchParams()
   const pageNumber = searchParams.get('pageNumber') || '1'
-  const pageSize = searchParams.get('pageSize') || '5'
+  const pageSize = searchParams.get('pageSize') || '10'
   const { data, isLoading, isFetching } =
     useGetFacilitiesListQuery<FacilityResponse>({
       pageNumber: Number(pageNumber),

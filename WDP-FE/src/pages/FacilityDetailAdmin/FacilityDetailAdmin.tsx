@@ -8,6 +8,7 @@ import {
 import {
   useGetSlotTemplateForFacilityQuery,
   useUpdateSlotTemplateMutation,
+  useCreateSlotTemplateMutation,
 } from '../../features/admin/slotAPI'
 import {
   useGetDistrictListQuery,
@@ -40,6 +41,7 @@ const FacilityDetailAdmin: React.FC = () => {
   const [workingForm] = Form.useForm()
   const [showWorkingTimeForm, setShowWorkingTimeForm] = useState(false)
   const [showUpdateAddressForm, setShowUpdateAddressForm] = useState(false)
+  const [createSlotTemplate] = useCreateSlotTemplateMutation()
   // Lấy dữ liệu chi tiết cơ sở từ API
   const { data, isLoading } = useGetFacilityDetailQuery(id!)
   const { data: slotTemplate, isLoading: isLoadingForSlotTemplate } =
@@ -171,7 +173,7 @@ const FacilityDetailAdmin: React.FC = () => {
       message.success('Cập nhật địa chỉ thành công!')
       setShowUpdateAddressForm(false)
     } catch (error: any) {
-      message.error(error?.message || 'Có lỗi xảy ra khi tạo địa chỉ')
+      message.error(error?.data.message || 'Có lỗi xảy ra khi tạo địa chỉ')
     }
   }
 
@@ -193,7 +195,7 @@ const FacilityDetailAdmin: React.FC = () => {
       message.success('Cập nhật địa chỉ thành công!')
       setShowUpdateAddressForm(false)
     } catch (error: any) {
-      message.error(error?.message || 'Có lỗi xảy ra khi cập nhật địa chỉ')
+      message.error(error?.data.message || 'Có lỗi xảy ra khi cập nhật địa chỉ')
     }
   }
 
@@ -330,7 +332,7 @@ const FacilityDetailAdmin: React.FC = () => {
           </Button>
           <Button
             style={{ marginLeft: 8 }}
-            onClick={() => navigate('/admin/facility')}
+            onClick={() => navigate('/admin/facilities')}
           >
             Trở lại
           </Button>
@@ -368,6 +370,13 @@ const FacilityDetailAdmin: React.FC = () => {
               }
 
               console.log(payload)
+
+              if (!slotTemplate || slotTemplate.data.length === 0) {
+                // Nếu không có slot template, tạo mới
+                await createSlotTemplate(payload).unwrap()
+                message.success('Tạo giờ làm việc thành công!')
+                setShowWorkingTimeForm(false)
+              }
 
               await updateSlotTemplate({
                 data: payload,

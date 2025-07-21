@@ -1,29 +1,32 @@
-// src/role/role.module.ts
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
+import { HttpModule } from '@nestjs/axios' // <-- 1. Import HttpModule
+
 import { Address, AddressSchema } from './schemas/address.schema'
-import { AccountModule } from '../account/account.module'
-import { TestTakerModule } from '../testTaker/testTaker.module'
-import { IAddressService } from './interfaces/iaddress.service'
-import { AddressService } from './address.service'
-import { IAddressRepository } from './interfaces/iaddress.repository'
-import { AddressRepository } from './address.repository'
 import { AddressController } from './address.controller'
+import { AddressService } from './address.service'
+import { AddressRepository } from './address.repository'
 import { AuthModule } from '../auth/auth.module'
+import { IAddressRepository } from './interfaces/iaddress.repository'
+import { IAddressService } from './interfaces/iaddress.service'
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
-    AccountModule,
-    TestTakerModule,
+    HttpModule, // <-- 2. Thêm HttpModule vào imports
     AuthModule,
+    MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
   ],
   controllers: [AddressController],
   providers: [
-    { provide: IAddressService, useClass: AddressService },
-    { provide: IAddressRepository, useClass: AddressRepository },
+    {
+      provide: IAddressRepository,
+      useClass: AddressRepository,
+    },
+    {
+      provide: IAddressService,
+      useClass: AddressService,
+    },
+    // <-- 3. XÓA BỎ TOÀN BỘ PROVIDER CHO 'GOOGLE_MAPS_CLIENT' -->
   ],
-
-  exports: [IAddressService, IAddressRepository],
 })
 export class AddressModule {}
