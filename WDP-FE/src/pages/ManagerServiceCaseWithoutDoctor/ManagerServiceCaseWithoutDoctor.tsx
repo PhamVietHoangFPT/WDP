@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import type React from 'react'
 import { useState } from 'react'
@@ -14,6 +14,7 @@ import {
   Menu,
   Tag,
   Modal,
+  DatePicker, // Thêm DatePicker
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
@@ -22,12 +23,14 @@ import {
   HomeOutlined,
   ShopOutlined,
   ExclamationCircleOutlined,
+  CalendarOutlined, // Thêm CalendarOutlined
 } from '@ant-design/icons'
 import {
   useGetDoctorListQuery,
   useGetServiceCaseNoDoctorListQuery,
   useAddDoctorToServiceCaseMutation,
 } from '../../features/manager/doctorAPI'
+import moment from 'moment' // Import moment
 
 const { Title } = Typography
 
@@ -65,6 +68,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null)
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
+  const [selectedBookingDate, setSelectedBookingDate] = useState<string | undefined>(undefined) // State mới cho ngày đặt lịch
 
   // Fetch danh sách service cases chưa có bác sĩ
   const {
@@ -74,14 +78,15 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
     error: serviceCasesError,
   } = useGetServiceCaseNoDoctorListQuery({
     pageNumber: 1,
-    pageSize: 1000, // Get all for client-side pagination
+    pageSize: 1000,
+    bookingDate: selectedBookingDate, // Truyền bookingDate vào query
   })
 
   // Fetch danh sách bác sĩ
   const { data: doctorsData, isLoading: isLoadingDoctors } =
     useGetDoctorListQuery({
       pageNumber: 1,
-      pageSize: 100, // Get all doctors for dropdown
+      pageSize: 100,
     })
 
   // Mutation để gán bác sĩ cho service case
@@ -103,7 +108,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
       await addDoctorToServiceCase({
         serviceCaseId: selectedServiceCase._id,
         doctorId: selectedDoctor._id,
-        data: {}, // Empty data object as required by API
+        data: {},
       }).unwrap()
 
       message.success(
@@ -282,6 +287,18 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
           <span style={{ fontSize: '16px', fontWeight: '500' }}>
             Danh sách dịch vụ chưa được gán bác sĩ
           </span>
+          {/* Thêm DatePicker vào đây */}
+          <DatePicker
+            format="YYYY-MM-DD"
+            placeholder="Chọn ngày đặt lịch"
+            onChange={(date, dateString) => {
+              setSelectedBookingDate(dateString || undefined)
+              setPageNumber(1) // Reset về trang 1 khi thay đổi ngày
+            }}
+            style={{ width: 180, marginLeft: "80px"}}
+            allowClear
+            suffixIcon={<CalendarOutlined />}
+          />
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

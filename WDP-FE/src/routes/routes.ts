@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
+import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -409,6 +410,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/update-status',
         component: StaffUpdateStatus,
+      },
+      {
+        path: '/staff/update-service-case-status-for-customer',
+        component: StaffGetServiceCaseByCustomer,
       },
     ],
   },

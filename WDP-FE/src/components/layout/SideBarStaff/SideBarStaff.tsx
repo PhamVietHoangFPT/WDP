@@ -78,6 +78,12 @@ export const SideBar = () => {
       label: 'Cập nhật tình trạng',
       onClick: () => navigate('/staff/update-status'),
     },
+    {
+      key: 'staff/update-service-case-status-for-customer',
+      icon: <TeamOutlined />,
+      label: 'Cập nhật tình trạng',
+      onClick: () => navigate('/staff/update-service-case-status-for-customer'),
+    },
     // ...
   ]
 
