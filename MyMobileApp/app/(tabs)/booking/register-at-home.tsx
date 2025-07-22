@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Calendar } from "react-native-calendars";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router"; // Updated for Expo Router
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { jwtDecode } from "jwt-decode";
@@ -30,6 +31,25 @@ import { getServiceById } from "@/service/service/service-api";
 import { Ionicons } from "@expo/vector-icons";
 import NotLoggedIn from "@/app/NotLoggedIn";
 
+function getDistanceFromLatLonInKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+}
 // Define Token Payload interface
 interface TokenPayload {
   id: string;
@@ -54,6 +74,8 @@ const getAccountIdFromToken = async (): Promise<string | null> => {
 interface Facility {
   _id: string;
   facilityName: string;
+  latitude: number; // Bắt buộc có latitude
+  longitude: number; // Bắt buộc có longitude
 }
 
 interface TestTaker {
@@ -93,10 +115,33 @@ export default function RegisterServiceAtHome() {
     taker2: null,
     taker3: null,
   });
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Cấp quyền thất bại",
+          "Vui lòng cấp quyền vị trí để sử dụng tính năng này."
+        );
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   // Initial Fetch
   useEffect(() => {
@@ -122,6 +167,41 @@ export default function RegisterServiceAtHome() {
     };
     fetchData();
   }, []);
+
+  // Tìm cơ sở gần nhất dựa trên userLocation và facilities
+  const findNearestFacility = () => {
+    if (!userLocation || facilities.length === 0) return null;
+
+    let nearest = facilities[0];
+    let minDist = getDistanceFromLatLonInKm(
+      userLocation.latitude,
+      userLocation.longitude,
+      nearest.latitude,
+      nearest.longitude
+    );
+
+    for (let i = 1; i < facilities.length; i++) {
+      const f = facilities[i];
+      const dist = getDistanceFromLatLonInKm(
+        userLocation.latitude,
+        userLocation.longitude,
+        f.latitude,
+        f.longitude
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = f;
+      }
+    }
+    return nearest;
+  };
+
+  useEffect(() => {
+    if (userLocation && facilities.length > 0) {
+      const nearest = findNearestFacility();
+      if (nearest) setSelectedFacility(nearest._id);
+    }
+  }, [userLocation, facilities]);
 
   if (hasToken === false) {
     return <NotLoggedIn />;
