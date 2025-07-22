@@ -2,7 +2,16 @@
 
 import type React from 'react'
 import { useState } from 'react'
-import { Form, Input, Button, Typography, message, Select } from 'antd'
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  message,
+  Select,
+  AutoComplete,
+  Spin,
+} from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
   useGetProvinceListQuery,
@@ -12,7 +21,6 @@ import {
 import { useCreateFacilityMutation } from '../../features/admin/facilitiesAPI'
 
 const { Title } = Typography
-const { Option } = Select
 
 interface Province {
   _id: string
@@ -35,7 +43,8 @@ interface FacilityInfo {
 const CreateFacilityForm: React.FC = () => {
   const navigate = useNavigate()
   const [form] = Form.useForm()
-
+  const [provinceOptions, setProvinceOptions] = useState([])
+  const [wardOptions, setWardOptions] = useState([])
   // State for cascading dropdowns
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(
     null
@@ -64,16 +73,80 @@ const CreateFacilityForm: React.FC = () => {
   const [createFacilityAddress] = useCreateFacilityAddressMutation()
   const [createFacility] = useCreateFacilityMutation()
 
-  const handleProvinceChange = (value: string) => {
-    const province = provincesData?.find((p: Province) => p.Code === value)
-    setSelectedProvince(province || null)
-    setSelectedWard(null)
-    form.setFieldsValue({ ward: undefined })
+  const handleProvinceSearch = (searchText: string) => {
+    if (!searchText) {
+      setProvinceOptions([])
+      return
+    }
+    const filtered = provincesData
+      ?.filter((province: Province) =>
+        province.FullName.toLowerCase().includes(searchText.toLowerCase())
+      )
+      .map((province: Province) => ({
+        value: province.FullName, // QUAN TRỌNG: value phải là FullName
+        label: province.FullName,
+        object: province, // Đính kèm cả object để dùng sau
+      }))
+    setProvinceOptions(filtered || [])
   }
 
-  const handleWardChange = (value: string) => {
-    const ward = wardsData?.find((w: Ward) => w.Code === value)
-    setSelectedWard(ward || null)
+  // Thay thế hàm handleWardSearch của bạn bằng hàm này
+  const handleWardSearch = (searchText: string) => {
+    if (!searchText) {
+      setWardOptions([])
+      return
+    }
+    const filtered = wardsData
+      ?.filter((ward: Ward) =>
+        ward.FullName.toLowerCase().includes(searchText.toLowerCase())
+      )
+      .map((ward: Ward) => ({
+        value: ward.FullName, // QUAN TRỌNG: value phải là FullName
+        label: ward.FullName,
+        object: ward, // Đính kèm cả object để dùng sau
+      }))
+    setWardOptions(filtered || [])
+  }
+  // Thay thế hàm handleProvinceChange của bạn bằng hàm này
+  const handleProvinceChange = (
+    value: string,
+    option?: { object: Province } | { object: Province }[] | undefined
+  ) => {
+    // Nếu option là mảng, lấy phần tử đầu tiên
+    let selectedOption: { object: Province } | undefined
+    if (Array.isArray(option)) {
+      selectedOption = option[0]
+    } else {
+      selectedOption = option
+    }
+
+    if (selectedOption) {
+      setSelectedProvince(selectedOption.object)
+      setSelectedWard(null)
+      form.setFieldsValue({ ward: undefined }) // Reset giá trị trong Form
+    } else {
+      setSelectedProvince(null)
+      setSelectedWard(null)
+      form.setFieldsValue({ ward: undefined })
+    }
+  }
+
+  // Thay thế hàm handleWardChange của bạn bằng hàm này
+  const handleWardChange = (
+    value: string,
+    option?: { object: Ward } | { object: Ward }[] | undefined
+  ) => {
+    let selectedOption: { object: Ward } | undefined
+    if (Array.isArray(option)) {
+      selectedOption = option[0]
+    } else {
+      selectedOption = option
+    }
+    if (selectedOption) {
+      setSelectedWard(selectedOption.object)
+    } else {
+      setSelectedWard(null)
+    }
   }
 
   const handleSubmit = async (values: any) => {
@@ -136,7 +209,6 @@ const CreateFacilityForm: React.FC = () => {
         >
           <Input placeholder='Nhập tên cơ sở' />
         </Form.Item>
-
         <Form.Item
           label='Số điện thoại'
           name='phoneNumber'
@@ -150,58 +222,36 @@ const CreateFacilityForm: React.FC = () => {
         >
           <Input placeholder='Nhập số điện thoại' />
         </Form.Item>
-
-        {/* Province */}
         <Form.Item
           label='Tỉnh/Thành phố'
           name='province'
           rules={[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố' }]}
         >
-          <Select
-            placeholder='Chọn tỉnh/thành phố'
-            loading={provincesLoading}
+          <AutoComplete
+            options={provinceOptions}
+            onSearch={handleProvinceSearch}
             onChange={handleProvinceChange}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.children as unknown as string)
-                ?.toLowerCase()
-                .includes(input.toLowerCase())
-            }
-          >
-            {provincesData?.map((province: Province) => (
-              <Option key={province.Code} value={province.Code}>
-                {province.FullName}
-              </Option>
-            ))}
-          </Select>
+            placeholder='Nhập để tìm kiếm tỉnh/thành phố'
+            allowClear // Thêm nút X để xóa
+          />
+          {provincesLoading && <Spin size='small' style={{ marginLeft: 8 }} />}
         </Form.Item>
 
-        {/* Ward */}
         <Form.Item
           label='Phường/Xã'
           name='ward'
           rules={[{ required: true, message: 'Vui lòng chọn phường/xã' }]}
         >
-          <Select
-            placeholder='Chọn phường/xã'
-            loading={wardsLoading}
+          <AutoComplete
+            options={wardOptions}
+            onSearch={handleWardSearch}
             onChange={handleWardChange}
+            placeholder='Nhập để tìm kiếm phường/xã'
             disabled={!selectedProvince}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.children as unknown as string)
-                ?.toLowerCase()
-                .includes(input.toLowerCase())
-            }
-          >
-            {wardsData?.map((ward: Ward) => (
-              <Option key={ward.Code} value={ward.Code}>
-                {ward.FullName}
-              </Option>
-            ))}
-          </Select>
+            allowClear
+          />
+          {wardsLoading && <Spin size='small' style={{ marginLeft: 8 }} />}
         </Form.Item>
-
         {/* House Number */}
         <Form.Item
           label='Số nhà/Địa chỉ cụ thể'
@@ -215,7 +265,6 @@ const CreateFacilityForm: React.FC = () => {
             onChange={(e) => setHouseNumberValue(e.target.value)}
           />
         </Form.Item>
-
         {/* Full Address Preview */}
         {selectedProvince && selectedWard && (
           <Form.Item label='Địa chỉ đầy đủ'>
@@ -226,7 +275,6 @@ const CreateFacilityForm: React.FC = () => {
             />
           </Form.Item>
         )}
-
         <Form.Item>
           <div style={{ display: 'flex', gap: '16px' }}>
             <Button type='primary' htmlType='submit' size='large'>
