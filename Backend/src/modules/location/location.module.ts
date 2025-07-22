@@ -1,13 +1,24 @@
 import { Module } from '@nestjs/common'
-import { HttpModule } from '@nestjs/axios'
+import { MongooseModule } from '@nestjs/mongoose'
 import { LocationService } from './location.service'
 import { LocationController } from './location.controller'
-import { ConfigModule } from '@nestjs/config'
+// Import schema mới
+import { Locations, LocationsSchema } from './schemas/location.schema'
+import { ILocationService } from './interfaces/ilocation.service'
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), HttpModule],
-  providers: [LocationService],
+  imports: [
+    // Chỉ cần đăng ký một schema duy nhất
+    MongooseModule.forFeature([
+      { name: Locations.name, schema: LocationsSchema },
+    ]),
+  ],
   controllers: [LocationController],
-  exports: [LocationService],
+  providers: [
+    {
+      provide: ILocationService,
+      useClass: LocationService,
+    },
+  ],
 })
 export class LocationModule {}
