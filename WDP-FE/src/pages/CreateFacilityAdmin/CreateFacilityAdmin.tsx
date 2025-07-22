@@ -10,7 +10,7 @@ import {
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
 } from '../../features/location/location'
-import { useCreateFacilityMutation } from '../../features/admin/serviceAPI'
+import { useCreateFacilityMutation } from '../../features/admin/facilitiesAPI'
 import type { Province, District, Ward } from '../../types/location'
 import type { FacilityInfo } from '../../types/facilities'
 

@@ -86,7 +86,7 @@ export default function ManageAddress() {
       title: 'Số thứ tự',
       dataIndex: 'index',
       key: 'index',
-      render: (text, record, index) => index + 1,
+      render: (_text, _record, index) => index + 1,
     },
     {
       title: 'Địa chỉ',
@@ -125,7 +125,7 @@ export default function ManageAddress() {
       key: 'action',
       width: 180, // Điều chỉnh lại độ rộng
       align: 'center',
-      render: (_, record) => (
+      render: (_, _record) => (
         <Space size='small'>
           <Tooltip title='Chỉnh sửa'>
             <Button type='text' icon={<EditOutlined />} />
