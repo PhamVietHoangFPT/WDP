@@ -9,20 +9,20 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Button, Menu, Provider as PaperProvider } from "react-native-paper";
+import { Button, Provider as PaperProvider } from "react-native-paper";
+import DropDownPicker from "react-native-dropdown-picker";
+import { Stack } from "expo-router";
 
 import {
   getServiceCaseStatusList,
   getAllServiceCases,
   updateServiceCaseStatus,
 } from "@/service/adminApi.ts/sample-colector-api";
-import { Stack } from "expo-router";
 
 interface ServiceCase {
   _id: string;
   statusDetails: string;
   bookingDate: string;
-  currentStatus?: string;
 }
 
 interface ServiceCaseStatus {
@@ -32,16 +32,14 @@ interface ServiceCaseStatus {
 }
 
 export default function SampleCollectorScreen() {
-  const [isAtHome, setIsAtHome] = useState<boolean>(true);
+  const [isAtHome, setIsAtHome] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null);
   const [newStatusId, setNewStatusId] = useState<string>("");
-  const [statusMenuVisible, setStatusMenuVisible] = useState(false);
-  const [serviceTypeMenuVisible, setServiceTypeMenuVisible] = useState(false);
 
   const [statusListData, setStatusListData] = useState<ServiceCaseStatus[]>([]);
   const [serviceCasesData, setServiceCasesData] = useState<ServiceCase[]>([]);
@@ -51,6 +49,11 @@ export default function SampleCollectorScreen() {
   const [serviceCasesError, setServiceCasesError] = useState<string | null>(
     null
   );
+
+  const [serviceTypeOpen, setServiceTypeOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [serviceTypeValue, setServiceTypeValue] = useState("home");
+  const [statusValue, setStatusValue] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStatusList = async () => {
@@ -71,10 +74,15 @@ export default function SampleCollectorScreen() {
   }, []);
 
   useEffect(() => {
+    setIsAtHome(serviceTypeValue === "home");
+  }, [serviceTypeValue]);
+
+  useEffect(() => {
     if (!selectedStatus) {
       setServiceCasesData([]);
       return;
     }
+
     const fetchServiceCases = async () => {
       setIsLoadingServices(true);
       setServiceCasesError(null);
@@ -87,8 +95,13 @@ export default function SampleCollectorScreen() {
         setIsLoadingServices(false);
       }
     };
+
     fetchServiceCases();
   }, [selectedStatus, isAtHome]);
+
+  useEffect(() => {
+    if (statusValue) setSelectedStatus(statusValue);
+  }, [statusValue]);
 
   useEffect(() => {
     setPageNumber(1);
@@ -97,13 +110,13 @@ export default function SampleCollectorScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Chờ xử lý":
-        return "#FA8C16"; // cam
+        return "#FA8C16";
       case "Đang lấy mẫu":
-        return "#1890FF"; // xanh dương
+        return "#1890FF";
       case "Đã nhận mẫu":
-        return "#52C41A"; // xanh lá
+        return "#52C41A";
       default:
-        return "#999"; // xám
+        return "#999";
     }
   };
 
@@ -131,10 +144,9 @@ export default function SampleCollectorScreen() {
       setUpdateModalVisible(false);
       setSelectedServiceCase(null);
       setNewStatusId("");
-      if (selectedStatus) {
-        const res = await getAllServiceCases(selectedStatus, isAtHome);
-        setServiceCasesData(res.data || []);
-      }
+
+      const res = await getAllServiceCases(selectedStatus, isAtHome);
+      setServiceCasesData(res.data || []);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Cập nhật trạng thái thất bại!");
     } finally {
@@ -166,38 +178,23 @@ export default function SampleCollectorScreen() {
           {new Date(item.bookingDate).toLocaleString("vi-VN")}
         </Text>
 
-        <Menu
-          visible={menuVisible && selectedServiceCase?._id === item._id}
-          onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <Button
-              mode="contained"
-              disabled={!canUpdate}
-              onPress={() => {
-                setSelectedServiceCase(item);
-                setMenuVisible(true);
-              }}
-            >
-              {canUpdate ? "Cập nhật trạng thái" : "Không thể cập nhật"}
-            </Button>
-          }
-        >
-          {availableStatuses.length === 0 ? (
-            <Menu.Item title="Không thể cập nhật thêm" disabled />
-          ) : (
-            availableStatuses.map((status) => (
-              <Menu.Item
-                key={status._id}
-                title={status.testRequestStatus}
-                onPress={() => {
-                  setNewStatusId(status._id);
-                  setUpdateModalVisible(true);
-                  setMenuVisible(false);
-                }}
-              />
-            ))
-          )}
-        </Menu>
+        {canUpdate ? (
+          <Button
+            mode="contained"
+            onPress={() => {
+              setSelectedServiceCase(item);
+              setNewStatusId("");
+              setUpdateModalVisible(true);
+            }}
+            style={{ marginTop: 8 }}
+          >
+            Cập nhật trạng thái
+          </Button>
+        ) : (
+          <Button mode="outlined" disabled style={{ marginTop: 8 }}>
+            Không thể cập nhật
+          </Button>
+        )}
       </View>
     );
   };
@@ -208,76 +205,43 @@ export default function SampleCollectorScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Quản lý trường hợp dịch vụ</Text>
 
-        <View style={{ marginBottom: 12 }}>
-          <Text style={[styles.label, { marginBottom: 8 }]}>Loại dịch vụ</Text>
-          <Menu
-            visible={serviceTypeMenuVisible}
-            onDismiss={() => setServiceTypeMenuVisible(false)}
-            anchor={
-              <Button
-                mode="outlined"
-                onPress={() => setServiceTypeMenuVisible(true)}
-                style={{ marginBottom: 12 }}
-              >
-                {isAtHome ? "🏠 Tại nhà" : "🏥 Tại cơ sở"}
-              </Button>
-            }
-          >
-            <Menu.Item
-              title="🏠 Tại nhà"
-              onPress={() => {
-                setIsAtHome(true);
-                setServiceTypeMenuVisible(false);
-              }}
-            />
-            <Menu.Item
-              title="🏥 Tại cơ sở"
-              onPress={() => {
-                setIsAtHome(false);
-                setServiceTypeMenuVisible(false);
-              }}
-            />
-          </Menu>
+        <View style={{ zIndex: 3000, marginBottom: 16 }}>
+          <Text style={styles.label}>Loại dịch vụ</Text>
+          <DropDownPicker
+            open={serviceTypeOpen}
+            value={serviceTypeValue}
+            items={[
+              { label: "🏠 Tại nhà", value: "home" },
+              { label: "🏥 Tại cơ sở", value: "center" },
+            ]}
+            setOpen={setServiceTypeOpen}
+            setValue={setServiceTypeValue}
+            style={styles.dropdown}
+            dropDownContainerStyle={styles.dropdownBox}
+            textStyle={styles.dropdownText}
+            zIndex={3000}
+            zIndexInverse={1000}
+          />
+        </View>
 
-          <Text style={[styles.label, { marginBottom: 8 }]}>
-            Lọc trạng thái
-          </Text>
-          {isLoadingStatus ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Menu
-              visible={statusMenuVisible}
-              onDismiss={() => setStatusMenuVisible(false)}
-              anchor={
-                <Button
-                  mode="outlined"
-                  onPress={() => setStatusMenuVisible(true)}
-                  style={{ marginBottom: 12 }}
-                  disabled={statusListData.length === 0}
-                >
-                  {selectedStatus
-                    ? statusListData.find((s) => s._id === selectedStatus)
-                        ?.testRequestStatus
-                    : "Chọn trạng thái"}
-                </Button>
-              }
-            >
-              {statusListData.length === 0 ? (
-                <Menu.Item title="Không có trạng thái" disabled />
-              ) : (
-                statusListData.map((status) => (
-                  <Menu.Item
-                    key={status._id}
-                    title={status.testRequestStatus}
-                    onPress={() => {
-                      setSelectedStatus(status._id);
-                      setStatusMenuVisible(false);
-                    }}
-                  />
-                ))
-              )}
-            </Menu>
-          )}
+        <View style={{ zIndex: 2000, marginBottom: 16 }}>
+          <Text style={styles.label}>Lọc trạng thái</Text>
+          <DropDownPicker
+            open={statusOpen}
+            value={statusValue}
+            items={statusListData.map((s) => ({
+              label: s.testRequestStatus,
+              value: s._id,
+            }))}
+            setOpen={setStatusOpen}
+            setValue={setStatusValue}
+            style={styles.dropdown}
+            dropDownContainerStyle={styles.dropdownBox}
+            textStyle={styles.dropdownText}
+            loading={isLoadingStatus}
+            zIndex={2000}
+            zIndexInverse={2000}
+          />
         </View>
 
         {isLoadingServices ? (
@@ -287,11 +251,9 @@ export default function SampleCollectorScreen() {
             color="#fff"
           />
         ) : serviceCasesError ? (
-          <Text style={[styles.emptyText, { color: "#BBDEFB" }]}>
-            Không thể tải dữ liệu dịch vụ.
-          </Text>
+          <Text style={styles.emptyText}>Không thể tải dữ liệu dịch vụ.</Text>
         ) : paginatedData.length === 0 ? (
-          <Text style={[styles.emptyText, { color: "#BBDEFB" }]}>
+          <Text style={styles.emptyText}>
             Không có dịch vụ với trạng thái này.
           </Text>
         ) : (
@@ -302,12 +264,10 @@ export default function SampleCollectorScreen() {
               renderItem={renderItem}
               contentContainerStyle={{ paddingBottom: 20 }}
             />
-
             {pageNumber * pageSize < serviceCasesData.length && (
               <Button
                 mode="contained"
                 onPress={() => setPageNumber((prev) => prev + 1)}
-                style={{ marginTop: 10 }}
               >
                 Xem thêm
               </Button>
@@ -342,38 +302,34 @@ export default function SampleCollectorScreen() {
                   {selectedServiceCase?.statusDetails}
                 </Text>
               </Text>
-              <Text style={{ color: "#000" }}>
-                Trạng thái mới:{" "}
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color: getStatusColor(
-                      statusListData.find((s) => s._id === newStatusId)
-                        ?.testRequestStatus || ""
-                    ),
-                  }}
-                >
-                  {
-                    statusListData.find((s) => s._id === newStatusId)
-                      ?.testRequestStatus
-                  }
-                </Text>
-              </Text>
               <Text style={{ marginTop: 12, color: "red" }}>
                 ⚠️ Việc cập nhật trạng thái không thể hoàn tác!
               </Text>
+
+              {getAvailableNextStatuses(
+                selectedServiceCase?.statusDetails || ""
+              ).map((status) => (
+                <Button
+                  key={status._id}
+                  mode="outlined"
+                  onPress={() => setNewStatusId(status._id)}
+                  style={{ marginVertical: 4 }}
+                >
+                  {status.testRequestStatus}
+                </Button>
+              ))}
 
               <View style={styles.modalButtons}>
                 <Button
                   mode="contained"
                   onPress={handleStatusUpdate}
+                  disabled={!newStatusId}
                   loading={isUpdating}
                 >
                   Xác nhận
                 </Button>
                 <Button
                   onPress={() => setUpdateModalVisible(false)}
-                  style={{ marginLeft: 12 }}
                   disabled={isUpdating}
                 >
                   Hủy
@@ -399,11 +355,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#BBDEFB",
   },
+  dropdown: {
+    borderColor: "#BBDEFB",
+    backgroundColor: "#fff",
+    marginTop: 8,
+  },
+  dropdownBox: {
+    borderColor: "#BBDEFB",
+    backgroundColor: "#fff",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
+  },
   label: {
     fontSize: 18,
     fontWeight: "600",
     color: "#BBDEFB",
-    marginTop: 8,
   },
   card: {
     padding: 16,
@@ -412,7 +381,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#0b4c91",
   },
   idText: {
-    fontFamily: "monospace",
     fontSize: 12,
     marginBottom: 4,
     color: "#BBDEFB",
@@ -446,7 +414,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContainer: {
-    backgroundColor: "#004b91",
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
   },
@@ -454,11 +422,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 12,
-    color: "#BBDEFB",
+    color: "#004b91",
   },
   modalButtons: {
     marginTop: 20,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
 });
