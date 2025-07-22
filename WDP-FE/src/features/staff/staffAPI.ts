@@ -23,8 +23,30 @@ const StaffApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['staff'],
     }),
+
+    getCustomerServiceCaseByEmail: builder.query({
+      query: ({email, currentStatus}) => {
+        return {
+          url:  `/staff/service-cases?email=${email}&currentStatus=${currentStatus}`,
+          method: 'GET',
+        }
+      },
+      // Cung cấp tag với id cụ thể để caching hiệu quả hơn
+      transformResponse: (res) => res,
+      providesTags: ['staff'],
+    }),
+
+    getAllStatusForCustomer: builder.query({
+      query: () => '/test-request-status',
+      // Cũng cung cấp tag 'addresses' để nó được làm mới khi danh sách thay đổi
+      providesTags: ['staff'],
+    }),
   }),
 })
 
 // Export ra hook được tự động tạo bởi RTK Query
-export const { useGetServiceCasesByCustomerQuery } = StaffApi
+export const { 
+  useGetServiceCasesByCustomerQuery,
+  useGetAllStatusForCustomerQuery,
+  useGetCustomerServiceCaseByEmailQuery
+} = StaffApi
