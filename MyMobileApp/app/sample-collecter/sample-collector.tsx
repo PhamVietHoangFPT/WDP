@@ -4,20 +4,20 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   Modal,
   Alert,
   ActivityIndicator,
 } from "react-native";
 import { Button, Provider as PaperProvider } from "react-native-paper";
 import DropDownPicker from "react-native-dropdown-picker";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 
 import {
   getServiceCaseStatusList,
   getAllServiceCases,
   updateServiceCaseStatus,
 } from "@/service/adminApi.ts/sample-colector-api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface ServiceCase {
   _id: string;
@@ -35,7 +35,7 @@ export default function SampleCollectorScreen() {
   const [isAtHome, setIsAtHome] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null);
@@ -153,6 +153,11 @@ export default function SampleCollectorScreen() {
       setIsUpdating(false);
     }
   };
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userToken");
+    Alert.alert("Đăng xuất", "Bạn đã đăng xuất thành công.");
+    router.replace("/(auth)/login");
+  };
 
   const paginatedData = serviceCasesData.slice(
     (pageNumber - 1) * pageSize,
@@ -205,139 +210,167 @@ export default function SampleCollectorScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Quản lý trường hợp dịch vụ</Text>
 
-        <View style={{ zIndex: 3000, marginBottom: 16 }}>
-          <Text style={styles.label}>Loại dịch vụ</Text>
-          <DropDownPicker
-            open={serviceTypeOpen}
-            value={serviceTypeValue}
-            items={[
-              { label: "🏠 Tại nhà", value: "home" },
-              { label: "🏥 Tại cơ sở", value: "center" },
-            ]}
-            setOpen={setServiceTypeOpen}
-            setValue={setServiceTypeValue}
-            style={styles.dropdown}
-            dropDownContainerStyle={styles.dropdownBox}
-            textStyle={styles.dropdownText}
-            zIndex={3000}
-            zIndexInverse={1000}
-          />
-        </View>
-
-        <View style={{ zIndex: 2000, marginBottom: 16 }}>
-          <Text style={styles.label}>Lọc trạng thái</Text>
-          <DropDownPicker
-            open={statusOpen}
-            value={statusValue}
-            items={statusListData.map((s) => ({
-              label: s.testRequestStatus,
-              value: s._id,
-            }))}
-            setOpen={setStatusOpen}
-            setValue={setStatusValue}
-            style={styles.dropdown}
-            dropDownContainerStyle={styles.dropdownBox}
-            textStyle={styles.dropdownText}
-            loading={isLoadingStatus}
-            zIndex={2000}
-            zIndexInverse={2000}
-          />
-        </View>
-
-        {isLoadingServices ? (
-          <ActivityIndicator
-            style={{ marginTop: 50 }}
-            size="large"
-            color="#fff"
-          />
-        ) : serviceCasesError ? (
-          <Text style={styles.emptyText}>Không thể tải dữ liệu dịch vụ.</Text>
-        ) : paginatedData.length === 0 ? (
-          <Text style={styles.emptyText}>
-            Không có dịch vụ với trạng thái này.
-          </Text>
-        ) : (
-          <>
-            <FlatList
-              data={paginatedData}
-              keyExtractor={(item) => item._id}
-              renderItem={renderItem}
-              contentContainerStyle={{ paddingBottom: 20 }}
+        {/* Loại dịch vụ */}
+        <View style={{ flex: 1 }}>
+          <View style={{ zIndex: 3000, marginBottom: 16 }}>
+            <Text style={styles.label}>Loại dịch vụ</Text>
+            <DropDownPicker
+              open={serviceTypeOpen}
+              value={serviceTypeValue}
+              items={[
+                { label: "🏠 Tại nhà", value: "home" },
+                { label: "🏥 Tại cơ sở", value: "center" },
+              ]}
+              setOpen={setServiceTypeOpen}
+              setValue={setServiceTypeValue}
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownBox}
+              textStyle={styles.dropdownText}
+              zIndex={3000}
+              zIndexInverse={1000}
             />
-            {pageNumber * pageSize < serviceCasesData.length && (
-              <Button
-                mode="contained"
-                onPress={() => setPageNumber((prev) => prev + 1)}
-              >
-                Xem thêm
-              </Button>
+          </View>
+
+          {/* Lọc trạng thái */}
+          <View style={{ zIndex: 2000, marginBottom: 16, marginTop: 30 }}>
+            <Text style={styles.label}>Lọc trạng thái</Text>
+            <DropDownPicker
+              open={statusOpen}
+              value={statusValue}
+              items={statusListData.map((s) => ({
+                label: s.testRequestStatus,
+                value: s._id,
+              }))}
+              setOpen={setStatusOpen}
+              setValue={setStatusValue}
+              placeholder="" // để trống
+              style={styles.dropdown}
+              dropDownContainerStyle={{
+                ...styles.dropdownBox,
+                maxHeight: 300,
+              }}
+              textStyle={styles.dropdownText}
+              loading={isLoadingStatus}
+              zIndex={2000}
+              zIndexInverse={2000}
+              listItemContainerStyle={styles.listItemContainer}
+              listItemLabelStyle={styles.listItemLabel}
+            />
+            {statusValue == null && (
+              <Text style={styles.instructionText}>
+                Hãy chọn trạng thái để xem danh sách dịch vụ
+              </Text>
             )}
-          </>
-        )}
+          </View>
 
-        <Modal
-          visible={updateModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setUpdateModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>
-                Xác nhận cập nhật trạng thái
-              </Text>
-              <Text style={{ color: "#000" }}>
-                Mã dịch vụ: {selectedServiceCase?._id.slice(-8).toUpperCase()}
-              </Text>
-              <Text style={{ color: "#000" }}>
-                Trạng thái hiện tại:{" "}
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color: getStatusColor(
-                      selectedServiceCase?.statusDetails || ""
-                    ),
-                  }}
-                >
-                  {selectedServiceCase?.statusDetails}
-                </Text>
-              </Text>
-              <Text style={{ marginTop: 12, color: "red" }}>
-                ⚠️ Việc cập nhật trạng thái không thể hoàn tác!
-              </Text>
-
-              {getAvailableNextStatuses(
-                selectedServiceCase?.statusDetails || ""
-              ).map((status) => (
-                <Button
-                  key={status._id}
-                  mode="outlined"
-                  onPress={() => setNewStatusId(status._id)}
-                  style={{ marginVertical: 4 }}
-                >
-                  {status.testRequestStatus}
-                </Button>
-              ))}
-
-              <View style={styles.modalButtons}>
+          {/* Danh sách dịch vụ */}
+          {isLoadingServices ? (
+            <ActivityIndicator
+              style={{ marginTop: 50 }}
+              size="large"
+              color="#fff"
+            />
+          ) : serviceCasesError ? (
+            <Text style={styles.emptyText}>Không thể tải dữ liệu dịch vụ.</Text>
+          ) : paginatedData.length === 0 ? (
+            <Text style={styles.emptyText}>
+              Không có dịch vụ với trạng thái này.
+            </Text>
+          ) : (
+            <>
+              <FlatList
+                data={paginatedData}
+                keyExtractor={(item) => item._id}
+                renderItem={renderItem}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              />
+              {pageNumber * pageSize < serviceCasesData.length && (
                 <Button
                   mode="contained"
-                  onPress={handleStatusUpdate}
-                  disabled={!newStatusId}
-                  loading={isUpdating}
+                  onPress={() => setPageNumber((prev) => prev + 1)}
                 >
-                  Xác nhận
+                  Xem thêm
                 </Button>
-                <Button
-                  onPress={() => setUpdateModalVisible(false)}
-                  disabled={isUpdating}
-                >
-                  Hủy
-                </Button>
+              )}
+            </>
+          )}
+
+          {/* Modal */}
+          <Modal
+            visible={updateModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setUpdateModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>
+                  Xác nhận cập nhật trạng thái
+                </Text>
+                <Text style={{ color: "#000" }}>
+                  Mã dịch vụ: {selectedServiceCase?._id.slice(-8).toUpperCase()}
+                </Text>
+                <Text style={{ color: "#000" }}>
+                  Trạng thái hiện tại:{" "}
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: getStatusColor(
+                        selectedServiceCase?.statusDetails || ""
+                      ),
+                    }}
+                  >
+                    {selectedServiceCase?.statusDetails}
+                  </Text>
+                </Text>
+                <Text style={{ marginTop: 12, color: "red" }}>
+                  ⚠️ Việc cập nhật trạng thái không thể hoàn tác!
+                </Text>
+
+                {getAvailableNextStatuses(
+                  selectedServiceCase?.statusDetails || ""
+                ).map((status) => (
+                  <Button
+                    key={status._id}
+                    mode="outlined"
+                    onPress={() => setNewStatusId(status._id)}
+                    style={{ marginVertical: 4 }}
+                  >
+                    {status.testRequestStatus}
+                  </Button>
+                ))}
+
+                <View style={styles.modalButtons}>
+                  <Button
+                    mode="contained"
+                    onPress={handleStatusUpdate}
+                    disabled={!newStatusId}
+                    loading={isUpdating}
+                  >
+                    Xác nhận
+                  </Button>
+                  <Button
+                    onPress={() => setUpdateModalVisible(false)}
+                    disabled={isUpdating}
+                  >
+                    Hủy
+                  </Button>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        </View>
+
+        <View style={styles.logoutContainer}>
+          <Button
+            mode="outlined"
+            onPress={handleLogout}
+            style={styles.logoutButton}
+            labelStyle={styles.logoutText}
+          >
+            Đăng xuất
+          </Button>
+        </View>
       </View>
     </PaperProvider>
   );
@@ -350,9 +383,43 @@ const styles = StyleSheet.create({
     backgroundColor: "#004b91",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#BBDEFB",
+    marginTop: 30,
+  },
+  logoutContainer: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+
+  logoutButton: {
+    borderColor: "#fff",
+    paddingHorizontal: 20,
+    backgroundColor: "#d40606ff",
+  },
+
+  logoutText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  listItemContainer: {
+    paddingVertical: 35, // khoảng cách trên dưới mỗi item
+    paddingHorizontal: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#ccc",
+  },
+
+  listItemLabel: {
+    fontSize: 16,
+    lineHeight: 22,
+    flexWrap: "wrap",
+    color: "#000",
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: "600",
     color: "#BBDEFB",
   },
   dropdown: {
@@ -363,15 +430,18 @@ const styles = StyleSheet.create({
   dropdownBox: {
     borderColor: "#BBDEFB",
     backgroundColor: "#fff",
+    maxHeight: 300,
   },
   dropdownText: {
     fontSize: 16,
     color: "#000",
     fontWeight: "500",
+    lineHeight: 20,
+    flexWrap: "wrap",
   },
-  label: {
-    fontSize: 18,
-    fontWeight: "600",
+  instructionText: {
+    marginTop: 6,
+    fontSize: 14,
     color: "#BBDEFB",
   },
   card: {
