@@ -1,4 +1,13 @@
-import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
+import {
+  Card,
+  Table,
+  Typography,
+  Button,
+  Pagination,
+  Tag,
+  Flex,
+  Divider,
+} from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
 
@@ -23,10 +32,45 @@ export default function ServiceCase() {
     },
     {
       title: 'Số tiền (VNĐ)',
-      dataIndex: 'totalFee',
-      key: 'totalFee',
-      render: (amount: number) =>
-        typeof amount === 'number' ? amount.toLocaleString('vi-VN') : '—',
+      key: 'fees',
+      render: (_: any, record: { totalFee: number; shippingFee: number }) => {
+        // Để code dễ đọc hơn, ta coi totalFee là phí dịch vụ
+        const serviceFee =
+          typeof record.totalFee === 'number' ? record.totalFee : 0
+        const shippingFee =
+          typeof record.shippingFee === 'number' ? record.shippingFee : 0
+
+        // Tính tổng cộng
+        const grandTotal = serviceFee + shippingFee
+
+        return (
+          // Sử dụng Flex để căn chỉnh các mục dễ dàng
+          <div style={{ minWidth: 200 }}>
+            <Flex justify='space-between'>
+              <Typography.Text>Chi phí dịch vụ:</Typography.Text>
+              <Typography.Text>
+                {serviceFee.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+
+            <Flex justify='space-between'>
+              <Typography.Text>Phí vận chuyển:</Typography.Text>
+              <Typography.Text>
+                {shippingFee.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+
+            <Divider style={{ margin: '4px 0' }} />
+
+            <Flex justify='space-between'>
+              <Typography.Text strong>Tổng cộng:</Typography.Text>
+              <Typography.Text strong style={{ color: '#1677ff' }}>
+                {grandTotal.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+          </div>
+        )
+      },
     },
     {
       title: 'Ngày tạo',

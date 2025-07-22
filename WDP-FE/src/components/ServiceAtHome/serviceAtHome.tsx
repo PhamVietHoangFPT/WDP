@@ -32,6 +32,7 @@ const ServiceAtHomeForm: React.FC = () => {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null
   )
+  const [shippingFee, setShippingFee] = useState<number | null>(null)
   const [testTakerCount, setTestTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
     accountId: accountId,
@@ -56,7 +57,8 @@ const ServiceAtHomeForm: React.FC = () => {
     shippingFee: number
   }) => {
     form.setFieldsValue({ slot: slotId })
-    form.setFieldsValue({ extraPrice: shippingFee })
+    console.log(shippingFee)
+    setShippingFee(shippingFee)
   }
 
   const addTestTaker = () => {
@@ -126,7 +128,10 @@ const ServiceAtHomeForm: React.FC = () => {
         throw new Error('Không thể lấy caseMemberId')
       }
 
-      const serviceCaseData = { caseMember: caseMemberId }
+      const serviceCaseData = {
+        caseMember: caseMemberId,
+        shippingFee: shippingFee,
+      }
       const serviceCase = await createServiceCase({
         data: serviceCaseData,
       }).unwrap()
