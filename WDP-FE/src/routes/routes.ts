@@ -149,10 +149,6 @@ const ServiceCaseDetail = lazy(
   () => import('../pages/ProfileUser/ServiceCaseDetail')
 )
 
-const StaffUpdateStatus = lazy(
-  () => import('../components/Staff/StaffUpdateStatus')
-)
-
 const ProfileLayout = lazy(() => import('../components/layout/ProfileLayout'))
 
 const ManageAddress = lazy(() => import('../pages/ProfileUser/ManageAddress'))
@@ -406,10 +402,6 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/sampling-kit-inventory/:samplingKitInventoryId',
         component: SamplingKitInventoryDetail,
-      },
-      {
-        path: '/staff/update-status',
-        component: StaffUpdateStatus,
       },
       {
         path: '/staff/update-service-case-status-for-customer',
