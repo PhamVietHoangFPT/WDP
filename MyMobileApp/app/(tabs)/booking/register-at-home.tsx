@@ -14,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import { Calendar } from "react-native-calendars";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router"; // Updated for Expo Router
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 
@@ -31,13 +31,14 @@ import { getServiceById } from "@/service/service/service-api";
 import { Ionicons } from "@expo/vector-icons";
 import NotLoggedIn from "@/app/NotLoggedIn";
 
+// Hàm tính khoảng cách km giữa 2 điểm kinh độ vĩ độ
 function getDistanceFromLatLonInKm(
   lat1: number,
   lon1: number,
   lat2: number,
   lon2: number
 ) {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -47,35 +48,33 @@ function getDistanceFromLatLonInKm(
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const d = R * c; // Distance in km
-  return d;
-}
-// Define Token Payload interface
-interface TokenPayload {
-  id: string;
-  // add more fields if your JWT includes them
+  return R * c;
 }
 
-// Helper Function
+interface TokenPayload {
+  id: string;
+}
+
 const getAccountIdFromToken = async (): Promise<string | null> => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) return null;
-
     const decoded: TokenPayload = jwtDecode(token);
     return decoded.id;
-  } catch (e) {
-    console.error("Failed to decode token", e);
+  } catch {
     return null;
   }
 };
 
-// Interface Definitions
 interface Facility {
   _id: string;
   facilityName: string;
-  latitude: number; // Bắt buộc có latitude
-  longitude: number; // Bắt buộc có longitude
+  address?: {
+    location?: {
+      coordinates?: [number, number]; // [lon, lat]
+    };
+  };
+  distance?: number;
 }
 
 interface TestTaker {
@@ -91,10 +90,9 @@ interface Slot {
   isBooked: boolean;
 }
 
-// Main Component
 export default function RegisterServiceAtHome() {
-  const router = useRouter(); // Use useRouter for navigation
-  const { serviceId } = useLocalSearchParams() as { serviceId: string }; // Use useLocalSearchParams for route params
+  const router = useRouter();
+  const { serviceId } = useLocalSearchParams() as { serviceId: string };
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -124,9 +122,10 @@ export default function RegisterServiceAtHome() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
 
+  // Lấy vị trí user
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Cấp quyền thất bại",
@@ -134,8 +133,7 @@ export default function RegisterServiceAtHome() {
         );
         return;
       }
-
-      let location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({});
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -143,7 +141,7 @@ export default function RegisterServiceAtHome() {
     })();
   }, []);
 
-  // Initial Fetch
+  // Lấy data facilities và test takers, tính khoảng cách
   useEffect(() => {
     const fetchData = async () => {
       const accountId = await getAccountIdFromToken();
@@ -158,48 +156,74 @@ export default function RegisterServiceAtHome() {
           getFacilities(),
           getTestTakers(accountId),
         ]);
-        setFacilities(facilitiesRes.data || []);
+
+        const facilitiesWithDistance = (facilitiesRes.data || []).map(
+          (facility: Facility) => {
+            const lon = facility.address?.location?.coordinates?.[0];
+            const lat = facility.address?.location?.coordinates?.[1];
+            if (
+              userLocation &&
+              typeof lat === "number" &&
+              typeof lon === "number"
+            ) {
+              const distance = getDistanceFromLatLonInKm(
+                userLocation.latitude,
+                userLocation.longitude,
+                lat,
+                lon
+              );
+              return { ...facility, distance };
+            }
+            return facility;
+          }
+        );
+
+        setFacilities(facilitiesWithDistance);
         setAvailableTestTakers(testTakersRes.data || []);
       } catch (error) {
-        console.error("Error fetching initial data:", error);
         Alert.alert("Lỗi", "Không thể tải dữ liệu cần thiết.");
       }
     };
     fetchData();
-  }, []);
+  }, [userLocation]);
 
-  // Tìm cơ sở gần nhất dựa trên userLocation và facilities
-  const findNearestFacility = () => {
-    if (!userLocation || facilities.length === 0) return null;
+  // Cập nhật lại khoảng cách khi userLocation thay đổi
+  useEffect(() => {
+    if (!userLocation || facilities.length === 0) return;
 
-    let nearest = facilities[0];
-    let minDist = getDistanceFromLatLonInKm(
-      userLocation.latitude,
-      userLocation.longitude,
-      nearest.latitude,
-      nearest.longitude
-    );
+    const updatedFacilities = facilities.map((facility) => {
+      const lon = facility.address?.location?.coordinates?.[0];
+      const lat = facility.address?.location?.coordinates?.[1];
+      if (typeof lat === "number" && typeof lon === "number") {
+        const distance = getDistanceFromLatLonInKm(
+          userLocation.latitude,
+          userLocation.longitude,
+          lat,
+          lon
+        );
+        return { ...facility, distance };
+      }
+      return facility;
+    });
+    setFacilities(updatedFacilities);
+  }, [userLocation]);
+
+  // Tự chọn facility gần nhất
+  useEffect(() => {
+    if (!userLocation || facilities.length === 0) return;
+
+    let nearestFacility = facilities[0];
+    let minDist = nearestFacility.distance ?? Infinity;
 
     for (let i = 1; i < facilities.length; i++) {
-      const f = facilities[i];
-      const dist = getDistanceFromLatLonInKm(
-        userLocation.latitude,
-        userLocation.longitude,
-        f.latitude,
-        f.longitude
-      );
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = f;
+      const facility = facilities[i];
+      if ((facility.distance ?? Infinity) < minDist) {
+        minDist = facility.distance ?? Infinity;
+        nearestFacility = facility;
       }
     }
-    return nearest;
-  };
-
-  useEffect(() => {
-    if (userLocation && facilities.length > 0) {
-      const nearest = findNearestFacility();
-      if (nearest) setSelectedFacility(nearest._id);
+    if (nearestFacility._id !== selectedFacility) {
+      setSelectedFacility(nearestFacility._id);
     }
   }, [userLocation, facilities]);
 
@@ -235,14 +259,9 @@ export default function RegisterServiceAtHome() {
       const slotsArray = Array.isArray(res) ? res : res.data;
       const filteredSlots = slotsArray.filter((slot: Slot) => !slot.isBooked);
       setSlots(filteredSlots);
-    } catch (error: any) {
+    } catch {
       setSlots([]);
-      if (error?.response?.status === 404) {
-        console.log("No slots found for this date.");
-      } else {
-        console.error("Error loading slots:", error);
-        Alert.alert("Lỗi", "Không có lịch trống hoặc không thể tải lịch.");
-      }
+      Alert.alert("Lỗi", "Không có lịch trống hoặc không thể tải lịch.");
     } finally {
       setLoadingSlots(false);
     }
@@ -297,17 +316,15 @@ export default function RegisterServiceAtHome() {
       const bookingId = bookingRes?.data?._id || bookingRes?._id;
       if (!bookingId) throw new Error("Không thể tạo lịch hẹn.");
 
-      // 🔍 Lấy thông tin dịch vụ để kiểm tra isAdministration
       const serviceInfo = await getServiceById(serviceId);
       const isAdministration = serviceInfo?.data?.isAdministration ?? false;
 
-      // ✅ Nếu là hành chính, vẫn cho booking nhưng hiện thông báo sau
       const caseMemberRes = await createCaseMember({
         testTaker: finalTestTakers,
         booking: bookingId,
         service: serviceId,
         note: "",
-        isAtHome: !isAdministration, // false nếu là hành chính
+        isAtHome: !isAdministration,
         isSelfSampling: false,
       });
 
@@ -333,7 +350,6 @@ export default function RegisterServiceAtHome() {
       if (supported) {
         await Linking.openURL(paymentUrl);
 
-        // ⚠️ Hiện cảnh báo nếu là hành chính
         if (isAdministration) {
           Alert.alert(
             "Lưu ý",
@@ -346,7 +362,6 @@ export default function RegisterServiceAtHome() {
         throw new Error("Không thể mở liên kết thanh toán.");
       }
     } catch (err: any) {
-      console.error("Lỗi khi đăng ký dịch vụ:", err);
       Alert.alert(
         "Đăng ký thất bại",
         err.message || "Đã có lỗi xảy ra. Vui lòng thử lại."
@@ -358,7 +373,6 @@ export default function RegisterServiceAtHome() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* Configure Stack screen options, e.g., hide header */}
       <Stack.Screen options={{ headerShown: false }} />
       <LinearGradient colors={["#001f3f", "#0074D9"]} style={styles.container}>
         <ScrollView
@@ -385,7 +399,14 @@ export default function RegisterServiceAtHome() {
               {facilities.map((facility) => (
                 <Picker.Item
                   key={facility._id}
-                  label={facility.facilityName}
+                  label={
+                    typeof facility.distance === "number" &&
+                    !isNaN(facility.distance)
+                      ? `${facility.facilityName} (~${facility.distance.toFixed(
+                          1
+                        )} km)`
+                      : facility.facilityName
+                  }
                   value={facility._id}
                 />
               ))}
@@ -514,7 +535,6 @@ export default function RegisterServiceAtHome() {
   );
 }
 
-// Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 20, paddingBottom: 20 },
