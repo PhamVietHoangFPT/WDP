@@ -18,24 +18,30 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     private testRequestStatusRepository: ITestRequestStatusRepository,
     @Inject(ITestRequestHistoryRepository)
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
-  ) { }
+  ) {}
 
   async getConditionFeeById(id: string): Promise<number | null> {
-    type ConditionPopulated = { condition: { conditionFee?: number } };
+    type ConditionPopulated = { condition: { conditionFee?: number } }
 
     const serviceCase = await this.serviceCaseModel
       .findById(id)
-      .populate({ path: 'condition', select: "conditionFee" })
-      .lean<ConditionPopulated>();
+      .populate({ path: 'condition', select: 'conditionFee' })
+      .lean<ConditionPopulated>()
 
-    return serviceCase?.condition?.conditionFee ?? null;
+    return serviceCase?.condition?.conditionFee ?? null
   }
 
   async findOneById(id: string): Promise<ServiceCaseDocument | null> {
-    return await this.serviceCaseModel.findOne({ _id: id, deleted_at: null }).exec()
+    return await this.serviceCaseModel
+      .findOne({ _id: id, deleted_at: null })
+      .exec()
   }
 
-  async updateCondition(id: string, condition: string, doctorId?: string): Promise<ServiceCaseDocument | null> {
+  async updateCondition(
+    id: string,
+    condition: string,
+    doctorId?: string,
+  ): Promise<ServiceCaseDocument | null> {
     const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
       id,
       {

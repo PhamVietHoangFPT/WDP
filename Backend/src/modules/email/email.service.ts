@@ -20,8 +20,7 @@ export class EmailService implements IEmailService {
     private readonly facilityModel: Model<Facility>,
     @InjectModel(Booking.name)
     private readonly bookingModel: Model<Booking>,
-  ) { }
-
+  ) {}
 
   APP_NAME = this.configService.get<string>('APP_NAME')
 
@@ -42,7 +41,11 @@ export class EmailService implements IEmailService {
 
     return `${dayName}, ${day}/${month}/${year}`
   }
-  async sendPaymentRequestForCondition(customerId: string, doctorId: string, paymentUrl: string): Promise<void> {
+  async sendPaymentRequestForCondition(
+    customerId: string,
+    doctorId: string,
+    paymentUrl: string,
+  ): Promise<void> {
     const customerAccount = await this.accountModel
       .findOne({
         _id: customerId,
@@ -230,5 +233,4 @@ export class EmailService implements IEmailService {
     })
     console.log(`Email thông báo đã được gửi đến ${customerAccount.email}`)
   }
-
 }

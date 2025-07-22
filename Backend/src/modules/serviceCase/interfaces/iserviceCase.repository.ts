@@ -1,4 +1,4 @@
-import { UpdateConditionDto } from './../../condition/dto/updateCondition.dto';
+import { UpdateConditionDto } from './../../condition/dto/updateCondition.dto'
 import { ServiceCaseDocument } from '../schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from '../dto/createServiceCase.dto'
 import mongoose from 'mongoose'
@@ -57,6 +57,5 @@ export interface IServiceCaseRepository {
   getServiceCaseCheckinTime(serviceCaseId: string): Promise<Date | null>
 
   getConditionFeeById(id: string): Promise<number | null>
-
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

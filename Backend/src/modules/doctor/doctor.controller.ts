@@ -41,10 +41,11 @@ import { IServiceCaseService } from '../serviceCase/interfaces/iserviceCase.serv
 export class DoctorController {
   constructor(
     @Inject(IResultService) private readonly resultService: IResultService,
-    @Inject(IServiceCaseService) private readonly serviceCaseService: IServiceCaseService,
+    @Inject(IServiceCaseService)
+    private readonly serviceCaseService: IServiceCaseService,
     @Inject(IDoctorService)
     private readonly doctorService: IDoctorService,
-  ) { }
+  ) {}
 
   @Patch('/serviceCase/:id/condition/:condition')
   @UseGuards(AuthGuard)
@@ -68,12 +69,11 @@ export class DoctorController {
     @Req() req: any,
   ): Promise<ApiResponseDto<ServiceCaseResponseDto> | null> {
     const doctorId = req.user.id
-    const updatedServiceCase =
-      await this.serviceCaseService.updateCondition(
-        id,
-        condition,
-        doctorId
-      )
+    const updatedServiceCase = await this.serviceCaseService.updateCondition(
+      id,
+      condition,
+      doctorId,
+    )
     if (!updatedServiceCase) {
       return null
     }

@@ -16,7 +16,6 @@ import {
   useCreateTestTakerMutation,
   useGetTestTakerByIdQuery,
 } from '../../features/customer/testTakerApi'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 const { Option } = Select

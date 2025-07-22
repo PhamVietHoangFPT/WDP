@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 const { Content } = Layout

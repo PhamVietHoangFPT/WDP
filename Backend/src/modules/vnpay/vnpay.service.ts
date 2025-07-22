@@ -12,7 +12,7 @@ export class VnpayService {
     private readonly vnpayService: VnpayServiceLocal,
     @Inject(IServiceCaseRepository)
     private readonly serviceCaseRepository: IServiceCaseRepository,
-  ) { }
+  ) {}
 
   async getBankList(): Promise<Bank[]> {
     return this.vnpayService.getBankList()

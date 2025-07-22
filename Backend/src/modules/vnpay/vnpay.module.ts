@@ -33,4 +33,4 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
   providers: [VnpayService], // Vẫn giữ VnpayService của bạn nếu nó làm các việc khác ngoài cấu hình client
   exports: [VnPayModuleLocal, VnpayService],
 })
-export class VnPayModule { }
+export class VnPayModule {}

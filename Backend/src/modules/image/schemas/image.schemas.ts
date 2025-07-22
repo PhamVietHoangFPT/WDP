@@ -1,4 +1,4 @@
-import { KitShipment } from './../../KitShipment/schemas/kitShipment.schema';
+import { KitShipment } from './../../KitShipment/schemas/kitShipment.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { HydratedDocument } from 'mongoose'
 import { BaseEntity } from 'src/common/schema/baseEntity.schema'

@@ -7,14 +7,12 @@ import {
   Card,
   Typography,
   notification,
-  Layout,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useCreateTestTakerMutation } from '../../features/customer/testTakerApi'
 import { jwtDecode } from 'jwt-decode'
 import Cookies from 'js-cookie'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 const { Option } = Select

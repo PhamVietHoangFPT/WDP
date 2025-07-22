@@ -1,7 +1,6 @@
 import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 

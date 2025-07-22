@@ -8,7 +8,7 @@ import { PaymentConditionCaseDto } from './dto/condition.dto'
 @ApiTags('vnpay')
 @Controller('vnpay')
 export class VnpayController {
-  constructor(private readonly vnpayService: VnpayService) { }
+  constructor(private readonly vnpayService: VnpayService) {}
   @Get('banks')
   @ApiOperation({ summary: 'Lấy danh sách ngân hàng' })
   @ApiResponse({
@@ -101,9 +101,8 @@ export class VnpayController {
     @Req() req: Request,
   ) {
     req.session.currentConditionPayment = conditionDto.serviceCaseId
-    const paymentUrl = await this.vnpayService.getPaymentUrlForCondition(
-      conditionDto,
-    )
+    const paymentUrl =
+      await this.vnpayService.getPaymentUrlForCondition(conditionDto)
     return { redirectUrl: paymentUrl }
   }
 }
