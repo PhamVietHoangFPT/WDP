@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsMongoId } from 'class-validator'
+import { IsMongoId, IsNotEmpty, IsNumber, IsPositive } from 'class-validator'
 
 export class CreateServiceCaseDto {
   @ApiProperty({
@@ -9,4 +9,14 @@ export class CreateServiceCaseDto {
   })
   @IsMongoId({ message: 'ID trường hợp dịch vụ không hợp lệ' })
   caseMember: string
+
+  @ApiProperty({
+    example: 100000,
+    description: 'Phí vận chuyển cho dịch vụ tại nhà',
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Phí vận chuyển không được để trống' })
+  @IsNumber({}, { message: 'Phí vận chuyển phải là một con số' })
+  @IsPositive({ message: 'Phí vận chuyển phải là số dương' })
+  shippingFee: number
 }
