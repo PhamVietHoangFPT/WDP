@@ -10,11 +10,9 @@ const getAuthHeader = async () => {
 
 // 🔍 Lấy tất cả dịch vụ
 export const getAllServices = async () => {
-  const headers = await getAuthHeader();
   const response = await fetch(`${API_BASE_URL}/services`, {
     headers: {
       "Content-Type": "application/json",
-      ...headers,
     },
   });
   if (!response.ok) throw new Error("Lỗi khi lấy danh sách dịch vụ");
@@ -23,11 +21,9 @@ export const getAllServices = async () => {
 
 // 🔍 Lấy chi tiết 1 dịch vụ theo ID
 export const getServiceById = async (id: string) => {
-  const headers = await getAuthHeader();
   const response = await fetch(`${API_BASE_URL}/services/${id}`, {
     headers: {
       "Content-Type": "application/json",
-      ...headers,
     },
   });
   if (!response.ok) throw new Error(`Lỗi khi lấy dịch vụ ID: ${id}`);

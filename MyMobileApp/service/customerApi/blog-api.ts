@@ -12,16 +12,14 @@ const getAuthHeader = async () => {
 const blogAPI = {
   // Lấy danh sách blog
   getBlogs: async () => {
-    const headers = await getAuthHeader();
-    const res = await fetch(`${API_BASE_URL}/blogs`, { headers });
+    const res = await fetch(`${API_BASE_URL}/blogs`);
     if (!res.ok) throw new Error("Lỗi khi lấy danh sách blog");
     return res.json();
   },
 
   // Lấy blog theo ID
   getBlogById: async (id: string) => {
-    const headers = await getAuthHeader();
-    const res = await fetch(`${API_BASE_URL}/blogs/${id}`, { headers });
+    const res = await fetch(`${API_BASE_URL}/blogs/${id}`);
     if (!res.ok) throw new Error("Lỗi khi lấy chi tiết blog");
     return res.json();
   },

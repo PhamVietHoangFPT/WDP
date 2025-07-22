@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import { login } from "@/service/auth-api";
+import { jwtDecode } from "jwt-decode";
 
 const LoginScreen = () => {
   const router = useRouter();
@@ -46,12 +47,27 @@ const LoginScreen = () => {
         } catch (storageError) {
           console.error("Lỗi khi lưu token vào AsyncStorage:", storageError);
           Alert.alert("Lỗi", "Không thể lưu thông tin đăng nhập.");
+          setLoading(false);
           return;
+        }
+
+        // Giải mã token lấy role
+        let userRole: string | null = null;
+        try {
+          const decoded: any = jwtDecode(accessToken);
+          userRole = decoded.role || decoded.roles || null;
+        } catch (decodeError) {
+          console.warn("Không thể giải mã token để lấy role:", decodeError);
         }
 
         Alert.alert("Thành công", result.message || "Đăng nhập thành công!");
         console.log("Đăng nhập thành công, đang chuyển trang...");
-        router.replace("/"); // ← Chuyển về home
+
+        if (userRole === "Sample Collector") {
+          router.replace("/sample-collecter/sample-collector"); // Chuyển trang dành cho Sample Collector
+        } else {
+          router.replace("/"); // Chuyển về home
+        }
       } else {
         console.log("Dữ liệu không hợp lệ hoặc thiếu accessToken.");
         Alert.alert(
