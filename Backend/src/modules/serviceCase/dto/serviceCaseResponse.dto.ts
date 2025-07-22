@@ -18,6 +18,10 @@ export class ServiceCaseResponseDto {
   totalFee: number
 
   @Expose()
+  @ApiProperty({ example: 50000, type: Number })
+  shippingFee: number
+
+  @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   caseMember: mongoose.Schema.Types.ObjectId

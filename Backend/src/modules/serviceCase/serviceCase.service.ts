@@ -50,8 +50,10 @@ export class ServiceCaseService implements IServiceCaseService {
     return new ServiceCaseResponseDto({
       _id: serviceCase._id,
       totalFee: serviceCase.totalFee,
+      shippingFee: serviceCase.shippingFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
+
       condition: serviceCase.condition,
       created_at: serviceCase.created_at,
     })

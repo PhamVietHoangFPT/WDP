@@ -41,9 +41,13 @@ export class VnpayService {
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
     const vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
-    const totalFee = await this.serviceCaseRepository.getTotalFeeById(
+    const serviceCaseFee = await this.serviceCaseRepository.getTotalFeeById(
       PaymentData.serviceCaseId,
     )
+    const shippingFee = await this.serviceCaseRepository.getShippingFeeById(
+      PaymentData.serviceCaseId,
+    )
+    const totalFee = serviceCaseFee + shippingFee
     const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
