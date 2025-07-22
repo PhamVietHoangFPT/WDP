@@ -114,12 +114,7 @@ const CreateFacilityForm: React.FC = () => {
       setHouseNumberValue('')
       navigate('/admin/createFacility')
     } catch (error: any) {
-      if (error.status === 404) {
-        message.error('Tên, số điện thoại hoặc địa chỉ đã tồn tại')
-        return
-      }
-      console.error('Error creating facility:', error)
-      message.error(error?.message || 'Có lỗi xảy ra khi tạo cơ sở')
+      message.error(error?.data?.message || 'Có lỗi xảy ra khi tạo cơ sở')
     }
   }
 
@@ -237,7 +232,12 @@ const CreateFacilityForm: React.FC = () => {
             <Button type='primary' htmlType='submit' size='large'>
               Tạo mới
             </Button>
-            <Button onClick={() => navigate('/admin/facility')} size='large'>
+            <Button
+              onClick={() =>
+                navigate('/admin/facilities?pageNumber=1&pageSize=10')
+              }
+              size='large'
+            >
               Hủy
             </Button>
           </div>
