@@ -411,4 +411,32 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .findById(id)
       .then((serviceCase) => serviceCase?.shippingFee || null)
   }
+
+  async checkPaidForCondition(resultId: string): Promise<boolean | null> {
+    // 1. Chỉ thực hiện MỘT query duy nhất để lấy các trường cần thiết
+    const serviceCase = await this.serviceCaseModel
+      .findOne({
+        result: new Types.ObjectId(resultId),
+      })
+      .select('condition paymentForCondition') // Chỉ lấy 2 trường này để tối ưu
+      .lean() // .lean() giúp query nhanh hơn cho các tác vụ chỉ đọc
+
+    // Case 1: Không tìm thấy service case nào khớp với resultId
+    if (!serviceCase) {
+      return null
+    }
+
+    // Case 2: Service case không có trường 'condition' -> không cần thanh toán
+    if (!serviceCase.condition) {
+      return false
+    }
+
+    // Case 3: Service case có 'condition', nhưng chưa có 'paymentForCondition' -> CẦN thanh toán
+    if (serviceCase.condition && !serviceCase.paymentForCondition) {
+      return true
+    }
+
+    // Case 4: Mặc định còn lại là có 'condition' và đã có 'paymentForCondition' -> không cần thanh toán
+    return false
+  }
 }

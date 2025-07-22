@@ -59,5 +59,13 @@ export interface IServiceCaseRepository {
   getServiceCaseCheckinTime(serviceCaseId: string): Promise<Date | null>
 
   getConditionFeeById(id: string): Promise<number | null>
+
+  /**
+   * Kiểm tra xem một service case có yêu cầu thanh toán cho chi phí phát sinh (condition) hay không.
+   * @returns `true` nếu cần thanh toán.
+   * @returns `false` nếu không cần thanh toán (do không có condition hoặc đã thanh toán rồi).
+   * @returns `null` nếu không tìm thấy service case.
+   */
+  checkPaidForCondition(resultId: string): Promise<boolean | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')
