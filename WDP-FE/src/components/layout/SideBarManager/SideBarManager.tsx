@@ -9,6 +9,9 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
+  ExperimentOutlined,
+  UnorderedListOutlined,
+  IdcardOutlined 
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -64,19 +67,19 @@ export const SideBar = () => {
     },
     {
       key: 'manager/samples',
-      icon: <BarChartOutlined />,
+      icon: <ExperimentOutlined />,
       label: 'Quản trị mẫu thu ',
       onClick: () => navigate('manager/samples'),
     },
     {
       key: 'manager/service-cases-without-doctor',
-      icon: <BarChartOutlined />,
+      icon: <UnorderedListOutlined />,
       label: 'Quản trị dịch vụ ',
       onClick: () => navigate('manager/service-cases-without-doctor'),
     },
     {
       key: 'manager/create-account',
-      icon: <BarChartOutlined />,
+      icon: <IdcardOutlined />,
       label: 'Quản trị tài khoản',
       onClick: () => navigate('manager/create-account'),
     },

@@ -10,6 +10,7 @@ import {
   MedicineBoxOutlined,
   BarChartOutlined,
   TeamOutlined,
+  InboxOutlined
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -66,7 +67,7 @@ export const SideBar = () => {
     // Thêm các mục menu khác của Staff/Manager vào đây nếu có
     {
       key: 'staff/sampling-kit-inventory',
-      icon: <BarChartOutlined />,
+      icon: <InboxOutlined />,
       label: 'Quản lý kho',
       onClick: () =>
         navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
