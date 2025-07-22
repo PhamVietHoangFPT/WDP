@@ -19,6 +19,11 @@ export class ServiceCase extends BaseEntity {
   totalFee: number
 
   @Prop({
+    type: Number,
+  })
+  shippingFee: number
+
+  @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CaseMember',
   })
@@ -71,6 +76,7 @@ export class ServiceCase extends BaseEntity {
     ref: 'Condition',
   })
   condition: mongoose.Schema.Types.ObjectId
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Payment',

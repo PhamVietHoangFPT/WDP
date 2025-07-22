@@ -86,6 +86,18 @@ export class FacilityService implements IFacilityService {
       )
     }
 
+    const existingFacilityByPhone = await this.facilityRepository.findWithQuery(
+      {
+        phoneNumber: createFacilityDto.phoneNumber,
+      },
+    )
+
+    if (existingFacilityByPhone.length > 0) {
+      throw new ConflictException(
+        `Cơ sở với số điện thoại "${createFacilityDto.phoneNumber}" đã tồn tại.`,
+      )
+    }
+
     const newFacility = await this.facilityRepository.create(
       createFacilityDto,
       userId,

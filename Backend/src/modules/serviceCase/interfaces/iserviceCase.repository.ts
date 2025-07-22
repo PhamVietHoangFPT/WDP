@@ -43,6 +43,8 @@ export interface IServiceCaseRepository {
 
   getTotalFeeById(id: string): Promise<number | null>
 
+  getShippingFeeById(id: string): Promise<number | null>
+
   updateResultId(
     id: string,
     resultId: string,

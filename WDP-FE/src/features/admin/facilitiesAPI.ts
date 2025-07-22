@@ -66,5 +66,5 @@ export const {
   useUpdateFacilityMutation,
   useGetFacilitiesNameAndAddressQuery,
   useGetUserListQuery,
-  useCreateFacilityMutation
+  useCreateFacilityMutation,
 } = facilitiesApi

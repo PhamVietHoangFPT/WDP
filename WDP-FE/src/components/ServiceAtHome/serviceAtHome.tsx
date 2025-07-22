@@ -29,6 +29,10 @@ const ServiceAtHomeForm: React.FC = () => {
     : undefined
   const [form] = Form.useForm()
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  )
+  const [shippingFee, setShippingFee] = useState<number | null>(null)
   const [testTakerCount, setTestTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
     accountId: accountId,
@@ -53,7 +57,8 @@ const ServiceAtHomeForm: React.FC = () => {
     shippingFee: number
   }) => {
     form.setFieldsValue({ slot: slotId })
-    form.setFieldsValue({ extraPrice: shippingFee })
+    console.log(shippingFee)
+    setShippingFee(shippingFee)
   }
 
   const addTestTaker = () => {
@@ -113,6 +118,7 @@ const ServiceAtHomeForm: React.FC = () => {
         note: '',
         isAtHome: true,
         isSelfSampling: false,
+        address: selectedAddressId,
       }
       const caseMember = await createCaseMember({ data }).unwrap()
       const caseMemberId = caseMember?.data?._id || caseMember?._id
@@ -122,7 +128,10 @@ const ServiceAtHomeForm: React.FC = () => {
         throw new Error('Không thể lấy caseMemberId')
       }
 
-      const serviceCaseData = { caseMember: caseMemberId }
+      const serviceCaseData = {
+        caseMember: caseMemberId,
+        shippingFee: shippingFee,
+      }
       const serviceCase = await createServiceCase({
         data: serviceCaseData,
       }).unwrap()
@@ -225,6 +234,8 @@ const ServiceAtHomeForm: React.FC = () => {
                   onSelectSlot={setSelectedSlotId} // ✅ Hàm để chọn slot
                   selectedSlotId={selectedSlotId} // ✅ Giá trị slot đang được chọn
                   serviceDetail={serviceDetail}
+                  addressId={selectedAddressId}
+                  setAddressId={setSelectedAddressId}
                 />
               </Form.Item>
             </Col>

@@ -78,6 +78,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       currentStatus: testRequestStatus,
       totalFee: totalFee,
       created_at: new Date(),
+      shippingFee: createServiceCaseDto.shippingFee,
     })
 
     await this.testRequestHistoryRepository.createTestRequestHistory(
@@ -403,5 +404,11 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       return serviceCaseResults[0].checkinDateTime || null
     }
     return null // Trả về null nếu không tìm thấy serviceCase hoặc checkinDateTime là null
+  }
+
+  async getShippingFeeById(id: string): Promise<number | null> {
+    return this.serviceCaseModel
+      .findById(id)
+      .then((serviceCase) => serviceCase?.shippingFee || null)
   }
 }
