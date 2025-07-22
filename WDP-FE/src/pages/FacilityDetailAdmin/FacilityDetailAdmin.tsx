@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Form, Input, Button, Typography, message, Spin, Select } from 'antd'
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  message,
+  Spin,
+  Select,
+  AutoComplete,
+} from 'antd'
 import {
   useGetFacilityDetailQuery,
   useUpdateFacilityMutation,
@@ -11,7 +20,6 @@ import {
   useCreateSlotTemplateMutation,
 } from '../../features/admin/slotAPI'
 import {
-  useGetDistrictListQuery,
   useGetProvinceListQuery,
   useGetWardListQuery,
   useCreateFacilityAddressMutation,
@@ -44,18 +52,15 @@ const FacilityDetailAdmin: React.FC = () => {
   const [createSlotTemplate] = useCreateSlotTemplateMutation()
   // Lấy dữ liệu chi tiết cơ sở từ API
   const { data, isLoading } = useGetFacilityDetailQuery(id!)
-  const { data: slotTemplate, isLoading: isLoadingForSlotTemplate } =
-    useGetSlotTemplateForFacilityQuery(id!)
+  const { data: slotTemplate } = useGetSlotTemplateForFacilityQuery(id!)
   // Hook để cập nhật cơ sở
   const [updateFacility] = useUpdateFacilityMutation()
   const [updateSlotTemplate] = useUpdateSlotTemplateMutation()
   const [updateAddressFacility] = useUpdateAddressFacilityMutation()
-  const [updateFullAddressFacility] = useUpdateFullAddressFacilityMutation()
+  const [updateFullAddressFacility, { isLoading: isUpdatingFullAddress }] =
+    useUpdateFullAddressFacilityMutation()
   // State for cascading dropdowns
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(
-    null
-  )
-  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
     null
   )
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
@@ -63,47 +68,62 @@ const FacilityDetailAdmin: React.FC = () => {
   const [houseNumberValue, setHouseNumberValue] = useState<string>('')
   // Hook để tạo địa chỉ cho cơ sở
   const [createFacilityAddress] = useCreateFacilityAddressMutation()
-
+  const [provinceOptions, setProvinceOptions] = useState([])
+  const [wardOptions, setWardOptions] = useState([])
   // API queries - Remove generic types and access data directly
   const { data: provincesData, isLoading: provincesLoading } =
     useGetProvinceListQuery({})
 
-  const { data: districtsData, isLoading: districtsLoading } =
-    useGetDistrictListQuery(
-      {
-        province_code: selectedProvince?.code,
-      },
-      {
-        skip: !selectedProvince?.code,
-      }
-    )
-
   const { data: wardsData, isLoading: wardsLoading } = useGetWardListQuery(
     {
-      district_code: selectedDistrict?.code,
+      province_code: selectedProvince?.Code,
     },
     {
-      skip: !selectedDistrict?.code,
+      skip: !selectedProvince?.Code,
     }
   )
 
-  const handleProvinceChange = (value: number) => {
-    const province = provincesData?.find((p: Province) => p.code === value)
-    setSelectedProvince(province || null)
-    setSelectedDistrict(null)
-    setSelectedWard(null)
-    form.setFieldsValue({ district: undefined, ward: undefined })
+  const handleProvinceSearch = (searchText: string) => {
+    if (!searchText) {
+      setProvinceOptions([])
+    } else {
+      const filtered = provincesData
+        ?.filter((province: Province) =>
+          province.FullName.toLowerCase().includes(searchText.toLowerCase())
+        )
+        .map((province: Province) => ({
+          value: province.Code, // Giá trị khi được chọn
+          label: province.FullName, // Hiển thị trong danh sách gợi ý
+        }))
+      setProvinceOptions(filtered || [])
+    }
   }
 
-  const handleDistrictChange = (value: number) => {
-    const district = districtsData?.find((d: District) => d.code === value)
-    setSelectedDistrict(district || null)
+  const handleWardSearch = (searchText: string) => {
+    if (!searchText) {
+      setWardOptions([])
+    } else {
+      const filtered = wardsData
+        ?.filter((ward: Ward) =>
+          ward.FullName.toLowerCase().includes(searchText.toLowerCase())
+        )
+        .map((ward: Ward) => ({
+          value: ward.Code, // Giá trị khi được chọn
+          label: ward.FullName, // Hiển thị trong danh sách gợi ý
+        }))
+      setWardOptions(filtered || [])
+    }
+  }
+  const handleProvinceChange = (value: string) => {
+    console.log(value)
+    const province = provincesData?.find((p: Province) => p.Code === value)
+    setSelectedProvince(province || null)
     setSelectedWard(null)
     form.setFieldsValue({ ward: undefined })
   }
 
-  const handleWardChange = (value: number) => {
-    const ward = wardsData?.find((w: Ward) => w.code === value)
+  const handleWardChange = (value: string) => {
+    const ward = wardsData?.find((w: Ward) => w.Code === value)
     setSelectedWard(ward || null)
   }
 
@@ -148,13 +168,13 @@ const FacilityDetailAdmin: React.FC = () => {
 
   const handleCreateAddress = async (values: any) => {
     try {
-      if (!selectedProvince || !selectedDistrict || !selectedWard) {
+      if (!selectedProvince || !selectedWard) {
         message.error('Vui lòng chọn đầy đủ thông tin địa chỉ')
         return
       }
 
       const fullAddress =
-        `${houseNumberValue || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
+        `${houseNumberValue || ''}, ${selectedWard.FullName}, ${selectedProvince.FullName}`.trim()
 
       // Tạo địa chỉ mới
       const addressResponse = await createFacilityAddress({
@@ -179,13 +199,13 @@ const FacilityDetailAdmin: React.FC = () => {
 
   const handleUpdateAddressFacility = async (form: any) => {
     try {
-      if (!selectedProvince || !selectedDistrict || !selectedWard) {
+      if (!selectedProvince || !selectedWard) {
         message.error('Vui lòng chọn đầy đủ thông tin địa chỉ')
         return
       }
 
       const fullAddress =
-        `${houseNumberValue || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()
+        `${houseNumberValue || ''}, ${selectedWard.FullName}, ${selectedProvince.FullName}`.trim()
       // Cập nhật địa chỉ cho cơ sở
       await updateFullAddressFacility({
         id: data.address._id,
@@ -214,51 +234,35 @@ const FacilityDetailAdmin: React.FC = () => {
           }
         }}
       >
-        <Form.Item label='Tỉnh/Thành phố'>
-          <Select
-            placeholder='Chọn tỉnh/thành phố'
-            value={selectedProvince?.code}
-            onChange={handleProvinceChange}
-            loading={provincesLoading}
-          >
-            {provincesData?.map((province: Province) => (
-              <Option key={province.code} value={province.code}>
-                {province.name}
-              </Option>
-            ))}
-          </Select>
+        <Form.Item
+          label='Tỉnh/Thành phố'
+          name='province'
+          rules={[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố' }]}
+        >
+          <AutoComplete
+            options={provinceOptions} // Danh sách gợi ý
+            onSearch={handleProvinceSearch} // Gọi khi người dùng gõ
+            onChange={handleProvinceChange} // Gọi khi giá trị thay đổi (chọn hoặc xóa)
+            placeholder='Nhập để tìm kiếm tỉnh/thành phố'
+            value={selectedProvince?.FullName} // Hiển thị tên thay vì mã
+          />
+          {provincesLoading && <Spin size='small' style={{ marginLeft: 8 }} />}
         </Form.Item>
 
-        <Form.Item label='Quận/Huyện'>
-          <Select
-            placeholder='Chọn quận/huyện'
-            value={selectedDistrict?.code}
-            onChange={handleDistrictChange}
-            disabled={!selectedProvince}
-            loading={districtsLoading}
-          >
-            {districtsData?.map((district: District) => (
-              <Option key={district.code} value={district.code}>
-                {district.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item label='Phường/Xã'>
-          <Select
-            placeholder='Chọn phường/xã'
-            value={selectedWard?.code}
-            onChange={handleWardChange}
-            disabled={!selectedDistrict}
-            loading={wardsLoading}
-          >
-            {wardsData?.map((ward: Ward) => (
-              <Option key={ward.code} value={ward.code}>
-                {ward.name}
-              </Option>
-            ))}
-          </Select>
+        <Form.Item
+          label='Phường/Xã'
+          name='ward'
+          rules={[{ required: true, message: 'Vui lòng chọn phường/xã' }]}
+        >
+          <AutoComplete
+            options={wardOptions} // Danh sách gợi ý
+            onSearch={handleWardSearch} // Gọi khi người dùng gõ
+            onChange={handleWardChange} // Gọi khi giá trị thay đổi (chọn hoặc xóa)
+            placeholder='Nhập để tìm kiếm phường/xã'
+            value={selectedWard?.FullName}
+            disabled={!selectedProvince} // Vô hiệu nếu chưa chọn tỉnh
+          />
+          {wardsLoading && <Spin size='small' style={{ marginLeft: 8 }} />}
         </Form.Item>
 
         <Form.Item
@@ -272,18 +276,22 @@ const FacilityDetailAdmin: React.FC = () => {
           />
         </Form.Item>
 
-        {selectedProvince && selectedDistrict && selectedWard && (
+        {selectedProvince && selectedWard && (
           <Form.Item label='Địa chỉ đầy đủ'>
             <Input
               // 2. Sử dụng biến đã theo dõi ở đây
-              value={`${houseNumberValue || ''}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`.trim()}
+              value={`${houseNumberValue || ''}, ${selectedWard.FullName}, ${selectedProvince.FullName}`.trim()}
               disabled
               style={{ backgroundColor: '#f5f5f5' }}
             />
           </Form.Item>
         )}
 
-        <Button type='primary' htmlType='submit'>
+        <Button
+          type='primary'
+          htmlType='submit'
+          loading={isUpdatingFullAddress}
+        >
           Lưu
         </Button>
       </Form>

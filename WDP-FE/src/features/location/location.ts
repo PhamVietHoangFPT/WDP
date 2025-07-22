@@ -62,7 +62,7 @@ const locationAPI = apiSlice.injectEndpoints({
     updateFullAddressFacility: builder.mutation({
       query: ({ id, data }) => ({
         url: `/addresses/facility/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: data,
       }),
       transformResponse: (res) => res,

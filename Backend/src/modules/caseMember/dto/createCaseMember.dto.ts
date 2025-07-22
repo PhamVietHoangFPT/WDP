@@ -33,6 +33,13 @@ export class CreateCaseMemberDto {
   service: string
 
   @ApiProperty({
+    example: '665b4f2a2ef540b5c6d6be3e',
+    description: 'ID của địa chỉ khách hàng',
+  })
+  @IsMongoId()
+  address: string
+
+  @ApiProperty({
     example: '',
     description: 'Lưu ý',
   })

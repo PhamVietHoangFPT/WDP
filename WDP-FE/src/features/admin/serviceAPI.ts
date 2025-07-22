@@ -11,7 +11,7 @@ const serviceAPI = apiSlice.injectEndpoints({
       providesTags: ['services'],
     }),
 
-    getFacilityDetail: builder.query({
+    getServiceDetail: builder.query({
       query: (id) => ({
         url: `/services/${id}`,
         method: 'GET',
@@ -20,7 +20,7 @@ const serviceAPI = apiSlice.injectEndpoints({
       providesTags: ['services'],
     }),
 
-    updateFacility: builder.mutation({
+    updateService: builder.mutation({
       query: ({ data, id }) => ({
         url: `/services/${id}`,
         method: 'PUT',
@@ -30,7 +30,7 @@ const serviceAPI = apiSlice.injectEndpoints({
       invalidatesTags: ['services'],
     }),
 
-    createFacility: builder.mutation({
+    createService: builder.mutation({
       query: ({ data }) => ({
         url: `/services`,
         method: 'POST',
@@ -44,7 +44,7 @@ const serviceAPI = apiSlice.injectEndpoints({
 
 export const {
   useGetServicesListQuery,
-  useGetFacilityDetailQuery,
-  useUpdateFacilityMutation,
-  useCreateFacilityMutation,
+  useGetServiceDetailQuery,
+  useUpdateServiceMutation,
+  useCreateServiceMutation,
 } = serviceAPI
