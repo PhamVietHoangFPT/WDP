@@ -5,6 +5,7 @@ import { PaymentDataDto } from './dto/PaymentData.dto'
 import { randomUUID } from 'crypto'
 import { PaymentServiceCaseDto } from './dto/serviceCase.dto'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
+import { PaymentConditionCaseDto } from './dto/condition.dto'
 @Injectable()
 export class VnpayService {
   constructor(
@@ -45,6 +46,28 @@ export class VnpayService {
     )
     const dataSend = {
       vnp_Amount: totalFee,
+      vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
+      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_CreateDate: dateFormat(createDate),
+      vnp_ExpireDate: dateFormat(expireDate),
+      vnp_IpAddr,
+      vnp_ReturnUrl,
+    }
+    return Promise.resolve(this.vnpayService.buildPaymentUrl(dataSend))
+  }
+
+  async getPaymentUrlForCondition(
+    PaymentData: PaymentConditionCaseDto,
+  ): Promise<string> {
+    const createDate = new Date()
+    const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
+    const vnp_IpAddr = '192.168.1.1'
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
+    const conditionFee = await this.serviceCaseRepository.getConditionFeeById(
+      PaymentData.serviceCaseId,
+    )
+    const dataSend = {
+      vnp_Amount: conditionFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
       vnp_TxnRef: PaymentData.serviceCaseId,
       vnp_CreateDate: dateFormat(createDate),

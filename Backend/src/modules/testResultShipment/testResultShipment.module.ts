@@ -1,12 +1,15 @@
-import { Module } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
-import { TestResultShipment, TestResultShipmentSchema } from "./schemas/testResultShipment.schema";
-import { AuthModule } from "../auth/auth.module";
-import { TestResultShipmentController } from "./testResultShipment.controller";
-import { ITestResultShipmentService } from "./interfaces/iTestResultShipment.service";
-import { TestResultShipmentService } from "./testResultShipment.service";
-import { ITestResultShipmentRepository } from "./interfaces/iTestResultShipment.repository";
-import { TestResultShipmentRepository } from "./testResultShipment.repository";
+import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
+import {
+  TestResultShipment,
+  TestResultShipmentSchema,
+} from './schemas/testResultShipment.schema'
+import { AuthModule } from '../auth/auth.module'
+import { TestResultShipmentController } from './testResultShipment.controller'
+import { ITestResultShipmentService } from './interfaces/iTestResultShipment.service'
+import { TestResultShipmentService } from './testResultShipment.service'
+import { ITestResultShipmentRepository } from './interfaces/iTestResultShipment.repository'
+import { TestResultShipmentRepository } from './testResultShipment.repository'
 
 @Module({
   imports: [
@@ -32,4 +35,4 @@ import { TestResultShipmentRepository } from "./testResultShipment.repository";
     MongooseModule,
   ],
 })
-export class TestResultShipmentModule { }
+export class TestResultShipmentModule {}

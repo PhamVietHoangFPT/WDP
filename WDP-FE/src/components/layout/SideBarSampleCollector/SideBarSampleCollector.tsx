@@ -8,6 +8,7 @@ import {
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
+  ExperimentOutlined
   // Thêm các icon khác nếu cần cho các mục menu khác
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
@@ -75,7 +76,7 @@ export const SideBar = () => {
     },
     {
       key: 'sample-collector/service-cases',
-      icon: <BarChartOutlined />,
+      icon: <ExperimentOutlined />,
       label: 'Quản trị mẫu thu ',
       onClick: () => navigate('sample-collector/service-cases'),
     },

@@ -9,7 +9,8 @@ import {
   UseGuards,
   Param,
   Patch, // <-- 1. Thay thế Put bằng Patch cho ngữ nghĩa đúng hơn
-  HttpCode, // <-- 2. Import HttpCode để trả về 201 Created
+  HttpCode,
+  Delete, // <-- 2. Import HttpCode để trả về 201 Created
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -32,6 +33,7 @@ import { RoleEnum } from 'src/common/enums/role.enum'
 import { UpdateAddressDto } from './dto/updateAddress.dto'
 import { UpdateFacilityAddressDto } from './dto/updateFacilityAddress.dto' // Giả sử bạn có DTO này
 import { CreateAddressFacilityDto } from './dto/createAddressFacility.dto'
+import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 
 @ApiTags('address')
 @Controller('addresses')
@@ -71,18 +73,57 @@ export class AddressController {
 
   @Get()
   @ApiOperation({ summary: 'Lấy tất cả địa chỉ' })
-  @ApiResponse({ status: HttpStatus.OK, type: [AddressResponseDto] })
-  async findAll(): Promise<AddressResponseDto[]> {
-    return this.addressService.findAll()
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [ApiResponseDto<AddressResponseDto>],
+  })
+  async findAll(@Req() req: any): Promise<ApiResponseDto<AddressResponseDto>> {
+    const userId: string = req.user?.id || req.user?._id
+    const data = await this.addressService.findAll(userId)
+    return {
+      data: data,
+      success: true,
+      message: 'Lấy danh sách địa chỉ thành công',
+      statusCode: HttpStatus.OK,
+    }
+  }
+
+  @Get('default')
+  @ApiOperation({ summary: 'Lấy địa chỉ mặc định của tài khoản' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ApiResponseDto<AddressResponseDto>,
+  })
+  async getDefaultAddress(
+    @Req() req: any,
+  ): Promise<ApiResponseDto<AddressResponseDto> | null> {
+    const userId: string = req.user?.id || req.user?._id
+    const data = await this.addressService.getDefaultAddressByAccount(userId)
+    return {
+      data: [data],
+      success: true,
+      message: 'Lấy địa chỉ mặc định thành công',
+      statusCode: HttpStatus.OK,
+    }
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy địa chỉ theo ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID của địa chỉ' })
-  @ApiResponse({ status: HttpStatus.OK, type: AddressResponseDto })
-  async findById(@Param('id') id: string): Promise<AddressResponseDto> {
-    return await this.addressService.findById(id)
-    // Bạn có thể trả về trực tiếp, hoặc gói trong ApiResponseDto như cũ
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ApiResponseDto<AddressResponseDto>,
+  })
+  async findById(
+    @Param('id') id: string,
+  ): Promise<ApiResponseDto<AddressResponseDto>> {
+    const data = await this.addressService.findById(id)
+    return {
+      data: [data],
+      success: true,
+      message: 'Lấy địa chỉ thành công',
+      statusCode: HttpStatus.OK,
+    }
   }
 
   @Patch(':id') // <-- 1. Đổi thành PATCH
@@ -114,5 +155,51 @@ export class AddressController {
     const userId = req.user?.id || req.user?._id
     // 6. Sửa lại chữ ký hàm gọi service cho đúng
     return this.addressService.updateFacilityAddress(id, userId, data)
+  }
+
+  @Patch('default/:addressId')
+  @ApiOperation({ summary: 'Cập nhật địa chỉ mặc định cho tài khoản' })
+  @ApiParam({ name: 'addressId', type: String, description: 'ID của địa chỉ' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ApiResponseDto<AddressResponseDto>,
+  })
+  async updateDefaultAddress(
+    @Req() req: any,
+    @Param('addressId') addressId: string,
+  ): Promise<ApiResponseDto<AddressResponseDto>> {
+    const userId: string = req.user?.id || req.user?._id
+    const data = await this.addressService.updateDefaultAddress(
+      userId,
+      addressId,
+    )
+    return {
+      data: [data],
+      success: true,
+      message: 'Cập nhật địa chỉ mặc định thành công',
+      statusCode: HttpStatus.OK,
+    }
+  }
+
+  @Delete(':id') // <-- 1. Đổi thành DELETE
+  @ApiOperation({ summary: 'Xóa địa chỉ theo ID' })
+  @ApiParam({ name: 'id', type: String, description: 'ID của địa chỉ' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Xóa địa chỉ thành công',
+    type: ApiResponseDto<boolean>,
+  })
+  async deleteAddressById(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<boolean> | null> {
+    const userId = req.user?.id || req.user?._id
+    const result = await this.addressService.deleteAddressById(id, userId)
+    return {
+      data: [result],
+      success: true,
+      message: 'Xóa địa chỉ thành công',
+      statusCode: HttpStatus.OK,
+    }
   }
 }

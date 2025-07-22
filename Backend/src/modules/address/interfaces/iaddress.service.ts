@@ -6,7 +6,7 @@ import { CreateAddressFacilityDto } from '../dto/createAddressFacility.dto'
 
 export interface IAddressService {
   create(dto: CreateAddressDto, userId: string): Promise<AddressResponseDto>
-  findAll(): Promise<AddressResponseDto[]>
+  findAll(account: string): Promise<AddressResponseDto[]>
   createForFacility(
     dto: CreateAddressFacilityDto,
     userId: string,
@@ -24,6 +24,14 @@ export interface IAddressService {
     userId: string,
     data: UpdateFacilityAddressDto,
   ): Promise<AddressResponseDto | null>
+  getDefaultAddressByAccount(
+    account: string,
+  ): Promise<AddressResponseDto | null>
+  updateDefaultAddress(
+    account: string,
+    addressId: string,
+  ): Promise<AddressResponseDto>
+  deleteAddressById(id: string, userId: string): Promise<boolean | null>
 }
 
 export const IAddressService = Symbol('IAddressService')

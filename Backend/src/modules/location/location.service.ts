@@ -1,40 +1,41 @@
-import { HttpService } from '@nestjs/axios'
 import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { lastValueFrom } from 'rxjs'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+// Import class schema chính
+import { Locations } from './schemas/location.schema'
 import { ProvinceDto } from './dto/province.dto'
-import { DistrictDto } from './dto/district.dto'
 import { WardDto } from './dto/ward.dto'
 
 @Injectable()
 export class LocationService {
-  private readonly baseUrl: string
-
+  // Chỉ cần inject một model duy nhất
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {
-    this.baseUrl = this.configService.get<string>('PROVINCE_API')
-  }
+    @InjectModel(Locations.name) private locationsModel: Model<Locations>,
+  ) {}
 
+  /**
+   * Lấy tất cả các tỉnh/thành phố
+   */
   async getProvinces(): Promise<ProvinceDto[]> {
-    const response = await lastValueFrom(
-      this.httpService.get(`${this.baseUrl}/p`),
-    )
-    return response.data as ProvinceDto[]
+    // Dùng projection `{ Wards: 0 }` để loại bỏ mảng Wards,
+    // giúp query nhẹ hơn rất nhiều.
+    return this.locationsModel.find({}, { Wards: 0 }).exec()
   }
 
-  async getDistrictsByProvinceCode(code: string): Promise<DistrictDto[]> {
-    const response = await lastValueFrom(
-      this.httpService.get(`${this.baseUrl}/p/${code}?depth=2`),
-    )
-    return response.data.districts as DistrictDto[]
-  }
+  /**
+   * Lấy các phường/xã theo mã tỉnh/thành phố
+   */
+  async getWardsByProvinceCode(provinceCode: string): Promise<WardDto[]> {
+    // 1. Tìm document của tỉnh/thành phố có mã tương ứng
+    const locationDoc = await this.locationsModel
+      .findOne({ Code: provinceCode })
+      .exec()
 
-  async getWardsByDistrictCode(code: string): Promise<WardDto[]> {
-    const response = await lastValueFrom(
-      this.httpService.get(`${this.baseUrl}/d/${code}?depth=2`),
-    )
-    return response.data.wards as WardDto[]
+    // 2. Nếu tìm thấy, trả về mảng Wards bên trong nó. Nếu không, trả về mảng rỗng.
+    if (locationDoc) {
+      return locationDoc.Wards
+    }
+
+    return []
   }
 }

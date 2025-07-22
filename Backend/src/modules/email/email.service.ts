@@ -41,6 +41,46 @@ export class EmailService implements IEmailService {
 
     return `${dayName}, ${day}/${month}/${year}`
   }
+  async sendPaymentRequestForCondition(
+    customerId: string,
+    doctorId: string,
+    paymentUrl: string,
+  ): Promise<void> {
+    const customerAccount = await this.accountModel
+      .findOne({
+        _id: customerId,
+      })
+      .select('email name -_id')
+      .exec()
+
+    const doctorAccount = await this.accountModel
+      .findOne({ _id: doctorId })
+      .select('name facility -_id')
+      .exec()
+
+    const facility = await this.facilityModel
+      .findOne({ _id: doctorAccount.facility })
+      .select('facilityName -_id')
+      .exec()
+
+    await this.mailerService.sendMail({
+      to: customerAccount.email,
+      subject: 'Thanh toán chi phí phát sinh',
+      template: 'payment-request', // Tên file template (ví dụ: result.hbs)
+      context: {
+        message: 'Đây là yêu cầu thanh toán chi phí phát sinh từ hệ thống.',
+        appName: this.APP_NAME,
+        customerName: customerAccount.name,
+        doctorName: doctorAccount
+          ? doctorAccount.name
+          : 'Bác sĩ không xác định',
+        facilityName: facility ? facility.facilityName : 'Cơ sở không xác định',
+        paymentUrl: paymentUrl,
+        currentYear: new Date().getFullYear(),
+      },
+    })
+    console.log(`Email kết quả đã được gửi đến ${customerAccount.email}`)
+  }
 
   async sendUserWelcomeEmail(email: string, name: string): Promise<void> {
     await this.mailerService.sendMail({

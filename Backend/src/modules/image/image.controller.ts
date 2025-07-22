@@ -35,7 +35,7 @@ export class ImageController {
   constructor(
     @Inject(IImageUploadService)
     private readonly uploadService: ImageUploadService,
-  ) { }
+  ) {}
 
   @Post('uploadForBlog')
   @UseGuards(AuthGuard)

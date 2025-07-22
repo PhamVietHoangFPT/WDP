@@ -18,7 +18,7 @@ export interface UpdateCompleteAddressData {
 
 export interface IAddressRepository {
   create(data: CreateCompleteAddressData): Promise<AddressDocument>
-  findAll(): Promise<AddressDocument[]>
+  findAll(account: string): Promise<AddressDocument[]>
   createForFacility(data: CreateCompleteAddressData): Promise<AddressDocument>
   updateAddressById(
     id: string,
@@ -29,6 +29,10 @@ export interface IAddressRepository {
     id: string,
     data: UpdateCompleteAddressData,
   ): Promise<AddressDocument | null>
+  getDefaultAddressByAccount(account: string): Promise<AddressDocument | null>
+  updateAllAddressToNotDefault(account: string): Promise<AddressDocument[]>
+  updateDefaultAddressById(id: string): Promise<AddressDocument | null>
+  deleteAddressById(id: string, userId: string): Promise<boolean | null>
 }
 
 export const IAddressRepository = Symbol('IAddressRepository')

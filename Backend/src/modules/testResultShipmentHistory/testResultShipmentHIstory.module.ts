@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import {
-    TestResultShipmentHistory,
-    TestResultShipmentHistorySchema,
+  TestResultShipmentHistory,
+  TestResultShipmentHistorySchema,
 } from './schemas/TestResultShipmentHistory.schema'
 import { TestResultShipmentHistoryController } from './TestResultShipmentHistory.controller'
 import { ITestResultShipmentHistoryService } from './interfaces/iTestResultShipmentHistory.service'
@@ -14,29 +14,32 @@ import { ShipmentStatusModule } from '../shipmentStatus/shipmentStatus.modules'
 import { TestResultShipmentModule } from '../testResultShipment/testResultShipment.module'
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: TestResultShipmentHistory.name, schema: TestResultShipmentHistorySchema },
-        ]),
-        AuthModule,
-        ShipmentStatusModule,
-        TestResultShipmentModule
-    ],
-    controllers: [TestResultShipmentHistoryController],
-    providers: [
-        {
-            provide: ITestResultShipmentHistoryRepository,
-            useClass: TestResultShipmentHistoryRepository,
-        },
-        {
-            provide: ITestResultShipmentHistoryService,
-            useClass: TestResultShipmentHistoryService,
-        },
-    ],
-    exports: [
-        ITestResultShipmentHistoryRepository,
-        ITestResultShipmentHistoryService,
-        MongooseModule,
-    ],
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: TestResultShipmentHistory.name,
+        schema: TestResultShipmentHistorySchema,
+      },
+    ]),
+    AuthModule,
+    ShipmentStatusModule,
+    TestResultShipmentModule,
+  ],
+  controllers: [TestResultShipmentHistoryController],
+  providers: [
+    {
+      provide: ITestResultShipmentHistoryRepository,
+      useClass: TestResultShipmentHistoryRepository,
+    },
+    {
+      provide: ITestResultShipmentHistoryService,
+      useClass: TestResultShipmentHistoryService,
+    },
+  ],
+  exports: [
+    ITestResultShipmentHistoryRepository,
+    ITestResultShipmentHistoryService,
+    MongooseModule,
+  ],
 })
-export class TestResultShipmentHistoryModule { }
+export class TestResultShipmentHistoryModule {}

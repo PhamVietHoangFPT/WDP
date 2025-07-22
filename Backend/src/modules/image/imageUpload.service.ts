@@ -21,7 +21,7 @@ export class ImageUploadService implements IImageUploadService {
     private readonly blogRepository: IBlogRepository,
     @Inject(IKitShipmentRepository)
     private readonly kitShipmentRepository: IKitShipmentRepository,
-  ) { }
+  ) {}
 
   async uploadFileForBlog(
     file: Express.Multer.File,
@@ -60,7 +60,9 @@ export class ImageUploadService implements IImageUploadService {
     createImageKitShipmentDto: CreateImageKitShipmentDto,
     userId: string,
   ): Promise<{ url: string; _id: string }> {
-    const kitShipment = await this.kitShipmentRepository.findById(createImageKitShipmentDto.kitShipment)
+    const kitShipment = await this.kitShipmentRepository.findById(
+      createImageKitShipmentDto.kitShipment,
+    )
     if (!kitShipment) {
       throw new NotFoundException('Kit shipment không tồn tại')
     }
@@ -75,11 +77,12 @@ export class ImageUploadService implements IImageUploadService {
 
     const url = `/uploads/${fileName}`
 
-    const saved: ImageDocument = await this.imageModel.createImageForKitShipmemt(
-      url,
-      createImageKitShipmentDto,
-      userId,
-    )
+    const saved: ImageDocument =
+      await this.imageModel.createImageForKitShipmemt(
+        url,
+        createImageKitShipmentDto,
+        userId,
+      )
 
     return {
       url: saved.url,
@@ -92,7 +95,9 @@ export class ImageUploadService implements IImageUploadService {
     createImageResultDto: CreateImageResultDto,
     userId: string,
   ): Promise<{ url: string; _id: string }> {
-    const kitShipment = await this.kitShipmentRepository.findById(createImageResultDto.result)
+    const kitShipment = await this.kitShipmentRepository.findById(
+      createImageResultDto.result,
+    )
     if (!kitShipment) {
       throw new NotFoundException('Result không tồn tại')
     }
