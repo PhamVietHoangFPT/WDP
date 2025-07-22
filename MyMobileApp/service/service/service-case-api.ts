@@ -75,3 +75,32 @@ export const createServiceCaseTest = async (data: any) => {
   if (!response.ok) throw new Error("Lỗi khi tạo service case test");
   return response.json();
 };
+
+export const getTestRequestHistories = async ({
+  accountId,
+  serviceCaseId,
+  pageNumber = 1,
+  pageSize = 10,
+}: {
+  accountId: string;
+  serviceCaseId: string;
+  pageNumber?: number;
+  pageSize?: number;
+}) => {
+  const headers = await getAuthHeader();
+  const url = new URL(`${API_BASE_URL}/test-request-histories`);
+  url.searchParams.append("accountId", accountId);
+  url.searchParams.append("serviceCaseId", serviceCaseId);
+  url.searchParams.append("pageNumber", pageNumber.toString());
+  url.searchParams.append("pageSize", pageSize.toString());
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+  });
+
+  if (!response.ok) throw new Error("Lỗi khi lấy lịch sử xét nghiệm ADN");
+  return response.json();
+};

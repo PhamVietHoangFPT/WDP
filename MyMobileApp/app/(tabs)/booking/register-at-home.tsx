@@ -178,7 +178,15 @@ export default function RegisterServiceAtHome() {
           }
         );
 
+        // Sắp xếp theo khoảng cách tăng dần, facilities không có distance được đẩy cuối
+        facilitiesWithDistance.sort((a, b) => {
+          if (typeof a.distance !== "number") return 1;
+          if (typeof b.distance !== "number") return -1;
+          return a.distance - b.distance;
+        });
+
         setFacilities(facilitiesWithDistance);
+
         setAvailableTestTakers(testTakersRes.data || []);
       } catch (error) {
         Alert.alert("Lỗi", "Không thể tải dữ liệu cần thiết.");
@@ -205,6 +213,14 @@ export default function RegisterServiceAtHome() {
       }
       return facility;
     });
+
+    // Sắp xếp lại theo khoảng cách
+    updatedFacilities.sort((a, b) => {
+      if (typeof a.distance !== "number") return 1;
+      if (typeof b.distance !== "number") return -1;
+      return a.distance - b.distance;
+    });
+
     setFacilities(updatedFacilities);
   }, [userLocation]);
 
