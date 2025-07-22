@@ -28,6 +28,7 @@ import { createServiceCase } from "@/service/service/service-case-api";
 import { createVNPayServicePayment } from "@/service/customerApi/vnpay-api";
 import { getServiceById } from "@/service/service/service-api";
 import { Ionicons } from "@expo/vector-icons";
+import NotLoggedIn from "@/app/NotLoggedIn";
 
 // Define Token Payload interface
 interface TokenPayload {
@@ -95,22 +96,23 @@ export default function RegisterServiceAtHome() {
 
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasToken, setHasToken] = useState<boolean | null>(null);
 
   // Initial Fetch
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const accountId = await getAccountIdFromToken(); // Lấy user đang đăng nhập
-        if (!accountId) {
-          Alert.alert("Lỗi", "Không xác định được người dùng.");
-          return;
-        }
+      const accountId = await getAccountIdFromToken();
+      if (!accountId) {
+        setHasToken(false);
+        return;
+      }
+      setHasToken(true);
 
+      try {
         const [facilitiesRes, testTakersRes] = await Promise.all([
           getFacilities(),
-          getTestTakers(accountId), // CHỈ lấy test-taker thuộc user
+          getTestTakers(accountId),
         ]);
-
         setFacilities(facilitiesRes.data || []);
         setAvailableTestTakers(testTakersRes.data || []);
       } catch (error) {
@@ -118,9 +120,12 @@ export default function RegisterServiceAtHome() {
         Alert.alert("Lỗi", "Không thể tải dữ liệu cần thiết.");
       }
     };
-
     fetchData();
   }, []);
+
+  if (hasToken === false) {
+    return <NotLoggedIn />;
+  }
 
   // Handlers
   const handleFacilityChange = (facilityId: string | null) => {
