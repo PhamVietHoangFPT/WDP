@@ -5,7 +5,9 @@ import Cookies from "js-cookie" // Import Cookies nếu account ID được lưu
 import {
   useGetAddressesQuery,
   useSetDefaultAddressMutation,
-  useCreateAddressMutation, // Import mutation để tạo địa chỉ mới
+  useCreateAddressMutation,
+  useUpdateAddressMutation, // Import mutation để cập nhật địa chỉ
+  useDeleteAddressMutation, // Import mutation để xóa địa chỉ
 } from "../../features/address/addressAPI"
 import {
   useGetProvinceListQuery, // Import query để lấy danh sách tỉnh
@@ -26,6 +28,7 @@ import {
   Form, // Import Form
   Input, // Import Input
   Select, // Import Select
+  Popconfirm, // Import Popconfirm cho xác nhận xóa
 } from "antd"
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined } from "@ant-design/icons"
 
@@ -33,10 +36,14 @@ export default function ManageAddress() {
   // 2. Gọi API để lấy dữ liệu địa chỉ hiện có
   const { data, isLoading, isError, refetch } = useGetAddressesQuery({})
   const [setDefaultAddress, { isLoading: isUpdating }] = useSetDefaultAddressMutation()
-  const [createAddress, { isLoading: isCreating }] = useCreateAddressMutation() // Khởi tạo mutation tạo địa chỉ
+  const [createAddress, { isLoading: isCreating }] = useCreateAddressMutation()
+  const [updateAddress, { isLoading: isUpdatingAddress }] = useUpdateAddressMutation()
+  const [deleteAddress, { isLoading: isDeleting }] = useDeleteAddressMutation()
 
   const [updatingId, setUpdatingId] = useState(null)
   const [isModalVisible, setIsModalVisible] = useState(false) // State để quản lý Modal
+  const [isEditMode, setIsEditMode] = useState(false) // State để phân biệt tạo mới hay chỉnh sửa
+  const [editingAddress, setEditingAddress] = useState(null) // State lưu địa chỉ đang chỉnh sửa
   const [form] = Form.useForm() // Khởi tạo form instance
 
   // States cho Dropdown Tỉnh/Thành, Phường/Xã
@@ -104,33 +111,47 @@ export default function ManageAddress() {
     form.resetFields() // Reset form khi mở modal
     setSelectedProvinceCode(null) // Reset tỉnh/thành đã chọn
     setFullAddressDisplay("") // Reset hiển thị địa chỉ đầy đủ
+    setIsEditMode(false) // Đặt về chế độ tạo mới
+    setEditingAddress(null) // Reset địa chỉ đang chỉnh sửa
+    setIsModalVisible(true)
+  }
+
+  // Hàm xử lý khi mở Modal "Chỉnh sửa địa chỉ"
+  const handleEditAddressClick = (address) => {
+    setIsEditMode(true) // Đặt về chế độ chỉnh sửa
+    setEditingAddress(address) // Lưu địa chỉ đang chỉnh sửa
+
+    // Parse địa chỉ hiện tại để lấy thông tin
+    const addressParts = address.fullAddress.split(", ")
+    const street = addressParts[0] || ""
+
+    // Tìm province và ward từ dữ liệu hiện có
+    const currentProvince = provincesData?.find((p) => address.province_name?.includes(p.FullName))
+    const provinceCode = currentProvince?.Code || address.province_code
+
+    setSelectedProvinceCode(provinceCode)
+
+    // Set form values
+    form.setFieldsValue({
+      street: street,
+      province_code: provinceCode,
+      ward_code: address.ward_code,
+    })
+
+    setFullAddressDisplay(address.fullAddress)
     setIsModalVisible(true)
   }
 
   // Hàm xử lý khi đóng Modal
   const handleCancelModal = () => {
     setIsModalVisible(false)
+    setIsEditMode(false)
+    setEditingAddress(null)
   }
 
-  // Hàm xử lý khi gửi form tạo địa chỉ mới
-  const handleCreateAddress = async (values) => {
+  // Hàm xử lý khi gửi form (tạo mới hoặc cập nhật)
+  const handleSubmitAddress = async (values) => {
     try {
-      // --- Lấy account ID từ cookie (hoặc nơi khác) ---
-      // Giả định account ID được lưu trong cookie dưới tên 'accountId'
-      // Mày cần thay thế bằng cách lấy ID thực tế của mày
-      const userDataString = Cookies.get('userData')
-  let userData = {}
-  if (userDataString) {
-    try {
-      // Decode URI component trước khi parse JSON
-      userData = JSON.parse(decodeURIComponent(userDataString))
-    } catch (error) {
-      console.error('Lỗi khi parse userData từ cookie:', error)
-    }
-  }
-  const accountId = userData.id
-      // --- Kết thúc lấy account ID ---
-
       // Logic để lấy tên tỉnh/phường từ code
       const selectedProvince = provincesData?.find((p) => p.Code === values.province_code)
       const selectedWard = wardsData?.find((w) => w.Code === values.ward_code)
@@ -139,7 +160,6 @@ export default function ManageAddress() {
       const displayParts = []
       if (values.street) displayParts.push(values.street)
       if (selectedWard) displayParts.push(selectedWard.FullName)
-      // Nếu có district, thêm district_name vào đây (chưa có trong API Location của mày)
       if (selectedProvince) displayParts.push(selectedProvince.FullName)
 
       const generatedFullAddress = displayParts.join(", ")
@@ -150,19 +170,50 @@ export default function ManageAddress() {
         province_name: selectedProvince ? selectedProvince.FullName : "",
         ward_code: values.ward_code,
         ward_name: selectedWard ? selectedWard.FullName : "",
-        // district_code: values.district_code, // Thêm nếu có
-        // district_name: selectedDistrict ? selectedDistrict.name : '', // Thêm nếu có
-        fullAddress: generatedFullAddress, // Gửi fullAddress đã được tạo
-        isKitShippingAddress: false, // Mặc định là false khi tạo mới
-        account: accountId, // Gán account ID
+        fullAddress: generatedFullAddress,
+        isKitShippingAddress: false,
       }
 
-      const payload = await createAddress(addressData).unwrap()
-      message.success(payload.message || "Thêm địa chỉ mới thành công!")
-      setIsModalVisible(false) // Đóng modal sau khi tạo thành công
-      refetch() // Làm mới danh sách địa chỉ để thấy địa chỉ mới
+      if (isEditMode && editingAddress) {
+        // Cập nhật địa chỉ
+        const payload = await updateAddress({
+          id: editingAddress._id,
+          data: addressData,
+        }).unwrap()
+        message.success(payload.message || "Cập nhật địa chỉ thành công!")
+      } else {
+        // Tạo địa chỉ mới
+        const userDataString = Cookies.get("userData")
+        let userData = {}
+        if (userDataString) {
+          try {
+            userData = JSON.parse(decodeURIComponent(userDataString))
+          } catch (error) {
+            console.error("Lỗi khi parse userData từ cookie:", error)
+          }
+        }
+        const accountId = userData.id
+
+        addressData.account = accountId
+        const payload = await createAddress(addressData).unwrap()
+        message.success(payload.message || "Thêm địa chỉ mới thành công!")
+      }
+
+      setIsModalVisible(false) // Đóng modal sau khi thành công
+      refetch() // Làm mới danh sách địa chỉ
     } catch (err) {
-      message.error(err.data?.message || "Có lỗi xảy ra khi thêm địa chỉ.")
+      message.error(err.data?.message || "Có lỗi xảy ra khi xử lý địa chỉ.")
+    }
+  }
+
+  // Hàm xử lý xóa địa chỉ
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      const payload = await deleteAddress(addressId).unwrap()
+      message.success(payload.message || "Xóa địa chỉ thành công!")
+      refetch() // Làm mới danh sách địa chỉ
+    } catch (err) {
+      message.error(err.data?.message || "Có lỗi xảy ra khi xóa địa chỉ.")
     }
   }
 
@@ -176,10 +227,6 @@ export default function ManageAddress() {
 
     const selectedWard = wardsData?.find((w) => w.Code === ward_code)
     if (selectedWard) displayParts.push(selectedWard.FullName)
-
-    // Nếu có district, thêm district_name vào đây
-    // const selectedDistrict = districtsData?.data?.find(d => d.code === district_code);
-    // if (selectedDistrict) displayParts.push(selectedDistrict.name);
 
     const selectedProvince = provincesData?.find((p) => p.Code === province_code)
     if (selectedProvince) displayParts.push(selectedProvince.FullName)
@@ -241,10 +288,19 @@ export default function ManageAddress() {
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Chỉnh sửa">
-            <Button type="text" icon={<EditOutlined />} />
+            <Button type="text" icon={<EditOutlined />} onClick={() => handleEditAddressClick(record)} />
           </Tooltip>
           <Tooltip title="Xóa">
-            <Button type="text" danger icon={<DeleteOutlined />} />
+            <Popconfirm
+              title="Xác nhận xóa"
+              description="Bạn có chắc chắn muốn xóa địa chỉ này?"
+              onConfirm={() => handleDeleteAddress(record._id)}
+              okText="Xóa"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true, loading: isDeleting }}
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} disabled={record.isKitShippingAddress} />
+            </Popconfirm>
           </Tooltip>
         </Space>
       ),
@@ -265,13 +321,13 @@ export default function ManageAddress() {
       </Card>
 
       <Modal
-        title="Thêm địa chỉ mới"
+        title={isEditMode ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}
         open={isModalVisible}
         onCancel={handleCancelModal}
         footer={null}
         destroyOnClose={true}
       >
-        <Form form={form} layout="vertical" onFinish={handleCreateAddress} onValuesChange={updateFullAddressDisplay}>
+        <Form form={form} layout="vertical" onFinish={handleSubmitAddress} onValuesChange={updateFullAddressDisplay}>
           <Form.Item
             name="street"
             label="Địa chỉ cụ thể (Số nhà, đường, hẻm)"
@@ -300,28 +356,6 @@ export default function ManageAddress() {
               ))}
             </Select>
           </Form.Item>
-
-          {/* Nếu có API cho quận/huyện, sẽ thêm ở đây */}
-          {/* <Form.Item
-            name='district_code'
-            label='Quận/Huyện'
-            rules={[{ required: true, message: 'Vui lòng chọn Quận/Huyện!' }]}
-          >
-            <Select
-              placeholder='Chọn Quận/Huyện'
-              showSearch
-              optionFilterProp="children"
-              loading={districtsData?.isLoading}
-              onChange={(value) => setSelectedDistrictCode(value)}
-              disabled={!selectedProvinceCode} // Chỉ cho phép chọn khi có tỉnh
-            >
-              {districtsData?.data?.map((district) => (
-                <Select.Option key={district.code} value={district.code}>
-                  {district.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item> */}
 
           <Form.Item
             name="ward_code"
@@ -352,8 +386,8 @@ export default function ManageAddress() {
           <Form.Item>
             <Space>
               <Button onClick={handleCancelModal}>Hủy</Button>
-              <Button type="primary" htmlType="submit" loading={isCreating}>
-                Thêm địa chỉ
+              <Button type="primary" htmlType="submit" loading={isEditMode ? isUpdatingAddress : isCreating}>
+                {isEditMode ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}
               </Button>
             </Space>
           </Form.Item>
