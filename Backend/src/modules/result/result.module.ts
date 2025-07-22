@@ -9,6 +9,7 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 import { AuthModule } from '../auth/auth.module'
 import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
 import { EmailModule } from '../email/email.module'
+import { ResultController } from './result.controller'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EmailModule } from '../email/email.module'
     TestRequestStatusModule,
     EmailModule,
   ],
+  controllers: [ResultController],
   providers: [
     {
       provide: IResultService,

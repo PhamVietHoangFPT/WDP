@@ -53,9 +53,9 @@ export class ServiceCaseService implements IServiceCaseService {
       shippingFee: serviceCase.shippingFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
-
       condition: serviceCase.condition,
       created_at: serviceCase.created_at,
+      result: serviceCase.result,
     })
   }
 

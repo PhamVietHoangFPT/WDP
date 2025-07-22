@@ -13,6 +13,7 @@ import { ResultDocument } from './schemas/result.schema'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { IEmailService } from '../email/interfaces/iemail.service'
+import { isMongoId } from 'class-validator'
 @Injectable()
 export class ResultService implements IResultService {
   constructor(
@@ -35,7 +36,11 @@ export class ResultService implements IResultService {
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         createResultDto.serviceCase.toString(),
       )
-
+    const isPaymentRequired =
+      await this.serviceCaseRepository.checkPaidForCondition(
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        createResultDto.serviceCase.toString(),
+      )
     const currentOrderStatus =
       await this.testRequestStatusRepository.getTestRequestStatusOrder(
         currentStatusOfServiceCase,
@@ -71,17 +76,23 @@ export class ResultService implements IResultService {
         doctorId,
       )
     const data = await this.resultRepository.create(createResultDto)
-    await this.emailService.sendEmailForResult(
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      serviceCaseData.account.toString(),
-      data.adnPercentage,
-      doctorId,
-      data.conclusion,
-    )
+    if (isPaymentRequired === false) {
+      await this.emailService.sendEmailForResult(
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        serviceCaseData.account.toString(),
+        data.adnPercentage,
+        doctorId,
+        data.conclusion,
+      )
+    }
     return data
   }
 
   async findById(id: string): Promise<ResultDocument | null> {
+    if (isMongoId(id) === false) {
+      throw new NotFoundException(`ID không hợp lệ: ${id}.`)
+    }
+
     const data = await this.resultRepository.findById(id)
     if (!data) {
       throw new NotFoundException('Không tìm thấy kết quả nào.')
@@ -114,5 +125,41 @@ export class ResultService implements IResultService {
     }
 
     return this.resultRepository.update(id, updateResultDto)
+  }
+
+  async findByIdForCustomer(id: string): Promise<ResultDocument | null> {
+    if (isMongoId(id) === false) {
+      throw new NotFoundException(`ID không hợp lệ: ${id}.`)
+    }
+
+    // Sử dụng tên hàm mới rõ ràng hơn
+    const isPaymentRequired =
+      await this.serviceCaseRepository.checkPaidForCondition(id)
+
+    // Xử lý tường minh các trường hợp trả về
+    switch (isPaymentRequired) {
+      case true:
+        // Case 1: Cần thanh toán -> Chặn truy cập
+        throw new ForbiddenException(
+          'Bạn cần thanh toán chi phí phát sinh trước khi xem kết quả.',
+        )
+
+      case null:
+        // Case 2: Không tìm thấy hồ sơ dịch vụ -> Có thể là lỗi hoặc trường hợp đặc biệt
+        // Tùy vào logic của bạn, bạn có thể chặn hoặc cho qua. Ở đây ta chặn để đảm bảo an toàn.
+        throw new NotFoundException(
+          'Không tìm thấy hồ sơ dịch vụ tương ứng với kết quả này.',
+        )
+
+      case false:
+        // Case 3: Không cần thanh toán -> Tiếp tục thực thi
+        break
+    }
+
+    const data = await this.resultRepository.findById(id)
+    if (!data) {
+      throw new NotFoundException('Không tìm thấy kết quả nào.')
+    }
+    return data
   }
 }
