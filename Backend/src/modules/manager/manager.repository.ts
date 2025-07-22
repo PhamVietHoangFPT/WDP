@@ -180,16 +180,13 @@ export class ManagerRepository implements IManagerRepository {
   async getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
+    bookingDate: string,
   ): Promise<ServiceCase[]> {
-    const serviceCaseStatus =
-      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
-        'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)',
-      )
+    const bookingDateConvert = new Date(bookingDate)
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
           sampleCollector: null,
-          currentStatus: new Types.ObjectId(serviceCaseStatus),
         },
       },
       // Ket noi voi casemembers
@@ -239,6 +236,11 @@ export class ManagerRepository implements IManagerRepository {
       // Mo mang bookings
       {
         $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          'bookings.bookingDate': bookingDateConvert, // Lọc theo ngày đặt lịch
+        },
       },
       // Ket noi voi slots
       {
@@ -351,16 +353,13 @@ export class ManagerRepository implements IManagerRepository {
 
   async getAllServiceCaseWithoutDoctor(
     facilityId: string,
+    bookingDate: string,
   ): Promise<ServiceCase[]> {
-    const serviceCaseStatus =
-      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
-        'Đã nhận mẫu',
-      )
+    const bookingDateConvert = new Date(bookingDate)
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
           doctor: null,
-          currentStatus: new Types.ObjectId(serviceCaseStatus),
         },
       },
       // Ket noi voi casemembers
@@ -404,6 +403,11 @@ export class ManagerRepository implements IManagerRepository {
       // Mo mang bookings
       {
         $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          'bookings.bookingDate': bookingDateConvert, // Lọc theo ngày đặt lịch
+        },
       },
       // Ket noi voi slots
       {

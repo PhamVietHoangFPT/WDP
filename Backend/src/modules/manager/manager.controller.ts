@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common'
@@ -18,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger'
 
 import { IManagerService } from './interfaces/imanager.service'
@@ -68,6 +70,7 @@ export class ManagerController {
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
+  @ApiQuery({ name: 'bookingDate', required: true, type: String })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Danh sách bác sĩ',
@@ -111,15 +114,22 @@ export class ManagerController {
     }
   }
 
-  @Get('service-cases-without-sample-collector/:isAtHome')
+  @Get('service-cases-without-sample-collector')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ chưa có nhân viên lấy mẫu' })
-  @ApiParam({
+  @ApiQuery({
     name: 'isAtHome',
     description: 'Lọc hồ sơ tại nhà (true) hoặc tại cơ sở (false)',
     required: false,
     type: Boolean,
+  })
+  @ApiQuery({
+    name: 'bookingDate',
+    required: true,
+    type: String,
+    description: 'Ngày đặt lịch ở định dạng YYYY-MM-DD',
+    example: '2025-07-22',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -129,13 +139,15 @@ export class ManagerController {
   })
   async getAllServiceCasesWithoutSampleCollector(
     @Req() req: any,
-    @Param('isAtHome') isAtHome: boolean = true, // Default to true if not provided
+    @Query('isAtHome') isAtHome: boolean = true,
+    @Query('bookingDate') bookingDate: string, // Default to true if not provided
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
     const facilityId = req.user.facility._id
     const data =
       await this.managerService.getAllServiceCasesWithoutSampleCollector(
         facilityId,
         isAtHome,
+        bookingDate,
       )
     return {
       statusCode: HttpStatus.OK,
@@ -149,12 +161,22 @@ export class ManagerController {
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa có bác sĩ' })
+  @ApiQuery({
+    name: 'bookingDate',
+    required: true,
+    type: String,
+    description: 'Ngày đặt lịch ở định dạng YYYY-MM-DD',
+    example: '2025-07-22',
+  })
   async getAllServiceCaseWithoutDoctor(
     @Req() req: any,
+    @Query('bookingDate') bookingDate: string,
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
     const facilityId = req.user.facility._id
-    const data =
-      await this.managerService.getAllServiceCaseWithoutDoctor(facilityId)
+    const data = await this.managerService.getAllServiceCaseWithoutDoctor(
+      facilityId,
+      bookingDate,
+    )
     return {
       data: data.map((item) => new ServiceCaseResponseDto(item)),
       statusCode: HttpStatus.OK,
