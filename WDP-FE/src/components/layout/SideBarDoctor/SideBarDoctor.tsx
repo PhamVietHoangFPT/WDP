@@ -76,7 +76,7 @@ export const SideBar = () => {
     },
     {
       key: 'doctor/service-cases-without-results', // Đảm bảo key khớp với path
-      icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
+      icon: <MenuUnfoldOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
       label: 'Hồ sơ chưa có kết quả',
       onClick: () => navigate('doctor/service-cases-without-results'),
     },
