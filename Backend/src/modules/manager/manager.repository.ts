@@ -183,10 +183,42 @@ export class ManagerRepository implements IManagerRepository {
     bookingDate: string,
   ): Promise<ServiceCase[]> {
     const bookingDateConvert = new Date(bookingDate)
+    const headOrderValue = 2
+    const tailOrderValue = 12
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
           sampleCollector: null,
+        },
+      },
+      {
+        $lookup: {
+          from: 'testrequeststatuses',
+          let: { statusId: '$currentStatus' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$statusId'],
+                },
+              },
+            },
+          ],
+          as: 'testRequestStatuses',
+        },
+      },
+      {
+        $unwind: {
+          path: '$testRequestStatuses',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          'testRequestStatuses.order': {
+            $gte: headOrderValue,
+            $lte: tailOrderValue,
+          }, // Lọc theo order >= 2 và <= 12
         },
       },
       // Ket noi voi casemembers
@@ -340,6 +372,7 @@ export class ManagerRepository implements IManagerRepository {
             email: '$accounts.email',
             phoneNumber: '$accounts.phoneNumber',
           },
+          currentStatus: '$testRequestStatuses.testRequestStatus',
           bookingDate: '$bookings.bookingDate',
           bookingTime: '$slots.startTime',
           facility: {
@@ -356,10 +389,42 @@ export class ManagerRepository implements IManagerRepository {
     bookingDate: string,
   ): Promise<ServiceCase[]> {
     const bookingDateConvert = new Date(bookingDate)
+    const headOrderValue = 2 // Giá trị order để lọc
+    const tailOrderValue = 11 // Giá trị order để lọc
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
           doctor: null,
+        },
+      },
+      {
+        $lookup: {
+          from: 'testrequeststatuses',
+          let: { statusId: '$currentStatus' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$statusId'],
+                },
+              },
+            },
+          ],
+          as: 'testRequestStatuses',
+        },
+      },
+      {
+        $unwind: {
+          path: '$testRequestStatuses',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          'testRequestStatuses.order': {
+            $gte: headOrderValue,
+            $lte: tailOrderValue,
+          }, // Lọc theo order >= 2 và <= 12
         },
       },
       // Ket noi voi casemembers
@@ -507,6 +572,7 @@ export class ManagerRepository implements IManagerRepository {
             email: '$accounts.email',
             phoneNumber: '$accounts.phoneNumber',
           },
+          currentStatus: '$testRequestStatuses.testRequestStatus',
           bookingDate: '$bookings.bookingDate',
           bookingTime: '$slots.startTime',
           facility: {
