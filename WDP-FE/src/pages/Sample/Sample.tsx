@@ -259,6 +259,12 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
 
+  // Hàm để disable các ngày trước ngày hiện tại
+  const disabledDate = (current: moment.Moment) => {
+    // Không cho phép chọn ngày trước ngày hiện tại
+    return current && current < moment().endOf('day');
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý dịch vụ chưa có nhân viên lấy mẫu</Title>
@@ -294,6 +300,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             style={{ width: 180 }}
             allowClear
             suffixIcon={<CalendarOutlined />}
+            disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
           />
         </div>
 
@@ -336,6 +343,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             rowKey='_id'
             pagination={false}
             loading={isFetchingServices}
+            scroll={{ x: 'max-content' }}
             locale={{
               emptyText: isAtHome
                 ? 'Không có dịch vụ tại nhà nào chưa được gán nhân viên lấy mẫu'
@@ -358,6 +366,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} của ${total} dịch vụ`
               }
+              pageSizeOptions={["5", "10", "20"]}
             />
           )}
         </>
