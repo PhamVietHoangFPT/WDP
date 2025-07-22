@@ -165,11 +165,11 @@ export default function ManageAddress() {
       const generatedFullAddress = displayParts.join(", ")
 
       const addressData = {
-        street: values.street,
-        province_code: values.province_code,
-        province_name: selectedProvince ? selectedProvince.FullName : "",
-        ward_code: values.ward_code,
-        ward_name: selectedWard ? selectedWard.FullName : "",
+        // street: values.street,
+        // province_code: values.province_code,
+        // province_name: selectedProvince ? selectedProvince.FullName : "",
+        // ward_code: values.ward_code,
+        // ward_name: selectedWard ? selectedWard.FullName : "",
         fullAddress: generatedFullAddress,
         isKitShippingAddress: false,
       }
