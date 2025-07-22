@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -33,15 +34,56 @@ import { RoleEnum } from 'src/common/enums/role.enum'
 import { IDoctorService } from './interfaces/idoctor.service'
 import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
 import { TestRequestStatus } from '../testRequestStatus/schemas/testRequestStatus.schema'
+import { IServiceCaseService } from '../serviceCase/interfaces/iserviceCase.service'
 @ApiTags('doctors')
 @Controller('doctors')
 @ApiBearerAuth()
 export class DoctorController {
   constructor(
     @Inject(IResultService) private readonly resultService: IResultService,
+    @Inject(IServiceCaseService)
+    private readonly serviceCaseService: IServiceCaseService,
     @Inject(IDoctorService)
     private readonly doctorService: IDoctorService,
   ) {}
+
+  @Patch('/serviceCase/:id/condition/:condition')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Cập nhật condition của hồ sơ dịch vụ' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: 'ID của hồ sơ dịch vụ cần cập nhật',
+  })
+  @ApiParam({
+    name: 'condition',
+    required: true,
+    type: String,
+    description: 'Condition mới của hồ sơ dịch vụ',
+  })
+  @ApiResponse({ status: 200, type: ApiResponseDto<ServiceCaseResponseDto> })
+  async updateCondition(
+    @Param('id') id: string,
+    @Param('condition') condition: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto> | null> {
+    const doctorId = req.user.id
+    const updatedServiceCase = await this.serviceCaseService.updateCondition(
+      id,
+      condition,
+      doctorId,
+    )
+    if (!updatedServiceCase) {
+      return null
+    }
+    return {
+      message: 'Cập nhật trạng thái hiện tại thành công',
+      data: [updatedServiceCase],
+      statusCode: 200,
+      success: true,
+    }
+  }
 
   @Post('/results')
   @ApiOperation({ summary: 'Tạo kết quả mới' })

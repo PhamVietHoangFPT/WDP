@@ -1,7 +1,6 @@
 import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 
@@ -72,7 +71,6 @@ export default function ServiceCase() {
 
   return (
     <div>
-      <HeaderCus />
       <Card style={{ margin: '40px auto' }}>
         <Title level={3}>Lịch sử trường hợp dịch vụ</Title>
         <Table

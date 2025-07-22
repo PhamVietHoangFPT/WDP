@@ -166,9 +166,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       const fetchNames = async () => {
         const namesPromises = selectedServiceCase.caseMember.testTaker.map(
           async (id) => {
-            const { data: testTaker, error } = await useGetTestTakerQuery(
-              id
-            ).unwrap() // Using unwrap() to get the actual data or throw error
+            const { data: testTaker, error } =
+              await useGetTestTakerQuery(id).unwrap() // Using unwrap() to get the actual data or throw error
             if (error) {
               console.error(`Error fetching test taker ${id}:`, error)
               return id.slice(-8).toUpperCase()

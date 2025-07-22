@@ -18,7 +18,6 @@ import { UpdateFacilityAddressDto } from './dto/updateFacilityAddress.dto'
 import { Address, Point } from './schemas/address.schema'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
-import { CreateAddressFacilityDto } from './dto/createAddressFacility.dto'
 @Injectable()
 export class AddressService implements IAddressService {
   constructor(
@@ -80,9 +79,18 @@ export class AddressService implements IAddressService {
   // Chúng chỉ gọi đến hàm private `getCoordinatesFromAddress`, nên không cần sửa gì cả.
 
   async create(
-    dto: CreateAddressFacilityDto,
+    dto: CreateAddressDto,
     userId: string,
   ): Promise<AddressResponseDto> {
+    if (dto.isKitShippingAddress) {
+      const existingDefault = await this.addressRepo.getDefaultAddressByAccount(
+        dto.account,
+      )
+      if (existingDefault) {
+        // Nếu đã có địa chỉ mặc định, cập nhật nó thành không mặc định
+        await this.addressRepo.updateAllAddressToNotDefault(dto.account)
+      }
+    }
     const location = await this.getCoordinatesFromAddress(dto.fullAddress)
     const completeData: CreateCompleteAddressData = {
       ...dto,
@@ -115,6 +123,15 @@ export class AddressService implements IAddressService {
     const updatePayload: UpdateCompleteAddressData = {
       ...data,
       updated_by: userId,
+    }
+    if (data.isKitShippingAddress) {
+      const existingDefault = await this.addressRepo.getDefaultAddressByAccount(
+        data.account,
+      )
+      if (existingDefault) {
+        // Nếu đã có địa chỉ mặc định, cập nhật nó thành không mặc định
+        await this.addressRepo.updateAllAddressToNotDefault(data.account)
+      }
     }
     if (data.fullAddress && data.fullAddress.trim() !== '') {
       updatePayload.location = await this.getCoordinatesFromAddress(
@@ -152,13 +169,49 @@ export class AddressService implements IAddressService {
   }
 
   // Các hàm còn lại đã đúng
-  async findAll(): Promise<AddressResponseDto[]> {
-    const data = await this.addressRepo.findAll()
+  async findAll(account: string): Promise<AddressResponseDto[]> {
+    const data = await this.addressRepo.findAll(account)
     return data.map((item) => this.mapToResponseDto(item))
   }
   async findById(id: string): Promise<AddressResponseDto> {
     const address = await this.addressRepo.findById(id)
     if (!address) throw new NotFoundException('Không tìm thấy địa chỉ')
     return this.mapToResponseDto(address)
+  }
+
+  async getDefaultAddressByAccount(
+    account: string,
+  ): Promise<AddressResponseDto | null> {
+    const address = await this.addressRepo.getDefaultAddressByAccount(account)
+    if (!address) return null
+    return this.mapToResponseDto(address)
+  }
+
+  async updateDefaultAddress(
+    account: string,
+    addressId: string,
+  ): Promise<AddressResponseDto> {
+    const checkIsExist = await this.addressRepo.findById(addressId)
+    if (!checkIsExist) {
+      throw new NotFoundException(
+        'Không tìm thấy địa chỉ để cập nhật làm mặc định',
+      )
+    }
+    await this.addressRepo.updateAllAddressToNotDefault(account)
+    const defaultAddress =
+      await this.addressRepo.updateDefaultAddressById(addressId)
+    if (!defaultAddress) {
+      throw new NotFoundException(
+        'Không tìm thấy địa chỉ để cập nhật làm mặc định',
+      )
+    }
+
+    return this.mapToResponseDto(defaultAddress)
+  }
+
+  async deleteAddressById(id: string, userId: string): Promise<boolean | null> {
+    const result = await this.addressRepo.deleteAddressById(id, userId)
+    if (!result) return false
+    return true
   }
 }

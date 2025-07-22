@@ -151,6 +151,10 @@ const ServiceCaseDetail = lazy(
 const StaffUpdateStatus = lazy(
   () => import('../components/Staff/StaffUpdateStatus')
 )
+
+const ProfileLayout = lazy(() => import('../components/layout/ProfileLayout'))
+
+const ManageAddress = lazy(() => import('../pages/ProfileUser/ManageAddress'))
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
@@ -166,13 +170,9 @@ const routes: LayoutRoute[] = [
     ],
   },
   {
-    layout: MainLayout,
+    layout: ProfileLayout,
+    role: ['Customer'],
     data: [
-      {
-        path: '/',
-        component: Homepage,
-        exact: true,
-      },
       {
         path: '/profile',
         component: ProfileUser,
@@ -193,24 +193,6 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
-        path: '/blogs',
-        component: Blog,
-      },
-      {
-        path: '/blogs/:id',
-        component: BlogDetail,
-      },
-      {
-        path: '/payment',
-        component: PaymentPage,
-        role: ['Customer'],
-      },
-      {
-        path: '/payment-success',
-        component: PaymentSuccessPage,
-        role: ['Customer'],
-      },
-      {
         path: '/payment-history',
         component: PaymentHistory,
         role: ['Customer'],
@@ -228,6 +210,40 @@ const routes: LayoutRoute[] = [
       {
         path: '/service-case-customer/:id',
         component: ServiceCaseDetail,
+        role: ['Customer'],
+      },
+      {
+        path: '/manage-address',
+        component: ManageAddress,
+        role: ['Customer'],
+      },
+    ],
+  },
+  {
+    layout: MainLayout,
+    data: [
+      {
+        path: '/',
+        component: Homepage,
+        exact: true,
+      },
+
+      {
+        path: '/blogs',
+        component: Blog,
+      },
+      {
+        path: '/blogs/:id',
+        component: BlogDetail,
+      },
+      {
+        path: '/payment',
+        component: PaymentPage,
+        role: ['Customer'],
+      },
+      {
+        path: '/payment-success',
+        component: PaymentSuccessPage,
         role: ['Customer'],
       },
       {

@@ -1,7 +1,6 @@
 import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useGetPaymentListQuery } from '../../features/customer/paymentApi'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 import { useSearchParams } from 'react-router-dom'
 
 const { Title } = Typography
@@ -71,7 +70,6 @@ export default function PaymentHistory() {
 
   return (
     <div>
-      <HeaderCus />
       <Card style={{ margin: '40px auto' }}>
         <Title level={3}>Lịch sử thanh toán</Title>
         <Table

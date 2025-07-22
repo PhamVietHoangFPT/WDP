@@ -1,11 +1,14 @@
-import { Controller, Get, Param } from '@nestjs/common'
-import { LocationService } from './location.service'
+import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger'
+import { ILocationService } from './interfaces/ilocation.service'
 
 @ApiTags('location')
 @Controller('location')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(
+    @Inject(ILocationService)
+    private readonly locationService: ILocationService,
+  ) {}
 
   @Get('provinces')
   @ApiOperation({ summary: 'Lấy danh sách tỉnh/thành' })
@@ -13,17 +16,10 @@ export class LocationController {
     return this.locationService.getProvinces()
   }
 
-  @Get('districts/:provinceCode')
-  @ApiOperation({ summary: 'Lấy danh sách quận/huyện theo mã tỉnh' })
+  @Get('wards/:provinceCode')
+  @ApiOperation({ summary: 'Lấy danh sách phường/xã theo mã tỉnh' })
   @ApiParam({ name: 'provinceCode', type: String })
-  getDistricts(@Param('provinceCode') code: string) {
-    return this.locationService.getDistrictsByProvinceCode(code)
-  }
-
-  @Get('wards/:districtCode')
-  @ApiOperation({ summary: 'Lấy danh sách phường/xã theo mã quận' })
-  @ApiParam({ name: 'districtCode', type: String })
-  getWards(@Param('districtCode') code: string) {
-    return this.locationService.getWardsByDistrictCode(code)
+  getWards(@Param('provinceCode') code: string) {
+    return this.locationService.getWardsByProvinceCode(code)
   }
 }

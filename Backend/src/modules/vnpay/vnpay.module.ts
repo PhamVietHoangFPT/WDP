@@ -31,6 +31,6 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
   ],
   controllers: [VnpayController],
   providers: [VnpayService], // Vẫn giữ VnpayService của bạn nếu nó làm các việc khác ngoài cấu hình client
-  exports: [VnPayModuleLocal],
+  exports: [VnPayModuleLocal, VnpayService],
 })
 export class VnPayModule {}

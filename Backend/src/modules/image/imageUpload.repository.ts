@@ -16,9 +16,12 @@ export class ImageUploadRepository implements IImageUploadRepository {
     private imageModel: Model<ImageDocument>,
     @Inject(IBlogRepository)
     private blogRepository: IBlogRepository,
-
-  ) { }
-  async createImageForResult(url: string, createImageDto: CreateImageResultDto, userId: string): Promise<ImageDocument> {
+  ) {}
+  async createImageForResult(
+    url: string,
+    createImageDto: CreateImageResultDto,
+    userId: string,
+  ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
       ...createImageDto,
@@ -29,7 +32,11 @@ export class ImageUploadRepository implements IImageUploadRepository {
     return await newImage.save()
   }
 
-  async createImageForKitShipmemt(url: string, createImageDto: CreateImageKitShipmentDto, userId: string): Promise<ImageDocument> {
+  async createImageForKitShipmemt(
+    url: string,
+    createImageDto: CreateImageKitShipmentDto,
+    userId: string,
+  ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
       ...createImageDto,
@@ -62,12 +69,18 @@ export class ImageUploadRepository implements IImageUploadRepository {
   async findAllImageForBlog(blogId: string): Promise<ImageDocument[]> {
     return await this.imageModel.find({ blog: blogId, deleted_at: null }).exec()
   }
-  async findAllImageForKitShipment(kitShipmentId: string): Promise<ImageDocument[]> {
-    return await this.imageModel.find({ kitShipment: kitShipmentId, deleted_at: null }).exec()
+  async findAllImageForKitShipment(
+    kitShipmentId: string,
+  ): Promise<ImageDocument[]> {
+    return await this.imageModel
+      .find({ kitShipment: kitShipmentId, deleted_at: null })
+      .exec()
   }
 
   async findAllImageForResult(resultId: string): Promise<ImageDocument[]> {
-    return await this.imageModel.find({ result: resultId, deleted_at: null }).exec()
+    return await this.imageModel
+      .find({ result: resultId, deleted_at: null })
+      .exec()
   }
 
   async deleteById(id: string, userId: string): Promise<ImageDocument | null> {
