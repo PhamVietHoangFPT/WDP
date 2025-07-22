@@ -39,7 +39,7 @@ export class ServiceCaseController {
   constructor(
     @Inject(IServiceCaseService)
     private readonly serviceCaseService: IServiceCaseService,
-  ) { }
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new service case' })
@@ -140,7 +140,6 @@ export class ServiceCaseController {
       success: true,
     }
   }
-
 
   @Post('Test')
   test(): Promise<void> {

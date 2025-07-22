@@ -1,4 +1,4 @@
-import { CreateImageKitShipmentDto } from './../dto/createImageShipment.dto';
+import { CreateImageKitShipmentDto } from './../dto/createImageShipment.dto'
 import { CreateBlogImageDto } from '../dto/createImage.dto'
 
 export interface IImageUploadService {
@@ -7,7 +7,6 @@ export interface IImageUploadService {
     createBlogImageDto: CreateBlogImageDto,
     userId: string,
   ): Promise<{ url: string; _id: string }>
-  
 }
 
 export const IImageUploadService = Symbol('IImageUploadService')

@@ -34,7 +34,7 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
     AuthModule,
     ResultModule,
     TestRequestStatusModule,
-    ServiceCaseModule
+    ServiceCaseModule,
   ],
   controllers: [DoctorController],
   providers: [
@@ -49,4 +49,4 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
   ],
   exports: [IDoctorService, IDoctorRepository],
 })
-export class DoctorModule { }
+export class DoctorModule {}

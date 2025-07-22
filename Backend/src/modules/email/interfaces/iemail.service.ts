@@ -16,7 +16,7 @@ export interface IEmailService {
   sendPaymentRequestForCondition(
     customerId: string,
     doctorId: string,
-    paymentUrl: string
+    paymentUrl: string,
   ): Promise<void>
 }
 export const IEmailService = Symbol('IEmailService')

@@ -16,7 +16,6 @@ import {
 } from '../../features/customer/testTakerApi'
 import { jwtDecode } from 'jwt-decode'
 import Cookies from 'js-cookie'
-import HeaderCus from '../../components/layout/Header/HeaderCus'
 
 const { Title } = Typography
 

@@ -16,4 +16,4 @@ declare module 'express-session' {
 
 // Nếu file này được coi là một module (ví dụ có các import/export khác),
 // bạn có thể cần thêm dòng này để đảm bảo augmentation hoạt động đúng:
-export { }
+export {}

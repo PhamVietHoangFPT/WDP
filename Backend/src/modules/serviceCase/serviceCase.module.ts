@@ -44,4 +44,4 @@ import { VnPayModule } from '../vnpay/vnpay.module'
   ],
   exports: [MongooseModule, IServiceCaseService, IServiceCaseRepository],
 })
-export class ServiceCaseModule { }
+export class ServiceCaseModule {}

@@ -17,7 +17,7 @@ import { KitShipmentModule } from '../KitShipment/kitShipment.module'
     MongooseModule.forFeature([{ name: Image.name, schema: ImageSchema }]),
     AuthModule,
     BlogModule,
-    KitShipmentModule
+    KitShipmentModule,
   ],
   controllers: [ImageController],
   providers: [
@@ -32,4 +32,4 @@ import { KitShipmentModule } from '../KitShipment/kitShipment.module'
   ],
   exports: [IImageUploadService],
 })
-export class ImageModule { }
+export class ImageModule {}

@@ -28,11 +28,13 @@ export default function ServiceCaseDetail() {
   return (
     <div>
       <Card style={{ margin: '30px auto', maxWidth: 800 }}>
-        <Title level={3} style={{paddingBottom: '30px'}}>Trạng thái hồ sơ</Title>
+        <Title level={3} style={{ paddingBottom: '30px' }}>
+          Trạng thái hồ sơ
+        </Title>
         {isLoading ? (
           <Spin />
         ) : (
-          <Timeline mode="left">
+          <Timeline mode='left'>
             {sortedData.map((item, index) => (
               <Timeline.Item
                 key={item._id}
@@ -47,7 +49,11 @@ export default function ServiceCaseDetail() {
             ))}
           </Timeline>
         )}
-        <Button type="primary" style={{ marginTop: 16 }} onClick={() => window.history.back()}>
+        <Button
+          type='primary'
+          style={{ marginTop: 16 }}
+          onClick={() => window.history.back()}
+        >
           Trở về
         </Button>
       </Card>
