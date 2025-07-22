@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import type React from 'react'
 import { useState } from 'react'
@@ -270,6 +270,12 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
 
+  // Hàm để disable các ngày trước ngày hiện tại
+  const disabledDate = (current: moment.Moment) => {
+    // Không cho phép chọn ngày trước ngày hiện tại
+    return current && current < moment().startOf('day'); // Sửa thành startOf('day') để bao gồm cả ngày hiện tại
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý dịch vụ chưa có bác sĩ</Title>
@@ -298,6 +304,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
             style={{ width: 180, marginLeft: "80px"}}
             allowClear
             suffixIcon={<CalendarOutlined />}
+            disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
           />
         </div>
 
@@ -338,6 +345,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
             rowKey='_id'
             pagination={false}
             loading={isFetchingServices}
+            scroll={{ x: 'max-content' }}
             locale={{
               emptyText: 'Không có dịch vụ nào chưa được gán bác sĩ',
             }}
@@ -358,6 +366,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} của ${total} dịch vụ`
               }
+              pageSizeOptions={["5", "10", "20"]}
             />
           )}
         </>

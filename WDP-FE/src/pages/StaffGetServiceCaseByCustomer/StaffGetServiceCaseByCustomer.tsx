@@ -22,15 +22,13 @@ import { SearchOutlined, ReloadOutlined } from "@ant-design/icons"
 import {
   useGetCustomerServiceCaseByEmailQuery,
   useGetAllStatusForCustomerQuery,
-  // Giả định mày có mutation này để cập nhật trạng thái, nếu chưa có thì phải tự tạo
-  // Ví dụ: useUpdateServiceCaseStatusMutation
-} from "../../features/staff/staffAPI" // Thay đổi đường dẫn này cho đúng với project của mày
+  useUpdateServiceCaseStatusForStaffMutation,
+} from "../../features/staff/staffAPI"
 
-// Định nghĩa kiểu dữ liệu cho ServiceCase và Status dựa trên API response của mày
 interface ServiceCase {
   _id: string
   created_at: string
-  currentStatus: string // Là chuỗi, ví dụ: "Chờ thanh toán"
+  currentStatus: string
   bookingDate: string
   customerEmail?: string
   serviceName?: string
@@ -51,7 +49,7 @@ interface ServiceCaseResponse {
 
 interface Status {
   _id: string
-  testRequestStatus: string // Tên trạng thái, ví dụ: "Chờ thanh toán"
+  testRequestStatus: string
   order: number
 }
 
@@ -65,14 +63,12 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
 
-  // Lấy danh sách trạng thái từ API /test-request-status
   const {
     data: allStatuses,
     isLoading: isLoadingStatuses,
     isError: isErrorStatuses,
   } = useGetAllStatusForCustomerQuery({})
 
-  // Lấy danh sách service cases của khách hàng theo email và status
   const {
     data: serviceCasesResponse,
     isLoading: isLoadingServiceCases,
@@ -91,21 +87,17 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
     },
   )
 
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const handleUpdateServiceCaseStatus = async ({ id, statusId }: { id: string; statusId: string }) => {
-    setIsUpdatingStatus(true);
+  const [updateServiceCaseStatus, { isLoading: isUpdatingStatus }] = useUpdateServiceCaseStatusForStaffMutation();
+
+  const handleUpdateServiceCaseStatus = async ({ id, newStatusId }: { id: string; newStatusId: string }) => {
     try {
-      // Thực hiện gọi API cập nhật trạng thái ở đây
-      // Ví dụ: await updateServiceCaseStatus({ id, statusId }).unwrap();
-      console.log(`Cập nhật trạng thái cho case ${id} thành ${statusId}`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      message.success("Cập nhật trạng thái thành công (giả lập)!");
+      // Truyền newStatusId trực tiếp lên API
+      await updateServiceCaseStatus({ id, currentStatus: newStatusId }).unwrap(); 
+      message.success("Cập nhật trạng thái thành công!");
       refetch();
     } catch (error: any) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
       message.error(error.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
-    } finally {
-      setIsUpdatingStatus(false);
     }
   };
 
@@ -113,12 +105,13 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
   const handleSearch = () => {
     const values = form.getFieldsValue()
     setCustomerEmail(values.email)
-    setSelectedStatusFilter(values.currentStatus || [])
+    // Khi lọc theo trạng thái, vẫn gửi _id lên backend
+    setSelectedStatusFilter(values.currentStatus || []) 
     setCurrentPage(1)
   }
 
   const handleUpdateStatus = async (serviceCaseId: string, newStatusId: string) => {
-    await handleUpdateServiceCaseStatus({ id: serviceCaseId, statusId: newStatusId });
+    await handleUpdateServiceCaseStatus({ id: serviceCaseId, newStatusId: newStatusId });
   }
 
   const serviceCases = serviceCasesResponse?.data || [];
@@ -144,7 +137,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
       render: (text) => {
         let color = 'geekblue';
         switch (text) {
-          case 'Chờ thanh toán': color = 'volcano'; break;
+          case 'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)': color = 'volcano'; break;
           case 'Đã thanh toán': color = 'blue'; break;
           case 'Check-in': color = 'cyan'; break;
           case 'Chờ xử lý': color = 'orange'; break;
@@ -167,9 +160,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
       render: (_, record) => {
         let availableStatuses: Status[] = [];
         
-        // Logic lọc trạng thái chỉ cho phép chuyển đổi từ "Đã thanh toán" -> "Check-in"
-        // và từ "Check-in" -> "Chờ xử lý"
-        if (record.currentStatus === "Đã thanh toán") {
+        if (record.currentStatus === "Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)") {
           const checkinStatus = allStatuses?.find(s => s.testRequestStatus === "Check-in");
           if (checkinStatus) {
             availableStatuses.push(checkinStatus);
@@ -180,13 +171,11 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
             availableStatuses.push(choXuLyStatus);
           }
         }
-        // Các trạng thái khác sẽ không có lựa chọn cập nhật.
 
-        // Tìm _id của trạng thái hiện tại để set initialValue
-        const currentStatusId = allStatuses?.find(s => s.testRequestStatus === record.currentStatus)?._id;
+        // Không cần tìm currentStatusId nếu không muốn set initial value
+        // const currentStatusId = allStatuses?.find(s => s.testRequestStatus === record.currentStatus)?._id;
 
-        // Nếu không có trạng thái nào để chuyển đến, hoặc không tìm thấy _id của trạng thái hiện tại, ẩn nút cập nhật
-        if (!availableStatuses || availableStatuses.length === 0 || !currentStatusId) {
+        if (!availableStatuses || availableStatuses.length === 0) { // Sửa điều kiện này
             return <Tag color="default">Không thể cập nhật</Tag>;
         }
 
@@ -197,7 +186,8 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
               description={
                 <Form
                   layout="vertical"
-                  initialValues={{ newStatus: currentStatusId }}
+                  // Bỏ initialValues để không hiển thị giá trị mặc định nào trong dropdown khi mở
+                  // initialValues={{ newStatus: currentStatusId }} // Đã bỏ dòng này
                   onFinish={(values) => handleUpdateStatus(record._id, values.newStatus)}
                 >
                   <Form.Item
@@ -209,10 +199,11 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
                       placeholder="Chọn trạng thái"
                       loading={isLoadingStatuses}
                       disabled={isLoadingStatuses || isErrorStatuses}
+                      optionLabelProp="children" // Đảm bảo hiển thị testRequestStatus
                     >
                       {availableStatuses.map((status: Status) => (
                         <Option key={status._id} value={status._id}>
-                          {status.testRequestStatus}
+                          {status.testRequestStatus} 
                         </Option>
                       ))}
                     </Select>
@@ -266,6 +257,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
               allowClear
               loading={isLoadingStatuses}
               disabled={isLoadingStatuses || isErrorStatuses}
+              optionLabelProp="children" 
             >
               {allStatuses?.map((status: Status) => (
                 <Option key={status._id} value={status._id}>
