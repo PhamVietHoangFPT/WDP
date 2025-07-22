@@ -1,4 +1,4 @@
-import { Get, Inject, Query, Controller, UseGuards } from '@nestjs/common'
+import { Get, Inject, Query, Controller, UseGuards, Req } from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
@@ -16,6 +16,7 @@ import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 @ApiTags('staff')
 @Controller('staff')
 @ApiBearerAuth()
+@Roles(RoleEnum.STAFF)
 export class StaffController {
   constructor(
     @Inject(IStaffService) private readonly staffService: IStaffService,
@@ -23,21 +24,20 @@ export class StaffController {
 
   @Get('/service-cases')
   @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(RoleEnum.STAFF, RoleEnum.MANAGER, RoleEnum.ADMIN)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ theo email khách hàng' })
   @ApiResponse({
     status: 200,
     type: [ApiResponseDto<ServiceCaseResponseDto>],
     description: 'Danh sách hồ sơ dịch vụ theo email khách hàng',
   })
-  @ApiQuery({ name: 'facilityId', required: true, type: String })
   @ApiQuery({ name: 'email', required: true, type: String })
   @ApiQuery({ name: 'currentStatus', required: false, type: String })
   async getServiceCasesByCustomerEmail(
-    @Query('facilityId') facilityId: string,
     @Query('email') email: string,
     @Query('currentStatus') currentStatus: string,
+    @Req() req: any,
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id
     const data = await this.staffService.getServiceCasesByCustomerEmail(
       facilityId,
       email,
