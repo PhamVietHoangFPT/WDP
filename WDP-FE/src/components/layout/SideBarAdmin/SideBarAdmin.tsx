@@ -12,6 +12,9 @@ import {
   AppstoreOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
+  BankOutlined,
+  ApartmentOutlined,
+  AlignCenterOutlined
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -64,25 +67,25 @@ export const SideBar = () => {
     },
     {
       key: 'admin/slotAdmin',
-      icon: <BarChartOutlined />,
+      icon: <AppstoreOutlined/>,
       label: 'Ca làm việc',
       onClick: () => navigate('admin/slotAdmin'),
     },
     {
       key: 'admin/slotsFacilitiesAdmin',
-      icon: <BarChartOutlined />,
+      icon: <ApartmentOutlined/>,
       label: 'Ca & Cơ sở',
       onClick: () => navigate('admin/slotsFacilitiesAdmin'),
     },
     {
       key: 'admin/facility',
-      icon: <BarChartOutlined />,
+      icon: <BankOutlined />,
       label: 'Danh sách cơ sở',
       onClick: () => navigate('/admin/facilities?pageNumber=1&pageSize=10'),
     },
     {
       key: 'service',
-      icon: <AppstoreOutlined />,
+      icon: <AlignCenterOutlined />,
       label: 'Quản lý dịch vụ',
       children: [
         {
