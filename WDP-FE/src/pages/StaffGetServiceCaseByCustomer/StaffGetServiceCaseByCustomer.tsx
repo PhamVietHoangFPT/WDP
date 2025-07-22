@@ -61,7 +61,7 @@ const { Option } = Select
 const StaffGetServiceCaseByCustomer: React.FC = () => {
   const [form] = Form.useForm()
   const [customerEmail, setCustomerEmail] = useState<string>("")
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | undefined>(undefined)
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
 
@@ -113,7 +113,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
   const handleSearch = () => {
     const values = form.getFieldsValue()
     setCustomerEmail(values.email)
-    setSelectedStatusFilter(values.currentStatus || undefined)
+    setSelectedStatusFilter(values.currentStatus || [])
     setCurrentPage(1)
   }
 
