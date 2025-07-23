@@ -531,11 +531,7 @@ export default function RegisterServiceAtHome() {
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={selectedFacility}
-              onValueChange={(value) => {
-                setSelectedAddressId(value);
-                setFeeConfirmed(false);
-                setShippingFee(null);
-              }}
+              onValueChange={(value) => setSelectedAddressId(value)}
               style={styles.picker}
               dropdownIconColor="#fff"
             >
