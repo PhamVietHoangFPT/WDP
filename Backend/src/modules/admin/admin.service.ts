@@ -6,7 +6,12 @@ import {
 import { FacilityDocument } from 'src/modules/facility/schemas/facility.schema'
 import { IAdminService } from './interfaces/iadmin.service'
 import { IAdminRepository } from './interfaces/iadmin.repository'
-import { Injectable, Inject, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common'
 import { IRoleRepository } from '../role/interfaces/irole.repository'
 import { AccountResponseDto } from '../account/dto/accountResponse.dto'
 import { FacilityResponseDto } from '../facility/dto/facilityResponse.dto'
@@ -98,6 +103,17 @@ export class AdminService implements IAdminService {
     if (!isMongoId(managerId) || !isMongoId(facilityId)) {
       throw new NotFoundException('ID không hợp lệ')
     }
+
+    const isAssignmentValid = await this.adminRepository.validateAssignment(
+      managerId,
+      facilityId,
+    )
+    if (!isAssignmentValid) {
+      throw new ConflictException(
+        'Gán không thành công. Quản lý đã được gán cho cơ sở khác hoặc cơ sở đã có quản lý.',
+      )
+    }
+
     return this.adminRepository.assignManagerToFacility(
       managerId,
       facilityId,
@@ -113,6 +129,7 @@ export class AdminService implements IAdminService {
     if (!isMongoId(facilityId) || !isMongoId(managerId)) {
       throw new NotFoundException('ID không hợp lệ')
     }
+
     return this.adminRepository.unassignManagerFromFacility(
       facilityId,
       managerId,

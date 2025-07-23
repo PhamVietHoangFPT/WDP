@@ -109,11 +109,32 @@ export class AdminRepository implements IAdminRepository {
       .exec()
   }
 
-  async checkFacilityHasManager(facilityId: string): Promise<boolean> {
-    const facility = await this.facilityModel
-      .findById(facilityId)
-      .populate({ path: 'account' })
-      .exec()
-    return !!facility?.account
+  async validateAssignment(
+    managerId: string,
+    facilityId: string,
+  ): Promise<boolean> {
+    // Tạo 2 promise để kiểm tra song song
+    const managerCheckPromise = this.facilityModel
+      .findOne({
+        account: new Types.ObjectId(managerId),
+      })
+      .lean()
+
+    const facilityCheckPromise = this.facilityModel
+      .findOne({
+        _id: new Types.ObjectId(facilityId),
+        account: { $ne: null },
+      })
+      .lean()
+
+    // Thực thi cả 2 promise cùng lúc
+    const [managerHasFacility, facilityHasManager] = await Promise.all([
+      managerCheckPromise,
+      facilityCheckPromise,
+    ])
+
+    // Trả về `true` chỉ khi CẢ HAI điều kiện kiểm tra đều không tìm thấy xung đột
+    // (tức là cả hai kết quả đều là `null`)
+    return !managerHasFacility && !facilityHasManager
   }
 }
