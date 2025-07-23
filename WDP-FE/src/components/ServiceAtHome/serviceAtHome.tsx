@@ -116,8 +116,8 @@ const ServiceAtHomeForm: React.FC = () => {
         booking: bookingId,
         service: id,
         note: '',
-        isAtHome: true,
-        isSelfSampling: false,
+        isAtHome: !serviceDetail.isAdministration,
+        isSelfSampling: serviceDetail.isSelfSampling,
         address: selectedAddressId,
       }
       const caseMember = await createCaseMember({ data }).unwrap()

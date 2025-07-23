@@ -63,6 +63,11 @@ export class PaymentService implements IPaymentService {
       )
     }
     const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
+    const isSelfSampling = currentServiceCasePayment.split('_')[2] === 'true'
+    if (isSelfSampling) {
+      // Handle self-sampling case
+    }
+
     const payment = await this.paymentRepository.createForServiceCase(
       paymentData,
       userId,
