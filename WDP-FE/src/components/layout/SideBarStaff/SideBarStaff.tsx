@@ -10,7 +10,7 @@ import {
   MedicineBoxOutlined,
   BarChartOutlined,
   TeamOutlined,
-  InboxOutlined
+  InboxOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 

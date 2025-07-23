@@ -16,12 +16,12 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
     }),
 
     getServiceNoSampleCollectorList: builder.query({
-      query: ({isAtHome, bookingDate}) => ({
+      query: ({ isAtHome, bookingDate }) => ({
         url: `managers/service-cases-without-sample-collector`,
         method: 'GET',
         params: {
           isAtHome,
-          bookingDate
+          bookingDate,
         },
       }),
       transformResponse: (res) => res,
