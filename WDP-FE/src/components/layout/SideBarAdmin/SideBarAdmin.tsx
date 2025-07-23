@@ -108,6 +108,18 @@ export const SideBar = () => {
         },
       ],
     },
+    {
+      key: 'admin/managers',
+      icon: <BankOutlined />,
+      label: 'Nhân viên Quản lý',
+      onClick: () => navigate('/admin/managers?pageNumber=1&pageSize=10'),
+    },
+    {
+      key: 'admin/facilitiesWithManager',
+      icon: <BankOutlined />,
+      label: 'Cơ sở theo Nhân viên Quản lý',
+      onClick: () => navigate('/admin/facilitiesWithManager'),
+    },
   ]
 
   return (
