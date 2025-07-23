@@ -12,6 +12,8 @@ import { IKitShipmentRepository } from './interfaces/ikitShipment.repository'
 import { KitShipmentRepository } from './kitShipment.repository'
 import { IKitShipmentService } from './interfaces/ikitShipment.service'
 import { KitShipmentService } from './kitShipment.service'
+import { KitShipmentHistoryModule } from '../kitShipmentHistory/kitShipmentHistory.module'
+import { TestTakerModule } from '../testTaker/testTaker.module'
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { KitShipmentService } from './kitShipment.service'
     AddressModule,
     CaseMemberModule,
     SamplingKitInventoryModule,
+    KitShipmentHistoryModule,
+    TestTakerModule
   ],
   controllers: [KitShipmentController],
   providers: [

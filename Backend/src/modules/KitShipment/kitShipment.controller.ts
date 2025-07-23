@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -29,6 +30,8 @@ import { KitShipmentResponseDto } from './dto/kitShipmentResponse.dto'
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
+import { Roles } from 'src/common/decorators/roles.decorator'
+import { RoleEnum } from 'src/common/enums/role.enum'
 
 @ApiTags('kit-shipment')
 @Controller('kit-shipment')
@@ -36,7 +39,7 @@ export class KitShipmentController {
   constructor(
     @Inject(IKitShipmentService)
     private readonly kitshipmentService: IKitShipmentService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
@@ -129,4 +132,44 @@ export class KitShipmentController {
       statusCode: HttpStatus.OK,
     })
   }
+
+  @Patch(':id/status/:currentStatus')
+  // @Roles(
+  //   RoleEnum.DELIVERY_STAFF,
+  // )
+  @ApiOperation({ summary: 'Cập nhật trạng thái hiện tại của hồ sơ dịch vụ' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: 'ID của kitshipment cần cập nhật',
+  })
+  @ApiParam({
+    name: 'currentStatus',
+    required: true,
+    type: String,
+    description: 'Trạng thái hiện tại mới của hồ sơ dịch vụ',
+  })
+  @ApiResponse({ status: 200, type: ApiResponseDto<KitShipmentResponseDto> })
+  async updateCurrentStatus(
+    @Param('id') id: string,
+    @Param('currentStatus') currentStatus: string,
+  ): Promise<ApiResponseDto<KitShipmentResponseDto> | null> {
+    const updatedServiceCase =
+      await this.kitshipmentService.updateCurrentStatus(
+        id,
+        currentStatus
+      )
+    if (!updatedServiceCase) {
+      return null
+    }
+
+    return {
+      message: 'Cập nhật trạng thái hiện tại thành công',
+      data: [updatedServiceCase],
+      statusCode: 200,
+      success: true,
+    }
+  }
+
 }
