@@ -122,6 +122,7 @@ export class PaymentRepository implements IPaymentRepository {
           ...filter, // Thêm các điều kiện lọc khác nếu cần
         })
         .populate({ path: 'paymentType', select: 'paymentType' })
+        .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
       return query
     }
     const query = this.paymentModel
@@ -130,7 +131,7 @@ export class PaymentRepository implements IPaymentRepository {
         created_by: new Types.ObjectId(userId), // Lọc theo userId
       })
       .populate({ path: 'paymentType', select: 'paymentType' })
-
+      .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
     return query
   }
 

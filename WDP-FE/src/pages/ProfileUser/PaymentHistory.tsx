@@ -1,4 +1,4 @@
-import { Card, Table, Typography, Button, Pagination, Tag } from 'antd'
+import { Card, Table, Typography, Button, Pagination, Tag, Tooltip } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useGetPaymentListQuery } from '../../features/customer/paymentApi'
 import { useSearchParams } from 'react-router-dom'
@@ -45,16 +45,37 @@ export default function PaymentHistory() {
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'responseCode',
-      key: 'responseCode',
-      render: (status: string) => {
-        // Chuyển status về dạng chữ thường để so sánh không phân biệt hoa/thường
-        const lowerStatus = status.toLowerCase()
-        if (lowerStatus.includes('không ')) {
-          return <Tag color='red'>{status}</Tag>
-        } else {
-          return <Tag color='green'>{status}</Tag>
+      dataIndex: 'transactionStatus',
+      key: 'transactionStatus',
+      align: 'center',
+      // ✅ Sửa lại signature để nhận cả `status` và `record`
+      render: (status: string, record: { responseCode?: string }) => {
+        // Case 1: Không có trạng thái
+        if (!status) {
+          return <Tag color='default'>Chưa xác định</Tag>
         }
+
+        // Logic chọn màu vẫn như cũ
+        const lowerStatus = status.toLowerCase()
+        let color = 'green'
+        if (lowerStatus.includes('lỗi') || lowerStatus.includes('hủy')) {
+          color = 'red'
+        } else if (lowerStatus.includes('chờ')) {
+          color = 'blue'
+        }
+
+        // ✅ Dùng Tooltip để hiển thị lý do (responseCode) khi người dùng di chuột vào
+        // Nếu không có responseCode, chỉ hiển thị Tag bình thường
+        if (record.responseCode && record.responseCode !== status) {
+          return (
+            <Tooltip title={`Lý do: ${record.responseCode}`}>
+              <Tag color={color}>{status}</Tag>
+            </Tooltip>
+          )
+        }
+
+        // Trả về Tag nếu không có responseCode hoặc responseCode trùng với status
+        return <Tag color={color}>{status}</Tag>
       },
     },
     {
