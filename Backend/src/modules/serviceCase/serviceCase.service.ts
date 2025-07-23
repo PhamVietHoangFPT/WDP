@@ -205,7 +205,7 @@ export class ServiceCaseService implements IServiceCaseService {
       )
     if (serviceCaseStatusOrder !== 8) {
       throw new ConflictException('Không thể thay đổi chất lượng của mẫu thử')
-    }
+    } 
 
     const updated = await this.serviceCaseRepository.updateCondition(
       id,
