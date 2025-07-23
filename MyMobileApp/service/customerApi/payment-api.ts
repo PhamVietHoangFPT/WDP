@@ -24,6 +24,22 @@ export const createPayment = async (data: any) => {
   return response.json();
 };
 
+// Tạo lịch sử thanh toán dịch vụ (Service Payment History)
+export const createServicePaymentHistory = async (data: any) => {
+  const headers = await getAuthHeader();
+  const response = await fetch(`${API_BASE_URL}/payments/service-case`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error("Lỗi khi tạo lịch sử thanh toán dịch vụ");
+  return response.json();
+};
+
 // Lấy danh sách thanh toán của người dùng
 export const getMyPayments = async () => {
   const headers = await getAuthHeader();
