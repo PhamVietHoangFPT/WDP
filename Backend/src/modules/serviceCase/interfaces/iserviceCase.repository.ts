@@ -22,6 +22,11 @@ export interface IServiceCaseRepository {
     payment: string,
   ): Promise<ServiceCaseDocument | null>
 
+  updatePaymentForCondition(
+    id: string,
+    paymentForCondition: string,
+  ): Promise<ServiceCaseDocument | null>
+
   updateCurrentStatus(
     id: string,
     currentStatus: string,

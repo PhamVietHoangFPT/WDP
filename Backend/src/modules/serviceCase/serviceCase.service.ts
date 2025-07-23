@@ -219,15 +219,11 @@ export class ServiceCaseService implements IServiceCaseService {
     if (!updated) {
       throw new ConflictException('Không thể cập nhật service case.')
     }
-    // Gọi VnPayService để lấy URL thanh toán
-    const paymentUrl = await this.VnpayService.getPaymentUrlForCondition({
-      serviceCaseId: id,
-    })
+
     await this.emailService.sendPaymentRequestForCondition(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       updated.account.toString(),
       doctorId,
-      paymentUrl,
     )
     return this.mapToResponseDto(updated)
   }
