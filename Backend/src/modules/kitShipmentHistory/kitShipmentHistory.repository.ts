@@ -16,14 +16,14 @@ export class KitShipmentHistoryRepository
     ) { }
 
     async createKitShipmentHistory(
-        kitShipmentStatusId: string,
-        kitShipmentId: string,
-        customerId: string,
+        kitShipmentStatus: string,
+        kitShipment: string,
+        customer: string,
     ): Promise<KitShipmentHistoryDocument> {
         const createdKitShipmentHistory = new this.KitShipmentHistoryModel({
-            kitShipmentStatusId: new mongoose.Types.ObjectId(kitShipmentStatusId),
-            kitShipmentId: new mongoose.Types.ObjectId(kitShipmentId),
-            customerId: new mongoose.Types.ObjectId(customerId),
+            kitShipmentStatus: new mongoose.Types.ObjectId(kitShipmentStatus),
+            kitShipment: new mongoose.Types.ObjectId(kitShipment),
+            customer: new mongoose.Types.ObjectId(customer),
             createdAt: new Date(),
         })
         return createdKitShipmentHistory.save()

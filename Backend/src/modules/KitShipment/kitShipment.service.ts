@@ -15,21 +15,25 @@ import { CreateKitShipmentDto } from './dto/createKitShipment.dto'
 import { IKitShipmentService } from './interfaces/ikitShipment.service'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
+import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
+import { IKitShipmentStatusRepository } from '../kitShipmentStatus/interfaces/ikitShipmentStatus.repository'
 
 @Injectable()
 export class KitShipmentService implements IKitShipmentService {
   constructor(
     @Inject(IKitShipmentRepository)
     private readonly kitShipmentRepository: IKitShipmentRepository,
-  ) {}
+    @Inject(IKitShipmentHistoryRepository)
+    private readonly kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
+    @Inject(IKitShipmentStatusRepository)
+    private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
+  ) { }
 
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
       _id: kitShipment._id,
       currentStatus: kitShipment.currentStatus,
       caseMember: kitShipment.caseMember,
-      samplingKitInventory: kitShipment.samplingKitInventory,
-      address: kitShipment.address,
       deliveryStaff: kitShipment.deliveryStaff,
       deleted_at: kitShipment.deleted_at,
     })
@@ -55,14 +59,10 @@ export class KitShipmentService implements IKitShipmentService {
         `Không tìm thấy kiểu trạng thái vận chuyển với ID ${id}.`,
       )
     }
-
     if (
       existingKitShipment.currentStatus ===
-        updateKitShipmentDto.currentStatus &&
+      updateKitShipmentDto.currentStatus &&
       existingKitShipment.caseMember === updateKitShipmentDto.caseMember &&
-      existingKitShipment.samplingKitInventory ===
-        updateKitShipmentDto.samplingKitInventory &&
-      existingKitShipment.address === updateKitShipmentDto.address &&
       existingKitShipment.deliveryStaff === updateKitShipmentDto.deliveryStaff
     ) {
       throw new ConflictException('Không có thay đổi nào để cập nhật.')
@@ -82,6 +82,61 @@ export class KitShipmentService implements IKitShipmentService {
       throw new InternalServerErrorException('Lỗi khi thay đổi kit shipment.')
     }
   }
+
+  async updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+  ): Promise<KitShipmentResponseDto | null> {
+    const oldKitShipmentStatusId =
+      await this.kitShipmentRepository.getCurrentStatusId(id)
+
+    const oldKitShipmentStatusOrder =
+      await this.kitShipmentStatusRepository.getKitShipmentStatusOrder(
+        oldKitShipmentStatusId,
+      )
+
+    const newKitShipmentStatusOrder =
+      await this.kitShipmentStatusRepository.getKitShipmentStatusOrder(
+        currentStatus,
+      )
+
+    if (newKitShipmentStatusOrder <= oldKitShipmentStatusOrder) {
+      throw new ConflictException(
+        'Trạng thái hiện tại không thể cập nhật xuống trạng thái cũ',
+      )
+    }
+    let updatedKitShipment: KitShipment | null
+    const customerId = await this.kitShipmentRepository.getAccountIdByKitShipmentId(id)
+    if (newKitShipmentStatusOrder - oldKitShipmentStatusOrder > 1) {
+      if (newKitShipmentStatusOrder === 4 && oldKitShipmentStatusOrder === 2) {
+        updatedKitShipment =
+          await this.kitShipmentRepository.updateCurrentStatus(
+            id,
+            currentStatus,
+            customerId
+          )
+        if (!updatedKitShipment) {
+          throw new Error('Cập nhật trạng thái hiện tại không thành công')
+        }
+        return this.mapToResponseDto(updatedKitShipment)
+      } else {
+        throw new ConflictException(
+          'Trạng thái hiện tại không thể cập nhật quá 1 bước từ trạng thái cũ',
+        )
+      }
+    }
+
+    updatedKitShipment = await this.kitShipmentRepository.updateCurrentStatus(
+      id,
+      currentStatus,
+      customerId
+    )
+    if (!updatedKitShipment) {
+      throw new Error('Cập nhật trạng thái hiện tại không thành công')
+    }
+    return this.mapToResponseDto(updatedKitShipment)
+  }
+
 
   async deleteKitShipment(id: string, userId: string): Promise<any> {
     const existingService = await this.findKitShipmentById(id)
@@ -150,6 +205,15 @@ export class KitShipmentService implements IKitShipmentService {
       const newService = await this.kitShipmentRepository.create(userId, {
         ...createKitShipmentDto,
       })
+      const kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+        'Chờ giao hàng',
+      )
+      const newKitShipmentHistory = await this.kitShipmentHistoryRepository.createKitShipmentHistory(
+        kitShipmentStatus._id.toString(),
+        newService._id.toString(),
+        userId
+      )
+
       return this.mapToResponseDto(newService)
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi tạo dịch vụ.')
