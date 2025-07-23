@@ -52,6 +52,15 @@ const doctorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['doctor'],
     }),
+
+    getResultById: builder.query({
+      query: (id: string) => ({
+        url: `results/for-customer/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['results'],
+    }),
   }),
 })
 
@@ -60,5 +69,7 @@ export const {
   useGetAllRequestStatusListQuery,
   useUpdateServiceCaseStatusMutation,
   useGetTestTakerQuery,
+  useLazyGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
+  useGetResultByIdQuery,
 } = doctorAPI
