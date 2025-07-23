@@ -56,6 +56,9 @@ const DeliveryStaffHomePage = lazy(
 const DoctorHomePage = lazy(
   () => import('../pages/DoctorHomePage/DoctorHomePage')
 )
+const DoctorUpdateConditionPage = lazy(
+  () => import('../pages/DoctorUpdateCondition/doctorUpdateCondition')
+)
 const FacilityDetailAdmin = lazy(
   () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
 )
@@ -408,6 +411,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor/service-cases-without-results',
         component: DoctorServiceCaseWithoutResult,
+      },
+      {
+        path: '/doctor/service-cases-condition',
+        component: DoctorUpdateConditionPage,
       },
     ],
   },
