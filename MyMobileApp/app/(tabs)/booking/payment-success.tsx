@@ -91,7 +91,7 @@ export default function PaymentSuccessScreen() {
               🎉 Thanh toán thành công!
             </Text>
             <Text style={styles.messageText}>
-              Chúng tôi đã nhận được thanh toán của bạn. Xin cảm ơn!!
+              Chúng tôi đã nhận được thanh toán của bạn. Xin cảm ơn!!!
             </Text>
           </>
         );
