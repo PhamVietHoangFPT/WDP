@@ -29,7 +29,7 @@ export class ManagerRepository implements IManagerRepository {
     private readonly testRequestStatusRepository: ITestRequestStatusRepository,
     @InjectModel(Role.name)
     private readonly roleModel: Model<RoleDocument>,
-  ) {}
+  ) { }
 
   async assignSampleCollectorToServiceCase(
     serviceCaseId: string,
