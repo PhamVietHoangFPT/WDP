@@ -21,35 +21,41 @@ import {
   useCreateManagerMutation,
   useDeleteManagerMutation,
   useUnAssignManagerMutation,
-} from '../../features/admin/managerAPI'
+} from '../../features/admin/managerAPI' // Đảm bảo đường dẫn API chính xác
 
 const { Option } = Select
 const { Title } = Typography
 
+// Định nghĩa kiểu dữ liệu cho Manager
 interface Manager {
   _id: string
   name: string
   email: string
   phoneNumber: string
   role: string
-  facility?: string
+  facility?: string // Optional, vì manager có thể chưa được gán
 }
 
+// Định nghĩa kiểu dữ liệu cho Form tạo Manager mới
 interface CreateManagerFormValues {
   name: string
   email: string
   phoneNumber: string
-  gender: boolean
+  gender: boolean // true cho nam, false cho nữ
+  password: string // Thêm trường password vào đây
 }
 
 export default function AdminManagerList() {
+  // Lấy danh sách manager
   const { data: managersData, isLoading: isManagersLoading, error: managersError, refetch } = useGetManagerListQuery(null)
   const managers: Manager[] = managersData?.data || []
 
+  // Mutation để tạo, xóa, unassign manager
   const [createManager, { isLoading: isCreatingManager }] = useCreateManagerMutation()
   const [deleteManager, { isLoading: isDeletingManager }] = useDeleteManagerMutation()
   const [unAssignManager, { isLoading: isUnAssigningManager }] = useUnAssignManagerMutation()
 
+  // State cho Modal tạo manager
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false)
   const [createForm] = Form.useForm()
 
@@ -64,15 +70,8 @@ export default function AdminManagerList() {
 
   const handleCreateManager = async (values: CreateManagerFormValues) => {
     try {
-      // Hardcode role ID cho manager
-      const MANAGER_ROLE_ID = "67f697151bfaa0e9cf14ec92" // ID role manager mà mày cung cấp
-
-      await createManager({
-        data: {
-          ...values,
-          role: MANAGER_ROLE_ID, // Thêm role ID vào đây
-        },
-      }).unwrap()
+      // Bỏ hoàn toàn role ID hardcode ở đây. API sẽ tự gán hoặc không cần.
+      await createManager({ data: values }).unwrap()
 
       notification.success({
         message: 'Tạo Manager thành công',
@@ -80,7 +79,7 @@ export default function AdminManagerList() {
       })
       setIsCreateModalVisible(false)
       createForm.resetFields()
-      refetch()
+      refetch() // Tải lại danh sách manager
     } catch (error: any) {
       console.error('Failed to create manager:', error)
       notification.error({
@@ -109,6 +108,7 @@ export default function AdminManagerList() {
       cancelText: 'Hủy',
       onOk: async () => {
         try {
+          // Nếu manager đang được gán cho facility, unassign trước
           if (manager.facility) {
             await unAssignManager({
               facilityId: manager.facility,
@@ -120,12 +120,13 @@ export default function AdminManagerList() {
             })
           }
 
+          // Xóa manager
           await deleteManager(manager._id).unwrap()
           notification.success({
             message: 'Xóa Manager thành công',
             description: `Manager "${manager.name}" đã được xóa.`,
           })
-          refetch()
+          refetch() // Tải lại danh sách manager
         } catch (error: any) {
           console.error('Failed to delete manager:', error)
           notification.error({
@@ -137,6 +138,7 @@ export default function AdminManagerList() {
     })
   }
 
+  // Định nghĩa cột cho bảng Ant Design
   const columns: ColumnsType<Manager> = [
     {
       title: 'Tên Manager',
@@ -261,6 +263,18 @@ export default function AdminManagerList() {
             ]}
           >
             <Input placeholder="09xxxxxxxx" />
+          </Form.Item>
+          {/* Thêm trường Password */}
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu!' },
+              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+            ]}
+            hasFeedback // Hiển thị trạng thái validation
+          >
+            <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>
           <Form.Item
             name="gender"

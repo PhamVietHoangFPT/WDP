@@ -16,13 +16,13 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router-dom'
-import { FilterOutlined, DownOutlined, UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons'
+import { FilterOutlined, DownOutlined, UserAddOutlined, UserDeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import {
   useGetFacilitiesWithManagerListQuery,
   useGetManagerListQuery,
   useAssignManagerMutation,
   useUnAssignManagerMutation,
-} from '../../features/admin/managerAPI'
+} from '../../features/admin/managerAPI' // Đảm bảo đường dẫn API chính xác
 
 const { Title } = Typography
 const { Option } = Select
@@ -37,21 +37,23 @@ interface Address {
   };
 }
 
-// Định nghĩa kiểu dữ liệu cho Facility
+// Định nghĩa kiểu dữ liệu cho Manager (đầy đủ hơn để hiển thị tên)
+interface Manager {
+  _id: string
+  name: string
+  email: string
+  phoneNumber?: string // Có thể có hoặc không tùy vào response của get all managers
+  role?: string // Có thể có hoặc không
+  facility?: string // ID của facility mà manager đang quản lý (nếu có)
+}
+
+// Định nghĩa kiểu dữ liệu cho Facility, cập nhật 'account'
 interface Facility {
   _id: string
   facilityName: string
   address: Address
   phoneNumber: string
-  account: string | null // managerId nếu đã gán, null nếu chưa
-}
-
-// Định nghĩa kiểu dữ liệu cho Manager (chỉ lấy những trường cần thiết)
-interface Manager {
-  _id: string
-  name: string
-  email: string
-  facility?: string // ID của facility mà manager đang quản lý (nếu có)
+  account: Manager | null // Cập nhật: 'account' giờ là một đối tượng Manager hoặc null
 }
 
 export default function FacilitiesWithManager() {
@@ -98,7 +100,8 @@ export default function FacilitiesWithManager() {
 
   // Xử lý gỡ Manager
   const handleUnAssignManager = async (facility: Facility) => {
-    if (!facility.account) {
+    // Bây giờ facility.account là một đối tượng Manager hoặc null
+    if (!facility.account || !facility.account._id) { // Kiểm tra cả facility.account và facility.account._id
       notification.warn({
         message: 'Không thể gỡ',
         description: 'Cơ sở này không có manager nào được gán.',
@@ -109,16 +112,16 @@ export default function FacilitiesWithManager() {
     Modal.confirm({
       title: 'Xác nhận gỡ Manager',
       icon: <ExclamationCircleOutlined />,
-      content: `Mày có chắc chắn muốn gỡ manager khỏi cơ sở "${facility.facilityName}" không?`,
+      content: `Mày có chắc chắn muốn gỡ manager "${facility.account.name}" khỏi cơ sở "${facility.facilityName}" không?`,
       okText: 'Gỡ',
       okType: 'danger',
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          await unAssignManager({ facilityId: facility._id, managerId: facility.account! }).unwrap()
+          await unAssignManager({ facilityId: facility._id, managerId: facility.account!._id }).unwrap() // Lấy _id từ facility.account
           notification.success({
             message: 'Gỡ Manager thành công',
-            description: `Manager đã được gỡ khỏi cơ sở "${facility.facilityName}".`,
+            description: `Manager "${facility.account!.name}" đã được gỡ khỏi cơ sở "${facility.facilityName}".`,
           })
           refetchFacilities() // Cập nhật lại danh sách facilities
           refetchManagers() // Cập nhật lại danh sách managers (để manager đó có thể được gán lại)
@@ -189,9 +192,10 @@ export default function FacilitiesWithManager() {
       key: 'phoneNumber',
     },
     {
-      title: 'Trạng thái Manager',
-      key: 'managerStatus',
-      render: (_, record) => (record.account ? 'Đã gán' : 'Chưa gán'),
+      title: 'Manager', // Đổi tên cột cho rõ ràng hơn
+      key: 'managerName',
+      // Render: Hiển thị tên manager nếu có, ngược lại là "Chưa gán"
+      render: (_, record) => (record.account ? record.account.name : 'Chưa gán'),
     },
     {
       title: 'Hành động',
@@ -212,6 +216,7 @@ export default function FacilitiesWithManager() {
             <Dropdown
               overlay={getUnassignedManagersMenu(record._id)}
               trigger={['click']}
+              // Vô hiệu hóa nút gán nếu đang xử lý hoặc không có manager nào chưa gán
               disabled={isAssigningManager || isManagersLoading || (managers.filter(m => !m.facility)).length === 0}
             >
               <Button
@@ -262,7 +267,6 @@ export default function FacilitiesWithManager() {
         >
           <Option value={false}>Chưa có Manager</Option>
           <Option value={true}>Đã có Manager</Option>
-          <Option value={undefined}>Tất cả</Option> {/* Option để hiển thị tất cả */}
         </Select>
       </div>
 
