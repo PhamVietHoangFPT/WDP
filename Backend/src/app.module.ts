@@ -39,6 +39,7 @@ import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.mo
 import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
 import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHistory/testResultShipmentHIstory.module'
 import { AdminModule } from './modules/admin/admin.module'
+import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipmentHistory.module'
 @Module({
   imports: [
     databaseConfig,
@@ -82,8 +83,9 @@ import { AdminModule } from './modules/admin/admin.module'
     TestResultShipmentModule,
     TestResultShipmentHistoryModule,
     AdminModule,
+    KitShipmentHistoryModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
