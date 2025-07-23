@@ -69,6 +69,12 @@ export class ServiceCaseController {
     type: Number,
     description: 'Số trang',
   })
+  @ApiQuery({
+    name: 'currentStatus',
+    required: false,
+    type: String,
+    description: 'Trạng thái hiện tại của hồ sơ dịch vụ',
+  })
   @ApiResponse({
     status: 200,
     description: 'Danh sách tài khoản.',
@@ -76,12 +82,14 @@ export class ServiceCaseController {
   })
   findAll(
     @Query() paginationQuery: PaginationQueryDto,
+    @Query('currentStatus') currentStatus: string | null,
     @Req() req: any,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
     const userId = req.user.id
     return this.serviceCaseService.findAllServiceCases(
       paginationQuery.pageNumber,
       paginationQuery.pageSize,
+      currentStatus,
       userId,
     )
   }

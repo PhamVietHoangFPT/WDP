@@ -24,6 +24,7 @@ import {
   useUpdateServiceCaseStatusMutation,
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
+  useLazyGetTestTakerQuery,
 } from '../../features/doctor/doctorAPI'
 import Cookies from 'js-cookie'
 
@@ -91,6 +92,7 @@ const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
 }
 
 const DoctorServiceCaseWithoutResult: React.FC = () => {
+  const [triggerGetTestTaker] = useLazyGetTestTakerQuery()
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedStatus, setSelectedStatus] = useState<string>('')
@@ -162,36 +164,40 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
 
   // Fetch test taker names when selectedServiceCase changes
   useEffect(() => {
-    if (selectedServiceCase?.caseMember?.testTaker.length) {
-      const fetchNames = async () => {
-        const namesPromises = selectedServiceCase.caseMember.testTaker.map(
-          async (id) => {
-            const { data: testTaker, error } =
-              await useGetTestTakerQuery(id).unwrap() // Using unwrap() to get the actual data or throw error
-            if (error) {
-              console.error(`Error fetching test taker ${id}:`, error)
-              return id.slice(-8).toUpperCase()
-            }
-            return testTaker?.name || id.slice(-8).toUpperCase()
-          }
-        )
-        try {
-          const fetchedNames = await Promise.all(namesPromises)
-          setTestTakerNames(fetchedNames)
-        } catch (err) {
-          console.error('Failed to fetch all test taker names:', err)
-          setTestTakerNames(
-            selectedServiceCase.caseMember.testTaker.map((id) =>
-              id.slice(-8).toUpperCase()
-            )
-          ) // Fallback to IDs
-        }
+    // Hàm này giữ nguyên, chỉ thay đổi cách gọi query
+    const fetchNames = async () => {
+      if (!selectedServiceCase?.caseMember?.testTaker?.length) {
+        setTestTakerNames([])
+        return
       }
-      fetchNames()
-    } else {
-      setTestTakerNames([])
+
+      try {
+        // Dùng Promise.all để gọi tất cả các trigger cùng lúc
+        const namesPromises = selectedServiceCase.caseMember.testTaker.map(
+          (id) =>
+            // ✅ SỬA LẠI Ở ĐÂY: Gọi hàm trigger thay vì gọi hook
+            triggerGetTestTaker(id, /* preferCacheValue */ true).unwrap()
+        )
+
+        const fetchedNames = await Promise.all(namesPromises)
+
+        console.log(fetchedNames)
+
+        // Map lại kết quả để lấy ra 'name', nếu fetch lỗi thì unwrap sẽ ném ra lỗi và được bắt bởi catch block
+        setTestTakerNames(fetchedNames.map((testTaker) => testTaker.name))
+      } catch (err) {
+        console.error('Failed to fetch one or more test taker names:', err)
+        // Fallback nếu có bất kỳ lỗi nào xảy ra
+        setTestTakerNames(
+          selectedServiceCase.caseMember.testTaker.map((id) =>
+            id.slice(-8).toUpperCase()
+          )
+        )
+      }
     }
-  }, [selectedServiceCase]) // Dependency on selectedServiceCase
+
+    fetchNames()
+  }, [selectedServiceCase, triggerGetTestTaker]) // Dependency on selectedServiceCase
 
   const calculateDaysLeft = (bookingDate: string, timeReturn: number) => {
     const booking = new Date(bookingDate)
@@ -269,7 +275,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       const values = await form.validateFields()
 
       const adnPercentage = parseFloat(values.adnPercentage)
-
+      console.log(testTakerNames)
       let conclusion = ''
       const testTakerNamesString = testTakerNames.join(' và ')
 
