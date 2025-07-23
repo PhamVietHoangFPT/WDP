@@ -22,6 +22,12 @@ export interface IPaymentRepository {
     userId: string,
     currentServiceCasePayment: string,
   ): Promise<PaymentDocument>
+
+  createForCondition(
+    createPaymentHistoryDto: CreatePaymentHistoryDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument>
 }
 
 export const IPaymentRepository = Symbol('IPaymentRepository')
