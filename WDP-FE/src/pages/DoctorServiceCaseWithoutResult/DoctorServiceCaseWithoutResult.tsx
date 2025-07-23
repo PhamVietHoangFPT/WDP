@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Table,
   Typography,
@@ -27,6 +27,8 @@ import {
   useLazyGetTestTakerQuery,
 } from '../../features/doctor/doctorAPI'
 import Cookies from 'js-cookie'
+import { useUpdateServiceCaseConditionMutation } from '../../features/serviceCase/serviceCase'
+import UpdateQualityModal from '../../components/Modal/updateConditionModal'
 
 const { Title } = Typography
 
@@ -66,6 +68,8 @@ interface TestTaker {
 interface TestTakerNameProps {
   id: string
 }
+
+
 
 const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
   const {
@@ -134,6 +138,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     }
   )
 
+
+
   const doctorId = useMemo(() => {
     const userData = Cookies.get('userData')
     if (userData) {
@@ -152,6 +158,32 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     useUpdateServiceCaseStatusMutation()
   const [createServiceCaseResult, { isLoading: isCreatingResult }] =
     useCreateServiceCaseResultMutation()
+  // THÊM MỘT HÀM ĐỂ CẬP NHẬT ĐIỀU KIỆN CỦA DỊCH VỤ
+  const [updateCondition] = useUpdateServiceCaseConditionMutation()
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleOpen = useCallback((serviceCase: ServiceCase) => {
+    console.log('handleOpen called with:', serviceCase);
+    setSelectedServiceCase(serviceCase);
+    setIsModalOpen(true);
+  }, [setSelectedServiceCase, setIsModalOpen]);
+
+  const handleClose = () => setIsModalOpen(false)
+
+  const handleSubmit = async (selectedConditionId: string) => {
+    console.log('Selected condition to update:', selectedConditionId)
+    try {
+      await updateCondition({ serviceCaseId: selectedServiceCase?._id, conditionId: selectedConditionId }).unwrap()
+    } catch (error: any) {
+      console.error('Error updating condition:', error)
+      message.error(
+        error?.data?.message || 'Không thể cập nhật chất lượng mẫu thử!'
+      )
+      return
+    }
+    handleClose()
+  }
 
   useEffect(() => {
     if (statusListData?.data && !selectedStatus) {
@@ -180,9 +212,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         )
 
         const fetchedNames = await Promise.all(namesPromises)
-
-        console.log(fetchedNames)
-
         // Map lại kết quả để lấy ra 'name', nếu fetch lỗi thì unwrap sẽ ném ra lỗi và được bắt bởi catch block
         setTestTakerNames(fetchedNames.map((testTaker) => testTaker.name))
       } catch (err) {
@@ -255,8 +284,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       console.error('Update status error:', error)
       message.error(
         error?.data?.message ||
-          error?.statusText ||
-          'Không thể kết nối đến máy chủ'
+        error?.statusText ||
+        'Không thể kết nối đến máy chủ'
       )
       refetchServiceCases()
     }
@@ -466,15 +495,25 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           )
         } else if (record.currentStatus.order === 8) {
           return (
-            <Button
-              type='primary'
-              icon={<PlusOutlined />}
-              onClick={() => handleCreateResult(record)}
-              size='small'
-              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-            >
-              Tạo kết quả
-            </Button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button
+                type='primary'
+                icon={<EditOutlined />}
+                onClick={() => handleOpen(record)}
+                size='small'
+              >
+                Cập nhật chất lượng
+              </Button>
+              <Button
+                type='primary'
+                icon={<PlusOutlined />}
+                onClick={() => handleCreateResult(record)}
+                size='small'
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+              >
+                Tạo kết quả
+              </Button>
+            </div>
           )
         } else {
           return (
@@ -542,13 +581,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
         <SelectionComponent />
         <Alert
           message='Lỗi tải dữ liệu'
-          description={`Đã xảy ra lỗi khi tải dữ liệu: ${
-            (fetchError as any)?.status || 'Không xác định'
-          } - ${
-            (fetchError as any)?.data?.message ||
+          description={`Đã xảy ra lỗi khi tải dữ liệu: ${(fetchError as any)?.status || 'Không xác định'
+            } - ${(fetchError as any)?.data?.message ||
             (fetchError as any)?.error ||
             'Vui lòng thử lại sau.'
-          }`}
+            }`}
           type='error'
           showIcon
           action={
@@ -723,11 +760,9 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
                       if (testTakerNames.length === 0) {
                         return 'Không đủ thông tin người xét nghiệm để đưa ra kết luận cụ thể.'
                       } else if (testTakerNames.length === 1) {
-                        return `${
-                          testTakerNames[0]
-                        } có kết quả xét nghiệm ADN là ${
-                          adnValue !== null ? adnValue : '...'
-                        }%.`
+                        return `${testTakerNames[0]
+                          } có kết quả xét nghiệm ADN là ${adnValue !== null ? adnValue : '...'
+                          }%.`
                       } else if (adnValue === null) {
                         return `${namesString} có quan hệ huyết thống... (vui lòng nhập tỷ lệ ADN)`
                       } else if (adnValue === 100) {
@@ -808,6 +843,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           </>
         )}
       </Modal>
+      <UpdateQualityModal
+        open={isModalOpen}
+        onClose={handleClose}
+        onSubmit={handleSubmit}
+      />
     </div>
   )
 }

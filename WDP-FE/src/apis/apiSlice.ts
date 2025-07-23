@@ -49,6 +49,7 @@ export const apiSlice = createApi({
     'staff',
     'vnpay',
     'results',
+    'conditions',
   ],
 
   endpoints: () => ({}),
