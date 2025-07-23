@@ -18,11 +18,13 @@ export class AdminRepository implements IAdminRepository {
   async createManagerAccount(
     accountData: Partial<Account>,
     userId: string,
+    managerRoleId: string,
   ): Promise<AccountDocument> {
     const createdManager = new this.accountModel({
       ...accountData,
       created_by: new Types.ObjectId(userId),
       created_at: new Date(),
+      role: new Types.ObjectId(managerRoleId),
     })
     return createdManager.save()
   }

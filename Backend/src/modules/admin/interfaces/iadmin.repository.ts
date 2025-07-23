@@ -6,6 +6,7 @@ export interface IAdminRepository {
   createManagerAccount(
     accountData: Partial<AccountDocument>,
     userId: string,
+    managerRoleId: string,
   ): Promise<AccountDocument>
   deleteManagerAccount(
     id: string,
