@@ -11,6 +11,7 @@ import { IRoleRepository } from '../role/interfaces/irole.repository'
 import { AccountResponseDto } from '../account/dto/accountResponse.dto'
 import { FacilityResponseDto } from '../facility/dto/facilityResponse.dto'
 import { isMongoId } from 'class-validator'
+import { Types } from 'mongoose'
 
 @Injectable()
 export class AdminService implements IAdminService {
@@ -72,7 +73,11 @@ export class AdminService implements IAdminService {
     if (!managerRoleId) {
       throw new NotFoundException('Role "Manager" không tồn tại')
     }
-    return this.adminRepository.createManagerAccount(createManagerDto, userId)
+    return this.adminRepository.createManagerAccount(
+      createManagerDto,
+      userId,
+      managerRoleId,
+    )
   }
 
   async deleteManagerAccount(
