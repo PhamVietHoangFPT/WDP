@@ -31,7 +31,7 @@ export class AdminRepository implements IAdminRepository {
 
   async getAllManagers(managerRoleId: string): Promise<AccountDocument[]> {
     return this.accountModel
-      .find({ role: new Types.ObjectId(managerRoleId) }) // Exclude the current manager
+      .find({ role: new Types.ObjectId(managerRoleId), deleted_at: null }) // Exclude the current manager
       .exec()
   }
   async deleteManagerAccount(

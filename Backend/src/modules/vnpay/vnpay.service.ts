@@ -48,10 +48,11 @@ export class VnpayService {
       PaymentData.serviceCaseId,
     )
     const totalFee = serviceCaseFee + shippingFee
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}`
     const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_TxnRef: uniqueTxnRef,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,
@@ -70,10 +71,12 @@ export class VnpayService {
     const conditionFee = await this.serviceCaseRepository.getConditionFeeById(
       PaymentData.serviceCaseId,
     )
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}`
     const dataSend = {
       vnp_Amount: conditionFee,
-      vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_OrderInfo:
+        'Thanh toán chi phí phát sinh cho dịch vụ ' + PaymentData.serviceCaseId,
+      vnp_TxnRef: uniqueTxnRef,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,

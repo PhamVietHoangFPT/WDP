@@ -62,11 +62,15 @@ export class PaymentService implements IPaymentService {
         'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
       )
     }
+    const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
     const payment = await this.paymentRepository.createForServiceCase(
       paymentData,
       userId,
-      currentServiceCasePayment,
+      originalServiceCaseId,
     )
+    if (!payment || typeof payment.save !== 'function') {
+      throw new Error('Failed to create payment document')
+    }
     return payment.save()
   }
 
@@ -85,6 +89,7 @@ export class PaymentService implements IPaymentService {
       orderInfo: checkVnPayPayment.vnp_OrderInfo,
       transactionNo: checkVnPayPayment.vnp_TransactionNo,
     }
+
     const existingPayment =
       await this.paymentRepository.findWithTransactionReferenceNumber(
         paymentData.transactionReferenceNumber,
@@ -94,11 +99,16 @@ export class PaymentService implements IPaymentService {
         'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
       )
     }
+
+    const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
     const payment = await this.paymentRepository.createForCondition(
       paymentData,
       userId,
-      currentServiceCasePayment,
+      originalServiceCaseId,
     )
+    if (!payment || typeof payment.save !== 'function') {
+      throw new Error('Failed to create payment document')
+    }
     return payment.save()
   }
 
