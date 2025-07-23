@@ -38,6 +38,7 @@ import { StaffModule } from './modules/staff/staff.module'
 import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.modules'
 import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
 import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHistory/testResultShipmentHIstory.module'
+import { AdminModule } from './modules/admin/admin.module'
 @Module({
   imports: [
     databaseConfig,
@@ -80,6 +81,7 @@ import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHis
     ShipmentStatusModule,
     TestResultShipmentModule,
     TestResultShipmentHistoryModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
