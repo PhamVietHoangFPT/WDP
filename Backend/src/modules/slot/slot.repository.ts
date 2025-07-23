@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { FilterQuery, Model, UpdateQuery } from 'mongoose'
 import { Slot, SlotDocument } from './schemas/slot.schema'
 import { ISlotRepository } from './interfaces/islot.repository'
 import { CreateSlotDto } from './dto/createSlot.dto'
@@ -110,5 +110,13 @@ export class SlotRepository implements ISlotRepository {
       return true
     }
     return false
+  }
+
+  async updateMany(
+    filter: FilterQuery<Slot>,
+    update: UpdateQuery<Slot>,
+  ): Promise<any> {
+    // Gọi thẳng hàm updateMany của model
+    return this.slotModel.updateMany(filter, update)
   }
 }

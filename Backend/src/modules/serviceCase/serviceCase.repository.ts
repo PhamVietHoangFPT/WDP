@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model, Types } from 'mongoose'
+import mongoose, { FilterQuery, Model, Types, UpdateQuery } from 'mongoose'
 import { ServiceCase, ServiceCaseDocument } from './schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from './dto/createServiceCase.dto'
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { ITestRequestHistoryRepository } from '../testRequestHistory/interfaces/itestRequestHistory.repository'
-import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
 
 @Injectable()
 export class ServiceCaseRepository implements IServiceCaseRepository {
@@ -189,10 +188,10 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<string[]> {
-    type BookingIdResult = { bookingId?: mongoose.Types.ObjectId }
+  ): Promise<{ _id: string; bookingId: string; slotId: string }[]> {
+    // ✅ 1. SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ
 
-    const results: BookingIdResult[] = await this.serviceCaseModel.aggregate([
+    const aggregationPipeline = [
       {
         $match: {
           created_at: { $lt: time },
@@ -216,21 +215,20 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           as: 'bookingDetails',
         },
       },
-      { $unwind: '$bookingDetails' },
+      // Dùng $unwind an toàn hơn với preserveNullAndEmptyArrays
+      // để không làm mất các service case có booking rỗng/null
+      {
+        $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
+      },
       {
         $project: {
-          _id: 0,
+          _id: 1, // ID của service case
           bookingId: '$bookingDetails._id',
+          slotId: '$bookingDetails.slot',
         },
       },
-    ])
-
-    // 3. DÙNG .filter() và .map() ĐỂ BIẾN ĐỔI TOÀN BỘ MẢNG KẾT QUẢ
-    const bookingIds = results
-      .filter((result) => result.bookingId)
-      .map((result) => result.bookingId.toString())
-
-    return bookingIds // Trả về mảng các chuỗi ID
+    ]
+    return this.serviceCaseModel.aggregate(aggregationPipeline)
   }
 
   async findByBookingId(bookingId: string): Promise<boolean> {
@@ -438,5 +436,12 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
 
     // Case 4: Mặc định còn lại là có 'condition' và đã có 'paymentForCondition' -> không cần thanh toán
     return false
+  }
+
+  async updateMany(
+    filter: FilterQuery<ServiceCase>,
+    update: UpdateQuery<ServiceCase>,
+  ): Promise<any> {
+    return this.serviceCaseModel.updateMany(filter, update)
   }
 }

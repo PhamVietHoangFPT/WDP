@@ -1,7 +1,6 @@
-import { UpdateConditionDto } from './../../condition/dto/updateCondition.dto'
-import { ServiceCaseDocument } from '../schemas/serviceCase.schema'
+import { ServiceCase, ServiceCaseDocument } from '../schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from '../dto/createServiceCase.dto'
-import mongoose from 'mongoose'
+import mongoose, { FilterQuery, UpdateQuery } from 'mongoose'
 
 export interface IServiceCaseRepository {
   createServiceCase(
@@ -50,7 +49,10 @@ export interface IServiceCaseRepository {
     resultId: string,
   ): Promise<ServiceCaseDocument | null>
 
-  getBookingIdsByTime(time: Date, currentStatusId: string): Promise<string[]>
+  getBookingIdsByTime(
+    time: Date,
+    currentStatusId: string,
+  ): Promise<{ _id: string; bookingId: string; slotId: string }[]>
 
   findByBookingId(bookingId: string): Promise<boolean | null>
 
@@ -67,5 +69,10 @@ export interface IServiceCaseRepository {
    * @returns `null` nếu không tìm thấy service case.
    */
   checkPaidForCondition(resultId: string): Promise<boolean | null>
+
+  updateMany(
+    filter: FilterQuery<ServiceCase>,
+    update: UpdateQuery<ServiceCase>,
+  ): Promise<any>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')
