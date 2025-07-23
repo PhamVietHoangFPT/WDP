@@ -201,4 +201,41 @@ export class BookingRepository implements IBookingRepository {
       }
     })
   }
+
+  async findBookingsWithoutServiceCase(
+    timeLimit: Date,
+  ): Promise<{ _id: string; slot: string }[]> {
+    return this.bookingModel.aggregate([
+      // Giai đoạn 1: Chỉ lấy các booking được tạo TRƯỚC một mốc thời gian
+      // Để cho người dùng có đủ thời gian hoàn thành tạo service case
+      {
+        $match: {
+          created_at: { $lt: timeLimit },
+        },
+      },
+      // Giai đoạn 2: "Thử" join với collection 'servicecases'
+      {
+        $lookup: {
+          from: 'servicecases', // Tên collection của service case
+          localField: '_id', // Khóa của collection 'bookings'
+          foreignField: 'booking', // Khóa ngoại trong 'servicecases' trỏ về booking
+          as: 'serviceCaseLink', // Tên mảng kết quả tạm thời
+        },
+      },
+      // Giai đoạn 3: Lọc ra những document mà mảng join được RỖNG
+      // Tức là không tìm thấy service case nào tương ứng
+      {
+        $match: {
+          serviceCaseLink: { $size: 0 },
+        },
+      },
+      // Giai đoạn 4: Chỉ lấy những trường cần thiết để xử lý
+      {
+        $project: {
+          _id: 1, // Lấy ID của booking
+          slot: 1, // Lấy ID của slot liên quan
+        },
+      },
+    ])
+  }
 }

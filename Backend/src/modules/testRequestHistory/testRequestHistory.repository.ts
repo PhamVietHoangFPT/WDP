@@ -52,4 +52,9 @@ export class TestRequestHistoryRepository
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
     return this.testRequestHistoryModel.countDocuments(filter).exec()
   }
+
+  async insertMany(docs: any[]): Promise<any> {
+    // Gọi thẳng hàm insertMany của model
+    return this.testRequestHistoryModel.insertMany(docs)
+  }
 }

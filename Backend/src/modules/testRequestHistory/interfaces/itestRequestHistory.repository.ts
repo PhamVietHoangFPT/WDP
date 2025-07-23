@@ -16,6 +16,8 @@ export interface ITestRequestHistoryRepository {
   ): mongoose.Query<TestRequestHistoryDocument[], TestRequestHistoryDocument>
 
   countDocuments(filter: Record<string, unknown>): Promise<number>
+
+  insertMany(docs: any[]): Promise<any>
 }
 
 export const ITestRequestHistoryRepository = Symbol(

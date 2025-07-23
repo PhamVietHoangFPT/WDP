@@ -1,12 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  ConflictException,
-  // NotFoundException,
-  // BadRequestException,
-  Logger,
-  InternalServerErrorException,
-} from '@nestjs/common'
+import { Injectable, Inject, ConflictException, Logger } from '@nestjs/common'
 
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
 import { IServiceCaseService } from './interfaces/iserviceCase.service'
@@ -22,9 +14,9 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { Cron } from '@nestjs/schedule'
 import { ISlotRepository } from '../slot/interfaces/islot.repository'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
-import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
 import { VnpayService } from '../vnpay/vnpay.service'
 import { IEmailService } from '../email/interfaces/iemail.service'
+import { ITestRequestHistoryRepository } from '../testRequestHistory/interfaces/itestRequestHistory.repository'
 @Injectable()
 export class ServiceCaseService implements IServiceCaseService {
   private readonly logger = new Logger(ServiceCaseService.name)
@@ -44,6 +36,8 @@ export class ServiceCaseService implements IServiceCaseService {
     @Inject(VnpayService)
     private readonly VnpayService: VnpayService,
     @Inject(IEmailService) private emailService: IEmailService,
+    @Inject(ITestRequestHistoryRepository)
+    private testRequestHistoryRepository: ITestRequestHistoryRepository,
   ) {}
 
   private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
@@ -234,98 +228,81 @@ export class ServiceCaseService implements IServiceCaseService {
     return this.mapToResponseDto(updated)
   }
 
-  @Cron('0 */3 * * * *')
+  @Cron('0 */1 * * * *')
   async handleCron() {
-    const now = new Date()
-    const futureTime = new Date(now.getTime())
-    this.logger.log(
-      `Bắt đầu cron job lúc ${now.toISOString()}, kiểm tra các lượt đặt sau ${futureTime.toISOString()}`,
-    )
-    // Trường hợp chưa thanh toán
-    const currentStatusId =
+    this.logger.log(`Bắt đầu cron job lúc ${new Date().toISOString()}`)
+
+    // 1. Lấy ID các trạng thái cần thiết (Giữ nguyên)
+    const pendingStatusId =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
         'Chờ thanh toán',
       )
-    const bookingIds = await this.serviceCaseRepository.getBookingIdsByTime(
-      futureTime,
-      currentStatusId,
-    )
-
-    // Trường hợp thanh toán thất bại
-    const failedPaymentStatusId =
+    const failedStatusId =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
         'Thanh toán thất bại',
       )
-    const failedPaymentStatusBookingIds =
-      await this.serviceCaseRepository.getBookingIdsByTime(
-        futureTime,
-        failedPaymentStatusId,
+    const cancelledStatusId =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Hủy (do thanh toán thất bại hoặc chưa thanh toán)',
       )
 
-    // Trường hợp chưa thanh toán
-    const unpaidBookingIds =
-      await this.serviceCaseRepository.getBookingIdsByTime(futureTime, null)
+    // 2. Lấy danh sách cần xử lý
+    const pendingCases = await this.serviceCaseRepository.getBookingIdsByTime(
+      new Date(),
+      pendingStatusId,
+    )
+    const failedCases = await this.serviceCaseRepository.getBookingIdsByTime(
+      new Date(),
+      failedStatusId,
+    )
 
-    const allBookingIds = await this.bookingRepository.getAllBookingsIds()
-    const bookingIdsToRemove: string[] = []
-    for (const allBookingId of allBookingIds) {
-      const isServiceCaseExist =
-        await this.serviceCaseRepository.findByBookingId(allBookingId)
-      if (!isServiceCaseExist) {
-        // Nếu không có service case, thêm vào danh sách để xóa
-        bookingIdsToRemove.push(allBookingId)
-      }
-    }
-    for (const bookingIdToRemove of bookingIdsToRemove) {
-      const slotId = await this.bookingRepository.getSlotIdByBookingId(
-        bookingIdToRemove.toString(),
-      )
-      if (slotId) {
-        await this.slotRepository.setBookingStatus(slotId.toString(), false)
-      }
-    }
-    // Cập nhật trạng thái đặt chỗ cho các bookingIds
-    if (
-      bookingIds.length === 0 &&
-      failedPaymentStatusBookingIds.length === 0 &&
-      unpaidBookingIds.length === 0
-    ) {
-      this.logger.log(
-        `Không có lượt đặt nào cần xử lý lúc ${now.toISOString()}`,
-      )
+    const casesToProcess = [...pendingCases, ...failedCases]
+
+    if (casesToProcess.length === 0) {
+      this.logger.log('Không có hồ sơ nào cần xử lý.')
       return
     }
 
-    for (const bookingId of bookingIds) {
-      const slotId = await this.bookingRepository.getSlotIdByBookingId(
-        bookingId.toString(),
+    this.logger.log(`Phát hiện ${casesToProcess.length} hồ sơ cần xử lý...`)
+
+    // 3. Chuẩn bị các mảng ID từ kết quả đã lấy (Không có DB call)
+    const serviceCaseIdsToCancel = casesToProcess.map((c) => c._id.toString())
+    // Lấy slotId và lọc ra các giá trị rỗng/null để đảm bảo mảng sạch
+    const slotIdsToFree = casesToProcess
+      .map((c) => c.slotId?.toString())
+      .filter(Boolean)
+    // Chuẩn bị sẵn các document để ghi lịch sử
+    const historyDocs = casesToProcess.map((c) => ({
+      testRequest: c._id,
+      status: cancelledStatusId,
+    }))
+
+    // 4. THỰC HIỆN CẬP NHẬT HÀNG LOẠT (Chỉ 3 lệnh gọi DB)
+
+    // Cập nhật tất cả slot cần giải phóng trong MỘT LỆNH
+    if (slotIdsToFree.length > 0) {
+      await this.slotRepository.updateMany(
+        { _id: { $in: slotIdsToFree } },
+        { isBooked: false },
       )
-      if (slotId) {
-        await this.slotRepository.setBookingStatus(slotId.toString(), false)
-      }
+      this.logger.log(`Đã giải phóng ${slotIdsToFree.length} slot.`)
     }
 
-    for (const failedPaymentStatusBookingId of failedPaymentStatusBookingIds) {
-      const slotId = await this.bookingRepository.getSlotIdByBookingId(
-        failedPaymentStatusBookingId.toString(),
+    // Cập nhật tất cả service case sang trạng thái Hủy trong MỘT LỆNH
+    if (serviceCaseIdsToCancel.length > 0) {
+      // (Giả sử bạn cũng có/thêm updateMany vào ServiceCaseRepository)
+      await this.serviceCaseRepository.updateMany(
+        { _id: { $in: serviceCaseIdsToCancel } },
+        { currentStatus: cancelledStatusId },
       )
-      if (slotId) {
-        await this.slotRepository.setBookingStatus(slotId.toString(), false)
-      }
+      this.logger.log(`Đã hủy ${serviceCaseIdsToCancel.length} hồ sơ.`)
+
+      // Ghi tất cả lịch sử trong MỘT LỆNH
+      await this.testRequestHistoryRepository.insertMany(historyDocs)
+      this.logger.log(`Đã ghi ${historyDocs.length} mục lịch sử.`)
     }
 
-    for (const unpaidBookingId of unpaidBookingIds) {
-      const slotId = await this.bookingRepository.getSlotIdByBookingId(
-        unpaidBookingId.toString(),
-      )
-      if (slotId) {
-        await this.slotRepository.setBookingStatus(slotId.toString(), false)
-      }
-    }
-
-    this.logger.log(
-      `Hoàn thành cron job lúc ${new Date().toISOString()} cho ${bookingIds.length} lượt đặt chờ thanh toán và ${failedPaymentStatusBookingIds.length} lượt thanh toán thất bại.`,
-    )
+    this.logger.log(`Hoàn thành cron job.`)
   }
 
   @Cron('0 */30 8-17 * * *')
