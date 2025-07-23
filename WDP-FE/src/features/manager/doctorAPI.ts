@@ -22,7 +22,7 @@ const doctorAPI = apiSlice.injectEndpoints({
         params: {
           pageNumber,
           pageSize,
-          bookingDate
+          bookingDate,
         },
       }),
       transformResponse: (res) => res,

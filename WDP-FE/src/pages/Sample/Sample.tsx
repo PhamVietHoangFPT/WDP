@@ -65,7 +65,9 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   const [isAtHome, setIsAtHome] = useState<boolean>(true)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
-  const [selectedBookingDate, setSelectedBookingDate] = useState<string | undefined>(undefined) // State mới cho bookingDate
+  const [selectedBookingDate, setSelectedBookingDate] = useState<
+    string | undefined
+  >(undefined) // State mới cho bookingDate
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] =
@@ -262,8 +264,8 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   // Hàm để disable các ngày trước ngày hiện tại
   const disabledDate = (current: moment.Moment) => {
     // Không cho phép chọn ngày trước ngày hiện tại
-    return current && current < moment().endOf('day');
-  };
+    return current && current < moment().endOf('day')
+  }
 
   return (
     <div style={{ padding: 24 }}>
@@ -291,8 +293,8 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             ]}
           />
           <DatePicker
-            format="YYYY-MM-DD"
-            placeholder="Chọn ngày đặt lịch"
+            format='YYYY-MM-DD'
+            placeholder='Chọn ngày đặt lịch'
             onChange={(date, dateString) => {
               setSelectedBookingDate(dateString || undefined)
               setPageNumber(1)
@@ -366,7 +368,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} của ${total} dịch vụ`
               }
-              pageSizeOptions={["5", "10", "20"]}
+              pageSizeOptions={['5', '10', '20']}
             />
           )}
         </>

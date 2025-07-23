@@ -17,7 +17,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     private testRequestStatusRepository: ITestRequestStatusRepository,
     @Inject(ITestRequestHistoryRepository)
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
-  ) { }
+  ) {}
 
   async getConditionFeeById(id: string): Promise<number | null> {
     type ConditionPopulated = { condition: { conditionFee?: number } }

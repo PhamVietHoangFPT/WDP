@@ -38,7 +38,7 @@ export class PaymentController {
   constructor(
     @Inject(IPaymentService)
     private readonly paymentService: IPaymentService,
-  ) { }
+  ) {}
 
   @Post('service-case')
   @ApiOperation({

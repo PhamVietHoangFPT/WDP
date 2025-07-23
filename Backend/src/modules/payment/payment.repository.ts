@@ -10,7 +10,7 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import * as dayjs from 'dayjs'
 import * as customParseFormat from 'dayjs/plugin/customParseFormat'
-  ; (dayjs as any).extend(customParseFormat as any)
+;(dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -24,7 +24,7 @@ export class PaymentRepository implements IPaymentRepository {
     private serviceCaseStatusRepository: ITestRequestStatusRepository,
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
-  ) { }
+  ) {}
 
   async createForServiceCase(
     createPaymentHistoryDto: CreatePaymentHistoryDto,
@@ -84,9 +84,8 @@ export class PaymentRepository implements IPaymentRepository {
       payDate: payDate.isValid() ? payDate.toDate() : new Date(),
     }
     const newPayment = new this.paymentModel(dataSend)
-    const paymentType = await this.paymentTypeRepository.findByPaymentType(
-      'Chi phí phát sinh',
-    )
+    const paymentType =
+      await this.paymentTypeRepository.findByPaymentType('Chi phí phát sinh')
     newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
     newPayment.paymentType = paymentType._id
     if (currentServiceCasePayment) {

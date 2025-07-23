@@ -13,16 +13,16 @@ export class PaymentService implements IPaymentService {
   constructor(
     @Inject(IPaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
     const responseCode =
       responseCodeEnum[
-      payment.responseCode as unknown as keyof typeof responseCodeEnum
+        payment.responseCode as unknown as keyof typeof responseCodeEnum
       ]
     const transactionStatus =
       transactionStatusEnum[
-      payment.transactionStatus as unknown as keyof typeof transactionStatusEnum
+        payment.transactionStatus as unknown as keyof typeof transactionStatusEnum
       ]
     return new PaymentHistoryResponseDto({
       _id: payment._id,

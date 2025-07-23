@@ -11,7 +11,7 @@ import {
   BarChartOutlined,
   ExperimentOutlined,
   UnorderedListOutlined,
-  IdcardOutlined 
+  IdcardOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 

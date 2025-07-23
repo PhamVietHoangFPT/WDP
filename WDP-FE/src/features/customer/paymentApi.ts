@@ -104,5 +104,5 @@ export const {
   useGetPaymentByStaffQuery,
   useGetServiceCasesListQuery,
   useGetTestRequestHistoryQuery,
-  useCreateConditionPaymentHistoryMutation
+  useCreateConditionPaymentHistoryMutation,
 } = paymentApi
