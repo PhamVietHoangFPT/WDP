@@ -2,6 +2,7 @@ import { Slot, SlotDocument } from '../schemas/slot.schema'
 import { CreateSlotDto } from '../dto/createSlot.dto'
 // import { UpdateSlotDto } from '../dto/update-slot.dto'
 import { QuerySlotDto } from '../dto/querySlot.dto'
+import { FilterQuery, UpdateQuery } from 'mongoose'
 
 export interface ISlotRepository {
   create(createSlotDto: CreateSlotDto): Promise<SlotDocument>
@@ -15,6 +16,8 @@ export interface ISlotRepository {
     isBooked: boolean,
   ): Promise<SlotDocument | null>
   findSlotByFacility(id: string): Promise<boolean>
+
+  updateMany(filter: FilterQuery<Slot>, update: UpdateQuery<Slot>): Promise<any>
 }
 
 export const ISlotRepository = Symbol('ISlotRepository')

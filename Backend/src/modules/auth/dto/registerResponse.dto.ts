@@ -13,7 +13,6 @@ export class RegisterResponseDto {
   email: string
 
   constructor(partial: Partial<Account & { _id?: string }>) {
-    this.name = partial.name ?? ''
-    this.email = partial.email ?? ''
+    Object.assign(this, partial)
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator'
-
+import { Account } from 'src/modules/account/schemas/account.schema'
 export class RegisterDto {
   @ApiProperty({ example: 'Trần Văn C', required: true, minLength: 3 })
   @IsString()
@@ -19,11 +19,16 @@ export class RegisterDto {
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string
 
-  constructor(
-    partial: Partial<{ name: string; email: string; password: string }>,
-  ) {
-    this.name = partial.name ?? ''
-    this.email = partial.email ?? ''
-    this.password = partial.password ?? ''
+  @ApiProperty({ example: '0987654321' })
+  @IsString()
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  phoneNumber: string
+
+  @ApiProperty({ example: true })
+  @IsNotEmpty({ message: 'Giới tính không được để trống' })
+  gender: boolean
+
+  constructor(partial: Partial<Account>) {
+    Object.assign(this, partial)
   }
 }
