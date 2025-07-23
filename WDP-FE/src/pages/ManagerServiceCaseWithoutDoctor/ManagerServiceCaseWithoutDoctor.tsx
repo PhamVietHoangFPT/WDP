@@ -68,7 +68,9 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null)
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
-  const [selectedBookingDate, setSelectedBookingDate] = useState<string | undefined>(undefined) // State mới cho ngày đặt lịch
+  const [selectedBookingDate, setSelectedBookingDate] = useState<
+    string | undefined
+  >(undefined) // State mới cho ngày đặt lịch
 
   // Fetch danh sách service cases chưa có bác sĩ
   const {
@@ -273,8 +275,8 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   // Hàm để disable các ngày trước ngày hiện tại
   const disabledDate = (current: moment.Moment) => {
     // Không cho phép chọn ngày trước ngày hiện tại
-    return current && current < moment().startOf('day'); // Sửa thành startOf('day') để bao gồm cả ngày hiện tại
-  };
+    return current && current < moment().startOf('day') // Sửa thành startOf('day') để bao gồm cả ngày hiện tại
+  }
 
   return (
     <div style={{ padding: 24 }}>
@@ -295,13 +297,13 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
           </span>
           {/* Thêm DatePicker vào đây */}
           <DatePicker
-            format="YYYY-MM-DD"
-            placeholder="Chọn ngày đặt lịch"
+            format='YYYY-MM-DD'
+            placeholder='Chọn ngày đặt lịch'
             onChange={(date, dateString) => {
               setSelectedBookingDate(dateString || undefined)
               setPageNumber(1) // Reset về trang 1 khi thay đổi ngày
             }}
-            style={{ width: 180, marginLeft: "80px"}}
+            style={{ width: 180, marginLeft: '80px' }}
             allowClear
             suffixIcon={<CalendarOutlined />}
             disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
@@ -366,7 +368,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} của ${total} dịch vụ`
               }
-              pageSizeOptions={["5", "10", "20"]}
+              pageSizeOptions={['5', '10', '20']}
             />
           )}
         </>

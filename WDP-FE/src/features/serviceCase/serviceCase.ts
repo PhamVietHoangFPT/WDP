@@ -11,7 +11,14 @@ export const serviceCaseAPI = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['service-cases'],
     }),
+    updateServiceCaseCondition: builder.mutation({
+      query: ({ serviceCaseId, conditionId }) => ({
+        url: `/doctors/serviceCase/${serviceCaseId}/condition/${conditionId}`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['service-cases'],
+    }),
   }),
 })
 
-export const { useCreateServiceCaseMutation } = serviceCaseAPI
+export const { useCreateServiceCaseMutation, useUpdateServiceCaseConditionMutation } = serviceCaseAPI

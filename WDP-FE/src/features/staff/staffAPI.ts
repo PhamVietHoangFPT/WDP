@@ -26,9 +26,9 @@ const StaffApi = apiSlice.injectEndpoints({
     }),
 
     getCustomerServiceCaseByEmail: builder.query({
-      query: ({email, currentStatus}) => {
+      query: ({ email, currentStatus }) => {
         return {
-          url:  `/staff/service-cases?email=${email}&currentStatus=${currentStatus}`,
+          url: `/staff/service-cases?email=${email}&currentStatus=${currentStatus}`,
           method: 'GET',
         }
       },
@@ -55,9 +55,9 @@ const StaffApi = apiSlice.injectEndpoints({
 })
 
 // Export ra hook được tự động tạo bởi RTK Query
-export const { 
+export const {
   useGetServiceCasesByCustomerQuery,
   useGetAllStatusForCustomerQuery,
   useGetCustomerServiceCaseByEmailQuery,
-  useUpdateServiceCaseStatusForStaffMutation
+  useUpdateServiceCaseStatusForStaffMutation,
 } = StaffApi
