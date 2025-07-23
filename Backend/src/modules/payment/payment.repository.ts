@@ -10,7 +10,7 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import * as dayjs from 'dayjs'
 import * as customParseFormat from 'dayjs/plugin/customParseFormat'
-;(dayjs as any).extend(customParseFormat as any)
+  ; (dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -24,7 +24,7 @@ export class PaymentRepository implements IPaymentRepository {
     private serviceCaseStatusRepository: ITestRequestStatusRepository,
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
-  ) {}
+  ) { }
 
   async createForServiceCase(
     createPaymentHistoryDto: CreatePaymentHistoryDto,
@@ -65,6 +65,33 @@ export class PaymentRepository implements IPaymentRepository {
       await this.serviceCaseRepository.updatePayment(
         currentServiceCasePayment,
         serviceCaseStatus,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        newPayment._id.toString(),
+      )
+    }
+    return await newPayment.save()
+  }
+
+  async createForCondition(
+    createPaymentHistoryDto: CreatePaymentHistoryDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument> {
+    const correctFormat = 'YYYYMMDDHHmmss'
+    const payDate = dayjs(createPaymentHistoryDto.payDate, correctFormat)
+    const dataSend = {
+      ...createPaymentHistoryDto,
+      payDate: payDate.isValid() ? payDate.toDate() : new Date(),
+    }
+    const newPayment = new this.paymentModel(dataSend)
+    const paymentType = await this.paymentTypeRepository.findByPaymentType(
+      'Chi phí phát sinh',
+    )
+    newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
+    newPayment.paymentType = paymentType._id
+    if (currentServiceCasePayment) {
+      await this.serviceCaseRepository.updatePaymentForCondition(
+        currentServiceCasePayment,
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         newPayment._id.toString(),
       )

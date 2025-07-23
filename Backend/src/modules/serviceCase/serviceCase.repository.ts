@@ -17,7 +17,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     private testRequestStatusRepository: ITestRequestStatusRepository,
     @Inject(ITestRequestHistoryRepository)
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
-  ) {}
+  ) { }
 
   async getConditionFeeById(id: string): Promise<number | null> {
     type ConditionPopulated = { condition: { conditionFee?: number } }
@@ -111,6 +111,20 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       updatedServiceCase?._id.toString(),
       currentStatus,
       updatedServiceCase?.created_by.toString(),
+    )
+    return updatedServiceCase
+  }
+
+  async updatePaymentForCondition(
+    id: string,
+    paymentForCondition: string,
+  ): Promise<ServiceCaseDocument | null> {
+    const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
+      id,
+      {
+        paymentForCondition: new mongoose.Types.ObjectId(paymentForCondition),
+      },
+      { new: true },
     )
     return updatedServiceCase
   }

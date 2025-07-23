@@ -12,7 +12,7 @@ export class VnpayService {
     private readonly vnpayService: VnpayServiceLocal,
     @Inject(IServiceCaseRepository)
     private readonly serviceCaseRepository: IServiceCaseRepository,
-  ) {}
+  ) { }
 
   async getBankList(): Promise<Bank[]> {
     return this.vnpayService.getBankList()
@@ -66,7 +66,7 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success-condition/'
     const conditionFee = await this.serviceCaseRepository.getConditionFeeById(
       PaymentData.serviceCaseId,
     )

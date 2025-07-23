@@ -13,16 +13,16 @@ export class PaymentService implements IPaymentService {
   constructor(
     @Inject(IPaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
     const responseCode =
       responseCodeEnum[
-        payment.responseCode as unknown as keyof typeof responseCodeEnum
+      payment.responseCode as unknown as keyof typeof responseCodeEnum
       ]
     const transactionStatus =
       transactionStatusEnum[
-        payment.transactionStatus as unknown as keyof typeof transactionStatusEnum
+      payment.transactionStatus as unknown as keyof typeof transactionStatusEnum
       ]
     return new PaymentHistoryResponseDto({
       _id: payment._id,
@@ -63,6 +63,38 @@ export class PaymentService implements IPaymentService {
       )
     }
     const payment = await this.paymentRepository.createForServiceCase(
+      paymentData,
+      userId,
+      currentServiceCasePayment,
+    )
+    return payment.save()
+  }
+
+  async createForCondition(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument> {
+    const paymentData: CreatePaymentHistoryDto = {
+      tmnCode: checkVnPayPayment.vnp_TmnCode,
+      amount: checkVnPayPayment.vnp_Amount,
+      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
+      responseCode: checkVnPayPayment.vnp_ResponseCode,
+      payDate: checkVnPayPayment.vnp_PayDate,
+      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
+      orderInfo: checkVnPayPayment.vnp_OrderInfo,
+      transactionNo: checkVnPayPayment.vnp_TransactionNo,
+    }
+    const existingPayment =
+      await this.paymentRepository.findWithTransactionReferenceNumber(
+        paymentData.transactionReferenceNumber,
+      )
+    if (existingPayment) {
+      throw new ForbiddenException(
+        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
+      )
+    }
+    const payment = await this.paymentRepository.createForCondition(
       paymentData,
       userId,
       currentServiceCasePayment,

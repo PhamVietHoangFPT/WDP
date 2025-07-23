@@ -9,6 +9,13 @@ export interface IPaymentService {
     userId: string,
     currentServiceCasePayment: string,
   ): Promise<PaymentDocument>
+
+  createForCondition(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument>
+
   findById(
     id: string,
     userId?: string,
