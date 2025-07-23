@@ -22,6 +22,16 @@ export const paymentApi = apiSlice.injectEndpoints({
         },
         responseHandler: (response) => response.text(), // 👈 bắt buộc để parse text
       }),
+      invalidatesTags: ['vnpay'],
+    }),
+
+    createPaymentForCondition: builder.mutation({
+      query: (data) => ({
+        url: '/vnpay/payment-for-condition',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['vnpay'],
     }),
 
     // ✅ Tạo lịch sử thanh toán cho dịch vụ
@@ -60,8 +70,8 @@ export const paymentApi = apiSlice.injectEndpoints({
     }),
 
     getServiceCasesList: builder.query({
-      query: ({ pageSize, pageNumber }) => ({
-        url: `/service-cases?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      query: ({ pageSize, pageNumber, currentStatus }) => ({
+        url: `/service-cases?pageNumber=${pageNumber}&pageSize=${pageSize}&currentStatus=${currentStatus}`,
         method: 'GET',
       }),
       providesTags: ['PaymentHistory'],
@@ -88,6 +98,7 @@ export const {
   useGetVnpayBanksQuery,
   useCreatePaymentUrlMutation,
   useCreateServicePaymentHistoryMutation,
+  useCreatePaymentForConditionMutation,
   useGetPaymentListQuery,
   useGetPaymentByIdQuery,
   useGetPaymentByStaffQuery,

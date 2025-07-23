@@ -11,6 +11,7 @@ export interface IServiceCaseService {
   findAllServiceCases(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
     userId: string,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>>
 

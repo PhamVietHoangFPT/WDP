@@ -22,10 +22,6 @@ export class AccountResponseDto {
   email: string
 
   @Expose()
-  @ApiProperty({ example: 0 })
-  point: number
-
-  @Expose()
   @ApiProperty({ example: '0987654321' })
   phoneNumber: string
 

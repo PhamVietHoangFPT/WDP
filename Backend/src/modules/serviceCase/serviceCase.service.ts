@@ -47,9 +47,12 @@ export class ServiceCaseService implements IServiceCaseService {
       shippingFee: serviceCase.shippingFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
-      condition: serviceCase.condition,
+      condition: serviceCase.condition ? serviceCase.condition : null,
       created_at: serviceCase.created_at,
       result: serviceCase.result,
+      paymentForCondition: serviceCase.paymentForCondition
+        ? serviceCase.paymentForCondition
+        : null,
     })
   }
 
@@ -100,10 +103,11 @@ export class ServiceCaseService implements IServiceCaseService {
   async findAllServiceCases(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
     userId: string,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = { created_by: userId }
+    const filter = { created_by: userId, currentStatus: currentStatus }
     const [totalItems, serviceCases] = await Promise.all([
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository

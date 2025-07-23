@@ -155,6 +155,8 @@ const ServiceCaseDetail = lazy(
 const ProfileLayout = lazy(() => import('../components/layout/ProfileLayout'))
 
 const ManageAddress = lazy(() => import('../pages/ProfileUser/ManageAddress'))
+
+const UserResult = lazy(() => import('../pages/ProfileUser/UserResult'))
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
@@ -266,6 +268,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/register-service',
         component: AdnFacilityRegisteration,
+      },
+      {
+        path: '/result/:resultId',
+        component: UserResult,
       },
     ],
   },

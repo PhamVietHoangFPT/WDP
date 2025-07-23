@@ -7,22 +7,60 @@ import {
   Tag,
   Flex,
   Divider,
+  Select,
+  Tooltip,
+  message,
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
-
-const { Title } = Typography
-
+import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
+import { useCreatePaymentForConditionMutation } from '../../features/customer/paymentApi'
+import { useState } from 'react'
+const { Title, Text } = Typography
+const { Option } = Select
 export default function ServiceCase() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const pageNumber = searchParams.get('pageNumber') || '1'
   const pageSize = searchParams.get('pageSize') || '5'
+  const currentStatusParam = searchParams.get('currentStatus') || null
+  const [currentStatus, setCurrentStatus] = useState(currentStatusParam)
+  const { data: statusData } = useGetAllStatusForCustomerQuery({})
 
   const { data, isLoading } = useGetServiceCasesListQuery({
     pageSize: Number(pageSize),
     pageNumber: Number(pageNumber),
+    currentStatus: currentStatus,
   })
+  // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
+  const [createPayment, { isLoading: isPaymentLoading }] =
+    useCreatePaymentForConditionMutation()
+
+  // 2. Tạo state để quản lý loading cho từng dòng cụ thể
+  const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
+    null
+  )
+
+  // 3. Tạo hàm xử lý việc thanh toán
+  const handlePayment = async (serviceCaseId: string) => {
+    setLoadingPaymentFor(serviceCaseId) // Bật loading cho dòng được click
+    try {
+      // Gọi API, .unwrap() sẽ trả về data nếu thành công hoặc ném lỗi nếu thất bại
+      const response = await createPayment({ serviceCaseId }).unwrap()
+
+      // Nếu có redirectUrl, chuyển hướng người dùng
+      if (response.redirectUrl) {
+        window.location.href = response.redirectUrl
+      } else {
+        message.error('Không nhận được đường dẫn thanh toán.')
+      }
+    } catch (err) {
+      console.error('Lỗi khi tạo yêu cầu thanh toán:', err)
+      message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
+    } finally {
+      setLoadingPaymentFor(null) // Tắt loading sau khi hoàn tất
+    }
+  }
 
   const columns = [
     {
@@ -101,6 +139,52 @@ export default function ServiceCase() {
       },
     },
     {
+      title: 'Kết quả',
+      key: 'result_action',
+      align: 'center',
+      width: 200, // Tăng chiều rộng để chứa nút mới
+      render: (
+        _: any,
+        record: {
+          _id: string
+          result: string
+          condition: any
+          paymentForCondition: any
+        }
+      ) => {
+        // Case 1: Chưa có kết quả (giữ nguyên)
+        if (!record.result) {
+          return <Tag color='default'>Chưa có kết quả</Tag>
+        }
+
+        // Case 2: Cần thanh toán chi phí phát sinh
+        const isPaymentRequired =
+          record.condition !== null && record.paymentForCondition === null
+
+        if (isPaymentRequired) {
+          return (
+            <Button
+              type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
+              onClick={() => handlePayment(record._id)}
+              loading={loadingPaymentFor === record._id}
+            >
+              Thanh toán chi phí phát sinh để xem kết quả
+            </Button>
+          )
+        }
+
+        // Case 3: Có thể xem kết quả (giữ nguyên)
+        return (
+          <Button
+            type='primary'
+            onClick={() => navigate(`/result/${record.result}`)}
+          >
+            Xem kết quả
+          </Button>
+        )
+      },
+    },
+    {
       title: 'Chi tiết',
       key: 'action',
       render: (_: any, record: any) => (
@@ -117,6 +201,32 @@ export default function ServiceCase() {
     <div>
       <Card style={{ margin: '40px auto' }}>
         <Title level={3}>Lịch sử trường hợp dịch vụ</Title>
+        <Flex
+          justify='space-between'
+          align='center'
+          style={{ marginBottom: 20 }}
+        >
+          <Flex align='center' gap={8}>
+            <Text>Trạng thái:</Text>
+            <Select
+              value={currentStatus || ''}
+              style={{ width: 200 }} // Antd Select thường cần set width
+              onChange={(value) => {
+                setCurrentStatus(value)
+                navigate(
+                  `/service-case-customer?pageNumber=1&pageSize=${pageSize}&currentStatus=${value}`
+                )
+              }}
+            >
+              <Option value=''>Tất cả</Option>
+              {statusData?.map((status) => (
+                <Option key={status._id} value={status._id}>
+                  {status.testRequestStatus}
+                </Option>
+              ))}
+            </Select>
+          </Flex>
+        </Flex>
         <Table
           loading={isLoading}
           rowKey='_id'
@@ -130,7 +240,7 @@ export default function ServiceCase() {
           total={data?.pagination?.totalItems || 0}
           onChange={(page, size) => {
             navigate(
-              `/service-case-customer?pageNumber=${page}&pageSize=${size}`
+              `/service-case-customer?pageNumber=${page}&pageSize=${size}&currentStatus=${currentStatus}`
             )
           }}
           showSizeChanger
