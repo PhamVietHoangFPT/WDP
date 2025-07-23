@@ -1,4 +1,5 @@
 import { apiSlice } from '../../apis/apiSlice'
+import type { useUpdateServiceCaseStatusMutation } from '../sampleCollector/sampleCollectorAPI'
 
 // Định nghĩa kiểu dữ liệu cho các tham số truyền vào để code chặt chẽ hơn
 interface GetServiceCasesArgs {
@@ -41,6 +42,15 @@ const StaffApi = apiSlice.injectEndpoints({
       // Cũng cung cấp tag 'addresses' để nó được làm mới khi danh sách thay đổi
       providesTags: ['staff'],
     }),
+
+    updateServiceCaseStatusForStaff: builder.mutation({
+      query: ({ id, currentStatus }) => ({
+        url: `/service-cases/${id}/status/${currentStatus}`,
+        method: 'PATCH',
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['staff'],
+    }),
   }),
 })
 
@@ -48,5 +58,6 @@ const StaffApi = apiSlice.injectEndpoints({
 export const { 
   useGetServiceCasesByCustomerQuery,
   useGetAllStatusForCustomerQuery,
-  useGetCustomerServiceCaseByEmailQuery
+  useGetCustomerServiceCaseByEmailQuery,
+  useUpdateServiceCaseStatusForStaffMutation
 } = StaffApi
