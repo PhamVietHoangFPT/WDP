@@ -17,13 +17,13 @@ export interface IAdminRepository {
     facilityId: string,
     userId: string,
   ): Promise<AccountDocument | null>
-  checkFacilityHasManager(facilityId: string): Promise<boolean>
   unassignManagerFromFacility(
     facilityId: string,
     managerId: string,
     userId: string,
   ): Promise<FacilityDocument | null>
   getAllFacilities(withManager: boolean): Promise<FacilityDocument[]>
+  validateAssignment(managerId: string, facilityId: string): Promise<boolean>
 }
 
 export const IAdminRepository = Symbol('IAdminRepository')

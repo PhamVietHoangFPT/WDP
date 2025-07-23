@@ -107,7 +107,12 @@ export class ServiceCaseService implements IServiceCaseService {
     userId: string,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = { created_by: userId, currentStatus: currentStatus }
+    let filter = {}
+    if (currentStatus !== 'null') {
+      filter = { currentStatus: currentStatus, created_by: userId }
+    } else {
+      filter = { created_by: userId }
+    }
     const [totalItems, serviceCases] = await Promise.all([
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository
@@ -209,7 +214,7 @@ export class ServiceCaseService implements IServiceCaseService {
       )
     if (serviceCaseStatusOrder !== 8) {
       throw new ConflictException('Không thể thay đổi chất lượng của mẫu thử')
-    } 
+    }
 
     const updated = await this.serviceCaseRepository.updateCondition(
       id,

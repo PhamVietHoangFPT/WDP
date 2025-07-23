@@ -10,7 +10,7 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import * as dayjs from 'dayjs'
 import * as customParseFormat from 'dayjs/plugin/customParseFormat'
-  ; (dayjs as any).extend(customParseFormat as any)
+;(dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -24,7 +24,7 @@ export class PaymentRepository implements IPaymentRepository {
     private serviceCaseStatusRepository: ITestRequestStatusRepository,
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
-  ) { }
+  ) {}
 
   async createForServiceCase(
     createPaymentHistoryDto: CreatePaymentHistoryDto,
@@ -84,9 +84,8 @@ export class PaymentRepository implements IPaymentRepository {
       payDate: payDate.isValid() ? payDate.toDate() : new Date(),
     }
     const newPayment = new this.paymentModel(dataSend)
-    const paymentType = await this.paymentTypeRepository.findByPaymentType(
-      'Chi phí phát sinh',
-    )
+    const paymentType =
+      await this.paymentTypeRepository.findByPaymentType('Chi phí phát sinh')
     newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
     newPayment.paymentType = paymentType._id
     if (currentServiceCasePayment) {
@@ -123,6 +122,7 @@ export class PaymentRepository implements IPaymentRepository {
           ...filter, // Thêm các điều kiện lọc khác nếu cần
         })
         .populate({ path: 'paymentType', select: 'paymentType' })
+        .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
       return query
     }
     const query = this.paymentModel
@@ -131,7 +131,7 @@ export class PaymentRepository implements IPaymentRepository {
         created_by: new Types.ObjectId(userId), // Lọc theo userId
       })
       .populate({ path: 'paymentType', select: 'paymentType' })
-
+      .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
     return query
   }
 

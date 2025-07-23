@@ -44,13 +44,19 @@ export default function ServiceCase() {
   // 3. Tạo hàm xử lý việc thanh toán
   const handlePayment = async (serviceCaseId: string) => {
     setLoadingPaymentFor(serviceCaseId) // Bật loading cho dòng được click
+    console.log(serviceCaseId)
     try {
       // Gọi API, .unwrap() sẽ trả về data nếu thành công hoặc ném lỗi nếu thất bại
       const response = await createPayment({ serviceCaseId }).unwrap()
 
       // Nếu có redirectUrl, chuyển hướng người dùng
-      if (response.redirectUrl) {
-        window.location.href = response.redirectUrl
+      if (
+        typeof response.redirectUrl === 'string' &&
+        response.redirectUrl.trim() !== ''
+      ) {
+        // Mở URL trong một tab mới.
+        // Thêm 'noopener,noreferrer' là một thông lệ tốt để tăng cường bảo mật.
+        window.open(response.redirectUrl, '_blank', 'noopener,noreferrer')
       } else {
         message.error('Không nhận được đường dẫn thanh toán.')
       }

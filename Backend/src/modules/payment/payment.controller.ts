@@ -38,7 +38,7 @@ export class PaymentController {
   constructor(
     @Inject(IPaymentService)
     private readonly paymentService: IPaymentService,
-  ) { }
+  ) {}
 
   @Post('service-case')
   @ApiOperation({
@@ -75,6 +75,7 @@ export class PaymentController {
     @Req() req: any, // Assuming you might need the request object for user info
   ) {
     const userId = req.user.id
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.paymentService.createForCondition(
       CheckVnPayPaymentDto,
       userId,
