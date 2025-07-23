@@ -27,13 +27,18 @@ export interface IKitShipmentRepository {
   findById(id: string): Promise<KitShipmentDocument | null>
   getCurrentStatusId(id: string): Promise<string | null>
   getCaseMemberId(id: string): Promise<string | null>
-  getSamplingKitInventoryId(id: string): Promise<string | null>
-  getAddressId(id: string): Promise<string | null>
   getDeliveryStaffId(id: string): Promise<string | null>
   findWithQuery(
     filter: Record<string, unknown>,
   ): mongoose.Query<KitShipment[], KitShipment>
   countDocuments(filter: Record<string, unknown>): Promise<number>
+
+  updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+    customerId: string,
+  ): Promise<KitShipmentDocument | null>
+  getAccountIdByKitShipmentId(id: string): Promise<string | null>
 }
 
 export const IKitShipmentRepository = Symbol('IKitShipmentRepository')

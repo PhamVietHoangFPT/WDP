@@ -28,24 +28,6 @@ export class UpdateKitShipmentDto {
     required: true,
     type: String,
   })
-  @IsNotEmpty({ message: 'ID sampling kit inventory không được để trống' })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  samplingKitInventory: mongoose.Schema.Types.ObjectId
-
-  @ApiProperty({
-    example: '67f697151bfaa0e9cf14ec92',
-    required: true,
-    type: String,
-  })
-  @IsNotEmpty({ message: 'ID địa chỉ không được để trống' })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  address: mongoose.Schema.Types.ObjectId
-
-  @ApiProperty({
-    example: '67f697151bfaa0e9cf14ec92',
-    required: true,
-    type: String,
-  })
   @IsNotEmpty({ message: 'ID nhân viên không được để trống' })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   deliveryStaff: mongoose.Schema.Types.ObjectId

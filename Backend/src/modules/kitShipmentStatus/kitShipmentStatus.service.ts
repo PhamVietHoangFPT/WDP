@@ -17,7 +17,7 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
   constructor(
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository, // Inject the repository
-  ) {}
+  ) { }
 
   private mapToResponseDto(
     kitShipmentStatus: KitShipmentStatusDocument,
@@ -31,19 +31,12 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
 
   async validateShipmentStatusUniqueness(
     status: string,
-    order: number,
     repository: any,
   ): Promise<void> {
     const existingName = await repository.findByName(status)
     if (existingName) {
       throw new BadRequestException(
         `Trạng thái vận chuyển với tên "${status}" đã tồn tại.`,
-      )
-    }
-    const existingOrder = await repository.findByOrder(order)
-    if (existingOrder) {
-      throw new BadRequestException(
-        `Thứ tự của trạng thái vận chuyển đã tồn tại.`,
       )
     }
   }
@@ -54,7 +47,6 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
   ): Promise<KitShipmentStatusResponseDto> {
     await this.validateShipmentStatusUniqueness(
       data.status,
-      data.order,
       this.kitShipmentStatusRepository,
     )
     const createStatus = await this.kitShipmentStatusRepository.create(

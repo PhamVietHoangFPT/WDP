@@ -22,6 +22,11 @@ export interface IKitShipmentService {
     updateKitShipmentDto: UpdateKitShipmentDto,
   ): Promise<any>
 
+  updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+  ): Promise<KitShipmentResponseDto | null>
+
   deleteKitShipment(id: string, userId: string): Promise<any>
 }
 
