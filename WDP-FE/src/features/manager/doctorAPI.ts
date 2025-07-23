@@ -16,12 +16,13 @@ const doctorAPI = apiSlice.injectEndpoints({
     }),
 
     getServiceCaseNoDoctorList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
+      query: ({ pageNumber, pageSize, bookingDate }) => ({
         url: '/managers/service-cases-without-doctor',
         method: 'GET',
         params: {
           pageNumber,
           pageSize,
+          bookingDate
         },
       }),
       transformResponse: (res) => res,

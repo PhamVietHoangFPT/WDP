@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
+import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -146,10 +147,6 @@ const ServiceCase = lazy(() => import('../pages/ProfileUser/ServiceCase'))
 
 const ServiceCaseDetail = lazy(
   () => import('../pages/ProfileUser/ServiceCaseDetail')
-)
-
-const StaffUpdateStatus = lazy(
-  () => import('../components/Staff/StaffUpdateStatus')
 )
 
 const ProfileLayout = lazy(() => import('../components/layout/ProfileLayout'))
@@ -407,8 +404,8 @@ const routes: LayoutRoute[] = [
         component: SamplingKitInventoryDetail,
       },
       {
-        path: '/staff/update-status',
-        component: StaffUpdateStatus,
+        path: '/staff/update-service-case-status-for-customer',
+        component: StaffGetServiceCaseByCustomer,
       },
     ],
   },

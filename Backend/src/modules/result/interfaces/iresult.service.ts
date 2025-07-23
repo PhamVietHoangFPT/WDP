@@ -14,5 +14,7 @@ export interface IResultService {
     id: string,
     updateResultDto: UpdateResultDto,
   ): Promise<ResultDocument | null>
+
+  findByIdForCustomer(id: string): Promise<ResultDocument | null>
 }
 export const IResultService = Symbol('IResultService')

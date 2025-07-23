@@ -29,6 +29,9 @@ export interface IBookingRepository {
   getSlotIdByBookingId(id: string): Promise<string | null>
   getAllBookingsIds(): Promise<string[]>
   getAllBookingsIdByCurrentDate(currentDate: Date): Promise<any[]>
+  findBookingsWithoutServiceCase(
+    timeLimit: Date,
+  ): Promise<{ _id: string; slot: string }[]>
 }
 
 export const IBookingRepository = Symbol('IBookingRepository')

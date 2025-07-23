@@ -7,23 +7,28 @@ import {
   LeanPopulatedAccount,
   PopulatedRoleDetails,
 } from '../account/interfaces/iaccount.response'
+import { RegisterDto } from './dto/register.dto'
 @Injectable()
 export class AuthRepository implements IAuthRepository {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
   ) {}
 
-  async register(
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-  ): Promise<Account | null> {
+  async createAccount(
+    registerDto: RegisterDto,
+    roleId: string,
+  ): Promise<Partial<Account> | null> {
+    const { email, name, phoneNumber, gender } = registerDto
+
     const newAccount = new this.accountModel({
       email: email.toLowerCase(),
-      password,
-      name: firstName + ' ' + lastName,
+      password: registerDto.password,
+      name, // Lấy trực tiếp từ DTO
+      phoneNumber, // Lấy trực tiếp từ DTO
+      gender, // Lấy trực tiếp từ DTO
+      role: new mongoose.Types.ObjectId(roleId), // Giả sử role được truyền vào là ObjectId
     })
+
     return await newAccount.save()
   }
 

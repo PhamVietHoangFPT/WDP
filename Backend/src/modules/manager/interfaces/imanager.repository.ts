@@ -15,6 +15,7 @@ export interface IManagerRepository {
   getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
+    bookingDate: string,
   ): Promise<ServiceCase[]>
   managerCreateAccount(
     accountData: Partial<AccountDocument>,
@@ -22,7 +23,10 @@ export interface IManagerRepository {
     facilityId: string,
   ): Promise<AccountDocument>
   managerGetAllRoles(): Promise<RoleDocument[]>
-  getAllServiceCaseWithoutDoctor(facilityId: string): Promise<ServiceCase[]>
+  getAllServiceCaseWithoutDoctor(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<ServiceCase[]>
   assignDoctorToServiceCase(
     serviceCaseId: string,
     doctorId: string,

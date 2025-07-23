@@ -29,7 +29,8 @@ import { useGetFacilitiesNameAndAddressQuery } from '../../features/admin/facili
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import { useGetSlotTemplateForFacilityQuery } from '../../features/admin/slotAPI'
 import type { Slot } from '../../types/slot'
-import { AimOutlined, CalculatorOutlined } from '@ant-design/icons'
+import { CalculatorOutlined } from '@ant-design/icons'
+import { useGetAddressesQuery } from '../../features/address/addressAPI'
 dayjs.locale('vi')
 dayjs.extend(isoWeek)
 dayjs.extend(weekOfYear)
@@ -90,7 +91,11 @@ const DAYS_OF_WEEK = [
 ]
 
 interface BookingComponentProps {
-  onConfirmBooking: (details: { slotId: string; shippingFee: number }) => void
+  onConfirmBooking: (details: {
+    slotId: string
+    shippingFee: number
+    addressId: string | null
+  }) => void
   onSelectSlot: (slotId: string | null) => void
   selectedSlotId: string | null
   serviceDetail: {
@@ -103,6 +108,8 @@ interface BookingComponentProps {
       fee: number
     }
   }
+  addressId: string | null
+  setAddressId: (addressId: string | null) => void
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -120,70 +127,24 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return d
 }
 
-const getLocationPromise = (
-  callId: number
-): Promise<{ lat: number; lon: number }> => {
-  return new Promise(async (resolve, reject) => {
-    if (!navigator.permissions || !navigator.geolocation) {
-      return reject(
-        new Error(
-          'Trình duyệt của bạn không hỗ trợ định vị hoặc Permissions API.'
-        )
-      )
-    }
-
-    try {
-      const permissionStatus = await navigator.permissions.query({
-        name: 'geolocation',
-      })
-      if (permissionStatus.state === 'denied') {
-        return reject(
-          new Error(
-            'Bạn đã từ chối quyền truy cập vị trí. Vui lòng kiểm tra cài đặt của trình duyệt.'
-          )
-        )
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        // Success Callback
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          })
-        }
-        // ✅ THÊM ERROR CALLBACK VÀO ĐÂY
-      )
-    } catch (error) {
-      reject(new Error('Không thể kiểm tra quyền truy cập vị trí.'))
-    }
-  })
-}
-
 const BookingComponent: React.FC<BookingComponentProps> = ({
   onConfirmBooking,
   onSelectSlot,
   selectedSlotId,
   serviceDetail,
+  addressId,
+  setAddressId,
 }) => {
-  const [userLocation, setUserLocation] = useState<{
-    lat: number
-    lon: number
-  } | null>(null)
+  const { data: addressesData, isLoading: addressesLoading } =
+    useGetAddressesQuery({})
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
 
-  // Hợp nhất các state loading
-  const [isFindingLocation, setIsFindingLocation] = useState(false)
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
   const isProcessingRef = useRef(false)
 
   // State cho việc tính toán và hiển thị
   const [shippingFee, setShippingFee] = useState<number | null>(null)
   const [totalPrice, setTotalPrice] = useState<number | null>(null)
-  const [userLocationForSorting, setUserLocationForSorting] = useState<{
-    lat: number
-    lon: number
-  } | null>(null)
   const [isAvailable, setIsAvailable] = useState(true)
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
     dayjs().startOf('isoWeek'),
@@ -192,8 +153,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   // Giá trị cho DatePicker (chỉ cần 1 ngày để hiển thị trong input)
   const [selectedDisplayDate, setSelectedDisplayDate] =
     useState<dayjs.Dayjs | null>(dayjs().startOf('week'))
-  const { data: facilitiesData, isLoading: facilitiesLoading } =
-    useGetFacilitiesNameAndAddressQuery({})
+  const {
+    data: facilitiesData,
+    isLoading: facilitiesLoading,
+    isError: facilitiesError,
+  } = useGetFacilitiesNameAndAddressQuery({})
   const { data: slotTemplateData } = useGetSlotTemplateForFacilityQuery(
     facilityId,
     {
@@ -223,7 +187,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     )
   }, [slotTemplateData])
 
-  const { data: slotsData, isLoading: slotsLoading } = useGetSlotsListQuery(
+  const {
+    data: slotsData,
+    isLoading: slotsLoading,
+    isError: slotsError,
+  } = useGetSlotsListQuery(
     {
       pageNumber: 1,
       pageSize: 100,
@@ -269,80 +237,66 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   }
 
   const handleCalculateShipping = useCallback(async () => {
-    // Dùng ref để kiểm tra, an toàn hơn
-    if (isProcessingRef.current) {
+    if (isProcessingRef.current) return
+    if (!facilityId) {
+      message.error('Vui lòng chọn một cơ sở.')
       return
     }
-    // Các guard-clause kiểm tra điều kiện
-    if (!facilityId) {
-      message.error('Vui lòng chọn một cơ sở trước.')
+    if (!addressId) {
+      message.error('Vui lòng chọn địa chỉ của bạn.')
       return
     }
     if (!serviceDetail) {
-      message.error('Chưa có thông tin dịch vụ để tính phí.')
+      message.error('Chưa có thông tin dịch vụ.')
       return
     }
 
-    // Bắt đầu quá trình
     isProcessingRef.current = true
-    setIsCalculatingFee(true) // Chỉ state này dùng để cập nhật UI (spinner)
+    setIsCalculatingFee(true)
+    message.loading({ content: 'Đang tính toán chi phí...', key: 'shipping' })
 
     try {
-      let locationToUse = userLocation
-
-      // Nếu chưa có vị trí, lấy mới
-      if (!locationToUse) {
-        message.loading({
-          content: 'Đang yêu cầu vị trí của bạn...',
-          key: 'shipping',
-        })
-        const newLocation = await getLocationPromise(Date.now())
-        locationToUse = newLocation
-        setUserLocation(newLocation) // Cập nhật vào state chung
+      // Lấy tọa độ của người dùng từ địa chỉ đã chọn
+      const userAddress = addressesData?.data?.find(
+        (addr) => addr._id === addressId
+      )
+      if (!userAddress?.location?.coordinates) {
+        throw new Error('Địa chỉ đã chọn không có thông tin tọa độ.')
       }
+      const [userLon, userLat] = userAddress.location.coordinates
 
-      if (!locationToUse) {
-        throw new Error('Không thể xác định vị trí để tiếp tục tính toán.')
-      }
-
-      message.loading({ content: 'Đang tính toán chi phí...', key: 'shipping' })
-
-      // Lấy dữ liệu cơ sở
+      // Lấy tọa độ của cơ sở
       const facilityRawData = facilitiesData?.data?.find(
         (f) => f._id === facilityId
       )
-      const coordinates = facilityRawData?.address?.location?.coordinates
-      if (!coordinates) {
+      if (!facilityRawData?.address?.location?.coordinates) {
         throw new Error('Cơ sở này không có thông tin tọa độ.')
       }
-      const [facilityLon, facilityLat] = coordinates
+      const [facilityLon, facilityLat] =
+        facilityRawData.address.location.coordinates
 
-      // Tính toán
+      // Tính toán phí
       const serviceFee =
         (serviceDetail?.fee || 0) +
         (serviceDetail?.timeReturn?.timeReturnFee || 0) +
         (serviceDetail?.sample?.fee || 0)
       const distance = getDistanceFromLatLonInKm(
-        locationToUse.lat,
-        locationToUse.lon,
+        userLat,
+        userLon,
         facilityLat,
         facilityLon
       )
 
-      let calculatedShippingFee = 0
-      if (distance > 5) {
-        calculatedShippingFee = (distance - 5) * 10000
-      }
+      let calculatedShippingFee = distance > 5 ? (distance - 5) * 10000 : 0
       calculatedShippingFee = Math.ceil(calculatedShippingFee / 1000) * 1000
       const calculatedTotalPrice = serviceFee + calculatedShippingFee
 
-      // Cập nhật state kết quả
       setShippingFee(calculatedShippingFee)
       setTotalPrice(calculatedTotalPrice)
 
       message.success({ content: 'Đã tính xong!', key: 'shipping' })
     } catch (error) {
-      console.error('ĐÃ XẢY RA LỖI TRONG KHỐI TRY:', error)
+      console.error('Lỗi khi tính phí vận chuyển:', error)
       message.error({
         content: error instanceof Error ? error.message : String(error),
         key: 'shipping',
@@ -351,66 +305,50 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       setShippingFee(null)
       setTotalPrice(null)
     } finally {
-      // Kết thúc quá trình
       isProcessingRef.current = false
       setIsCalculatingFee(false)
     }
-  }, [facilityId, serviceDetail, userLocation, facilitiesData])
-
-  const handleFindNearest = async () => {
-    if (isProcessingRef.current) return
-
-    setIsFindingLocation(true)
-    isProcessingRef.current = true
-    onSelectSlot(null)
-
-    try {
-      const location = await getLocationPromise(Date.now())
-      setUserLocation(location)
-      setUserLocationForSorting(location)
-      message.success('Đã tìm thấy vị trí và sắp xếp lại các cơ sở!')
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : String(error))
-    } finally {
-      setIsFindingLocation(false)
-      isProcessingRef.current = false
-    }
-  }
+  }, [facilityId, addressId, serviceDetail, facilitiesData, addressesData])
 
   const selectOptions = useMemo(() => {
-    // Nếu không có dữ liệu hoặc mảng dữ liệu rỗng, trả về mảng rỗng
     if (!facilitiesData?.data?.length) return []
 
-    const mappedFacilities = facilitiesData.data.map((facility) => {
-      // 1. Trích xuất các thông tin cần thiết từ `facility.address`
-      const fullAddress = facility.address?.fullAddress || 'N/A'
-      const location = facility.address?.location
+    // Tìm đối tượng địa chỉ đầy đủ mà người dùng đã chọn
+    const selectedUserAddress = addressesData?.data?.find(
+      (addr) => addr._id === addressId
+    )
 
+    const mappedFacilities = facilitiesData.data.map((facility) => {
+      const fullAddress = facility.address?.fullAddress || 'N/A'
+      const facilityLocation = facility.address?.location
       let distance
-      // 2. Tính khoảng cách nếu có vị trí người dùng và cơ sở có tọa độ
-      if (userLocationForSorting && location?.coordinates) {
-        const [lon, lat] = location.coordinates
+
+      // Chỉ tính khoảng cách khi người dùng đã chọn địa chỉ VÀ cả hai đều có tọa độ
+      if (
+        selectedUserAddress?.location?.coordinates &&
+        facilityLocation?.coordinates
+      ) {
+        const [userLon, userLat] = selectedUserAddress.location.coordinates
+        const [facilityLon, facilityLat] = facilityLocation.coordinates
         distance = getDistanceFromLatLonInKm(
-          userLocationForSorting.lat,
-          userLocationForSorting.lon,
-          lat,
-          lon
+          userLat,
+          userLon,
+          facilityLat,
+          facilityLon
         )
       }
 
-      // 3. Trả về object đã được cấu trúc lại đúng đắn
       return {
         value: facility._id,
         label: facility.facilityName,
-        // Dùng `fullAddress` đã trích xuất, đây là một chuỗi (string)
         address: fullAddress,
         searchLabel: `${facility.facilityName} ${fullAddress}`,
-        distance, // Sẽ là `undefined` nếu không tính được
+        distance,
       }
     })
 
-    // Sắp xếp lại mảng nếu có thông tin vị trí người dùng
-    if (userLocationForSorting) {
+    // Sắp xếp lại nếu đã có địa chỉ được chọn
+    if (selectedUserAddress) {
       mappedFacilities.sort((a, b) => {
         if (a.distance === undefined) return 1
         if (b.distance === undefined) return -1
@@ -419,12 +357,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     }
 
     return mappedFacilities
-  }, [facilitiesData, userLocationForSorting]) // `useMemo` giờ phụ thuộc vào cả `userLocation`
+  }, [facilitiesData, addressesData, addressId]) // `useMemo` giờ phụ thuộc vào cả `userLocation`
 
   // === 7. TỰ ĐỘNG CHỌN CƠ SỞ GẦN NHẤT SAU KHI TÌM THẤY VỊ TRÍ ===
   useEffect(() => {
-    // Chỉ chạy khi đã có vị trí VÀ danh sách đã được sắp xếp
-    if (userLocationForSorting && selectOptions.length > 0) {
+    // Chỉ chạy khi đã chọn địa chỉ VÀ danh sách cơ sở đã được tính toán/sắp xếp
+    if (addressId && selectOptions.length > 0) {
       const nearestFacility = selectOptions.find(
         (opt) => opt.distance !== undefined
       )
@@ -432,19 +370,41 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
         setFacilityId(nearestFacility.value)
       }
     }
-  }, [selectOptions, userLocationForSorting])
+  }, [addressId, selectOptions])
+
+  useEffect(() => {
+    setShippingFee(null)
+    setTotalPrice(null)
+    onSelectSlot(null)
+  }, [addressId, facilityId, onSelectSlot])
 
   const handleConfirmBooking = () => {
-    if (selectedSlotId && shippingFee !== null) {
-      // Gọi prop từ component cha với đầy đủ dữ liệu
-      onConfirmBooking({
-        slotId: selectedSlotId,
-        shippingFee: shippingFee,
-      })
-      message.success('Đã gửi thông tin đặt lịch!')
-    } else {
-      message.error('Vui lòng tính phí vận chuyển trước khi xác nhận.')
+    // 1. Kiểm tra đã chọn địa chỉ chưa
+    if (!addressId) {
+      message.error('Vui lòng chọn địa chỉ của bạn.')
+      return // Dừng hàm
     }
+
+    // 2. Kiểm tra đã chọn khung giờ chưa
+    if (!selectedSlotId) {
+      message.error('Vui lòng chọn một khung giờ hẹn trên lịch.')
+      return // Dừng hàm
+    }
+
+    // 3. Kiểm tra đã tính phí vận chuyển chưa (sửa lỗi shippingFee = 0)
+    if (shippingFee === null) {
+      message.error('Bạn cần bấm "Tính phí vận chuyển" trước khi xác nhận.')
+      return // Dừng hàm
+    }
+
+    // ✅ Nếu tất cả điều kiện đều đạt, tiến hành xác nhận
+    onConfirmBooking({
+      slotId: selectedSlotId,
+      shippingFee: shippingFee, // Giờ sẽ hoạt động đúng kể cả khi phí là 0
+      addressId: addressId,
+    })
+
+    message.success('Đã xác nhận thông tin đặt lịch!')
   }
 
   return (
@@ -453,6 +413,31 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
         <Title level={4}>Chọn lịch hẹn</Title>
         <Card style={{ marginBottom: 24, minWidth: 800 }}>
           <Row gutter={[16, 16]} align='bottom'>
+            <Col xs={24}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Text type='secondary' style={{ marginBottom: 4 }}>
+                  Chọn địa chỉ của bạn
+                </Text>
+                <Select
+                  placeholder='Chọn một địa chỉ đã lưu...'
+                  style={{ width: '100%' }}
+                  loading={addressesLoading}
+                  value={addressId}
+                  onChange={(id) => setAddressId(id)} // Cập nhật state từ props
+                  options={addressesData?.data?.map((addr) => ({
+                    value: addr._id,
+                    label: addr.fullAddress,
+                  }))}
+                  notFoundContent={
+                    addressesLoading ? (
+                      <Spin size='small' />
+                    ) : (
+                      <Empty description='Không có địa chỉ' />
+                    )
+                  }
+                />
+              </div>
+            </Col>
             <Col xs={24} md={18}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <Text type='secondary' style={{ marginBottom: 4 }}>
@@ -490,7 +475,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                     </div>
                   )}
                   notFoundContent={
-                    facilitiesLoading ? (
+                    facilitiesLoading || facilitiesError ? (
                       <div
                         style={{
                           display: 'flex',
@@ -509,18 +494,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   }
                 />
               </div>
-            </Col>
-            <Col xs={24} md={6}>
-              <Button
-                type='primary'
-                icon={<AimOutlined />}
-                onClick={handleFindNearest}
-                loading={isFindingLocation}
-                title='Tìm cơ sở gần vị trí của bạn'
-                style={{ width: '100%' }}
-              >
-                Tìm gần tôi
-              </Button>
             </Col>
           </Row>
           {/* Hàng 2: Lọc theo ngày và trạng thái */}
@@ -583,6 +556,10 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
           <Empty description='Chọn cơ sở để xem lịch' />
         ) : slotsLoading ? (
           <Spin />
+        ) : slotsError ? (
+          <div>
+            <Empty description='Cơ sở này không còn lịch trống' />
+          </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <Table
@@ -736,9 +713,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   loading={isCalculatingFee}
                   onClick={handleCalculateShipping}
                   style={{ width: '100%', marginTop: 24 }}
-                  disabled={!facilityId}
+                  disabled={!facilityId || !addressId} // SỬA LẠI ĐIỀU KIỆN
                 >
-                  Bắt buộc: Yêu cầu vị trí & Tính phí vận chuyển
+                  Tính phí vận chuyển
                 </Button>
                 <Paragraph
                   type='secondary'

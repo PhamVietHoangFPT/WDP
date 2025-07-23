@@ -16,13 +16,31 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
     }),
 
     getServiceNoSampleCollectorList: builder.query({
-      query: (isAtHome) => ({
-        url: `managers/service-cases-without-sample-collector/${isAtHome}`,
+      query: ({isAtHome, bookingDate}) => ({
+        url: `managers/service-cases-without-sample-collector`,
         method: 'GET',
+        params: {
+          isAtHome,
+          bookingDate
+        },
       }),
       transformResponse: (res) => res,
       providesTags: ['sample-collectors'],
     }),
+
+    // getServiceCaseNoDoctorList: builder.query({
+    //   query: ({ pageNumber, pageSize, bookingDate }) => ({
+    //     url: '/managers/service-cases-without-doctor',
+    //     method: 'GET',
+    //     params: {
+    //       pageNumber,
+    //       pageSize,
+    //       bookingDate
+    //     },
+    //   }),
+    //   transformResponse: (res) => res,
+    //   providesTags: ['doctor'],
+    // }),
 
     addSampleCollectorToServiceCase: builder.mutation({
       query: ({ data, serviceCaseId, sampleCollectorId }) => ({

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model, Types } from 'mongoose'
+import mongoose, { FilterQuery, Model, Types, UpdateQuery } from 'mongoose'
 import { ServiceCase, ServiceCaseDocument } from './schemas/serviceCase.schema'
 import { CreateServiceCaseDto } from './dto/createServiceCase.dto'
 import { IServiceCaseRepository } from './interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { ITestRequestHistoryRepository } from '../testRequestHistory/interfaces/itestRequestHistory.repository'
-import { UpdateConditionDto } from '../condition/dto/updateCondition.dto'
 
 @Injectable()
 export class ServiceCaseRepository implements IServiceCaseRepository {
@@ -78,6 +77,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       currentStatus: testRequestStatus,
       totalFee: totalFee,
       created_at: new Date(),
+      shippingFee: createServiceCaseDto.shippingFee,
     })
 
     await this.testRequestHistoryRepository.createTestRequestHistory(
@@ -188,10 +188,10 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<string[]> {
-    type BookingIdResult = { bookingId?: mongoose.Types.ObjectId }
+  ): Promise<{ _id: string; bookingId: string; slotId: string }[]> {
+    // ✅ 1. SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ
 
-    const results: BookingIdResult[] = await this.serviceCaseModel.aggregate([
+    const aggregationPipeline = [
       {
         $match: {
           created_at: { $lt: time },
@@ -215,21 +215,20 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           as: 'bookingDetails',
         },
       },
-      { $unwind: '$bookingDetails' },
+      // Dùng $unwind an toàn hơn với preserveNullAndEmptyArrays
+      // để không làm mất các service case có booking rỗng/null
+      {
+        $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
+      },
       {
         $project: {
-          _id: 0,
+          _id: 1, // ID của service case
           bookingId: '$bookingDetails._id',
+          slotId: '$bookingDetails.slot',
         },
       },
-    ])
-
-    // 3. DÙNG .filter() và .map() ĐỂ BIẾN ĐỔI TOÀN BỘ MẢNG KẾT QUẢ
-    const bookingIds = results
-      .filter((result) => result.bookingId)
-      .map((result) => result.bookingId.toString())
-
-    return bookingIds // Trả về mảng các chuỗi ID
+    ]
+    return this.serviceCaseModel.aggregate(aggregationPipeline)
   }
 
   async findByBookingId(bookingId: string): Promise<boolean> {
@@ -403,5 +402,46 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       return serviceCaseResults[0].checkinDateTime || null
     }
     return null // Trả về null nếu không tìm thấy serviceCase hoặc checkinDateTime là null
+  }
+
+  async getShippingFeeById(id: string): Promise<number | null> {
+    return this.serviceCaseModel
+      .findById(id)
+      .then((serviceCase) => serviceCase?.shippingFee || null)
+  }
+
+  async checkPaidForCondition(resultId: string): Promise<boolean | null> {
+    // 1. Chỉ thực hiện MỘT query duy nhất để lấy các trường cần thiết
+    const serviceCase = await this.serviceCaseModel
+      .findOne({
+        result: new Types.ObjectId(resultId),
+      })
+      .select('condition paymentForCondition') // Chỉ lấy 2 trường này để tối ưu
+      .lean() // .lean() giúp query nhanh hơn cho các tác vụ chỉ đọc
+
+    // Case 1: Không tìm thấy service case nào khớp với resultId
+    if (!serviceCase) {
+      return null
+    }
+
+    // Case 2: Service case không có trường 'condition' -> không cần thanh toán
+    if (!serviceCase.condition) {
+      return false
+    }
+
+    // Case 3: Service case có 'condition', nhưng chưa có 'paymentForCondition' -> CẦN thanh toán
+    if (serviceCase.condition && !serviceCase.paymentForCondition) {
+      return true
+    }
+
+    // Case 4: Mặc định còn lại là có 'condition' và đã có 'paymentForCondition' -> không cần thanh toán
+    return false
+  }
+
+  async updateMany(
+    filter: FilterQuery<ServiceCase>,
+    update: UpdateQuery<ServiceCase>,
+  ): Promise<any> {
+    return this.serviceCaseModel.updateMany(filter, update)
   }
 }

@@ -50,6 +50,13 @@ export class CaseMember extends BaseEntity {
 
   @Prop({ type: Boolean, required: true })
   isSelfSampling: boolean
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Address',
+    required: true,
+  })
+  address: mongoose.Schema.Types.ObjectId
 }
 
 export const CaseMemberSchema = SchemaFactory.createForClass(CaseMember)

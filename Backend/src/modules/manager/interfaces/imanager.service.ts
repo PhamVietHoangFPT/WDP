@@ -13,6 +13,7 @@ export interface IManagerService {
   getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
+    bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
   managerCreateAccount(
     accountData: Partial<ManagerCreateAccountDto>,
@@ -22,6 +23,7 @@ export interface IManagerService {
   managerGetAllRoles(): Promise<RoleDocument[]>
   getAllServiceCaseWithoutDoctor(
     facilityId: string,
+    bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
   assignDoctorToServiceCase(
     serviceCaseId: string,

@@ -73,10 +73,10 @@ export const SideBar = () => {
         navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
     },
     {
-      key: 'patients',
+      key: 'staff/update-service-case-status-for-customer',
       icon: <TeamOutlined />,
       label: 'Cập nhật tình trạng',
-      onClick: () => navigate('/staff/update-status'),
+      onClick: () => navigate('/staff/update-service-case-status-for-customer'),
     },
     // ...
   ]

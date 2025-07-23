@@ -15,6 +15,7 @@ import {
   Menu,
   Tag,
   Modal,
+  DatePicker, // Import DatePicker
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
@@ -24,12 +25,15 @@ import {
   HomeOutlined,
   ShopOutlined,
   ExclamationCircleOutlined,
+  CalendarOutlined, // Import CalendarOutlined
 } from '@ant-design/icons'
 import {
   useGetSampleCollectorListQuery,
   useGetServiceNoSampleCollectorListQuery,
   useAddSampleCollectorToServiceCaseMutation,
 } from '../../features/manager/sampleCollectorAPI'
+import moment from 'moment' // Import moment
+
 const { Title } = Typography
 
 interface ServiceCase {
@@ -61,6 +65,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   const [isAtHome, setIsAtHome] = useState<boolean>(true)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
+  const [selectedBookingDate, setSelectedBookingDate] = useState<string | undefined>(undefined) // State mới cho bookingDate
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] =
@@ -68,26 +73,25 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
   const [selectedSampleCollector, setSelectedSampleCollector] =
     useState<SampleCollector | null>(null)
 
-  // Fetch service cases without sample collectors
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
     isFetching: isFetchingServices,
     error: serviceCasesError,
-  } = useGetServiceNoSampleCollectorListQuery(isAtHome)
+  } = useGetServiceNoSampleCollectorListQuery({
+    isAtHome,
+    bookingDate: selectedBookingDate, // Truyền bookingDate vào query
+  })
 
-  // Fetch sample collectors list
   const { data: sampleCollectorsData, isLoading: isLoadingSampleCollectors } =
     useGetSampleCollectorListQuery({
       pageNumber: 1,
-      pageSize: 100, // Get all sample collectors for dropdown
+      pageSize: 100,
     })
 
-  // Mutation để gán sample collector cho service case
   const [addSampleCollectorToServiceCase, { isLoading: isAssigning }] =
     useAddSampleCollectorToServiceCaseMutation()
 
-  // Xử lý gán sample collector cho service case
   const handleAssignSampleCollector = (
     serviceCase: ServiceCase,
     sampleCollector: SampleCollector
@@ -97,7 +101,6 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
     setConfirmModalVisible(true)
   }
 
-  // Xác nhận gán sample collector
   const handleConfirmAssignment = async () => {
     if (!selectedServiceCase || !selectedSampleCollector) return
 
@@ -105,7 +108,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
       await addSampleCollectorToServiceCase({
         serviceCaseId: selectedServiceCase._id,
         sampleCollectorId: selectedSampleCollector._id,
-        data: {}, // Empty data object as required by API
+        data: {},
       }).unwrap()
 
       message.success(
@@ -120,7 +123,6 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
     }
   }
 
-  // Hủy gán sample collector
   const handleCancelAssignment = () => {
     setConfirmModalVisible(false)
     setSelectedServiceCase(null)
@@ -251,12 +253,17 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
     },
   ]
 
-  // Calculate pagination for client-side pagination
   const serviceCases = serviceCasesData?.data || []
   const totalItems = serviceCases.length
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
+
+  // Hàm để disable các ngày trước ngày hiện tại
+  const disabledDate = (current: moment.Moment) => {
+    // Không cho phép chọn ngày trước ngày hiện tại
+    return current && current < moment().endOf('day');
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -282,6 +289,18 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
               { value: true, label: '🏠 Dịch vụ tại nhà' },
               { value: false, label: '🏥 Dịch vụ tại cơ sở' },
             ]}
+          />
+          <DatePicker
+            format="YYYY-MM-DD"
+            placeholder="Chọn ngày đặt lịch"
+            onChange={(date, dateString) => {
+              setSelectedBookingDate(dateString || undefined)
+              setPageNumber(1)
+            }}
+            style={{ width: 180 }}
+            allowClear
+            suffixIcon={<CalendarOutlined />}
+            disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
           />
         </div>
 
@@ -324,6 +343,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             rowKey='_id'
             pagination={false}
             loading={isFetchingServices}
+            scroll={{ x: 'max-content' }}
             locale={{
               emptyText: isAtHome
                 ? 'Không có dịch vụ tại nhà nào chưa được gán nhân viên lấy mẫu'
@@ -346,12 +366,12 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} của ${total} dịch vụ`
               }
+              pageSizeOptions={["5", "10", "20"]}
             />
           )}
         </>
       )}
 
-      {/* Confirmation Modal */}
       <Modal
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
