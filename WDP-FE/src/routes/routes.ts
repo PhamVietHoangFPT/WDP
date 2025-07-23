@@ -82,6 +82,9 @@ const PaymentPage = lazy(() => import('../pages/Payment/PaymentPage'))
 const PaymentSuccessPage = lazy(
   () => import('../pages/Payment/PaymentSuccessPage')
 )
+const PaymentConditionSuccessPage = lazy(
+  () => import('../pages/Payment/PaymentConditionSuccessPage')
+)
 const PaymentHistory = lazy(() => import('../pages/ProfileUser/PaymentHistory'))
 const PaymentDetail = lazy(() => import('../pages/ProfileUser/PaymentDetail'))
 const HomeRegisteration = lazy(
@@ -243,6 +246,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/payment-success',
         component: PaymentSuccessPage,
+        role: ['Customer'],
+      },
+      {
+        path: '/payment-success-condition',
+        component: PaymentConditionSuccessPage,
         role: ['Customer'],
       },
       {

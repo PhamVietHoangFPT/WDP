@@ -43,7 +43,15 @@ export const paymentApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['PaymentHistory'],
     }),
-
+    // ✅ Tạo lịch sử thanh toán cho condition
+    createConditionPaymentHistory: builder.mutation({
+      query: (data) => ({
+        url: '/payments/condition',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['PaymentHistory'],
+    }),
     // ✅ Lấy danh sách lịch sử thanh toán
     getPaymentList: builder.query({
       query: ({ pageSize, pageNumber }) => ({
@@ -96,4 +104,5 @@ export const {
   useGetPaymentByStaffQuery,
   useGetServiceCasesListQuery,
   useGetTestRequestHistoryQuery,
+  useCreateConditionPaymentHistoryMutation
 } = paymentApi
