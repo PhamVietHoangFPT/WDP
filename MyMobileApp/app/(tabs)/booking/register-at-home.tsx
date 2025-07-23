@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Linking,
   SafeAreaView,
+  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "react-native-elements";
@@ -18,8 +18,8 @@ import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { jwtDecode } from "jwt-decode";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+
 import { getFacilities } from "@/service/adminApi.ts/facilities-api";
 import { getTestTakers } from "@/service/customerApi/testTaker-api";
 import { getSlots } from "@/service/adminApi.ts/slot-api";
@@ -28,8 +28,8 @@ import { createCaseMember } from "@/service/adminApi.ts/case-members";
 import { createServiceCase } from "@/service/service/service-case-api";
 import { createVNPayServicePayment } from "@/service/customerApi/vnpay-api";
 import { getServiceById } from "@/service/service/service-api";
-import { Ionicons } from "@expo/vector-icons";
-import NotLoggedIn from "@/app/NotLoggedIn";
+import { getAddresses } from "@/service/customerApi/address-api";
+import { jwtDecode } from "jwt-decode";
 
 // Hàm tính khoảng cách km giữa 2 điểm kinh độ vĩ độ
 function getDistanceFromLatLonInKm(
@@ -94,8 +94,6 @@ export default function RegisterServiceAtHome() {
   const router = useRouter();
   const { serviceId } = useLocalSearchParams() as { serviceId: string };
 
-  const tabBarHeight = useBottomTabBarHeight();
-
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [availableTestTakers, setAvailableTestTakers] = useState<TestTaker[]>(
     []
@@ -121,6 +119,29 @@ export default function RegisterServiceAtHome() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  );
+
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false);
+  const [feeConfirmed, setFeeConfirmed] = useState(false);
+
+  // Load addresses
+  const loadAddresses = async () => {
+    try {
+      const res = await getAddresses();
+      setAddresses(res.data || []);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải danh sách địa chỉ.");
+    }
+  };
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
   // Lấy vị trí user
   useEffect(() => {
@@ -196,33 +217,47 @@ export default function RegisterServiceAtHome() {
   }, [userLocation]);
 
   // Cập nhật lại khoảng cách khi userLocation thay đổi
+  // Khi selectedAddressId thay đổi => tính lại khoảng cách facilities dựa trên tọa độ địa chỉ đã chọn
   useEffect(() => {
-    if (!userLocation || facilities.length === 0) return;
+    if (!selectedAddressId || facilities.length === 0) {
+      setSelectedFacility(null);
+      return;
+    }
+    // Lấy tọa độ địa chỉ đã chọn
+    const selectedAddress = addresses.find(
+      (addr) => addr._id === selectedAddressId
+    );
+    if (!selectedAddress?.location?.coordinates) {
+      setSelectedFacility(null);
+      return;
+    }
+    const [addrLon, addrLat] = selectedAddress.location.coordinates;
 
-    const updatedFacilities = facilities.map((facility) => {
+    // Tính khoảng cách facility so với địa chỉ đã chọn
+    const facilitiesWithDistance = facilities.map((facility) => {
       const lon = facility.address?.location?.coordinates?.[0];
       const lat = facility.address?.location?.coordinates?.[1];
       if (typeof lat === "number" && typeof lon === "number") {
-        const distance = getDistanceFromLatLonInKm(
-          userLocation.latitude,
-          userLocation.longitude,
-          lat,
-          lon
-        );
+        const distance = getDistanceFromLatLonInKm(addrLat, addrLon, lat, lon);
         return { ...facility, distance };
       }
-      return facility;
+      return { ...facility, distance: Infinity };
     });
 
-    // Sắp xếp lại theo khoảng cách
-    updatedFacilities.sort((a, b) => {
-      if (typeof a.distance !== "number") return 1;
-      if (typeof b.distance !== "number") return -1;
-      return a.distance - b.distance;
-    });
+    // Sắp xếp theo khoảng cách tăng dần
+    facilitiesWithDistance.sort(
+      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
+    );
 
-    setFacilities(updatedFacilities);
-  }, [userLocation]);
+    setFacilities(facilitiesWithDistance);
+
+    // Set facility gần nhất làm facility mặc định
+    if (facilitiesWithDistance.length > 0) {
+      setSelectedFacility(facilitiesWithDistance[0]._id);
+    } else {
+      setSelectedFacility(null);
+    }
+  }, [selectedAddressId, addresses]);
 
   // Tự chọn facility gần nhất
   useEffect(() => {
@@ -244,7 +279,11 @@ export default function RegisterServiceAtHome() {
   }, [userLocation, facilities]);
 
   if (hasToken === false) {
-    return <NotLoggedIn />;
+    return (
+      <Text style={{ color: "#fff", textAlign: "center", marginTop: 40 }}>
+        Bạn cần đăng nhập để sử dụng chức năng này.
+      </Text>
+    );
   }
 
   // Handlers
@@ -301,6 +340,54 @@ export default function RegisterServiceAtHome() {
     );
   };
 
+  const handleCalculateShippingFee = async () => {
+    if (!selectedAddressId || !selectedFacility) {
+      Alert.alert("Thông báo", "Vui lòng chọn địa chỉ và cơ sở.");
+      return;
+    }
+    setIsCalculatingFee(true);
+    try {
+      // Lấy tọa độ địa chỉ đã chọn
+      const userAddress = addresses.find(
+        (addr) => addr._id === selectedAddressId
+      );
+      if (!userAddress?.location?.coordinates) {
+        throw new Error("Địa chỉ chọn không có tọa độ.");
+      }
+      const [userLon, userLat] = userAddress.location.coordinates;
+
+      // Lấy tọa độ cơ sở
+      const facility = facilities.find((f) => f._id === selectedFacility);
+      if (!facility?.address?.location?.coordinates) {
+        throw new Error("Cơ sở không có tọa độ.");
+      }
+      const [facilityLon, facilityLat] = facility.address.location.coordinates;
+
+      // Tính khoảng cách
+      const distance = getDistanceFromLatLonInKm(
+        userLat,
+        userLon,
+        facilityLat,
+        facilityLon
+      );
+
+      // Tính phí (ví dụ: miễn phí 5km đầu, 10k/km tiếp theo)
+      let fee = distance > 5 ? (distance - 5) * 10000 : 0;
+      fee = Math.ceil(fee / 1000) * 1000; // Làm tròn lên 1000
+
+      setShippingFee(fee);
+      Alert.alert(
+        "Thông báo",
+        `Phí vận chuyển ước tính: ${fee.toLocaleString()} ₫`
+      );
+    } catch (err) {
+      Alert.alert("Lỗi", err.message || "Không thể tính phí vận chuyển");
+      setShippingFee(null);
+    } finally {
+      setIsCalculatingFee(false);
+    }
+  };
+
   const handleSubmit = async () => {
     const accountId = await getAccountIdFromToken();
     if (!accountId) {
@@ -316,43 +403,57 @@ export default function RegisterServiceAtHome() {
       !selectedFacility ||
       finalTestTakers.length < 2 ||
       !selectedDate ||
-      !selectedSlot
+      !selectedSlot ||
+      !selectedAddressId
     ) {
       Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ tất cả các mục.");
       return;
     }
 
+    if (!feeConfirmed) {
+      Alert.alert("Thông báo", "Vui lòng xác nhận phí vận chuyển.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // Tạo booking
       const bookingRes = await createBooking({
         slot: selectedSlot,
         account: accountId,
+        address: selectedAddressId,
         note: "Đặt lịch hẹn xét nghiệm ADN tại nhà.",
+        shippingFee,
       });
       const bookingId = bookingRes?.data?._id || bookingRes?._id;
       if (!bookingId) throw new Error("Không thể tạo lịch hẹn.");
 
+      // Lấy thông tin dịch vụ
       const serviceInfo = await getServiceById(serviceId);
       const isAdministration = serviceInfo?.data?.isAdministration ?? false;
 
+      // Tạo case member
       const caseMemberRes = await createCaseMember({
         testTaker: finalTestTakers,
         booking: bookingId,
         service: serviceId,
+        address: selectedAddressId,
         note: "",
         isAtHome: !isAdministration,
         isSelfSampling: false,
       });
-
       const caseMemberId = caseMemberRes?.data?._id || caseMemberRes?._id;
       if (!caseMemberId) throw new Error("Không thể tạo hồ sơ xét nghiệm.");
 
+      // Tạo service case
       const serviceCaseRes = await createServiceCase({
         caseMember: caseMemberId,
+        shippingFee: shippingFee,
       });
       const serviceCaseId = serviceCaseRes?.data?._id || serviceCaseRes?._id;
       if (!serviceCaseId) throw new Error("Không thể tạo đơn dịch vụ.");
 
+      // Tạo link thanh toán VNPAY
       const paymentResponse = await createVNPayServicePayment({
         serviceCaseId,
         amount: 10000,
@@ -395,7 +496,7 @@ export default function RegisterServiceAtHome() {
           style={{ flex: 1 }}
           contentContainerStyle={[
             styles.scroll,
-            { paddingBottom: styles.scroll.paddingBottom + tabBarHeight },
+            { paddingBottom: styles.scroll.paddingBottom },
           ]}
         >
           <TouchableOpacity onPress={() => router.back()}>
@@ -403,11 +504,34 @@ export default function RegisterServiceAtHome() {
           </TouchableOpacity>
           <Text style={styles.title}>Đăng Ký Dịch Vụ Tại Nhà</Text>
 
+          <Text style={styles.section}>Chọn địa chỉ của bạn</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={selectedAddressId}
+              onValueChange={(value) => {
+                setSelectedAddressId(value);
+                setFeeConfirmed(false);
+                setShippingFee(null);
+              }}
+              style={styles.picker}
+              dropdownIconColor="#fff"
+            >
+              <Picker.Item label="-- Chọn địa chỉ --" value={null} />
+              {addresses.map((addr) => (
+                <Picker.Item
+                  key={addr._id}
+                  label={addr.fullAddress}
+                  value={addr._id}
+                />
+              ))}
+            </Picker>
+          </View>
+
           <Text style={styles.section}>1. Chọn cơ sở</Text>
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={selectedFacility}
-              onValueChange={handleFacilityChange}
+              onValueChange={(value) => setSelectedAddressId(value)}
               style={styles.picker}
               dropdownIconColor="#fff"
             >
@@ -536,12 +660,48 @@ export default function RegisterServiceAtHome() {
           </View>
 
           <Button
+            title="Tính phí vận chuyển"
+            onPress={handleCalculateShippingFee}
+            disabled={
+              isCalculatingFee || !selectedAddressId || !selectedFacility
+            }
+          />
+
+          {shippingFee !== null && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 8,
+              }}
+            >
+              <Text style={{ color: "#fff" }}>
+                Phí vận chuyển: {shippingFee.toLocaleString()} ₫
+              </Text>
+              <TouchableOpacity
+                onPress={() => setFeeConfirmed(!feeConfirmed)}
+                style={{ marginLeft: 12 }}
+              >
+                <MaterialIcons
+                  name={feeConfirmed ? "check-box" : "check-box-outline-blank"}
+                  size={24}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+              <Text style={{ color: "#fff", marginLeft: 6 }}>
+                Xác nhận phí vận chuyển
+              </Text>
+            </View>
+          )}
+
+          <Button
             title="Đăng Ký và Thanh Toán"
             onPress={handleSubmit}
-            buttonStyle={styles.submitButton}
-            disabled={isSubmitting || !selectedSlot}
+            disabled={!feeConfirmed || !selectedSlot || isSubmitting}
             loading={isSubmitting}
+            style={{ marginTop: 20 }}
           />
+
           <Text style={styles.footerText}>
             * Dịch vụ tại nhà chỉ áp dụng cho mục đích dân sự.
           </Text>
@@ -626,5 +786,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontStyle: "italic",
     marginTop: 15,
+    marginBottom: 60,
+    fontWeight: "bold",
   },
 });

@@ -47,8 +47,10 @@ export const apiSlice = createApi({
     'slot-templates',
     'sampling-kit-inventory',
     'staff',
+    'admin',
     'vnpay',
     'results',
+
   ],
 
   endpoints: () => ({}),
