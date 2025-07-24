@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { Injectable, Inject, ForbiddenException } from '@nestjs/common'
 import { IPaymentService } from './interfaces/ipayment.service'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
@@ -8,11 +10,17 @@ import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
 import { transactionStatusEnum } from 'src/common/enums/transactionStatus.enum'
 import { responseCodeEnum } from 'src/common/enums/responseCode.enum'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
+import { IKitShipmentRepository } from '../KitShipment/interfaces/ikitShipment.repository'
+import { IKitShipmentStatusRepository } from '../kitShipmentStatus/interfaces/ikitShipmentStatus.repository'
 @Injectable()
 export class PaymentService implements IPaymentService {
   constructor(
     @Inject(IPaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
+    @Inject(IKitShipmentRepository)
+    private readonly kitShipmentRepository: IKitShipmentRepository,
+    @Inject(IKitShipmentStatusRepository)
+    private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
   ) {}
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
@@ -65,7 +73,33 @@ export class PaymentService implements IPaymentService {
     const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
     const isSelfSampling = currentServiceCasePayment.split('_')[2] === 'true'
     if (isSelfSampling) {
-      // Handle self-sampling case
+      const dataSend = await this.paymentRepository.updateStatusForKitShipment(
+        originalServiceCaseId,
+      )
+      const kitShipmentId = dataSend.kitShipmentId
+      const customerId = dataSend.customerId
+      let kitShipmentStatus: any = null
+      if (
+        paymentData.transactionStatus !== '00' &&
+        paymentData.responseCode !== '00'
+      ) {
+        kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+          'Hủy do không thanh toán thành công',
+        )
+      } else if (
+        paymentData.transactionStatus === '00' &&
+        paymentData.responseCode === '00'
+      ) {
+        kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+          'Thanh toán thành công',
+        )
+      }
+      const currentStatusId = kitShipmentStatus._id.toString()
+      await this.kitShipmentRepository.updateCurrentStatus(
+        kitShipmentId,
+        currentStatusId,
+        customerId,
+      )
     }
 
     const payment = await this.paymentRepository.createForServiceCase(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { Injectable, Inject } from '@nestjs/common'
 import { IKitShipmentRepository } from './interfaces/ikitShipment.repository'
 import { InjectModel } from '@nestjs/mongoose'
@@ -19,36 +20,39 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private testTakerRepository: ITestTakerRepository,
-  ) { }
+  ) {}
 
-  async getAccountIdByKitShipmentId(kitShipmentId: string): Promise<string | null> {
+  async getAccountIdByKitShipmentId(
+    kitShipmentId: string,
+  ): Promise<string | null> {
     try {
       // Tìm kitShipment bằng ID
       const kitShipment = await this.kitShipmentModel
         .findOne({ _id: kitShipmentId })
-        .exec();
+        .exec()
 
       if (!kitShipment || !kitShipment.caseMember) {
-        return null;
+        return null
       }
 
       // Tìm caseMember bằng caseMemberId
-      const caseMember = await this.caseMemberRepository
-        .findById(kitShipment.caseMember.toString())
+      const caseMember = await this.caseMemberRepository.findById(
+        kitShipment.caseMember.toString(),
+      )
 
       if (!caseMember || !caseMember.testTaker) {
-        return null;
+        return null
       }
 
       // Tìm testTaker bằng testTakerId
-      const testTaker = await this.testTakerRepository
-        .findById(caseMember.testTaker.toString())
+      const testTaker = await this.testTakerRepository.findById(
+        caseMember.testTaker.toString(),
+      )
 
-      return testTaker?.account.toString() || null;
-
+      return testTaker?.account.toString() || null
     } catch (error) {
       // Xử lý lỗi (có thể log lỗi hoặc throw custom error)
-      throw new Error(`Failed to get accountId: ${error.message}`);
+      throw new Error(`Failed to get accountId: ${error.message}`)
     }
   }
 
@@ -57,7 +61,6 @@ export class KitShipmentRepository implements IKitShipmentRepository {
       .findOne({ _id: id })
       .select('currentStatus')
       .exec()
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return currentStatus?.currentStatus
       ? currentStatus.currentStatus.toString()
       : null
@@ -68,7 +71,6 @@ export class KitShipmentRepository implements IKitShipmentRepository {
       .findOne({ _id: id })
       .select('caseMember')
       .exec()
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return caseMember?.caseMember ? caseMember.caseMember.toString() : null
   }
   async getDeliveryStaffId(id: string): Promise<string | null> {
@@ -76,7 +78,6 @@ export class KitShipmentRepository implements IKitShipmentRepository {
       .findOne({ _id: id })
       .select('deliveryStaff')
       .exec()
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return deliveryStaff?.deliveryStaff
       ? deliveryStaff.deliveryStaff.toString()
       : null
@@ -97,6 +98,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     })
     return await newKitShipment.save()
   }
+
   async updateCurrentStatus(
     id: string,
     currentStatus: string,
@@ -112,7 +114,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     await this.kitShipmentHistoryRepository.createKitShipmentHistory(
       currentStatus,
       updatedKitShipment?._id.toString(),
-      customerId
+      customerId,
     )
     return updatedKitShipment
   }

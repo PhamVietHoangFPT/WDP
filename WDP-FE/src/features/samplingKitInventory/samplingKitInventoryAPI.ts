@@ -34,6 +34,14 @@ const samplingKitInventoryAPI = apiSlice.injectEndpoints({
       providesTags: ['sampling-kit-inventory'],
     }),
 
+    getSamplingKitInventoryBySampleIdAndFacilityId: builder.query({
+      query: ({ sampleId, facilityId }) => ({
+        url: `/sampling-kit-inventory/sample-and-facility?sampleId=${sampleId}&facilityId=${facilityId}`,
+        method: 'GET',
+      }),
+      providesTags: ['sampling-kit-inventory'],
+    }),
+
     // 3. POST /sampling-kit-inventory: Tạo mới kit
     createSamplingKitInventory: builder.mutation({
       query: (newKit) => ({
@@ -80,6 +88,7 @@ export const {
   useGetAllSamplingKitInventoriesQuery,
   useGetSamplingKitInventoryDetailQuery,
   useCreateSamplingKitInventoryMutation,
+  useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery,
   useUpdateSamplingKitInventoryMutation,
   useDeleteSamplingKitInventoryMutation,
   useDeleteExpiredSamplingKitsMutation,

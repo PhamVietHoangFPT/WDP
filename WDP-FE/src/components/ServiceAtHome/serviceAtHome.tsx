@@ -12,6 +12,7 @@ import { useCreateServiceCaseMutation } from '../../features/serviceCase/service
 import { useCreateServiceCasePaymentMutation } from '../../features/vnpay/vnpayApi'
 import BookingComponent from '../../pages/BookingPage/BookingPage'
 import { useCreateBookingMutation } from '../../features/customer/bookingApi'
+import { useCreateKitShipmentMutation } from '../../features/kitShipment/kitShipmentAPI'
 interface TestTakerListResponse {
   data: {
     data: TestTaker[]
@@ -43,9 +44,11 @@ const ServiceAtHomeForm: React.FC = () => {
     useGetServiceDetailQuery<ServiceDetailResponse>(id)
   const [createCaseMember, { isLoading: isCreating }] =
     useCreateCaseMemberMutation()
+  const [createKitShipment] = useCreateKitShipmentMutation()
   const [createServiceCase] = useCreateServiceCaseMutation()
   const [createBooking] = useCreateBookingMutation()
   const [createPaymentUrl] = useCreateServiceCasePaymentMutation()
+  const [isDisabled, setIsDisabled] = useState(false)
   const dataTestTaker = data?.data || []
   const selectedTestTakers = Form.useWatch([], form)
 
@@ -127,6 +130,13 @@ const ServiceAtHomeForm: React.FC = () => {
       if (!caseMemberId) {
         throw new Error('Không thể lấy caseMemberId')
       }
+
+      const kitShipmentData = {
+        caseMember: caseMemberId,
+      }
+      const kitShipment = await createKitShipment(kitShipmentData).unwrap()
+      const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
+      console.log('kitShipmentId:', kitShipmentId)
 
       const serviceCaseData = {
         caseMember: caseMemberId,
@@ -236,6 +246,7 @@ const ServiceAtHomeForm: React.FC = () => {
                   serviceDetail={serviceDetail}
                   addressId={selectedAddressId}
                   setAddressId={setSelectedAddressId}
+                  setDisabled={setIsDisabled}
                 />
               </Form.Item>
             </Col>
@@ -251,6 +262,7 @@ const ServiceAtHomeForm: React.FC = () => {
                   type='primary'
                   htmlType='submit'
                   block
+                  disabled={isDisabled}
                   loading={isCreating}
                 >
                   Đăng ký

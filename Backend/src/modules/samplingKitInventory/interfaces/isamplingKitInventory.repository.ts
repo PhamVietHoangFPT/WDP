@@ -63,6 +63,11 @@ export interface ISamplingKitInventoryRepository {
     SamplingKitInventoryDocument[],
     SamplingKitInventoryDocument
   >
+
+  findBySampleIdAndFacilityId(
+    sampleId: string,
+    facilityId: string,
+  ): Promise<SamplingKitInventoryDocument | null>
 }
 export const ISamplingKitInventoryRepository = Symbol(
   'ISamplingKitInventoryRepository',
