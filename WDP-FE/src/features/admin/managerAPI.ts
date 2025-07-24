@@ -16,8 +16,8 @@ const managerAPI = apiSlice.injectEndpoints({
         url: `/admin/facilities`,
         method: 'GET',
         params: {
-          withManager
-        }
+          withManager,
+        },
       }),
       transformResponse: (res) => res,
       providesTags: ['admin'],
@@ -67,5 +67,5 @@ export const {
   useDeleteManagerMutation,
   useGetFacilitiesWithManagerListQuery,
   useGetManagerListQuery,
-  useUnAssignManagerMutation
+  useUnAssignManagerMutation,
 } = managerAPI
