@@ -11,6 +11,8 @@ import { BookingModule } from '../booking/booking.module'
 import { PaymentTypeModule } from '../paymentType/paymentType.module'
 import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+import { KitShipmentModule } from '../KitShipment/kitShipment.module'
+import { KitShipmentStatusModule } from '../kitShipmentStatus/kitShipmentStatus.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
@@ -19,6 +21,8 @@ import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.
     PaymentTypeModule,
     ServiceCaseModule,
     TestRequestStatusModule,
+    KitShipmentModule,
+    KitShipmentStatusModule,
   ],
 
   controllers: [PaymentController],

@@ -11,11 +11,12 @@ import { UpdateKitShipmentStatusDto } from './dto/updateKitShipmentStatus.dto'
 
 @Injectable()
 export class KitShipmentStatusRepository
-  implements IKitShipmentStatusRepository {
+  implements IKitShipmentStatusRepository
+{
   constructor(
     @InjectModel(KitShipmentStatus.name)
     private KitShipmentStatusModel: Model<KitShipmentStatusDocument>,
-  ) { }
+  ) {}
   findByOrder(order: number): Promise<KitShipmentStatusDocument | null> {
     return this.KitShipmentStatusModel.findOne({
       order,
@@ -82,8 +83,9 @@ export class KitShipmentStatusRepository
   }
 
   async getKitShipmentStatusOrder(id: string): Promise<number | null> {
-    const result = await this.KitShipmentStatusModel.findById(id).select('order').exec()
+    const result = await this.KitShipmentStatusModel.findById(id)
+      .select('order')
+      .exec()
     return result ? result.order : null
   }
-
 }

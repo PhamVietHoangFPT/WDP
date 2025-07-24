@@ -12,5 +12,4 @@ export class CreateKitShipmentDto {
   @IsNotEmpty({ message: 'ID case member không được để trống' })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   caseMember: mongoose.Schema.Types.ObjectId
-
 }

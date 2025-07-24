@@ -44,6 +44,11 @@ export interface ISamplingKitInventoryService {
     pageSize: number,
     sampleId?: string,
   ): Promise<PaginatedResponse<SamplingKitInventoryResponseDto>>
+
+  findBySampleIdAndFacilityId(
+    sampleId: string,
+    facilityId: string,
+  ): Promise<SamplingKitInventoryResponseDto | null>
 }
 
 export const ISamplingKitInventoryService = Symbol(

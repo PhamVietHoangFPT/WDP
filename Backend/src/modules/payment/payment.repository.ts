@@ -10,6 +10,10 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import * as dayjs from 'dayjs'
 import * as customParseFormat from 'dayjs/plugin/customParseFormat'
+import {
+  ServiceCase,
+  ServiceCaseDocument,
+} from '../serviceCase/schemas/serviceCase.schema'
 ;(dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
@@ -24,6 +28,8 @@ export class PaymentRepository implements IPaymentRepository {
     private serviceCaseStatusRepository: ITestRequestStatusRepository,
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
+    @InjectModel(ServiceCase.name)
+    private serviceCaseModel: Model<ServiceCaseDocument>,
   ) {}
 
   async createForServiceCase(
@@ -153,5 +159,47 @@ export class PaymentRepository implements IPaymentRepository {
     return await this.paymentModel
       .exists({ transactionReferenceNumber })
       .then((exists) => !!exists)
+  }
+
+  async updateStatusForKitShipment(serviceCaseId: string): Promise<any | null> {
+    const serviceCase = await this.serviceCaseModel.aggregate([
+      {
+        $match: { _id: new Types.ObjectId(serviceCaseId) },
+      },
+      {
+        $lookup: {
+          from: 'kitshipments',
+          let: {
+            caseMemberId: '$caseMember',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'kitShipmentDetails',
+        },
+      },
+      {
+        $unwind: {
+          path: '$kitShipmentDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          account: 1,
+          kitShipmentId: '$kitShipmentDetails._id',
+        },
+      },
+    ])
+    if (!serviceCase || serviceCase.length === 0) {
+      return null
+    }
+    return serviceCase
   }
 }

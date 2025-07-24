@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React, { useState } from 'react'
 import {
@@ -15,7 +15,11 @@ import {
   Typography,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons'
 import {
   useGetManagerListQuery,
   useCreateManagerMutation,
@@ -47,13 +51,21 @@ interface CreateManagerFormValues {
 
 export default function AdminManagerList() {
   // Lấy danh sách manager
-  const { data: managersData, isLoading: isManagersLoading, error: managersError, refetch } = useGetManagerListQuery(null)
+  const {
+    data: managersData,
+    isLoading: isManagersLoading,
+    error: managersError,
+    refetch,
+  } = useGetManagerListQuery(null)
   const managers: Manager[] = managersData?.data || []
 
   // Mutation để tạo, xóa, unassign manager
-  const [createManager, { isLoading: isCreatingManager }] = useCreateManagerMutation()
-  const [deleteManager, { isLoading: isDeletingManager }] = useDeleteManagerMutation()
-  const [unAssignManager, { isLoading: isUnAssigningManager }] = useUnAssignManagerMutation()
+  const [createManager, { isLoading: isCreatingManager }] =
+    useCreateManagerMutation()
+  const [deleteManager, { isLoading: isDeletingManager }] =
+    useDeleteManagerMutation()
+  const [unAssignManager, { isLoading: isUnAssigningManager }] =
+    useUnAssignManagerMutation()
 
   // State cho Modal tạo manager
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false)
@@ -84,7 +96,8 @@ export default function AdminManagerList() {
       console.error('Failed to create manager:', error)
       notification.error({
         message: 'Tạo Manager thất bại',
-        description: error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+        description:
+          error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
       })
     }
   }
@@ -98,7 +111,8 @@ export default function AdminManagerList() {
           Mày có chắc chắn muốn xóa manager **{manager.name}** không?
           {manager.facility && (
             <p style={{ color: 'red', marginTop: '10px' }}>
-              Manager này hiện đang được gán cho một cơ sở. Nếu xóa, manager sẽ tự động được unassign khỏi cơ sở đó.
+              Manager này hiện đang được gán cho một cơ sở. Nếu xóa, manager sẽ
+              tự động được unassign khỏi cơ sở đó.
             </p>
           )}
         </>
@@ -131,7 +145,8 @@ export default function AdminManagerList() {
           console.error('Failed to delete manager:', error)
           notification.error({
             message: 'Xóa Manager thất bại',
-            description: error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+            description:
+              error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
           })
         }
       },
@@ -165,17 +180,17 @@ export default function AdminManagerList() {
       title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
-        <Space size="middle">
+        <Space size='middle'>
           <Popconfirm
-            title="Xác nhận xóa?"
+            title='Xác nhận xóa?'
             onConfirm={() => handleDeleteManager(record)}
-            okText="Xóa"
-            cancelText="Hủy"
-            placement="topRight"
+            okText='Xóa'
+            cancelText='Hủy'
+            placement='topRight'
             disabled={isDeletingManager || isUnAssigningManager}
           >
             <Button
-              type="primary"
+              type='primary'
               danger
               icon={<DeleteOutlined />}
               loading={isDeletingManager || isUnAssigningManager}
@@ -191,7 +206,7 @@ export default function AdminManagerList() {
   if (isManagersLoading) {
     return (
       <div style={{ textAlign: 'center', padding: '50px 0' }}>
-        <Spin size="large" tip="Đang tải danh sách Manager..." />
+        <Spin size='large' tip='Đang tải danh sách Manager...' />
       </div>
     )
   }
@@ -199,7 +214,10 @@ export default function AdminManagerList() {
   if (managersError) {
     return (
       <div style={{ textAlign: 'center', padding: '50px 0', color: 'red' }}>
-        <p>Lỗi khi tải danh sách Manager: {managersError.message || JSON.stringify(managersError.data)}</p>
+        <p>
+          Lỗi khi tải danh sách Manager:{' '}
+          {managersError.message || JSON.stringify(managersError.data)}
+        </p>
         <Button onClick={() => refetch()}>Thử lại</Button>
       </div>
     )
@@ -210,7 +228,7 @@ export default function AdminManagerList() {
       <Title level={2}>Quản lý Managers</Title>
 
       <Button
-        type="primary"
+        type='primary'
         icon={<PlusOutlined />}
         onClick={showCreateModal}
         style={{ marginBottom: 16 }}
@@ -221,73 +239,81 @@ export default function AdminManagerList() {
       <Table
         columns={columns}
         dataSource={managers}
-        rowKey="_id"
+        rowKey='_id'
         loading={isManagersLoading}
         pagination={{ pageSize: 10 }}
       />
 
       <Modal
-        title="Tạo Manager mới"
+        title='Tạo Manager mới'
         visible={isCreateModalVisible}
         onCancel={handleCreateCancel}
         footer={null}
       >
         <Form
           form={createForm}
-          layout="vertical"
+          layout='vertical'
           onFinish={handleCreateManager}
         >
           <Form.Item
-            name="name"
-            label="Họ và tên"
+            name='name'
+            label='Họ và tên'
             rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
           >
-            <Input placeholder="Nguyễn Văn A" />
+            <Input placeholder='Nguyễn Văn A' />
           </Form.Item>
           <Form.Item
-            name="email"
-            label="Email"
+            name='email'
+            label='Email'
             rules={[
               { required: true, message: 'Vui lòng nhập email!' },
               { type: 'email', message: 'Email không hợp lệ!' },
             ]}
           >
-            <Input placeholder="example@gmail.com" />
+            <Input placeholder='example@gmail.com' />
           </Form.Item>
           <Form.Item
-            name="phoneNumber"
-            label="Số điện thoại"
+            name='phoneNumber'
+            label='Số điện thoại'
             rules={[
               { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ!' },
+              {
+                pattern: /^[0-9]{10,11}$/,
+                message: 'Số điện thoại không hợp lệ!',
+              },
             ]}
           >
-            <Input placeholder="09xxxxxxxx" />
+            <Input placeholder='09xxxxxxxx' />
           </Form.Item>
           {/* Thêm trường Password */}
           <Form.Item
-            name="password"
-            label="Mật khẩu"
+            name='password'
+            label='Mật khẩu'
             rules={[
               { required: true, message: 'Vui lòng nhập mật khẩu!' },
               { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
             ]}
             hasFeedback // Hiển thị trạng thái validation
           >
-            <Input.Password placeholder="Nhập mật khẩu" />
+            <Input.Password placeholder='Nhập mật khẩu' />
           </Form.Item>
           <Form.Item
-            name="gender"
-            label="Giới tính"
+            name='gender'
+            label='Giới tính'
             rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
           >
-            <Select placeholder="Chọn giới tính">
+            <Select placeholder='Chọn giới tính'>
               <Option value={true}>Nam</Option>
               <Option value={false}>Nữ</Option>
             </Select>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isCreatingManager} block>
+            <Button
+              type='primary'
+              htmlType='submit'
+              loading={isCreatingManager}
+              block
+            >
               Tạo Manager
             </Button>
           </Form.Item>

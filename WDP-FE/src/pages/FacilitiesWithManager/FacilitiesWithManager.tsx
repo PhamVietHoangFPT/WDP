@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React, { useState } from 'react'
 import {
@@ -16,7 +16,13 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router-dom'
-import { FilterOutlined, DownOutlined, UserAddOutlined, UserDeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import {
+  FilterOutlined,
+  DownOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons'
 import {
   useGetFacilitiesWithManagerListQuery,
   useGetManagerListQuery,
@@ -29,12 +35,12 @@ const { Option } = Select
 
 // Định nghĩa kiểu dữ liệu cho Address
 interface Address {
-  _id: string;
-  fullAddress: string;
+  _id: string
+  fullAddress: string
   location: {
-    type: string;
-    coordinates: number[];
-  };
+    type: string
+    coordinates: number[]
+  }
 }
 
 // Định nghĩa kiểu dữ liệu cho Manager (đầy đủ hơn để hiển thị tên)
@@ -57,9 +63,11 @@ interface Facility {
 }
 
 export default function FacilitiesWithManager() {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
   // State để lọc facility: true (có manager), false (chưa có manager), undefined (tất cả)
-  const [withManagerFilter, setWithManagerFilter] = useState<boolean | undefined>(false) // Mặc định là chưa có manager
+  const [withManagerFilter, setWithManagerFilter] = useState<
+    boolean | undefined
+  >(false) // Mặc định là chưa có manager
 
   // Lấy danh sách facilities dựa trên filter
   const {
@@ -72,12 +80,19 @@ export default function FacilitiesWithManager() {
   const facilities: Facility[] = facilitiesData?.data || []
 
   // Lấy danh sách managers (để hiển thị trong dropdown gán)
-  const { data: managersData, isLoading: isManagersLoading, error: managersError, refetch: refetchManagers } = useGetManagerListQuery(null)
+  const {
+    data: managersData,
+    isLoading: isManagersLoading,
+    error: managersError,
+    refetch: refetchManagers,
+  } = useGetManagerListQuery(null)
   const managers: Manager[] = managersData?.data || []
 
   // Mutations
-  const [assignManager, { isLoading: isAssigningManager }] = useAssignManagerMutation()
-  const [unAssignManager, { isLoading: isUnAssigningManager }] = useUnAssignManagerMutation()
+  const [assignManager, { isLoading: isAssigningManager }] =
+    useAssignManagerMutation()
+  const [unAssignManager, { isLoading: isUnAssigningManager }] =
+    useUnAssignManagerMutation()
 
   // Xử lý gán Manager
   const handleAssignManager = async (facilityId: string, managerId: string) => {
@@ -93,7 +108,8 @@ export default function FacilitiesWithManager() {
       console.error('Failed to assign manager:', error)
       notification.error({
         message: 'Gán Manager thất bại',
-        description: error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+        description:
+          error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
       })
     }
   }
@@ -101,7 +117,8 @@ export default function FacilitiesWithManager() {
   // Xử lý gỡ Manager
   const handleUnAssignManager = async (facility: Facility) => {
     // Bây giờ facility.account là một đối tượng Manager hoặc null
-    if (!facility.account || !facility.account._id) { // Kiểm tra cả facility.account và facility.account._id
+    if (!facility.account || !facility.account._id) {
+      // Kiểm tra cả facility.account và facility.account._id
       notification.warn({
         message: 'Không thể gỡ',
         description: 'Cơ sở này không có manager nào được gán.',
@@ -118,7 +135,10 @@ export default function FacilitiesWithManager() {
       cancelText: 'Hủy',
       onOk: async () => {
         try {
-          await unAssignManager({ facilityId: facility._id, managerId: facility.account!._id }).unwrap() // Lấy _id từ facility.account
+          await unAssignManager({
+            facilityId: facility._id,
+            managerId: facility.account!._id,
+          }).unwrap() // Lấy _id từ facility.account
           notification.success({
             message: 'Gỡ Manager thành công',
             description: `Manager "${facility.account!.name}" đã được gỡ khỏi cơ sở "${facility.facilityName}".`,
@@ -129,7 +149,8 @@ export default function FacilitiesWithManager() {
           console.error('Failed to unassign manager:', error)
           notification.error({
             message: 'Gỡ Manager thất bại',
-            description: error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+            description:
+              error?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
           })
         }
       },
@@ -138,7 +159,7 @@ export default function FacilitiesWithManager() {
 
   // Tạo menu dropdown cho managers chưa được gán
   const getUnassignedManagersMenu = (facilityId: string) => {
-    const unassignedManagers = managers.filter(manager => !manager.facility)
+    const unassignedManagers = managers.filter((manager) => !manager.facility)
 
     if (unassignedManagers.length === 0) {
       return (
@@ -147,7 +168,9 @@ export default function FacilitiesWithManager() {
             {
               key: 'no-managers',
               label: (
-                <span style={{ color: '#999' }}>Không có manager nào khả dụng</span>
+                <span style={{ color: '#999' }}>
+                  Không có manager nào khả dụng
+                </span>
               ),
               disabled: true,
             },
@@ -166,7 +189,9 @@ export default function FacilitiesWithManager() {
               style={{ padding: '5px 12px' }}
             >
               <div style={{ fontWeight: 'bold' }}>{manager.name}</div>
-              <div style={{ fontSize: '12px', color: '#666' }}>{manager.email}</div>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                {manager.email}
+              </div>
             </div>
           ),
         }))}
@@ -195,16 +220,17 @@ export default function FacilitiesWithManager() {
       title: 'Manager', // Đổi tên cột cho rõ ràng hơn
       key: 'managerName',
       // Render: Hiển thị tên manager nếu có, ngược lại là "Chưa gán"
-      render: (_, record) => (record.account ? record.account.name : 'Chưa gán'),
+      render: (_, record) =>
+        record.account ? record.account.name : 'Chưa gán',
     },
     {
       title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
-        <Space size="middle">
+        <Space size='middle'>
           {record.account ? ( // Nếu đã có manager
             <Button
-              type="primary"
+              type='primary'
               danger
               icon={<UserDeleteOutlined />}
               onClick={() => handleUnAssignManager(record)}
@@ -212,15 +238,20 @@ export default function FacilitiesWithManager() {
             >
               Gỡ Manager
             </Button>
-          ) : ( // Nếu chưa có manager
+          ) : (
+            // Nếu chưa có manager
             <Dropdown
               overlay={getUnassignedManagersMenu(record._id)}
               trigger={['click']}
               // Vô hiệu hóa nút gán nếu đang xử lý hoặc không có manager nào chưa gán
-              disabled={isAssigningManager || isManagersLoading || (managers.filter(m => !m.facility)).length === 0}
+              disabled={
+                isAssigningManager ||
+                isManagersLoading ||
+                managers.filter((m) => !m.facility).length === 0
+              }
             >
               <Button
-                type="primary"
+                type='primary'
                 icon={<UserAddOutlined />}
                 loading={isAssigningManager || isManagersLoading}
               >
@@ -236,7 +267,7 @@ export default function FacilitiesWithManager() {
   if (isFacilitiesLoading || isManagersLoading) {
     return (
       <div style={{ textAlign: 'center', padding: '50px 0' }}>
-        <Spin size="large" tip="Đang tải dữ liệu..." />
+        <Spin size='large' tip='Đang tải dữ liệu...' />
       </div>
     )
   }
@@ -245,9 +276,25 @@ export default function FacilitiesWithManager() {
     return (
       <div style={{ textAlign: 'center', padding: '50px 0', color: 'red' }}>
         <p>Lỗi khi tải dữ liệu:</p>
-        {facilitiesError && <p>Facilities: {facilitiesError.message || JSON.stringify(facilitiesError.data)}</p>}
-        {managersError && <p>Managers: {managersError.message || JSON.stringify(managersError.data)}</p>}
-        <Button onClick={() => { navigate('/admin') }}>Quay lại trang Admin</Button>
+        {facilitiesError && (
+          <p>
+            Facilities:{' '}
+            {facilitiesError.message || JSON.stringify(facilitiesError.data)}
+          </p>
+        )}
+        {managersError && (
+          <p>
+            Managers:{' '}
+            {managersError.message || JSON.stringify(managersError.data)}
+          </p>
+        )}
+        <Button
+          onClick={() => {
+            navigate('/admin')
+          }}
+        >
+          Quay lại trang Admin
+        </Button>
       </div>
     )
   }
@@ -256,7 +303,14 @@ export default function FacilitiesWithManager() {
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý Cơ sở & Managers</Title>
 
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
         <FilterOutlined />
         <span>Lọc theo trạng thái Manager:</span>
         <Select
@@ -273,8 +327,13 @@ export default function FacilitiesWithManager() {
       <Table
         columns={columns}
         dataSource={facilities}
-        rowKey="_id"
-        loading={isFacilitiesLoading || isManagersLoading || isAssigningManager || isUnAssigningManager}
+        rowKey='_id'
+        loading={
+          isFacilitiesLoading ||
+          isManagersLoading ||
+          isAssigningManager ||
+          isUnAssigningManager
+        }
         pagination={{ pageSize: 10 }}
       />
     </div>

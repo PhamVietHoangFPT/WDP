@@ -42,7 +42,7 @@ export class KitShipmentController {
   constructor(
     @Inject(IKitShipmentService)
     private readonly kitshipmentService: IKitShipmentService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
@@ -169,10 +169,7 @@ export class KitShipmentController {
     @Param('currentStatus') currentStatus: string,
   ): Promise<ApiResponseDto<KitShipmentResponseDto> | null> {
     const updatedKitShipment =
-      await this.kitshipmentService.updateCurrentStatus(
-        id,
-        currentStatus
-      )
+      await this.kitshipmentService.updateCurrentStatus(id, currentStatus)
     if (!updatedKitShipment) {
       return null
     }
@@ -184,5 +181,4 @@ export class KitShipmentController {
       success: true,
     }
   }
-
 }

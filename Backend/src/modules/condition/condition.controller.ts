@@ -25,7 +25,7 @@ export class ConditionController {
   constructor(
     @Inject(IConditionService)
     private readonly ConditionService: IConditionService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)

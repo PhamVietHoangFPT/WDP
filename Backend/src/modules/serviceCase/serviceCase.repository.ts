@@ -458,4 +458,31 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   ): Promise<any> {
     return this.serviceCaseModel.updateMany(filter, update)
   }
+
+  async checkIsSelfSampling(serviceCaseId: string): Promise<boolean | null> {
+    if (!Types.ObjectId.isValid(serviceCaseId)) {
+      console.warn('Id không hợp lệ')
+      return null
+    }
+
+    const serviceCase = await this.serviceCaseModel
+      .findById(serviceCaseId)
+      .populate<{ caseMember: { isSelfSampling: boolean } }>({
+        path: 'caseMember',
+        select: 'isSelfSampling',
+      })
+      .lean()
+
+    if (!serviceCase || !serviceCase.caseMember) {
+      return null
+    }
+
+    const selfSamplingValue = serviceCase.caseMember.isSelfSampling
+
+    if (typeof selfSamplingValue !== 'boolean') {
+      return null
+    }
+
+    return selfSamplingValue
+  }
 }

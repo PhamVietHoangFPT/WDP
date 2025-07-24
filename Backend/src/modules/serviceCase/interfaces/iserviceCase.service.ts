@@ -1,7 +1,6 @@
 import { CreateServiceCaseDto } from '../dto/createServiceCase.dto'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { ServiceCaseResponseDto } from '../dto/serviceCaseResponse.dto'
-import { UpdateConditionDto } from 'src/modules/condition/dto/updateCondition.dto'
 export interface IServiceCaseService {
   createServiceCase(
     createServiceCaseDto: CreateServiceCaseDto,

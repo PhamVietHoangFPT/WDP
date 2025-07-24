@@ -51,6 +51,7 @@ export const apiSlice = createApi({
     'vnpay',
     'results',
     'conditions',
+    'kit-shippments',
   ],
 
   endpoints: () => ({}),

@@ -84,7 +84,6 @@ export class ImageController {
       },
     },
   })
-  
   async uploadKitShipment(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateImageKitShipmentDto,

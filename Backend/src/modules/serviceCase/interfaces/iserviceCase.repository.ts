@@ -79,5 +79,7 @@ export interface IServiceCaseRepository {
     filter: FilterQuery<ServiceCase>,
     update: UpdateQuery<ServiceCase>,
   ): Promise<any>
+
+  checkIsSelfSampling(serviceCaseId: string): Promise<boolean | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

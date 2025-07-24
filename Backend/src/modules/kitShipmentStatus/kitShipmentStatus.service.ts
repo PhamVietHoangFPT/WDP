@@ -17,7 +17,7 @@ export class KitShipmentStatusService implements IKitShipmentStatusService {
   constructor(
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository, // Inject the repository
-  ) { }
+  ) {}
 
   private mapToResponseDto(
     kitShipmentStatus: KitShipmentStatusDocument,

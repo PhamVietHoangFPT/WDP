@@ -31,6 +31,7 @@ import { useGetSlotTemplateForFacilityQuery } from '../../features/admin/slotAPI
 import type { Slot } from '../../types/slot'
 import { CalculatorOutlined } from '@ant-design/icons'
 import { useGetAddressesQuery } from '../../features/address/addressAPI'
+import { useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery } from '../../features/samplingKitInventory/samplingKitInventoryAPI'
 dayjs.locale('vi')
 dayjs.extend(isoWeek)
 dayjs.extend(weekOfYear)
@@ -105,11 +106,13 @@ interface BookingComponentProps {
       timeReturnFee: number
     }
     sample: {
+      _id: string
       fee: number
     }
   }
   addressId: string | null
   setAddressId: (addressId: string | null) => void
+  setDisabled: (disabled: boolean) => void
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -134,11 +137,29 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   serviceDetail,
   addressId,
   setAddressId,
+  setDisabled,
 }) => {
   const { data: addressesData, isLoading: addressesLoading } =
     useGetAddressesQuery({})
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
+  const {
+    data: samplingKitData,
+    isError: samplingKitIsError,
+    error: samplingKitError,
+  } = useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery(
+    { sampleId: serviceDetail?.sample?._id, facilityId },
+    {
+      skip: !facilityId,
+    }
+  )
 
+  useEffect(() => {
+    if (samplingKitIsError) {
+      setDisabled(true)
+    } else {
+      setDisabled(false)
+    }
+  }, [samplingKitIsError, setDisabled])
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
   const isProcessingRef = useRef(false)
 
@@ -493,6 +514,21 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                     )
                   }
                 />
+                {samplingKitError ? (
+                  <Text type='danger' style={{ marginTop: 8 }}>
+                    {'data' in samplingKitError &&
+                    samplingKitError.data?.message
+                      ? samplingKitError.data.message
+                      : 'Lỗi không xác định. Vui lòng thử lại.'}
+                  </Text>
+                ) : (
+                  samplingKitData && (
+                    <Text type='secondary' style={{ marginTop: 8 }}>
+                      Số lượng bộ kit hiện có:{' '}
+                      {samplingKitData?.data[0]?.inventory || 0}
+                    </Text>
+                  )
+                )}
               </div>
             </Col>
           </Row>

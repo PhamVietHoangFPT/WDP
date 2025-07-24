@@ -69,8 +69,6 @@ interface TestTakerNameProps {
   id: string
 }
 
-
-
 const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
   const {
     data: testTaker,
@@ -138,8 +136,6 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     }
   )
 
-
-
   const doctorId = useMemo(() => {
     const userData = Cookies.get('userData')
     if (userData) {
@@ -163,18 +159,24 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleOpen = useCallback((serviceCase: ServiceCase) => {
-    console.log('handleOpen called with:', serviceCase);
-    setSelectedServiceCase(serviceCase);
-    setIsModalOpen(true);
-  }, [setSelectedServiceCase, setIsModalOpen]);
+  const handleOpen = useCallback(
+    (serviceCase: ServiceCase) => {
+      console.log('handleOpen called with:', serviceCase)
+      setSelectedServiceCase(serviceCase)
+      setIsModalOpen(true)
+    },
+    [setSelectedServiceCase, setIsModalOpen]
+  )
 
   const handleClose = () => setIsModalOpen(false)
 
   const handleSubmit = async (selectedConditionId: string) => {
     console.log('Selected condition to update:', selectedConditionId)
     try {
-      await updateCondition({ serviceCaseId: selectedServiceCase?._id, conditionId: selectedConditionId }).unwrap()
+      await updateCondition({
+        serviceCaseId: selectedServiceCase?._id,
+        conditionId: selectedConditionId,
+      }).unwrap()
     } catch (error: any) {
       console.error('Error updating condition:', error)
       message.error(

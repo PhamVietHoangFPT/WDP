@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import {
   SamplingKitInventory,
   SamplingKitInventoryDocument,
@@ -171,5 +171,21 @@ export class SamplingKitInventoryRepository
       })
       .populate({ path: 'sample', select: 'name' })
       .lean()
+  }
+
+  async findBySampleIdAndFacilityId(
+    sampleId: string,
+    facilityId: string,
+  ): Promise<SamplingKitInventoryDocument | null> {
+    return this.samplingKitInventoryModel
+      .findOne({
+        sample: new Types.ObjectId(sampleId),
+        facility: new Types.ObjectId(facilityId),
+        deleted_at: null,
+        expDate: { $gte: new Date() },
+      })
+      .select('-deleted_at -created_at -updated_at -facility -sample')
+      .lean()
+      .exec()
   }
 }

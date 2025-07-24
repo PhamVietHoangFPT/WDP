@@ -48,8 +48,11 @@ export class VnpayService {
       PaymentData.serviceCaseId,
     )
     const totalFee = serviceCaseFee + shippingFee
-    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}`
-    const dataSend = {  
+    const isSelfSampling = await this.serviceCaseRepository.checkIsSelfSampling(
+      PaymentData.serviceCaseId,
+    )
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}_${isSelfSampling ? 'true' : 'false'}`
+    const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
       vnp_TxnRef: uniqueTxnRef,

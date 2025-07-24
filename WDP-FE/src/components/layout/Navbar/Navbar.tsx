@@ -31,71 +31,45 @@ const Navbar: React.FC = () => {
     : null
   const navigate = useNavigate()
 
-  const items = useMemo(() => {
-    return [
+  const mainMenuItems = useMemo(() => {
+    // Bắt đầu với các mục bên trái
+    const leftItems = [
       {
         key: 'home',
         icon: <HomeFilled style={{ fontSize: '16px' }} />,
         label: 'Trang chủ',
-        style: { fontSize: '16px', color: '#616161' },
         url: '/',
-      },
-      // {
-      //   key: 'services',
-      //   icon: <SmileOutlined style={{ fontSize: '16px' }} />,
-      //   label: 'Dịch vụ',
-      //   style: { fontSize: '16px', color: '#616161' },
-      //   url: '/vaccines?pageNumber=1',
-      // },
-      {
-        key: 'booking',
-        icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
-        label: 'Đặt chỗ',
-        style: { fontSize: '16px', color: '#616161' },
-        url: '/booking',
       },
       {
         key: 'blogs',
         icon: <FontAwesomeIcon icon={faBlog} style={{ fontSize: '16px' }} />,
         label: 'Cẩm nang',
-        style: { fontSize: '16px', color: '#616161' },
         url: '/blogs',
       },
     ]
-  }, [])
 
-  const userItems = useMemo(() => {
-    return [
-      {
-        key: 'adn-at-facility',
-        icon: <SmileOutlined style={{ fontSize: '16px' }} />,
-        label: 'Dịch vụ hành chính',
-        style: { fontSize: '16px', color: '#616161' },
-        url: '/register-service',
-      },
+    // Các mục bên phải
+    const rightItems = [
       {
         key: 'kit',
         icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
         label: 'Lấy mẫu tại nhà',
-        style: { fontSize: '16px', color: '#616161' },
         url: '/home-registeration',
+        // ✅ THÊM DÒNG NÀY: Dòng này sẽ đẩy mục này và tất cả các mục sau nó sang hẳn bên phải
+        style: { marginLeft: 'auto' },
       },
       {
         key: userData ? 'profile' : 'login',
-        icon: userData ? (
-          <UserOutlined style={{ fontSize: '16px' }} />
-        ) : (
-          <LoginOutlined style={{ fontSize: '16px' }} />
-        ),
+        icon: userData ? <UserOutlined /> : <LoginOutlined />,
         label: userData ? 'Hồ sơ' : 'Đăng nhập / Đăng ký',
-        style: { fontSize: '16px', color: '#616161' },
         url: userData ? '/profile' : '/login',
       },
+      // Dùng toán tử spread để thêm mục Đăng xuất nếu đã đăng nhập
       ...(userData
         ? [
             {
               key: 'logout',
-              icon: <LogoutOutlined style={{ fontSize: '16px' }} />,
+              icon: <LogoutOutlined />,
               label: 'Đăng xuất',
               style: { fontSize: '16px', color: 'red' },
               onClick: () => {
@@ -107,6 +81,8 @@ const Navbar: React.FC = () => {
           ]
         : []),
     ]
+
+    return [...leftItems, ...rightItems]
   }, [userData, navigate])
 
   const onClick: MenuProps['onClick'] = (e) => {
@@ -122,7 +98,7 @@ const Navbar: React.FC = () => {
       return null
     }
 
-    const allItems = [...items, ...userItems]
+    const allItems = mainMenuItems
     const item = findItem(allItems, e.key)
     if (item?.url) {
       navigate(item.url)
@@ -133,30 +109,28 @@ const Navbar: React.FC = () => {
   }
 
   return (
-    <Header style={{ background: '#fff' }}>
-      <div
+    <Header
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: '#fff',
+        borderBottom: '1px solid #f0f0f0',
+        padding: '0 24px',
+      }}
+    >
+      {/* Bỏ các div bao ngoài, chỉ cần một Menu duy nhất */}
+      <Menu
+        onClick={onClick}
+        selectedKeys={[current]}
+        mode='horizontal'
+        items={mainMenuItems} // ✅ SỬ DỤNG MẢNG ĐÃ GỘP
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: 'none',
+          lineHeight: '62px',
+          flex: 1, // ✅ THÊM DÒNG NÀY: Cho phép menu chiếm toàn bộ chiều rộng
+          minWidth: 0, // Cần thiết để flexbox co giãn đúng cách
         }}
-      >
-        <Menu
-          onClick={onClick}
-          selectedKeys={[current]}
-          mode='horizontal'
-          items={items}
-          style={{ flex: '7', borderBottom: 'none' }}
-        />
-        <Menu
-          onClick={onClick}
-          selectedKeys={[current]}
-          mode='horizontal'
-          items={userItems}
-          style={{ flex: '3', borderBottom: 'none' }}
-        />
-      </div>
+      />
     </Header>
   )
 }

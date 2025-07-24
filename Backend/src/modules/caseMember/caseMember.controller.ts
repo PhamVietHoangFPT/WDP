@@ -39,7 +39,7 @@ export class CaseMemberController {
   constructor(
     @Inject(ICaseMemberService)
     private readonly caseMemberService: ICaseMemberService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiBearerAuth()

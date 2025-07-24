@@ -21,4 +21,7 @@ export const serviceCaseAPI = apiSlice.injectEndpoints({
   }),
 })
 
-export const { useCreateServiceCaseMutation, useUpdateServiceCaseConditionMutation } = serviceCaseAPI
+export const {
+  useCreateServiceCaseMutation,
+  useUpdateServiceCaseConditionMutation,
+} = serviceCaseAPI
