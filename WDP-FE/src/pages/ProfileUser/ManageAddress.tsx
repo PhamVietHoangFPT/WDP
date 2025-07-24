@@ -311,13 +311,13 @@ export default function ManageAddress() {
       align: 'center',
       render: (_, record) => (
         <Space size='small'>
-          <Tooltip title='Chỉnh sửa'>
+          {/* <Tooltip title='Chỉnh sửa'>
             <Button
               type='text'
               icon={<EditOutlined />}
               onClick={() => handleEditAddressClick(record)}
             />
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title='Xóa'>
             <Popconfirm
               title='Xác nhận xóa'
