@@ -106,7 +106,8 @@ export default function UserResult() {
 
           <Descriptions.Item label='Bác sĩ phụ trách'>
             <UserOutlined style={{ marginRight: 8 }} />
-            {resultData.doctorId ? resultData.doctorId : 'Chưa cập nhật'}
+            {/* Sửa lại: Truy cập vào thuộc tính .name của object doctorId */}
+            {resultData.doctorId?.name || 'Chưa cập nhật'}
           </Descriptions.Item>
         </Descriptions>
       </Card>
