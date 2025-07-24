@@ -131,12 +131,14 @@ const ServiceAtHomeForm: React.FC = () => {
         throw new Error('Không thể lấy caseMemberId')
       }
 
-      const kitShipmentData = {
-        caseMember: caseMemberId,
+      if (serviceDetail.isSelfSampling) {
+        const kitShipmentData = {
+            caseMember: caseMemberId,
+          }
+          const kitShipment = await createKitShipment(kitShipmentData).unwrap()
+          const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
+          console.log('kitShipmentId:', kitShipmentId)
       }
-      const kitShipment = await createKitShipment(kitShipmentData).unwrap()
-      const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
-      console.log('kitShipmentId:', kitShipmentId)
 
       const serviceCaseData = {
         caseMember: caseMemberId,
