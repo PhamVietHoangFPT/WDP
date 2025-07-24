@@ -27,7 +27,7 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
     CaseMemberModule,
     SamplingKitInventoryModule,
     KitShipmentHistoryModule,
-    TestTakerModule
+    TestTakerModule,
   ],
   controllers: [KitShipmentController],
   providers: [

@@ -27,7 +27,7 @@ export class KitShipmentService implements IKitShipmentService {
     private readonly kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
@@ -61,7 +61,7 @@ export class KitShipmentService implements IKitShipmentService {
     }
     if (
       existingKitShipment.currentStatus ===
-      updateKitShipmentDto.currentStatus &&
+        updateKitShipmentDto.currentStatus &&
       existingKitShipment.caseMember === updateKitShipmentDto.caseMember &&
       existingKitShipment.deliveryStaff === updateKitShipmentDto.deliveryStaff
     ) {
@@ -106,14 +106,15 @@ export class KitShipmentService implements IKitShipmentService {
       )
     }
     let updatedKitShipment: KitShipment | null
-    const customerId = await this.kitShipmentRepository.getAccountIdByKitShipmentId(id)
+    const customerId =
+      await this.kitShipmentRepository.getAccountIdByKitShipmentId(id)
     if (newKitShipmentStatusOrder - oldKitShipmentStatusOrder > 1) {
       if (newKitShipmentStatusOrder === 4 && oldKitShipmentStatusOrder === 2) {
         updatedKitShipment =
           await this.kitShipmentRepository.updateCurrentStatus(
             id,
             currentStatus,
-            customerId
+            customerId,
           )
         if (!updatedKitShipment) {
           throw new Error('Cập nhật trạng thái hiện tại không thành công')
@@ -129,14 +130,13 @@ export class KitShipmentService implements IKitShipmentService {
     updatedKitShipment = await this.kitShipmentRepository.updateCurrentStatus(
       id,
       currentStatus,
-      customerId
+      customerId,
     )
     if (!updatedKitShipment) {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')
     }
     return this.mapToResponseDto(updatedKitShipment)
   }
-
 
   async deleteKitShipment(id: string, userId: string): Promise<any> {
     const existingService = await this.findKitShipmentById(id)
@@ -201,23 +201,24 @@ export class KitShipmentService implements IKitShipmentService {
     const newService = await this.kitShipmentRepository.create(userId, {
       ...createKitShipmentDto,
     })
-    const kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
-      'Chờ thanh toán',
-    )
+    const kitShipmentStatus =
+      await this.kitShipmentStatusRepository.findByName('Chờ thanh toán')
 
     if (!kitShipmentStatus) {
       throw new NotFoundException('Trạng thái vận chuyển không tồn tại.')
     }
 
-    const newKitShipmentHistory = await this.kitShipmentHistoryRepository.createKitShipmentHistory(
-      kitShipmentStatus._id.toString(),
-      newService._id.toString(),
-      userId
-    )
+    const newKitShipmentHistory =
+      await this.kitShipmentHistoryRepository.createKitShipmentHistory(
+        kitShipmentStatus._id.toString(),
+        newService._id.toString(),
+        userId,
+      )
     if (!newKitShipmentHistory) {
-      throw new InternalServerErrorException('Lỗi khi tạo lịch sử vận chuyển kit.')
+      throw new InternalServerErrorException(
+        'Lỗi khi tạo lịch sử vận chuyển kit.',
+      )
     }
     return this.mapToResponseDto(newService)
-
   }
 }

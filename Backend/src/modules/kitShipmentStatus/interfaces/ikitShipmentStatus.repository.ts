@@ -18,7 +18,6 @@ export interface IKitShipmentStatusRepository {
   findByName(status: string): Promise<KitShipmentStatusDocument | null>
   findByOrder(order: number): Promise<KitShipmentStatusDocument | null>
   getKitShipmentStatusOrder(id: string): Promise<number | null>
-
 }
 export const IKitShipmentStatusRepository = Symbol(
   'IKitShipmentStatusRepository',

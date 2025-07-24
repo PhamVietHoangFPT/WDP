@@ -83,9 +83,9 @@ import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipme
     TestResultShipmentModule,
     TestResultShipmentHistoryModule,
     AdminModule,
-    KitShipmentHistoryModule
+    KitShipmentHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
