@@ -161,39 +161,36 @@ export class KitShipmentService implements IKitShipmentService {
   async findAllKitShipment(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
+    userId: string,
   ): Promise<PaginatedResponse<KitShipmentResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = {}
+    let filter = {}
+    if (currentStatus !== 'null') {
+      filter = { currentStatus: currentStatus, created_by: userId }
+    } else {
+      filter = { created_by: userId }
+    }
     const [kitShipments, totalItems] = await Promise.all([
       this.kitShipmentRepository
-        .findWithQuery(filter) // Returns a query object
+        .findAllKitShipments(filter) // Returns a query object
         .skip(skip)
         .limit(pageSize)
         .exec(), // Execute the query
       this.kitShipmentRepository.countDocuments(filter), // Use repository for count
     ])
-    if (!kitShipments || kitShipments.length == 0) {
-      throw new ConflictException('Không tìm thấy kit shipment nào.')
-    } else {
-      try {
-        const totalPages = Math.ceil(totalItems / pageSize)
-        const data = kitShipments.map((kitShipment: KitShipment) =>
-          this.mapToResponseDto(kitShipment),
-        ) // Explicitly type `user`
-        return {
-          data,
-          pagination: {
-            totalItems,
-            totalPages,
-            currentPage: pageNumber,
-            pageSize,
-          },
-        }
-      } catch (error) {
-        throw new InternalServerErrorException(
-          'Lỗi khi lấy danh sách kit shipment.',
-        )
-      }
+    const totalPages = Math.ceil(totalItems / pageSize)
+    const data = kitShipments.map((serviceCase) =>
+      this.mapToResponseDto(serviceCase),
+    )
+    return {
+      data,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize,
+      },
     }
   }
 
@@ -201,22 +198,26 @@ export class KitShipmentService implements IKitShipmentService {
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
   ): Promise<CreateKitShipmentDto> {
-    try {
-      const newService = await this.kitShipmentRepository.create(userId, {
-        ...createKitShipmentDto,
-      })
-      const kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
-        'Chờ giao hàng',
-      )
-      const newKitShipmentHistory = await this.kitShipmentHistoryRepository.createKitShipmentHistory(
-        kitShipmentStatus._id.toString(),
-        newService._id.toString(),
-        userId
-      )
+    const newService = await this.kitShipmentRepository.create(userId, {
+      ...createKitShipmentDto,
+    })
+    const kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+      'Chờ thanh toán',
+    )
 
-      return this.mapToResponseDto(newService)
-    } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi tạo dịch vụ.')
+    if (!kitShipmentStatus) {
+      throw new NotFoundException('Trạng thái vận chuyển không tồn tại.')
     }
+
+    const newKitShipmentHistory = await this.kitShipmentHistoryRepository.createKitShipmentHistory(
+      kitShipmentStatus._id.toString(),
+      newService._id.toString(),
+      userId
+    )
+    if (!newKitShipmentHistory) {
+      throw new InternalServerErrorException('Lỗi khi tạo lịch sử vận chuyển kit.')
+    }
+    return this.mapToResponseDto(newService)
+
   }
 }

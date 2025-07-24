@@ -32,6 +32,9 @@ import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { Roles } from 'src/common/decorators/roles.decorator'
 import { RoleEnum } from 'src/common/enums/role.enum'
+import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto'
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
+import { RolesGuard } from 'src/common/guard/roles.guard'
 
 @ApiTags('kit-shipment')
 @Controller('kit-shipment')
@@ -50,6 +53,9 @@ export class KitShipmentController {
     const user = req.user.id // Lấy thông tin người dùng từ request
     return this.kitshipmentService.createKitShipment(user, createKitShipmentDto)
   }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: 'Xem tất cả kit shipment' })
   @ApiQuery({
@@ -64,23 +70,30 @@ export class KitShipmentController {
     type: Number,
     description: 'Số trang',
   })
+  @ApiQuery({
+    name: 'currentStatus',
+    required: false,
+    type: String,
+    description: 'Trạng thái hiện tại của kit shipment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách kitshipment.',
+    type: PaginatedResponseDto<KitShipmentResponseDto>,
+  })
   @ApiResponse({ status: HttpStatus.OK, type: [KitShipmentResponseDto] })
-  async findAll(
-    @Query(
-      new ValidationPipe({
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-        forbidNonWhitelisted: true,
-      }),
+  findAll(
+    @Query() paginationQuery: PaginationQueryDto,
+    @Query('currentStatus') currentStatus: string | null,
+    @Req() req: any,
+  ): Promise<PaginatedResponse<KitShipmentResponseDto>> {
+    const userId = req.user.id
+    return this.kitshipmentService.findAllKitShipment(
+      paginationQuery.pageNumber,
+      paginationQuery.pageSize,
+      currentStatus,
+      userId,
     )
-    paginationQuery: PaginationQueryDto,
-  ) {
-    const { pageNumber, pageSize } = paginationQuery
-    const result = await this.kitshipmentService.findAllKitShipment(
-      pageNumber || 1,
-      pageSize || 10,
-    )
-    return result
   }
 
   @Get(':id')
@@ -155,18 +168,18 @@ export class KitShipmentController {
     @Param('id') id: string,
     @Param('currentStatus') currentStatus: string,
   ): Promise<ApiResponseDto<KitShipmentResponseDto> | null> {
-    const updatedServiceCase =
+    const updatedKitShipment =
       await this.kitshipmentService.updateCurrentStatus(
         id,
         currentStatus
       )
-    if (!updatedServiceCase) {
+    if (!updatedKitShipment) {
       return null
     }
 
     return {
       message: 'Cập nhật trạng thái hiện tại thành công',
-      data: [updatedServiceCase],
+      data: [updatedKitShipment],
       statusCode: 200,
       success: true,
     }

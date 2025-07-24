@@ -12,6 +12,8 @@ export interface IKitShipmentService {
   findAllKitShipment(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
+    userId: string,
   ): Promise<PaginatedResponse<KitShipmentResponseDto>>
 
   findKitShipmentById(id: string): Promise<KitShipmentResponseDto>
