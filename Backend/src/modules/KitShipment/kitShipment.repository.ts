@@ -119,22 +119,19 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     return updatedKitShipment
   }
 
-  async findAll(): Promise<KitShipmentDocument[] | null> {
-    return await this.kitShipmentModel
-      .find({ deleted_at: null })
+  findAllKitShipments(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<KitShipmentDocument[], KitShipmentDocument> {
+    return this.kitShipmentModel
+      .find(filter)
+      .sort({ created_at: -1 })
       .populate({ path: 'currentStatus', select: '_id status' })
       .populate({ path: 'caseMember' })
-      .populate({
-        path: 'samplingKitInventory',
-        select: '_id ',
-        populate: { path: 'facility', select: 'facilityName -_id' },
-      })
-      .populate({ path: 'address', select: 'fullAddress -_id' })
       .populate({
         path: 'deliveryStaff',
         select: '-_id name email phoneNumber gender',
       })
-      .exec()
+      .lean()
   }
 
   async updateKitShipmentById(

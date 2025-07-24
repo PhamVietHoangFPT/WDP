@@ -28,7 +28,7 @@ export class KitShipment extends BaseEntity {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
-    required: true,
+    required: false,
   })
   deliveryStaff: mongoose.Schema.Types.ObjectId
 }

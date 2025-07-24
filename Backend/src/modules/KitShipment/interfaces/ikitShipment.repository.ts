@@ -9,7 +9,9 @@ export interface IKitShipmentRepository {
     createKitShipmentDto: CreateKitShipmentDto,
   ): Promise<KitShipmentDocument>
   // findOneById(id: string): Promise<KitShipmentDocument | null>
-  findAll(): Promise<KitShipmentDocument[]>
+  findAllKitShipments(
+    filter: Record<string, unknown>,
+  ): mongoose.Query<KitShipmentDocument[], KitShipmentDocument>
   updateKitShipmentById(
     id: string,
     userId: string,
