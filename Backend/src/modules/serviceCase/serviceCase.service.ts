@@ -235,7 +235,7 @@ export class ServiceCaseService implements IServiceCaseService {
     return this.mapToResponseDto(updated)
   }
 
-  @Cron('0 */1 * * * *')
+  @Cron('0 */3 * * * *')
   async handleCron() {
     this.logger.log(`Bắt đầu cron job lúc ${new Date().toISOString()}`)
 
@@ -281,7 +281,8 @@ export class ServiceCaseService implements IServiceCaseService {
     // Chuẩn bị sẵn các document để ghi lịch sử
     const historyDocs = casesToProcess.map((c) => ({
       testRequest: c._id,
-      status: cancelledStatusId,
+      testRequestStatus: cancelledStatusId,
+      account: c.account,
     }))
 
     // 4. THỰC HIỆN CẬP NHẬT HÀNG LOẠT (Chỉ 3 lệnh gọi DB)

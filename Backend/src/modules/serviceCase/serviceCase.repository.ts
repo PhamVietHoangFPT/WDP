@@ -204,7 +204,9 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<{ _id: string; bookingId: string; slotId: string }[]> {
+  ): Promise<
+    { _id: string; bookingId: string; slotId: string; account: string }[]
+  > {
     // ✅ 1. SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ
 
     const aggregationPipeline = [
@@ -241,6 +243,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           _id: 1, // ID của service case
           bookingId: '$bookingDetails._id',
           slotId: '$bookingDetails.slot',
+          account: 1,
         },
       },
     ]

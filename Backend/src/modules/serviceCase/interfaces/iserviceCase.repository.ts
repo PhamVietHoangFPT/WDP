@@ -57,7 +57,9 @@ export interface IServiceCaseRepository {
   getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<{ _id: string; bookingId: string; slotId: string }[]>
+  ): Promise<
+    { _id: string; bookingId: string; slotId: string; account: string }[]
+  >
 
   findByBookingId(bookingId: string): Promise<boolean | null>
 
