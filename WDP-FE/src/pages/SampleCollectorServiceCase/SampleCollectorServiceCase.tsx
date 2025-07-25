@@ -14,6 +14,8 @@ import {
   Menu,
   Modal,
   message,
+  Space,
+  Tooltip,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
@@ -21,6 +23,12 @@ import {
   useGetAllServiceCasesQuery,
   useUpdateServiceCaseStatusMutation,
 } from '../../features/sampleCollector/sampleCollectorAPI'
+import {
+  UserOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  CarOutlined,
+} from '@ant-design/icons'
 
 const { Title } = Typography
 
@@ -166,6 +174,70 @@ const SampleCollectorServiceCase: React.FC = () => {
     )
   }
 
+  const customerCollumns = {
+    title: 'Thông tin Khách hàng',
+    key: 'customerInfo',
+    dataIndex: ['accountDetails', 'name'],
+    render: (_, record) => {
+      const account = record.accountDetails
+
+      if (!account) {
+        return '—'
+      }
+
+      const fullAddress = account.address?.fullAddress
+      const coordinates = account.address?.location?.coordinates
+      const canNavigate = fullAddress && coordinates
+
+      const handleDirectionsClick = () => {
+        if (!canNavigate) return
+        const encodedAddress = encodeURIComponent(fullAddress)
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
+        window.open(mapsUrl, '_blank', 'noopener,noreferrer')
+      }
+
+      return (
+        <Space direction='vertical' size={4}>
+          {/* Tên khách hàng */}
+          <Space>
+            <UserOutlined />
+            <Typography.Text strong>{account.name}</Typography.Text>
+          </Space>
+
+          {/* Số điện thoại */}
+          <Space>
+            <PhoneOutlined />
+            <Typography.Text>{account.phoneNumber}</Typography.Text>
+          </Space>
+
+          {/* Địa chỉ */}
+          {fullAddress && (
+            <Tooltip title={fullAddress}>
+              <Space style={{ maxWidth: 250 }}>
+                <EnvironmentOutlined />
+                <Typography.Text type='secondary' ellipsis>
+                  {fullAddress}
+                </Typography.Text>
+              </Space>
+            </Tooltip>
+          )}
+
+          {/* ✅ NÚT CHỈ ĐƯỜNG ĐƯỢC THÊM VÀO ĐÂY */}
+          {canNavigate && (
+            <Button
+              icon={<CarOutlined />}
+              size='small' // Dùng nút nhỏ để vừa vặn hơn
+              onClick={handleDirectionsClick}
+              style={{ marginTop: '4px' }}
+            >
+              Chỉ đường
+            </Button>
+          )}
+        </Space>
+      )
+    },
+  }
+
   const columns: ColumnsType<ServiceCase> = [
     {
       title: 'Mã dịch vụ',
@@ -173,14 +245,6 @@ const SampleCollectorServiceCase: React.FC = () => {
       key: '_id',
       render: (id: string) => (
         <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{id}</div>
-      ),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'statusDetails',
-      key: 'statusDetails',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{status}</Tag>
       ),
     },
     {
@@ -226,6 +290,7 @@ const SampleCollectorServiceCase: React.FC = () => {
         }
       },
     },
+    ...(isAtHome ? [customerCollumns] : []),
     {
       title: 'Hành động',
       key: 'actions',
