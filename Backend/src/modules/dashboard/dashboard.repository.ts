@@ -342,7 +342,7 @@ export class DashboardRepository implements IDashboardRepository {
       totalServiceCases: totalCases,
       totalPatients: stats.totalPatients || 0,
       returningPatients: returningPatientsCount,
-      totalFacilities: totalFacilities,
+      totalFacilities: facilityId ? 1 : totalFacilities, // Nếu có facilityId thì chỉ tính 1
       revenueByDate: rawData.revenueByDate || [],
       serviceCasesByDate: rawData.serviceCasesByDate || [],
       successfulPayments: paymentStats.successfulPayments,
