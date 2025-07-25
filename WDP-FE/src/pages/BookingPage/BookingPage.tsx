@@ -19,6 +19,7 @@ import {
   Statistic,
   List,
   Space,
+  Checkbox,
 } from 'antd'
 import dayjs from 'dayjs'
 import viVN from 'antd/locale/vi_VN'
@@ -29,9 +30,10 @@ import { useGetFacilitiesNameAndAddressQuery } from '../../features/admin/facili
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import { useGetSlotTemplateForFacilityQuery } from '../../features/admin/slotAPI'
 import type { Slot } from '../../types/slot'
-import { CalculatorOutlined } from '@ant-design/icons'
+import { CalculatorOutlined, CheckOutlined } from '@ant-design/icons'
 import { useGetAddressesQuery } from '../../features/address/addressAPI'
 import { useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery } from '../../features/samplingKitInventory/samplingKitInventoryAPI'
+import type { CheckboxChangeEvent } from 'antd/lib'
 dayjs.locale('vi')
 dayjs.extend(isoWeek)
 dayjs.extend(weekOfYear)
@@ -113,6 +115,8 @@ interface BookingComponentProps {
   addressId: string | null
   setAddressId: (addressId: string | null) => void
   setDisabled: (disabled: boolean) => void
+  setAgreed: (agreed: boolean) => void
+  isAgreed: boolean
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -138,6 +142,8 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   addressId,
   setAddressId,
   setDisabled,
+  setAgreed,
+  isAgreed,
 }) => {
   const { data: addressesData, isLoading: addressesLoading } =
     useGetAddressesQuery({})
@@ -164,7 +170,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   const isProcessingRef = useRef(false)
 
   // State cho việc tính toán và hiển thị
-  const [shippingFee, setShippingFee] = useState<number | null>(null)
+  const [shippingFee, setShippingFee] = useState<number | null>(0)
   const [totalPrice, setTotalPrice] = useState<number | null>(null)
   const [isAvailable, setIsAvailable] = useState(true)
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
@@ -257,6 +263,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     }
   }
 
+  const handleAgreementChange = (e: CheckboxChangeEvent) => {
+    console.log(e.target.checked)
+    setAgreed(e.target.checked)
+    handleConfirmBooking()
+  }
+
   const handleCalculateShipping = useCallback(async () => {
     if (isProcessingRef.current) return
     if (!facilityId) {
@@ -317,7 +329,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
       message.success({ content: 'Đã tính xong!', key: 'shipping' })
     } catch (error) {
-      console.error('Lỗi khi tính phí vận chuyển:', error)
+      console.error('Lỗi khi tính phí dịch vụ:', error)
       message.error({
         content: error instanceof Error ? error.message : String(error),
         key: 'shipping',
@@ -389,15 +401,17 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       )
       if (nearestFacility) {
         setFacilityId(nearestFacility.value)
+        setAgreed(false)
       }
     }
-  }, [addressId, selectOptions])
+  }, [addressId, selectOptions, setAgreed])
 
   useEffect(() => {
-    setShippingFee(null)
+    setShippingFee(0)
     setTotalPrice(null)
     onSelectSlot(null)
-  }, [addressId, facilityId, onSelectSlot])
+    setAgreed(false)
+  }, [addressId, facilityId, onSelectSlot, setAgreed])
 
   const handleConfirmBooking = () => {
     // 1. Kiểm tra đã chọn địa chỉ chưa
@@ -412,9 +426,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       return // Dừng hàm
     }
 
-    // 3. Kiểm tra đã tính phí vận chuyển chưa (sửa lỗi shippingFee = 0)
+    // 3. Kiểm tra đã tính phí dịch vụ chưa (sửa lỗi shippingFee = 0)
     if (shippingFee === null) {
-      message.error('Bạn cần bấm "Tính phí vận chuyển" trước khi xác nhận.')
+      message.error('Bạn cần bấm "Tính phí dịch vụ" trước khi xác nhận.')
       return // Dừng hàm
     }
 
@@ -425,7 +439,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       addressId: addressId,
     })
 
-    message.success('Đã xác nhận thông tin đặt lịch!')
+    if (!isAgreed) {
+      message.success('Đã xác nhận thông tin đặt lịch!')
+    } else {
+      message.warning('Bạn cần đồng ý với các điều khoản trước khi xác nhận.')
+    }
   }
 
   return (
@@ -693,7 +711,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                 size='small'
                 dataSource={[
                   {
-                    label: 'Phí dịch vụ',
+                    label: 'Chi phí cho mẫu và trả mẫu',
                     value:
                       serviceDetail.fee +
                       serviceDetail.timeReturn.timeReturnFee +
@@ -701,7 +719,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                     isFee: true,
                   },
                   {
-                    label: 'Phí vận chuyển',
+                    label: 'Phí dịch vụ',
                     value: shippingFee,
                     isFee: true,
                     color: '#52c41a',
@@ -724,9 +742,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   </List.Item>
                 )}
               />
-
               <Divider style={{ margin: '0' }} />
-
               <Statistic
                 title={
                   <Title level={5} style={{ color: 'inherit' }}>
@@ -751,7 +767,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   style={{ width: '100%', marginTop: 24 }}
                   disabled={!facilityId || !addressId} // SỬA LẠI ĐIỀU KIỆN
                 >
-                  Tính phí vận chuyển
+                  Tính phí dịch vụ
                 </Button>
                 <Paragraph
                   type='secondary'
@@ -761,13 +777,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                 </Paragraph>
               </>
             ) : (
-              <Button
-                type='primary'
-                onClick={handleConfirmBooking}
-                style={{ width: '100%', marginTop: 24, background: '#52c41a' }}
-              >
-                Xác nhận Đặt lịch
-              </Button>
+              <>
+                <Checkbox checked={isAgreed} onChange={handleAgreementChange}>
+                  Tôi đã đọc và đồng ý với các điều khoản đặt lịch
+                </Checkbox>
+              </>
             )}
           </Card>
         )}

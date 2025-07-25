@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsMongoId, IsNotEmpty, IsNumber, IsPositive } from 'class-validator'
+import { IsMongoId, IsNotEmpty, IsNumber, Min } from 'class-validator'
 
 export class CreateServiceCaseDto {
   @ApiProperty({
@@ -17,6 +17,6 @@ export class CreateServiceCaseDto {
   })
   @IsNotEmpty({ message: 'Phí vận chuyển không được để trống' })
   @IsNumber({}, { message: 'Phí vận chuyển phải là một con số' })
-  @IsPositive({ message: 'Phí vận chuyển phải là số dương' })
+  @Min(0, { message: 'Phí vận chuyển không được là số âm' })
   shippingFee: number
 }

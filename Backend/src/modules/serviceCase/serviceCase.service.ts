@@ -53,6 +53,8 @@ export class ServiceCaseService implements IServiceCaseService {
       paymentForCondition: serviceCase.paymentForCondition
         ? serviceCase.paymentForCondition
         : null,
+      sampleCollector: serviceCase.sampleCollector,
+      doctor: serviceCase.doctor,
     })
   }
 
