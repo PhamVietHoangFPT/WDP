@@ -8,8 +8,8 @@ import {
   Flex,
   Divider,
   Select,
-  Tooltip,
   message,
+  Space,
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
@@ -18,6 +18,7 @@ import { useCreatePaymentForConditionMutation } from '../../features/customer/pa
 import { useState } from 'react'
 const { Title, Text } = Typography
 const { Option } = Select
+import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
 export default function ServiceCase() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -98,7 +99,7 @@ export default function ServiceCase() {
             </Flex>
 
             <Flex justify='space-between'>
-              <Typography.Text>Phí vận chuyển:</Typography.Text>
+              <Typography.Text>Phí dịch vụ:</Typography.Text>
               <Typography.Text>
                 {shippingFee.toLocaleString('vi-VN')} ₫
               </Typography.Text>
@@ -126,22 +127,52 @@ export default function ServiceCase() {
       },
     },
     {
-      title: 'Trạng thái',
-      dataIndex: ['currentStatus', 'testRequestStatus'],
-      key: 'status',
-      render: (status: string) => {
-        const lowerStatus = status?.toLowerCase() || ''
-        let color = 'default'
+      title: 'Nhân viên lấy mẫu',
+      key: 'sampleCollector',
+      dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
+      render: (_, record) => {
+        const collector = record.sampleCollector
 
-        if (lowerStatus.includes('thất bại') || lowerStatus.includes('hủy')) {
-          color = 'red'
-        } else if (status?.includes('Chờ thanh toán')) {
-          color = 'orange'
-        } else if (lowerStatus.includes('đã')) {
-          color = 'green'
+        // Nếu không có thông tin nhân viên, hiển thị tag
+        if (!collector) {
+          return <Tag>Chưa chỉ định</Tag>
         }
 
-        return <Tag color={color}>{status || '—'}</Tag>
+        // Nếu có, hiển thị tên và số điện thoại
+        return (
+          <Space direction='vertical' size={0}>
+            <Space>
+              <UserOutlined />
+              <Typography.Text strong>{collector.name}</Typography.Text>
+            </Space>
+            <Space>
+              <PhoneOutlined />
+              <Typography.Text type='secondary'>
+                {collector.phoneNumber}
+              </Typography.Text>
+            </Space>
+          </Space>
+        )
+      },
+    },
+
+    {
+      title: 'Bác sĩ phụ trách',
+      key: 'doctor',
+      dataIndex: ['doctor', 'name'],
+      render: (_, record) => {
+        const doctor = record.doctor
+
+        if (!doctor) {
+          return <Tag>Chưa chỉ định</Tag>
+        }
+
+        return (
+          <Space>
+            <UserOutlined />
+            <Typography.Text>{doctor.name}</Typography.Text>
+          </Space>
+        )
       },
     },
     {

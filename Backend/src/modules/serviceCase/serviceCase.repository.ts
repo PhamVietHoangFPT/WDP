@@ -59,6 +59,8 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .find(filter)
       .sort({ created_at: -1 })
       .populate({ path: 'currentStatus', select: 'testRequestStatus -_id' })
+      .populate({ path: 'doctor', select: 'name -_id' })
+      .populate({ path: 'sampleCollector', select: 'phoneNumber name -_id' })
       .lean()
   }
 
