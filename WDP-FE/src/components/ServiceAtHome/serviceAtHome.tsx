@@ -49,6 +49,7 @@ const ServiceAtHomeForm: React.FC = () => {
   const [createBooking] = useCreateBookingMutation()
   const [createPaymentUrl] = useCreateServiceCasePaymentMutation()
   const [isDisabled, setIsDisabled] = useState(false)
+  const [isAgreed, setIsAgreed] = useState(false)
   const dataTestTaker = data?.data || []
   const selectedTestTakers = Form.useWatch([], form)
 
@@ -133,11 +134,11 @@ const ServiceAtHomeForm: React.FC = () => {
 
       if (serviceDetail.isSelfSampling) {
         const kitShipmentData = {
-            caseMember: caseMemberId,
-          }
-          const kitShipment = await createKitShipment(kitShipmentData).unwrap()
-          const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
-          console.log('kitShipmentId:', kitShipmentId)
+          caseMember: caseMemberId,
+        }
+        const kitShipment = await createKitShipment(kitShipmentData).unwrap()
+        const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
+        console.log('kitShipmentId:', kitShipmentId)
       }
 
       const serviceCaseData = {
@@ -249,6 +250,8 @@ const ServiceAtHomeForm: React.FC = () => {
                   addressId={selectedAddressId}
                   setAddressId={setSelectedAddressId}
                   setDisabled={setIsDisabled}
+                  setAgreed={setIsAgreed}
+                  isAgreed={isAgreed}
                 />
               </Form.Item>
             </Col>
@@ -264,7 +267,7 @@ const ServiceAtHomeForm: React.FC = () => {
                   type='primary'
                   htmlType='submit'
                   block
-                  disabled={isDisabled}
+                  disabled={isDisabled || !isAgreed}
                   loading={isCreating}
                 >
                   Đăng ký
