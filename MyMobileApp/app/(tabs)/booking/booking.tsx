@@ -35,9 +35,7 @@ export default function BookingScreen() {
   const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [filterType, setFilterType] = useState<
-    "all" | "administration" | "civil"
-  >("all");
+  const [filterType, setFilterType] = useState<"all" | "civil">("all");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -65,7 +63,6 @@ export default function BookingScreen() {
 
   const filteredServices = services.filter((item) => {
     if (filterType === "all") return true;
-    if (filterType === "administration") return item.isAdministration;
     if (filterType === "civil") return !item.isAdministration;
     return true;
   });
@@ -77,8 +74,7 @@ export default function BookingScreen() {
         <Text style={styles.subtitle}>Tổng hợp thông tin Dịch vụ 🧬</Text>
 
         <Text style={styles.note}>
-          * Hành chính: phục vụ cơ quan nhà nước.{"\n"}* Dân sự: phục vụ mục
-          đích cá nhân, gia đình.
+          * Dân sự: phục vụ mục đích cá nhân, gia đình.
         </Text>
 
         <View style={styles.filterWrapper}>
@@ -90,16 +86,6 @@ export default function BookingScreen() {
             onPress={() => setFilterType("all")}
           >
             <Text style={styles.filterText}>Tất cả</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filterType === "administration" && styles.activeFilter,
-            ]}
-            onPress={() => setFilterType("administration")}
-          >
-            <Text style={styles.filterText}>Hành chính</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
