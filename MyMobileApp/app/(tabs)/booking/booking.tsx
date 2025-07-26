@@ -78,7 +78,7 @@ export default function BookingScreen() {
         </Text>
 
         <View style={styles.filterWrapper}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[
               styles.filterButton,
               filterType === "all" && styles.activeFilter,
@@ -86,7 +86,7 @@ export default function BookingScreen() {
             onPress={() => setFilterType("all")}
           >
             <Text style={styles.filterText}>Tất cả</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={[
