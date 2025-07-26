@@ -5,6 +5,7 @@ export interface KitShipment {
     facility: Facility
     bookingDate: string
     bookingTime: string
+    address: Address
 }
 
 export interface Facility {
@@ -17,4 +18,8 @@ export interface Account {
     name: string
     email: string
     phoneNumber: string
+}
+export interface Address {
+    _id: string
+    fullAddress: string
 }

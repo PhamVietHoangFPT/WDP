@@ -3,8 +3,9 @@ import type { KitShipment } from "../../types/kitShipment"
 import type { DeliveryStaff } from "../../types/deliveryStaff"
 import { useAssignDeliveryStaffToKitShipmentMutation, useGetDeliveryStaffListQuery, useGetKitShipmentWithoutDeliveryStaffListQuery } from "../../features/manager/sampleCollectorAPI"
 import type { ColumnsType } from "antd/es/table"
-import { DatePicker, Table, Tag, Spin, message, Space, Dropdown, Button, Modal } from "antd"
+import { DatePicker, Table, Tag, Spin, message, Space, Dropdown, Menu, Button, Modal } from "antd"
 import { CalendarOutlined, DownOutlined, ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons"
+
 
 
 interface KitShipmentResponse {
@@ -154,9 +155,9 @@ const ManagerKitShipmentPage: React.FC = () => {
             key: 'bookingTime',
         },
         {
-            title: 'Cơ sở',
-            key: 'account',
-            render: (_, record) => record.account?.name || 'N/A',
+            title: 'Địa chỉ',
+            key: 'address',
+            render: (_, record) => record?.address?.fullAddress || 'N/A',
         },
         {
             title: 'Trạng thái',
@@ -202,7 +203,7 @@ const ManagerKitShipmentPage: React.FC = () => {
                     <DatePicker
                         format='YYYY-MM-DD'
                         placeholder='Chọn ngày đặt lịch'
-                        onChange={(dateString) => {
+                        onChange={(date, dateString) => {
                             setSelectedBookingDate(typeof dateString === "string" ? dateString : undefined)
                         }}
                         style={{ width: 180, marginLeft: '80px' }}

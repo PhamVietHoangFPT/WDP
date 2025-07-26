@@ -54,6 +54,7 @@ export const apiSlice = createApi({
     'kit-shippments',
     'dashboard',
     'delivery-staff',
+    'kit-shipments-without-delivery-staff'
   ],
 
   endpoints: () => ({}),

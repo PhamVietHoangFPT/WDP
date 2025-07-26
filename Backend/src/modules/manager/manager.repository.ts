@@ -440,7 +440,23 @@ export class ManagerRepository implements IManagerRepository {
         },
       },
       { $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true } },
-
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$caseMembers.address' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$addressId'],
+                },
+              },
+            },
+          ],
+          as: 'addresses',
+        },
+      },
+      { $unwind: { path: '$addresses', preserveNullAndEmptyArrays: true } },
       // B3: Join bookings
       {
         $lookup: {
@@ -556,6 +572,10 @@ export class ManagerRepository implements IManagerRepository {
             name: '$accounts.name',
             email: '$accounts.email',
             phoneNumber: '$accounts.phoneNumber',
+          },
+          address: {
+            _id: '$addresses._id',
+            fullAddress: '$addresses.fullAddress',
           },
           bookingDate: '$bookings.bookingDate',
           bookingTime: '$slots.startTime',
