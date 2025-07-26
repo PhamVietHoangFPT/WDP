@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import DashboardHeader from '../../components/layout/Header/HeaderDashboardAdmin'
 import { Spin, Alert, Row, Col, Card, Statistic } from 'antd'
-import { LineChart } from '@mui/x-charts/LineChart'
 import {
   UserOutlined,
   FileDoneOutlined,
@@ -304,46 +303,27 @@ const AdminHomePage = () => {
         <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
           <Col xs={24} lg={12}>
             <Card title='Biểu đồ doanh thu'>
-              {revenueChartData.dates.length > 1 ? (
-                <LineChart
-                  height={300}
-                  yAxis={[
-                    {
-                      valueFormatter: formatLargeNumber,
-                    },
-                  ]}
-                  xAxis={[{ data: revenueChartData.dates, scaleType: 'band' }]}
-                  series={[
-                    {
-                      data: revenueChartData.revenues,
-                      label: 'Doanh thu',
-                      valueFormatter: formatLargeNumber,
-                    },
-                  ]}
-                />
-              ) : (
-                <BarChart
-                  height={300}
-                  yAxis={[
-                    {
-                      valueFormatter: formatLargeNumber,
-                    },
-                  ]}
-                  xAxis={[{ data: revenueChartData.dates, scaleType: 'band' }]}
-                  series={[
-                    {
-                      data: revenueChartData.revenues,
-                      label: 'Doanh thu',
-                      valueFormatter: formatLargeNumber,
-                    },
-                  ]}
-                />
-              )}
+              <BarChart
+                height={300}
+                yAxis={[
+                  {
+                    valueFormatter: formatLargeNumber,
+                  },
+                ]}
+                xAxis={[{ data: revenueChartData.dates, scaleType: 'band' }]}
+                series={[
+                  {
+                    data: revenueChartData.revenues,
+                    label: 'Doanh thu',
+                    valueFormatter: formatLargeNumber,
+                  },
+                ]}
+              />
             </Card>
           </Col>
           <Col xs={24} lg={12}>
             <Card title='Biểu đồ số lượng hồ sơ'>
-              <LineChart
+              <BarChart
                 height={300}
                 xAxis={[
                   { data: serviceCasesChartData.dates, scaleType: 'band' },

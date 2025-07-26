@@ -28,5 +28,7 @@ export interface IFacilityRepository {
     id: string,
     updateAddressFacilityDto: UpdateAddressFacilityDto,
   ): Promise<FacilityDocument | null>
+
+  getFacilitiesDetails(): Promise<FacilityDocument[] | null>
 }
 export const IFacilityRepository = Symbol('IFacilityRepository')
