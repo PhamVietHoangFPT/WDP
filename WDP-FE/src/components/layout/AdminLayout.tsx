@@ -7,7 +7,6 @@ const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 export const AdminLayout = () => {
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <SideBar />
@@ -24,7 +23,7 @@ export const AdminLayout = () => {
           }}
         >
           <Title level={4} style={{ margin: 0 }}>
-            Quản Lý Tiêm Chủng
+            Quản lý ADN
           </Title>
         </Header>
 
