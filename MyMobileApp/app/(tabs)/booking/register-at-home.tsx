@@ -453,21 +453,11 @@ export default function RegisterServiceAtHome() {
       const serviceCaseId = serviceCaseRes?.data?._id || serviceCaseRes?._id;
       if (!serviceCaseId) throw new Error("Không thể tạo đơn dịch vụ.");
 
-      // // Tạo link thanh toán VNPAY
-      // const paymentResponse = await createVNPayServicePayment({
-      //   serviceCaseId,
-      //   amount: 10000,
-      //   description: "Thanh toán dịch vụ tại nhà",
-      // });
-      // Tính tổng tiền = giá dịch vụ + phí vận chuyển
-      const servicePrice = serviceInfo?.data?.fee ?? 0;
-      const totalAmount = servicePrice + (shippingFee || 0);
-
-      // Tạo link thanh toán VNPAY với tổng tiền
+      // Tạo link thanh toán VNPAY
       const paymentResponse = await createVNPayServicePayment({
         serviceCaseId,
-        amount: totalAmount,
-        description: `Thanh toán dịch vụ tại nhà (bao gồm phí ship)`,
+        amount: 10000,
+        description: "Thanh toán dịch vụ tại nhà",
       });
 
       const paymentUrl = paymentResponse?.redirectUrl;
