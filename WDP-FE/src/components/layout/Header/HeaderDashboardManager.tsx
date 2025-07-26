@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Header } from 'antd/es/layout/layout'
-import { DatePicker, Button, Segmented, Space } from 'antd'
-import dayjs, { Dayjs } from 'dayjs'
+import { DatePicker, Button, Segmented, Space, ConfigProvider } from 'antd'
+import { Dayjs } from 'dayjs'
+import viVN from 'antd/locale/vi_VN' // Import locale tiếng Việt
 
+// Để dayjs cũng hiển thị đúng tiếng Việt
+import dayjs from 'dayjs'
+import 'dayjs/locale/vi'
+dayjs.locale('vi')
 interface DashboardFilters {
   viewMode: string
   date: Dayjs
@@ -51,11 +56,14 @@ export default function DashboardHeaderManager({
         )
       case 'month':
         return (
-          <DatePicker
-            value={date}
-            onChange={(d) => setDate(d!)}
-            picker='month'
-          />
+          <ConfigProvider locale={viVN}>
+            <DatePicker
+              value={date}
+              onChange={(d) => setDate(d!)}
+              picker='month'
+              placeholder='Chọn tháng' // Thêm placeholder tiếng Việt
+            />
+          </ConfigProvider>
         )
       case 'quarter':
         return (
