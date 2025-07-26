@@ -14,7 +14,11 @@ export class TestTakerRepository implements ITestTakerRepository {
   ) {}
 
   async create(dto: CreateTestTakerDto): Promise<TestTaker> {
-    const created = new this.testTakerModel(dto)
+    const created = new this.testTakerModel({
+      ...dto,
+      created_at: new Date(),
+      created_by: dto.account, // Assuming account is the creator
+    })
     return await created.save()
   }
 
@@ -32,7 +36,6 @@ export class TestTakerRepository implements ITestTakerRepository {
     limit: number,
   ): Promise<TestTaker[]> {
     const filter: any = {}
-    console.log(queryDto.accountId)
     if (queryDto.name) {
       filter.name = { $regex: queryDto.name, $options: 'i' }
     }
@@ -59,7 +62,7 @@ export class TestTakerRepository implements ITestTakerRepository {
         .find(filter)
         .skip(skip)
         .limit(limit)
-        .sort({ name: 1 })
+        .sort({ created_at: -1 })
         .populate({ path: 'account', select: 'name email' })
         .lean()
         .exec()
@@ -108,9 +111,9 @@ export class TestTakerRepository implements ITestTakerRepository {
 
   async delete(id: string): Promise<boolean> {
     const result = await this.testTakerModel
-      .deleteOne({ _id: id })
+      .findByIdAndUpdate({ _id: id }, { deleted_at: new Date() }, { new: true })
       .lean()
       .exec()
-    return result.deletedCount > 0
+    return result !== null
   }
 }

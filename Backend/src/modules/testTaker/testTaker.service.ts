@@ -30,6 +30,7 @@ export class TestTakerService implements ITestTakerService {
       dateOfBirth: testTaker.dateOfBirth,
       account: testTaker.account,
       gender: testTaker.gender,
+      created_at: testTaker.created_at,
     })
   }
 

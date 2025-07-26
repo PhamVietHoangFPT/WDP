@@ -45,7 +45,7 @@ export class TestTakerController {
 
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.CUSTOMER)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Tạo test taker mới' })
   @ApiBody({ type: CreateTestTakerDto })
@@ -70,6 +70,7 @@ export class TestTakerController {
 
   @Get()
   @UseGuards(AuthGuard)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Lấy danh sách test takers' })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
@@ -107,6 +108,7 @@ export class TestTakerController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Lấy test taker theo ID' })
   @ApiParam({ name: 'id', type: String })
@@ -129,6 +131,7 @@ export class TestTakerController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiBearerAuth('bearer')
   @ApiOperation({ summary: 'Xóa test taker' })
   @ApiParam({ name: 'id', type: String })
