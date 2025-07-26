@@ -101,7 +101,7 @@ export default function AdministrativeService() {
     isLoading: isFacilitiesLoading,
     error: facilitiesError,
     refetch: refetchFacilities,
-  } = useGetAllFacilitiesDetailQuery(null)
+  } = useGetAllFacilitiesDetailQuery({})
 
   // State để lưu vị trí người dùng [latitude, longitude]
   const [userLocation, setUserLocation] = useState<[number, number] | null>(

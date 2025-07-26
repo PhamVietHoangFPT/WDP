@@ -1,5 +1,14 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
+
+const StaffAdministrationRegister = lazy(
+  () => import('../pages/Staff/StaffAdministrationRegister')
+)
+
+const StaffManageTestTaker = lazy(
+  () => import('../pages/Staff/StaffManageTestTaker')
+)
+
 const StaffGetServiceCaseByCustomer = lazy(
   () =>
     import(
@@ -391,16 +400,6 @@ const routes: LayoutRoute[] = [
     ],
   },
   {
-    layout: DeliveryStaffLayout,
-    data: [
-      {
-        path: '/delivery-staff',
-        component: DeliveryStaffHomePage,
-        // role: ['admin'],
-      },
-    ],
-  },
-  {
     layout: SampleCollectorLayout,
     role: ['Sample Collector'],
     data: [
@@ -453,6 +452,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/update-service-case-status-for-customer',
         component: StaffGetServiceCaseByCustomer,
+      },
+      {
+        path: '/staff/manage-test-taker',
+        component: StaffManageTestTaker,
+      },
+      {
+        path: '/staff/register-for-administration',
+        component: StaffAdministrationRegister,
       },
     ],
   },
