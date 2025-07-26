@@ -27,7 +27,7 @@ export class KitShipmentService implements IKitShipmentService {
     private readonly kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
@@ -61,7 +61,7 @@ export class KitShipmentService implements IKitShipmentService {
     }
     if (
       existingKitShipment.currentStatus ===
-        updateKitShipmentDto.currentStatus &&
+      updateKitShipmentDto.currentStatus &&
       existingKitShipment.caseMember === updateKitShipmentDto.caseMember &&
       existingKitShipment.deliveryStaff === updateKitShipmentDto.deliveryStaff
     ) {
@@ -198,11 +198,13 @@ export class KitShipmentService implements IKitShipmentService {
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
   ): Promise<CreateKitShipmentDto> {
-    const newService = await this.kitShipmentRepository.create(userId, {
-      ...createKitShipmentDto,
-    })
     const kitShipmentStatus =
       await this.kitShipmentStatusRepository.findByName('Chờ thanh toán')
+    const newService = await this.kitShipmentRepository.create(userId, {
+      ...createKitShipmentDto,
+    },
+      kitShipmentStatus._id.toString(),
+    )
 
     if (!kitShipmentStatus) {
       throw new NotFoundException('Trạng thái vận chuyển không tồn tại.')

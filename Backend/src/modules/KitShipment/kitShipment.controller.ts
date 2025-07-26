@@ -42,7 +42,7 @@ export class KitShipmentController {
   constructor(
     @Inject(IKitShipmentService)
     private readonly kitshipmentService: IKitShipmentService, // <-- Thay đổi cách inject
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')
@@ -119,7 +119,7 @@ export class KitShipmentController {
     @Body() updateKitShipmentDto: UpdateKitShipmentDto,
     @Req() req: any,
   ): Promise<ApiResponseDto<KitShipmentResponseDto>> {
-    const user = req.user.id
+    const user = req.user.idx``
     const updatedType = await this.kitshipmentService.updateKitShipment(
       id,
       user,

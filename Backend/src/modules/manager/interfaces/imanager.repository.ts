@@ -1,4 +1,5 @@
 import { AccountDocument } from 'src/modules/account/schemas/account.schema'
+import { KitShipment } from 'src/modules/KitShipment/schemas/kitShipment.schema'
 import { RoleDocument } from 'src/modules/role/schemas/role.schema'
 import {
   ServiceCase,
@@ -17,6 +18,12 @@ export interface IManagerRepository {
     isAtHome: boolean,
     bookingDate: string,
   ): Promise<ServiceCase[]>
+
+  getAllKitShipmentWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<KitShipment[]>
+
   managerCreateAccount(
     accountData: Partial<AccountDocument>,
     userId: string,

@@ -7,6 +7,7 @@ export interface IKitShipmentRepository {
   create(
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
+    currentStatus: string,
   ): Promise<KitShipmentDocument>
   // findOneById(id: string): Promise<KitShipmentDocument | null>
   findAllKitShipments(

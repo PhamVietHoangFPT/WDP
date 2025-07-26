@@ -20,7 +20,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private testTakerRepository: ITestTakerRepository,
-  ) {}
+  ) { }
 
   async getAccountIdByKitShipmentId(
     kitShipmentId: string,
@@ -90,9 +90,11 @@ export class KitShipmentRepository implements IKitShipmentRepository {
   async create(
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
+    currentStatus: string,
   ): Promise<KitShipmentDocument> {
     const newKitShipment = new this.kitShipmentModel({
       ...createKitShipmentDto,
+      currentStatus: new mongoose.Types.ObjectId(currentStatus),
       created_by: userId,
       created_at: new Date(),
     })

@@ -2,6 +2,7 @@ import { AccountResponseDto } from 'src/modules/account/dto/accountResponse.dto'
 import { RoleDocument } from 'src/modules/role/schemas/role.schema'
 import { ServiceCaseResponseDto } from 'src/modules/serviceCase/dto/serviceCaseResponse.dto'
 import { ManagerCreateAccountDto } from '../dto/managerCreateAccount.dto'
+import { KitShipmentResponseDto } from 'src/modules/KitShipment/dto/kitShipmentResponse.dto'
 
 export interface IManagerService {
   assignSampleCollectorToServiceCase(
@@ -15,6 +16,12 @@ export interface IManagerService {
     isAtHome: boolean,
     bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
+  
+  getAllKitShipmentsWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<KitShipmentResponseDto[]>
+
   managerCreateAccount(
     accountData: Partial<ManagerCreateAccountDto>,
     userId: string,

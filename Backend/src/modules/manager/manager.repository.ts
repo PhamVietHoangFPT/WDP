@@ -15,6 +15,7 @@ import { IRoleRepository } from '../role/interfaces/irole.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { Role, RoleDocument } from '../role/schemas/role.schema'
 import { hashPassword } from 'src/utils/hashPassword'
+import { KitShipment, KitShipmentDocument } from '../KitShipment/schemas/kitShipment.schema'
 
 @Injectable()
 export class ManagerRepository implements IManagerRepository {
@@ -29,7 +30,9 @@ export class ManagerRepository implements IManagerRepository {
     private readonly testRequestStatusRepository: ITestRequestStatusRepository,
     @InjectModel(Role.name)
     private readonly roleModel: Model<RoleDocument>,
-  ) {}
+    @InjectModel(KitShipment.name)
+    private readonly kitShipmentModel: Model<KitShipmentDocument>,
+  ) { }
 
   async assignSampleCollectorToServiceCase(
     serviceCaseId: string,
@@ -383,6 +386,174 @@ export class ManagerRepository implements IManagerRepository {
       },
     ])
   }
+
+  async getAllKitShipmentWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<KitShipment[]> {
+    const bookingDateConvert = new Date(bookingDate)
+    bookingDateConvert.setHours(0, 0, 0, 0)
+
+    const nextDate = new Date(bookingDateConvert)
+    nextDate.setDate(nextDate.getDate() + 1)
+
+    return await this.kitShipmentModel.aggregate([
+      // B1: Chưa có deliveryStaff
+      {
+        $match: {
+          deliveryStaff: null,
+        },
+      },
+      // B2: Join caseMembers
+      {
+        $lookup: {
+          from: 'casemembers',
+          let: { caseMemberId: '$caseMember' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'caseMembers',
+        },
+      },
+      { $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true } },
+
+      // B3: Join bookings
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { bookingId: '$caseMembers.booking' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$bookingId'],
+                },
+              },
+            },
+          ],
+          as: 'bookings',
+        },
+      },
+      { $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true } },
+
+      // B4: Lọc theo bookingDate (chính xác 1 ngày)
+      {
+        $match: {
+          'bookings.bookingDate': {
+            $gte: bookingDateConvert,
+            $lt: nextDate,
+          },
+        },
+      },
+
+      // B5: Join slots
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: { $toObjectId: '$bookings.slot' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slots',
+        },
+      },
+      { $unwind: { path: '$slots', preserveNullAndEmptyArrays: true } },
+
+      // B6: Join slotTemplates
+      {
+        $lookup: {
+          from: 'slottemplates',
+          let: { slotTemplateId: '$slots.slotTemplate' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotTemplateId'],
+                },
+              },
+            },
+          ],
+          as: 'slotTemplates',
+        },
+      },
+      { $unwind: { path: '$slotTemplates', preserveNullAndEmptyArrays: true } },
+
+      // B7: Join facilities và lọc theo facilityId
+      {
+        $lookup: {
+          from: 'facilities',
+          let: { facilityId: '$slotTemplates.facility' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$facilityId'] },
+                    { $eq: ['$_id', new Types.ObjectId(facilityId)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'facilities',
+        },
+      },
+      { $unwind: { path: '$facilities', preserveNullAndEmptyArrays: true } },
+
+      // B8: Join accounts nếu cần
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accounts',
+        },
+      },
+      { $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true } },
+
+      // B9: Project kết quả
+      {
+        $project: {
+          _id: 1,
+          deliveryStatus: 1,
+          createdAt: 1,
+          account: {
+            _id: '$accounts._id',
+            name: '$accounts.name',
+            email: '$accounts.email',
+            phoneNumber: '$accounts.phoneNumber',
+          },
+          bookingDate: '$bookings.bookingDate',
+          bookingTime: '$slots.startTime',
+          facility: {
+            _id: '$facilities._id',
+            name: '$facilities.facilityName',
+          },
+        },
+      },
+    ])
+  }
+
 
   async getAllServiceCaseWithoutDoctor(
     facilityId: string,

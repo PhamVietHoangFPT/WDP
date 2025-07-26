@@ -41,7 +41,7 @@ export class ManagerController {
   constructor(
     @Inject(IManagerService)
     private readonly managerService: IManagerService,
-  ) {}
+  ) { }
 
   @Get('sample-collectors')
   @ApiBearerAuth()
@@ -147,6 +147,41 @@ export class ManagerController {
       await this.managerService.getAllServiceCasesWithoutSampleCollector(
         facilityId,
         isAtHome,
+        bookingDate,
+      )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách hồ sơ chưa có nhân viên lấy mẫu',
+      data: data.map((item) => new ServiceCaseResponseDto(item)),
+    }
+  }
+
+  @Get('kit-shipments-without-delivery-staff')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({ summary: 'Lấy danh sách kitshipment chưa có nhân viên giao hàng' })
+  @ApiQuery({
+    name: 'bookingDate',
+    required: true,
+    type: String,
+    description: 'Ngày đặt lịch ở định dạng YYYY-MM-DD',
+    example: '2025-07-22',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách hồ sơ chưa có nhân viên lấy mẫu',
+    type: ServiceCaseResponseDto,
+    isArray: true,
+  })
+  async getAllKitShipmentsWithoutDeliveryStaff(
+    @Req() req: any,
+    @Query('bookingDate') bookingDate: string, // Default to true if not provided
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data =
+      await this.managerService.getAllKitShipmentsWithoutDeliveryStaff(
+        facilityId,
         bookingDate,
       )
     return {
