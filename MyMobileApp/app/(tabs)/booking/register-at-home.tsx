@@ -261,7 +261,7 @@ export default function RegisterServiceAtHome() {
 
   // Tự chọn facility gần nhất
   useEffect(() => {
-    if (!userLocation || facilities.length === 0) return;
+    if (!userLocation || facilities.length === 0 || selectedFacility) return;
 
     let nearestFacility = facilities[0];
     let minDist = nearestFacility.distance ?? Infinity;
@@ -273,9 +273,8 @@ export default function RegisterServiceAtHome() {
         nearestFacility = facility;
       }
     }
-    if (nearestFacility._id !== selectedFacility) {
-      setSelectedFacility(nearestFacility._id);
-    }
+
+    setSelectedFacility(nearestFacility._id);
   }, [userLocation, facilities]);
 
   if (hasToken === false) {
@@ -531,7 +530,7 @@ export default function RegisterServiceAtHome() {
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={selectedFacility}
-              onValueChange={(value) => setSelectedAddressId(value)}
+              onValueChange={(value) => handleFacilityChange(value)}
               style={styles.picker}
               dropdownIconColor="#fff"
             >
