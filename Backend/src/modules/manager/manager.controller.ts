@@ -33,6 +33,7 @@ import { RoleEnum } from '../../common/enums/role.enum'
 import { FacilityAccessGuard } from 'src/common/guard/facility.guard'
 import { RoleDocument } from '../role/schemas/role.schema'
 import { ManagerCreateAccountDto } from './dto/managerCreateAccount.dto'
+import { KitShipmentResponseDto } from '../KitShipment/dto/kitShipmentResponse.dto'
 
 @ApiTags('managers')
 @Controller('managers')
@@ -250,6 +251,46 @@ export class ManagerController {
     const data = await this.managerService.assignSampleCollectorToServiceCase(
       serviceCaseId,
       sampleCollectorId,
+      userId,
+    )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Cập nhật thành công',
+      data: [data],
+    }
+  }
+
+  @Put('kit-shipments/:kitShipmentId/delivery-staff/:deliveryStaffId')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({
+    summary: 'Gán nhân viên giao hàng cho hồ sơ vận chuyển',
+  })
+  @ApiParam({
+    name: 'kitShipmentId',
+    description: 'ID của hồ sơ vận chuyển',
+    required: true,
+  })
+  @ApiParam({
+    name: 'deliveryStaffId',
+    description: 'ID của nhân viên giao hàng',
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cập nhật thành công',
+    type: ApiResponseDto,
+  })
+  async assignDeliveryStaffToKitShipment(
+    @Param('kitShipmentId') kitShipmentId: string,
+    @Param('deliveryStaffId') deliveryStaffId: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<KitShipmentResponseDto>> {
+    const userId = req.user.id
+    const data = await this.managerService.assignDeliveryStaffToKitShipment(
+      kitShipmentId,
+      deliveryStaffId,
       userId,
     )
     return {

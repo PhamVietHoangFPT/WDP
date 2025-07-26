@@ -52,6 +52,24 @@ export class ManagerRepository implements IManagerRepository {
     )
     return data
   }
+  async assignDeliveryStaffToKitShipment(
+    kitShipmentId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<KitShipmentDocument> {
+    const deliveryStaffIdObjectId = new Types.ObjectId(deliveryStaffId)
+    const userIdObjectId = new Types.ObjectId(userId)
+    const data = await this.kitShipmentModel.findByIdAndUpdate(
+      kitShipmentId,
+      {
+        deliveryStaff: deliveryStaffIdObjectId,
+        updated_by: userIdObjectId,
+        updated_at: Date.now(),
+      },
+      { new: true },
+    )
+    return data
+  }
 
   async assignDoctorToServiceCase(
     serviceCaseId: string,

@@ -99,6 +99,23 @@ export class ManagerService implements IManagerService {
     return new ServiceCaseResponseDto(serviceCase)
   }
 
+  async assignDeliveryStaffToKitShipment(
+    kitShipmentId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<KitShipmentResponseDto> {
+    const kitShipment =
+      await this.managerRepository.assignDeliveryStaffToKitShipment(
+        kitShipmentId,
+        deliveryStaffId,
+        userId,
+      )
+    if (!kitShipment) {
+      throw new NotFoundException('Không tìm thấy hồ sơ vận chuyển')
+    }
+    return new KitShipmentResponseDto(kitShipment)
+  }
+
   async getAllServiceCaseWithoutDoctor(
     facilityId: string,
     bookingDate: string,

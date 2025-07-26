@@ -10,13 +10,20 @@ export interface IManagerService {
     sampleCollectorId: string,
     userId: string,
   ): Promise<ServiceCaseResponseDto>
+
+  assignDeliveryStaffToKitShipment(
+    kitShipmentId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<KitShipmentResponseDto>
+
   getAllSampleCollectors(facilityId: string): Promise<AccountResponseDto[]>
   getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
     bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
-  
+
   getAllKitShipmentsWithoutDeliveryStaff(
     facilityId: string,
     bookingDate: string,
