@@ -128,8 +128,12 @@ const ManagerServiceCaseWithoutDoctor = lazy(
       '../pages/ManagerServiceCaseWithoutDoctor/ManagerServiceCaseWithoutDoctor'
     )
 )
+
 const ManagerServiceCaseWithoutSampleCollector = lazy(
   () => import('../pages/Sample/Sample')
+)
+const ManagerKitShipmentPage = lazy(
+  () => import('../pages/ManagerKitShipment/managerKitShipmentPage')
 )
 const TimeReturnList = lazy(
   () => import('../components/Admin/AdminTimeReturn/TimeReturnList')
@@ -366,6 +370,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/manager/create-account',
         component: ManagerCreateAccount,
+      },
+      {
+        path: 'manager/kit-shipment-without-delivery-staff',
+        component: ManagerKitShipmentPage,
       },
     ],
   },

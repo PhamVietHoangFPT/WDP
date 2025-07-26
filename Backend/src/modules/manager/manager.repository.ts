@@ -469,7 +469,23 @@ export class ManagerRepository implements IManagerRepository {
           },
         },
       },
-
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$bookings.account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accounts',
+        },
+      },
+      { $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true } },
       // B5: Join slots
       {
         $lookup: {
@@ -529,26 +545,6 @@ export class ManagerRepository implements IManagerRepository {
         },
       },
       { $unwind: { path: '$facilities', preserveNullAndEmptyArrays: true } },
-
-      // B8: Join accounts nếu cần
-      {
-        $lookup: {
-          from: 'accounts',
-          let: { accountId: '$account' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$accountId'],
-                },
-              },
-            },
-          ],
-          as: 'accounts',
-        },
-      },
-      { $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true } },
-
       // B9: Project kết quả
       {
         $project: {

@@ -28,19 +28,35 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       providesTags: ['sample-collectors'],
     }),
 
-    // getServiceCaseNoDoctorList: builder.query({
-    //   query: ({ pageNumber, pageSize, bookingDate }) => ({
-    //     url: '/managers/service-cases-without-doctor',
-    //     method: 'GET',
-    //     params: {
-    //       pageNumber,
-    //       pageSize,
-    //       bookingDate
-    //     },
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['doctor'],
-    // }),
+    getKitShipmentWithoutDeliveryStaffList: builder.query({
+      query: ({ bookingDate }) => ({
+        url: `managers/kit-shipments-without-delivery-staff`,
+        method: 'GET',
+        params: {
+          bookingDate,
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['delivery-staff'],
+    }),
+
+    getDeliveryStaffList: builder.query({
+      query: () => ({
+        url: '/managers/delivery-staff',
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['delivery-staff'],
+    }),
+
+    assignDeliveryStaffToKitShipment: builder.mutation({
+      query: ({ kitShipmentId, deliveryStaffId }) => ({
+        url: `/managers/kit-shipments/${kitShipmentId}/delivery-staff/${deliveryStaffId}`,
+        method: 'PUT',
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['delivery-staff'],
+    }),
 
     addSampleCollectorToServiceCase: builder.mutation({
       query: ({ data, serviceCaseId, sampleCollectorId }) => ({
@@ -51,72 +67,6 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['sample-collectors'],
     }),
-
-    // createSlotTemplate: builder.mutation({
-    //   query: (data) => ({
-    //     url: '/slotTemplates',
-    //     method: 'POST',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['slots'],
-    // }),
-
-    // getSlotTemplateForFacility: builder.query({
-    //   query: (facilityId) => ({
-    //     url: `/slotTemplates/facility/${facilityId}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['slots'],
-    // }),
-
-    // getBlogsMinimalList: builder.query({
-    //   query: ({ pageNumber, pageSize }) => ({
-    //     url: '/blogs/minimal',
-    //     method: 'GET',
-    //     params: {
-    //       pageNumber,
-    //       pageSize,
-    //     },
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['blogs'],
-    // }),
-    // createSlots: builder.mutation({
-    //   query: (data) => ({
-    //     url: '/admin/slot-generation/trigger',
-    //     method: 'POST',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    // getBlogsDetail: builder.query({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'GET',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   providesTags: ['blogs'],
-    // }),
-    // updateBlogs: builder.mutation({
-    //   query: ({ data, id }) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'PUT',
-    //     body: data,
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
-    // deleteBlogs: builder.mutation({
-    //   query: (id) => ({
-    //     url: `/blogs/${id}`,
-    //     method: 'DELETE',
-    //   }),
-    //   transformResponse: (res) => res,
-    //   invalidatesTags: ['blogs'],
-    // }),
   }),
 })
 
@@ -124,4 +74,7 @@ export const {
   useGetSampleCollectorListQuery,
   useGetServiceNoSampleCollectorListQuery,
   useAddSampleCollectorToServiceCaseMutation,
+  useGetKitShipmentWithoutDeliveryStaffListQuery,
+  useGetDeliveryStaffListQuery,
+  useAssignDeliveryStaffToKitShipmentMutation
 } = sampleCollectorAPI
