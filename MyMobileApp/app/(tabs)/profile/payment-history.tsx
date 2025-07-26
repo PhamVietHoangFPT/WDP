@@ -112,7 +112,7 @@ export default function PaymentHistoryScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Chưa có lịch sử thanh toán.</Text>
+          <Text style={styles.emptyText}>Chưa có lịch sử thanh toán!</Text>
         }
       />
     </LinearGradient>
