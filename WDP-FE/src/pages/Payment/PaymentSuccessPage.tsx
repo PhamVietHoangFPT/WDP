@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, Typography, Button, message } from 'antd'
 import { useCreateServicePaymentHistoryMutation } from '../../features/customer/paymentApi'
 import { useNavigate, useSearchParams } from 'react-router-dom'

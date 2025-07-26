@@ -61,6 +61,28 @@ export class PaymentController {
     )
   }
 
+  @Post('condition')
+  @ApiOperation({
+    summary: 'Tạo lịch sử thanh toán cho chi phí phát sinh',
+  })
+  @ApiBody({ type: CheckVnPayPaymentDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Lịch sử thanh toán được tạo thành công',
+  })
+  createPaymentHistoryForCondition(
+    @Body(ValidationPipe) CheckVnPayPaymentDto: CheckVnPayPaymentDto,
+    @Req() req: any, // Assuming you might need the request object for user info
+  ) {
+    const userId = req.user.id
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.paymentService.createForCondition(
+      CheckVnPayPaymentDto,
+      userId,
+      CheckVnPayPaymentDto.vnp_TxnRef,
+    )
+  }
+
   @Get('staff')
   @Roles(RoleEnum.STAFF)
   @ApiQuery({

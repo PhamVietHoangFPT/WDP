@@ -59,6 +59,8 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .find(filter)
       .sort({ created_at: -1 })
       .populate({ path: 'currentStatus', select: 'testRequestStatus -_id' })
+      .populate({ path: 'doctor', select: 'name -_id' })
+      .populate({ path: 'sampleCollector', select: 'phoneNumber name -_id' })
       .lean()
   }
 
@@ -111,6 +113,20 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       updatedServiceCase?._id.toString(),
       currentStatus,
       updatedServiceCase?.created_by.toString(),
+    )
+    return updatedServiceCase
+  }
+
+  async updatePaymentForCondition(
+    id: string,
+    paymentForCondition: string,
+  ): Promise<ServiceCaseDocument | null> {
+    const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
+      id,
+      {
+        paymentForCondition: new mongoose.Types.ObjectId(paymentForCondition),
+      },
+      { new: true },
     )
     return updatedServiceCase
   }
@@ -188,7 +204,9 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<{ _id: string; bookingId: string; slotId: string }[]> {
+  ): Promise<
+    { _id: string; bookingId: string; slotId: string; account: string }[]
+  > {
     // ✅ 1. SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ
 
     const aggregationPipeline = [
@@ -225,6 +243,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           _id: 1, // ID của service case
           bookingId: '$bookingDetails._id',
           slotId: '$bookingDetails.slot',
+          account: 1,
         },
       },
     ]
@@ -443,5 +462,32 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     update: UpdateQuery<ServiceCase>,
   ): Promise<any> {
     return this.serviceCaseModel.updateMany(filter, update)
+  }
+
+  async checkIsSelfSampling(serviceCaseId: string): Promise<boolean | null> {
+    if (!Types.ObjectId.isValid(serviceCaseId)) {
+      console.warn('Id không hợp lệ')
+      return null
+    }
+
+    const serviceCase = await this.serviceCaseModel
+      .findById(serviceCaseId)
+      .populate<{ caseMember: { isSelfSampling: boolean } }>({
+        path: 'caseMember',
+        select: 'isSelfSampling',
+      })
+      .lean()
+
+    if (!serviceCase || !serviceCase.caseMember) {
+      return null
+    }
+
+    const selfSamplingValue = serviceCase.caseMember.isSelfSampling
+
+    if (typeof selfSamplingValue !== 'boolean') {
+      return null
+    }
+
+    return selfSamplingValue
   }
 }

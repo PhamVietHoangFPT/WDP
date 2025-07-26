@@ -14,7 +14,7 @@ import {
   ExperimentOutlined,
   BankOutlined,
   ApartmentOutlined,
-  AlignCenterOutlined
+  AlignCenterOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -67,13 +67,13 @@ export const SideBar = () => {
     },
     {
       key: 'admin/slotAdmin',
-      icon: <AppstoreOutlined/>,
+      icon: <AppstoreOutlined />,
       label: 'Ca làm việc',
       onClick: () => navigate('admin/slotAdmin'),
     },
     {
       key: 'admin/slotsFacilitiesAdmin',
-      icon: <ApartmentOutlined/>,
+      icon: <ApartmentOutlined />,
       label: 'Ca & Cơ sở',
       onClick: () => navigate('admin/slotsFacilitiesAdmin'),
     },
@@ -107,6 +107,18 @@ export const SideBar = () => {
           onClick: () => navigate('/admin/samples'),
         },
       ],
+    },
+    {
+      key: 'admin/managers',
+      icon: <BankOutlined />,
+      label: 'Nhân viên Quản lý',
+      onClick: () => navigate('/admin/managers?pageNumber=1&pageSize=10'),
+    },
+    {
+      key: 'admin/facilitiesWithManager',
+      icon: <BankOutlined />,
+      label: 'Cơ sở theo Nhân viên Quản lý',
+      onClick: () => navigate('/admin/facilitiesWithManager'),
     },
   ]
 

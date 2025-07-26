@@ -5,6 +5,7 @@ import {
   Logger,
   ConflictException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common'
 
 import { ISamplingKitInventoryRepository } from './interfaces/isamplingKitInventory.repository'
@@ -16,6 +17,7 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { ISampleRepository } from '../sample/interfaces/isample.repository'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { UpdateInventoryDto } from './dto/updateInventory.dto'
+import { isMongoId } from 'class-validator'
 @Injectable()
 export class SamplingKitInventoryService
   implements ISamplingKitInventoryService
@@ -220,5 +222,23 @@ export class SamplingKitInventoryService
         pageSize,
       },
     }
+  }
+
+  async findBySampleIdAndFacilityId(
+    sampleId: string,
+    facilityId: string,
+  ): Promise<SamplingKitInventoryResponseDto | null> {
+    if (!isMongoId(sampleId) || !isMongoId(facilityId)) {
+      throw new BadRequestException(`ID mẫu kit hoặc ID cơ sở không hợp lệ.`)
+    }
+    const samplingKitInventory =
+      await this.samplingKitInventoryRepository.findBySampleIdAndFacilityId(
+        sampleId,
+        facilityId,
+      )
+    if (!samplingKitInventory) {
+      throw new NotFoundException(`Mẫu kit không còn đủ trong kho.`)
+    }
+    return this.mapToResponseDto(samplingKitInventory)
   }
 }

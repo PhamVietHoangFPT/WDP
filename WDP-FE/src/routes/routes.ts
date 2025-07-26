@@ -1,6 +1,9 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
 import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
+import AdminManagerList from '../pages/AdminManagerList/AdminManagerList'
+import FacilitiesWithManager from '../pages/FacilitiesWithManager/FacilitiesWithManager'
+import AdminstrativeServices from '../components/AdminstrativeServices/AdminstrativeServices'
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -54,6 +57,9 @@ const DeliveryStaffHomePage = lazy(
 const DoctorHomePage = lazy(
   () => import('../pages/DoctorHomePage/DoctorHomePage')
 )
+const DoctorUpdateConditionPage = lazy(
+  () => import('../pages/DoctorUpdateCondition/doctorUpdateCondition')
+)
 const FacilityDetailAdmin = lazy(
   () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
 )
@@ -81,6 +87,9 @@ const StaffHomePage = lazy(() => import('../pages/StaffHomePage/StaffHomePage'))
 const PaymentPage = lazy(() => import('../pages/Payment/PaymentPage'))
 const PaymentSuccessPage = lazy(
   () => import('../pages/Payment/PaymentSuccessPage')
+)
+const PaymentConditionSuccessPage = lazy(
+  () => import('../pages/Payment/PaymentConditionSuccessPage')
 )
 const PaymentHistory = lazy(() => import('../pages/ProfileUser/PaymentHistory'))
 const PaymentDetail = lazy(() => import('../pages/ProfileUser/PaymentDetail'))
@@ -152,6 +161,8 @@ const ServiceCaseDetail = lazy(
 const ProfileLayout = lazy(() => import('../components/layout/ProfileLayout'))
 
 const ManageAddress = lazy(() => import('../pages/ProfileUser/ManageAddress'))
+
+const UserResult = lazy(() => import('../pages/ProfileUser/UserResult'))
 const routes: LayoutRoute[] = [
   {
     layout: LoginRegisterLayout,
@@ -244,8 +255,17 @@ const routes: LayoutRoute[] = [
         role: ['Customer'],
       },
       {
+        path: '/payment-success-condition',
+        component: PaymentConditionSuccessPage,
+        role: ['Customer'],
+      },
+      {
         path: '/home-registeration',
         component: HomeRegisteration,
+      },
+      {
+        path: '/adminstrative-services',
+        component: AdminstrativeServices,
       },
       {
         path: '/register-service-at-home/:id',
@@ -258,6 +278,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/register-service',
         component: AdnFacilityRegisteration,
+      },
+      {
+        path: '/result/:resultId',
+        component: UserResult,
       },
     ],
   },
@@ -312,6 +336,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/admin/samples/:sampleId',
         component: SampleDetail,
+      },
+      {
+        path: '/admin/managers',
+        component: AdminManagerList,
+      },
+      {
+        path: '/admin/facilitiesWithManager',
+        component: FacilitiesWithManager,
       },
     ],
   },
@@ -384,6 +416,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor/service-cases-without-results',
         component: DoctorServiceCaseWithoutResult,
+      },
+      {
+        path: '/doctor/service-cases-condition',
+        component: DoctorUpdateConditionPage,
       },
     ],
   },

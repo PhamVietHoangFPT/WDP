@@ -64,5 +64,8 @@ async function bootstrap() {
     console.log(`Example app listening on port ${port}`)
   })
   console.log(`Swagger UI available at http://localhost:${port}/api/v1`)
+  console.log(
+    `API documentation available at http://localhost:${port}/api/v1-json`,
+  )
 }
 void bootstrap()

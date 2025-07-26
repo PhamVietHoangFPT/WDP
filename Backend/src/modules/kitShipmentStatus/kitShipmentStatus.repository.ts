@@ -76,6 +76,16 @@ export class KitShipmentStatusRepository
     return this.KitShipmentStatusModel.findOne({
       status,
       deleted_at: null,
-    }).exec()
+    })
+      .select('_id')
+      .lean()
+      .exec()
+  }
+
+  async getKitShipmentStatusOrder(id: string): Promise<number | null> {
+    const result = await this.KitShipmentStatusModel.findById(id)
+      .select('order')
+      .exec()
+    return result ? result.order : null
   }
 }

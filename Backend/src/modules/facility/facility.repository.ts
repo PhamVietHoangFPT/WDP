@@ -125,4 +125,15 @@ export class FacilityRepository implements IFacilityRepository {
       )
       .exec()
   }
+
+  async getFacilitiesDetails(): Promise<FacilityDocument[] | null> {
+    return this.facilityModel
+      .find({ deleted_at: null })
+      .populate({ path: 'account', select: '_id username email phoneNumber' })
+      .populate({
+        path: 'address',
+        select: '_id fullAddress location phoneNumber',
+      })
+      .exec()
+  }
 }

@@ -27,22 +27,8 @@ export class KitShipment extends BaseEntity {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SamplingKitInventory',
-    required: true,
-  })
-  samplingKitInventory: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Address',
-    required: true,
-  })
-  address: mongoose.Schema.Types.ObjectId
-
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
-    required: true,
+    required: false,
   })
   deliveryStaff: mongoose.Schema.Types.ObjectId
 }

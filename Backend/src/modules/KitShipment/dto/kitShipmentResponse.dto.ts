@@ -23,16 +23,6 @@ export class KitShipmentResponseDto {
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  samplingKitInventory: mongoose.Schema.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
-  address: mongoose.Schema.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1b', type: String })
-  @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   deliveryStaff: mongoose.Schema.Types.ObjectId
 
   @Expose()

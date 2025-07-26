@@ -254,6 +254,43 @@ export class SamplingKitInventoryController {
     }
   }
 
+  @Get('sample-and-facility')
+  @ApiOperation({
+    summary: 'Lấy mẫu kit theo ID mẫu và ID cơ sở',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin mẫu kit theo ID mẫu và ID cơ sở.',
+    type: ApiResponseDto<SamplingKitInventoryResponseDto | null>,
+  })
+  @ApiQuery({
+    name: 'sampleId',
+    required: true,
+    type: String,
+    description: 'ID mẫu để lọc các mẫu kit',
+  })
+  @ApiQuery({
+    name: 'facilityId',
+    required: true,
+    type: String,
+    description: 'ID cơ sở y tế để lọc mẫu kit',
+  })
+  async findBySampleIdAndFacilityId(
+    @Query('sampleId') sampleId: string,
+    @Query('facilityId') facilityId: string,
+  ): Promise<ApiResponseDto<SamplingKitInventoryResponseDto | null>> {
+    const samplingKitInventory =
+      await this.samplingKitInventoryService.findBySampleIdAndFacilityId(
+        sampleId,
+        facilityId,
+      )
+    return new ApiResponseDto<SamplingKitInventoryResponseDto>({
+      data: [samplingKitInventory],
+      message: 'Lấy thông tin mẫu kit theo ID mẫu và ID cơ sở thành công',
+      statusCode: 200,
+    })
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin sample kit theo ID' })
   @ApiResponse({

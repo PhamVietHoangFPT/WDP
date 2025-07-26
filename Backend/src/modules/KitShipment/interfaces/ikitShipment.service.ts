@@ -12,6 +12,8 @@ export interface IKitShipmentService {
   findAllKitShipment(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
+    userId: string,
   ): Promise<PaginatedResponse<KitShipmentResponseDto>>
 
   findKitShipmentById(id: string): Promise<KitShipmentResponseDto>
@@ -21,6 +23,11 @@ export interface IKitShipmentService {
     userId: string,
     updateKitShipmentDto: UpdateKitShipmentDto,
   ): Promise<any>
+
+  updateCurrentStatus(
+    id: string,
+    currentStatus: string,
+  ): Promise<KitShipmentResponseDto | null>
 
   deleteKitShipment(id: string, userId: string): Promise<any>
 }

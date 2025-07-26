@@ -12,6 +12,7 @@ import { useCreateServiceCaseMutation } from '../../features/serviceCase/service
 import { useCreateServiceCasePaymentMutation } from '../../features/vnpay/vnpayApi'
 import BookingComponent from '../../pages/BookingPage/BookingPage'
 import { useCreateBookingMutation } from '../../features/customer/bookingApi'
+import { useCreateKitShipmentMutation } from '../../features/kitShipment/kitShipmentAPI'
 interface TestTakerListResponse {
   data: {
     data: TestTaker[]
@@ -43,9 +44,12 @@ const ServiceAtHomeForm: React.FC = () => {
     useGetServiceDetailQuery<ServiceDetailResponse>(id)
   const [createCaseMember, { isLoading: isCreating }] =
     useCreateCaseMemberMutation()
+  const [createKitShipment] = useCreateKitShipmentMutation()
   const [createServiceCase] = useCreateServiceCaseMutation()
   const [createBooking] = useCreateBookingMutation()
   const [createPaymentUrl] = useCreateServiceCasePaymentMutation()
+  const [isDisabled, setIsDisabled] = useState(false)
+  const [isAgreed, setIsAgreed] = useState(false)
   const dataTestTaker = data?.data || []
   const selectedTestTakers = Form.useWatch([], form)
 
@@ -116,8 +120,8 @@ const ServiceAtHomeForm: React.FC = () => {
         booking: bookingId,
         service: id,
         note: '',
-        isAtHome: true,
-        isSelfSampling: false,
+        isAtHome: !serviceDetail.isAdministration,
+        isSelfSampling: serviceDetail.isSelfSampling,
         address: selectedAddressId,
       }
       const caseMember = await createCaseMember({ data }).unwrap()
@@ -126,6 +130,15 @@ const ServiceAtHomeForm: React.FC = () => {
 
       if (!caseMemberId) {
         throw new Error('Không thể lấy caseMemberId')
+      }
+
+      if (serviceDetail.isSelfSampling) {
+        const kitShipmentData = {
+          caseMember: caseMemberId,
+        }
+        const kitShipment = await createKitShipment(kitShipmentData).unwrap()
+        const kitShipmentId = kitShipment?.data?._id || kitShipment?._id
+        console.log('kitShipmentId:', kitShipmentId)
       }
 
       const serviceCaseData = {
@@ -236,6 +249,9 @@ const ServiceAtHomeForm: React.FC = () => {
                   serviceDetail={serviceDetail}
                   addressId={selectedAddressId}
                   setAddressId={setSelectedAddressId}
+                  setDisabled={setIsDisabled}
+                  setAgreed={setIsAgreed}
+                  isAgreed={isAgreed}
                 />
               </Form.Item>
             </Col>
@@ -251,6 +267,7 @@ const ServiceAtHomeForm: React.FC = () => {
                   type='primary'
                   htmlType='submit'
                   block
+                  disabled={isDisabled || !isAgreed}
                   loading={isCreating}
                 >
                   Đăng ký

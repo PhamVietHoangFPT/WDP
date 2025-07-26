@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Table,
   Typography,
@@ -24,8 +24,11 @@ import {
   useUpdateServiceCaseStatusMutation,
   useGetTestTakerQuery,
   useCreateServiceCaseResultMutation,
+  useLazyGetTestTakerQuery,
 } from '../../features/doctor/doctorAPI'
 import Cookies from 'js-cookie'
+import { useUpdateServiceCaseConditionMutation } from '../../features/serviceCase/serviceCase'
+import UpdateQualityModal from '../../components/Modal/updateConditionModal'
 
 const { Title } = Typography
 
@@ -91,6 +94,7 @@ const TestTakerName: React.FC<TestTakerNameProps> = ({ id }) => {
 }
 
 const DoctorServiceCaseWithoutResult: React.FC = () => {
+  const [triggerGetTestTaker] = useLazyGetTestTakerQuery()
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedStatus, setSelectedStatus] = useState<string>('')
@@ -150,6 +154,38 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
     useUpdateServiceCaseStatusMutation()
   const [createServiceCaseResult, { isLoading: isCreatingResult }] =
     useCreateServiceCaseResultMutation()
+  // THÊM MỘT HÀM ĐỂ CẬP NHẬT ĐIỀU KIỆN CỦA DỊCH VỤ
+  const [updateCondition] = useUpdateServiceCaseConditionMutation()
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleOpen = useCallback(
+    (serviceCase: ServiceCase) => {
+      console.log('handleOpen called with:', serviceCase)
+      setSelectedServiceCase(serviceCase)
+      setIsModalOpen(true)
+    },
+    [setSelectedServiceCase, setIsModalOpen]
+  )
+
+  const handleClose = () => setIsModalOpen(false)
+
+  const handleSubmit = async (selectedConditionId: string) => {
+    console.log('Selected condition to update:', selectedConditionId)
+    try {
+      await updateCondition({
+        serviceCaseId: selectedServiceCase?._id,
+        conditionId: selectedConditionId,
+      }).unwrap()
+    } catch (error: any) {
+      console.error('Error updating condition:', error)
+      message.error(
+        error?.data?.message || 'Không thể cập nhật chất lượng mẫu thử!'
+      )
+      return
+    }
+    handleClose()
+  }
 
   useEffect(() => {
     if (statusListData?.data && !selectedStatus) {
@@ -162,36 +198,37 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
 
   // Fetch test taker names when selectedServiceCase changes
   useEffect(() => {
-    if (selectedServiceCase?.caseMember?.testTaker.length) {
-      const fetchNames = async () => {
-        const namesPromises = selectedServiceCase.caseMember.testTaker.map(
-          async (id) => {
-            const { data: testTaker, error } =
-              await useGetTestTakerQuery(id).unwrap() // Using unwrap() to get the actual data or throw error
-            if (error) {
-              console.error(`Error fetching test taker ${id}:`, error)
-              return id.slice(-8).toUpperCase()
-            }
-            return testTaker?.name || id.slice(-8).toUpperCase()
-          }
-        )
-        try {
-          const fetchedNames = await Promise.all(namesPromises)
-          setTestTakerNames(fetchedNames)
-        } catch (err) {
-          console.error('Failed to fetch all test taker names:', err)
-          setTestTakerNames(
-            selectedServiceCase.caseMember.testTaker.map((id) =>
-              id.slice(-8).toUpperCase()
-            )
-          ) // Fallback to IDs
-        }
+    // Hàm này giữ nguyên, chỉ thay đổi cách gọi query
+    const fetchNames = async () => {
+      if (!selectedServiceCase?.caseMember?.testTaker?.length) {
+        setTestTakerNames([])
+        return
       }
-      fetchNames()
-    } else {
-      setTestTakerNames([])
+
+      try {
+        // Dùng Promise.all để gọi tất cả các trigger cùng lúc
+        const namesPromises = selectedServiceCase.caseMember.testTaker.map(
+          (id) =>
+            // ✅ SỬA LẠI Ở ĐÂY: Gọi hàm trigger thay vì gọi hook
+            triggerGetTestTaker(id, /* preferCacheValue */ true).unwrap()
+        )
+
+        const fetchedNames = await Promise.all(namesPromises)
+        // Map lại kết quả để lấy ra 'name', nếu fetch lỗi thì unwrap sẽ ném ra lỗi và được bắt bởi catch block
+        setTestTakerNames(fetchedNames.map((testTaker) => testTaker.name))
+      } catch (err) {
+        console.error('Failed to fetch one or more test taker names:', err)
+        // Fallback nếu có bất kỳ lỗi nào xảy ra
+        setTestTakerNames(
+          selectedServiceCase.caseMember.testTaker.map((id) =>
+            id.slice(-8).toUpperCase()
+          )
+        )
+      }
     }
-  }, [selectedServiceCase]) // Dependency on selectedServiceCase
+
+    fetchNames()
+  }, [selectedServiceCase, triggerGetTestTaker]) // Dependency on selectedServiceCase
 
   const calculateDaysLeft = (bookingDate: string, timeReturn: number) => {
     const booking = new Date(bookingDate)
@@ -269,7 +306,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
       const values = await form.validateFields()
 
       const adnPercentage = parseFloat(values.adnPercentage)
-
+      console.log(testTakerNames)
       let conclusion = ''
       const testTakerNamesString = testTakerNames.join(' và ')
 
@@ -460,15 +497,25 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           )
         } else if (record.currentStatus.order === 8) {
           return (
-            <Button
-              type='primary'
-              icon={<PlusOutlined />}
-              onClick={() => handleCreateResult(record)}
-              size='small'
-              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-            >
-              Tạo kết quả
-            </Button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button
+                type='primary'
+                icon={<EditOutlined />}
+                onClick={() => handleOpen(record)}
+                size='small'
+              >
+                Cập nhật chất lượng
+              </Button>
+              <Button
+                type='primary'
+                icon={<PlusOutlined />}
+                onClick={() => handleCreateResult(record)}
+                size='small'
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+              >
+                Tạo kết quả
+              </Button>
+            </div>
           )
         } else {
           return (
@@ -489,7 +536,7 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
   const serviceCases = serviceCasesData?.data || []
   const totalItems = serviceCases.length
   const currentStatusName =
-    statusListData?.data?.find((s) => s._id === selectedStatus)
+    statusListData?.data?.find((s: any) => s._id === selectedStatus)
       ?.testRequestStatus || ''
 
   const SelectionComponent = () => {
@@ -507,8 +554,8 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           disabled={isLoadingStatus}
         >
           {statusListData?.data
-            ?.filter((s) => s.order >= 6 && s.order <= 9)
-            ?.map((s) => (
+            ?.filter((s: any) => s.order >= 6 && s.order <= 9)
+            ?.map((s: any) => (
               <Select.Option key={s._id} value={s._id}>
                 {s.testRequestStatus}
               </Select.Option>
@@ -802,6 +849,11 @@ const DoctorServiceCaseWithoutResult: React.FC = () => {
           </>
         )}
       </Modal>
+      <UpdateQualityModal
+        open={isModalOpen}
+        onClose={handleClose}
+        onSubmit={handleSubmit}
+      />
     </div>
   )
 }

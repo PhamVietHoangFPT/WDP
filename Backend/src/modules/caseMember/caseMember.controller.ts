@@ -110,7 +110,7 @@ export class CaseMemberController {
 
   @Get(':id')
   @ApiBearerAuth()
-  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
+  // @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiParam({
     name: 'id',
     required: true,

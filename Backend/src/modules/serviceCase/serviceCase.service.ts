@@ -47,9 +47,14 @@ export class ServiceCaseService implements IServiceCaseService {
       shippingFee: serviceCase.shippingFee,
       account: serviceCase.account,
       currentStatus: serviceCase.currentStatus,
-      condition: serviceCase.condition,
+      condition: serviceCase.condition ? serviceCase.condition : null,
       created_at: serviceCase.created_at,
       result: serviceCase.result,
+      paymentForCondition: serviceCase.paymentForCondition
+        ? serviceCase.paymentForCondition
+        : null,
+      sampleCollector: serviceCase.sampleCollector,
+      doctor: serviceCase.doctor,
     })
   }
 
@@ -100,10 +105,16 @@ export class ServiceCaseService implements IServiceCaseService {
   async findAllServiceCases(
     pageNumber: number,
     pageSize: number,
+    currentStatus: string | null,
     userId: string,
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
-    const filter = { created_by: userId }
+    let filter = {}
+    if (currentStatus !== 'null') {
+      filter = { currentStatus: currentStatus, created_by: userId }
+    } else {
+      filter = { created_by: userId }
+    }
     const [totalItems, serviceCases] = await Promise.all([
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository
@@ -215,20 +226,16 @@ export class ServiceCaseService implements IServiceCaseService {
     if (!updated) {
       throw new ConflictException('Không thể cập nhật service case.')
     }
-    // Gọi VnPayService để lấy URL thanh toán
-    const paymentUrl = await this.VnpayService.getPaymentUrlForCondition({
-      serviceCaseId: id,
-    })
+
     await this.emailService.sendPaymentRequestForCondition(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       updated.account.toString(),
       doctorId,
-      paymentUrl,
     )
     return this.mapToResponseDto(updated)
   }
 
-  @Cron('0 */1 * * * *')
+  @Cron('0 */3 * * * *')
   async handleCron() {
     this.logger.log(`Bắt đầu cron job lúc ${new Date().toISOString()}`)
 
@@ -274,7 +281,8 @@ export class ServiceCaseService implements IServiceCaseService {
     // Chuẩn bị sẵn các document để ghi lịch sử
     const historyDocs = casesToProcess.map((c) => ({
       testRequest: c._id,
-      status: cancelledStatusId,
+      testRequestStatus: cancelledStatusId,
+      account: c.account,
     }))
 
     // 4. THỰC HIỆN CẬP NHẬT HÀNG LOẠT (Chỉ 3 lệnh gọi DB)

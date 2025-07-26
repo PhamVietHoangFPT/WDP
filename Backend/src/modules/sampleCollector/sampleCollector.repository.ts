@@ -32,6 +32,26 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
           currentStatus: new Types.ObjectId(serviceCaseStatus),
         },
       },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accountDetails',
+        },
+      },
+      // Mo mang accountDetails
+      {
+        $unwind: { path: '$accountDetails', preserveNullAndEmptyArrays: true },
+      },
       // Mo bang testrequeststatuses
       {
         $lookup: {
@@ -79,6 +99,28 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $match: {
           'caseMemberDetails.isAtHome': isAtHome, // Lọc chính xác các serviceCase có casemember isAtHome mong muốn
+        },
+      },
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$caseMemberDetails.address' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$addressId'],
+                },
+              },
+            },
+          ],
+          as: 'addressDetails',
+        },
+      },
+      {
+        $unwind: {
+          path: '$addressDetails',
+          preserveNullAndEmptyArrays: true,
         },
       },
       // Mo bang bookings
@@ -153,6 +195,15 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
           _id: 1,
           statusDetails: '$statusDetails.testRequestStatus',
           bookingDate: '$bookingDetails.bookingDate',
+          accountDetails: {
+            _id: '$accountDetails._id',
+            name: '$accountDetails.name',
+            phoneNumber: '$accountDetails.phoneNumber',
+            address: {
+              fullAddress: '$addressDetails.fullAddress',
+              location: '$addressDetails.location',
+            },
+          },
           timeReturn: {
             $concat: [
               { $toString: '$timeReturnDetails.timeReturn' }, // Chuyển số/value thành chuỗi

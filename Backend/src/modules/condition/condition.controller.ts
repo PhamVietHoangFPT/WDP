@@ -29,7 +29,7 @@ export class ConditionController {
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.DOCTOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Xem tất cả condition' })
   @ApiResponse({ status: HttpStatus.OK, type: [ConditionResponseDto] })
@@ -40,7 +40,7 @@ export class ConditionController {
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.DOCTOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tìm condition' })
   @ApiResponse({ status: HttpStatus.OK, type: ConditionResponseDto })

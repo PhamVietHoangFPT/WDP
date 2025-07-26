@@ -22,6 +22,11 @@ export interface IServiceCaseRepository {
     payment: string,
   ): Promise<ServiceCaseDocument | null>
 
+  updatePaymentForCondition(
+    id: string,
+    paymentForCondition: string,
+  ): Promise<ServiceCaseDocument | null>
+
   updateCurrentStatus(
     id: string,
     currentStatus: string,
@@ -52,7 +57,9 @@ export interface IServiceCaseRepository {
   getBookingIdsByTime(
     time: Date,
     currentStatusId: string,
-  ): Promise<{ _id: string; bookingId: string; slotId: string }[]>
+  ): Promise<
+    { _id: string; bookingId: string; slotId: string; account: string }[]
+  >
 
   findByBookingId(bookingId: string): Promise<boolean | null>
 
@@ -74,5 +81,7 @@ export interface IServiceCaseRepository {
     filter: FilterQuery<ServiceCase>,
     update: UpdateQuery<ServiceCase>,
   ): Promise<any>
+
+  checkIsSelfSampling(serviceCaseId: string): Promise<boolean | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

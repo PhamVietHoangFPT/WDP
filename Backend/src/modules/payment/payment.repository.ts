@@ -10,6 +10,10 @@ import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/it
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import * as dayjs from 'dayjs'
 import * as customParseFormat from 'dayjs/plugin/customParseFormat'
+import {
+  ServiceCase,
+  ServiceCaseDocument,
+} from '../serviceCase/schemas/serviceCase.schema'
 ;(dayjs as any).extend(customParseFormat as any)
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
@@ -24,6 +28,8 @@ export class PaymentRepository implements IPaymentRepository {
     private serviceCaseStatusRepository: ITestRequestStatusRepository,
     @Inject(IServiceCaseRepository)
     private serviceCaseRepository: IServiceCaseRepository,
+    @InjectModel(ServiceCase.name)
+    private serviceCaseModel: Model<ServiceCaseDocument>,
   ) {}
 
   async createForServiceCase(
@@ -72,6 +78,32 @@ export class PaymentRepository implements IPaymentRepository {
     return await newPayment.save()
   }
 
+  async createForCondition(
+    createPaymentHistoryDto: CreatePaymentHistoryDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument> {
+    const correctFormat = 'YYYYMMDDHHmmss'
+    const payDate = dayjs(createPaymentHistoryDto.payDate, correctFormat)
+    const dataSend = {
+      ...createPaymentHistoryDto,
+      payDate: payDate.isValid() ? payDate.toDate() : new Date(),
+    }
+    const newPayment = new this.paymentModel(dataSend)
+    const paymentType =
+      await this.paymentTypeRepository.findByPaymentType('Chi phí phát sinh')
+    newPayment.created_by = new mongoose.Types.ObjectId(userId) as any
+    newPayment.paymentType = paymentType._id
+    if (currentServiceCasePayment) {
+      await this.serviceCaseRepository.updatePaymentForCondition(
+        currentServiceCasePayment,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        newPayment._id.toString(),
+      )
+    }
+    return await newPayment.save()
+  }
+
   async findById(id: string, userId?: string): Promise<PaymentDocument> {
     return this.paymentModel
       .findById({
@@ -96,6 +128,7 @@ export class PaymentRepository implements IPaymentRepository {
           ...filter, // Thêm các điều kiện lọc khác nếu cần
         })
         .populate({ path: 'paymentType', select: 'paymentType' })
+        .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
       return query
     }
     const query = this.paymentModel
@@ -104,7 +137,7 @@ export class PaymentRepository implements IPaymentRepository {
         created_by: new Types.ObjectId(userId), // Lọc theo userId
       })
       .populate({ path: 'paymentType', select: 'paymentType' })
-
+      .sort({ payDate: -1 }) // Sắp xếp theo ngày thanh toán mới nhất
     return query
   }
 
@@ -126,5 +159,47 @@ export class PaymentRepository implements IPaymentRepository {
     return await this.paymentModel
       .exists({ transactionReferenceNumber })
       .then((exists) => !!exists)
+  }
+
+  async updateStatusForKitShipment(serviceCaseId: string): Promise<any | null> {
+    const serviceCase = await this.serviceCaseModel.aggregate([
+      {
+        $match: { _id: new Types.ObjectId(serviceCaseId) },
+      },
+      {
+        $lookup: {
+          from: 'kitshipments',
+          let: {
+            caseMemberId: '$caseMember',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'kitShipmentDetails',
+        },
+      },
+      {
+        $unwind: {
+          path: '$kitShipmentDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          account: 1,
+          kitShipmentId: '$kitShipmentDetails._id',
+        },
+      },
+    ])
+    if (!serviceCase || serviceCase.length === 0) {
+      return null
+    }
+    return serviceCase
   }
 }

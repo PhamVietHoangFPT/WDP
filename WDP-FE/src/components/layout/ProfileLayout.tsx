@@ -1,9 +1,5 @@
-// src/layouts/ProfileLayout.jsx
-
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { Layout } from 'antd'
-import Cookies from 'js-cookie'
-import { useEffect } from 'react'
 import AppHeader from './Header/Header'
 import AppFooter from './Footer/Footer'
 import HeaderCus from './Header/HeaderCus'
@@ -12,23 +8,6 @@ import Navbar from './Navbar/Navbar'
 const { Content } = Layout
 
 function ProfileLayout() {
-  const navigate = useNavigate()
-
-  // Giữ lại logic kiểm tra thông tin người dùng
-  const userData = Cookies.get('userData')
-    ? JSON.parse(Cookies.get('userData') as string)
-    : null
-
-  useEffect(() => {
-    if (userData) {
-      if (userData.Role === 'Customer') {
-        if (!userData?.PhoneNumber || !userData?.Address) {
-          navigate('/force-update')
-        }
-      }
-    }
-  }, [userData, navigate])
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Navbar />

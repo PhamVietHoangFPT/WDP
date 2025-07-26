@@ -8,6 +8,7 @@ export interface Service {
   timeReturn: TimeReturn
   sample: Sample
   isAdministration: boolean
+  isSelfSampling: boolean
   isAgnate: boolean
   delete_by: string
   delete_at: Date

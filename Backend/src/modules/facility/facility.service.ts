@@ -28,8 +28,9 @@ export class FacilityService implements IFacilityService {
     return new FacilityResponseDto({
       _id: facility._id,
       facilityName: facility.facilityName,
-      address: facility.address,
       phoneNumber: facility.phoneNumber,
+      account: facility.account,
+      address: facility.address,
     })
   }
 
@@ -161,5 +162,15 @@ export class FacilityService implements IFacilityService {
       throw new NotFoundException(`Không tìm thấy cơ sở với ID "${id}".`)
     }
     return this.mapToResponseDto(updatedFacility)
+  }
+
+  async getFacilitiesDetails(): Promise<FacilityResponseDto[] | null> {
+    const facilities = await this.facilityRepository.getFacilitiesDetails()
+    if (!facilities || facilities.length === 0) {
+      throw new NotFoundException('Không tìm thấy thông tin chi tiết cơ sở.')
+    }
+    return facilities.map((facility: Facility) =>
+      this.mapToResponseDto(facility),
+    )
   }
 }

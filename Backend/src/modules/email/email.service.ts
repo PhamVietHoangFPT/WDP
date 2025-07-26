@@ -44,7 +44,6 @@ export class EmailService implements IEmailService {
   async sendPaymentRequestForCondition(
     customerId: string,
     doctorId: string,
-    paymentUrl: string,
   ): Promise<void> {
     const customerAccount = await this.accountModel
       .findOne({
@@ -75,7 +74,6 @@ export class EmailService implements IEmailService {
           ? doctorAccount.name
           : 'Bác sĩ không xác định',
         facilityName: facility ? facility.facilityName : 'Cơ sở không xác định',
-        paymentUrl: paymentUrl,
         currentYear: new Date().getFullYear(),
       },
     })

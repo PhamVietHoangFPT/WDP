@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { Injectable, Inject, ForbiddenException } from '@nestjs/common'
 import { IPaymentService } from './interfaces/ipayment.service'
 import { IPaymentRepository } from './interfaces/ipayment.repository'
@@ -8,11 +10,17 @@ import { PaymentHistoryResponseDto } from './dto/paymentHistoryResponse.dto'
 import { transactionStatusEnum } from 'src/common/enums/transactionStatus.enum'
 import { responseCodeEnum } from 'src/common/enums/responseCode.enum'
 import { CreatePaymentHistoryDto } from './dto/createPaymentHistory.dto'
+import { IKitShipmentRepository } from '../KitShipment/interfaces/ikitShipment.repository'
+import { IKitShipmentStatusRepository } from '../kitShipmentStatus/interfaces/ikitShipmentStatus.repository'
 @Injectable()
 export class PaymentService implements IPaymentService {
   constructor(
     @Inject(IPaymentRepository)
     private readonly paymentRepository: IPaymentRepository,
+    @Inject(IKitShipmentRepository)
+    private readonly kitShipmentRepository: IKitShipmentRepository,
+    @Inject(IKitShipmentStatusRepository)
+    private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
   ) {}
 
   private mapToResponseDto(payment: Payment): PaymentHistoryResponseDto {
@@ -62,11 +70,84 @@ export class PaymentService implements IPaymentService {
         'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
       )
     }
+    const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
+    const isSelfSampling = currentServiceCasePayment.split('_')[2] === 'true'
+    if (isSelfSampling) {
+      const dataSend = await this.paymentRepository.updateStatusForKitShipment(
+        originalServiceCaseId,
+      )
+      const kitShipmentId = dataSend.kitShipmentId
+      const customerId = dataSend.customerId
+      let kitShipmentStatus: any = null
+      if (
+        paymentData.transactionStatus !== '00' &&
+        paymentData.responseCode !== '00'
+      ) {
+        kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+          'Hủy do không thanh toán thành công',
+        )
+      } else if (
+        paymentData.transactionStatus === '00' &&
+        paymentData.responseCode === '00'
+      ) {
+        kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
+          'Thanh toán thành công',
+        )
+      }
+      const currentStatusId = kitShipmentStatus._id.toString()
+      await this.kitShipmentRepository.updateCurrentStatus(
+        kitShipmentId,
+        currentStatusId,
+        customerId,
+      )
+    }
+
     const payment = await this.paymentRepository.createForServiceCase(
       paymentData,
       userId,
-      currentServiceCasePayment,
+      originalServiceCaseId,
     )
+    if (!payment || typeof payment.save !== 'function') {
+      throw new Error('Failed to create payment document')
+    }
+    return payment.save()
+  }
+
+  async createForCondition(
+    checkVnPayPayment: CheckVnPayPaymentDto,
+    userId: string,
+    currentServiceCasePayment: string,
+  ): Promise<PaymentDocument> {
+    const paymentData: CreatePaymentHistoryDto = {
+      tmnCode: checkVnPayPayment.vnp_TmnCode,
+      amount: checkVnPayPayment.vnp_Amount,
+      transactionStatus: checkVnPayPayment.vnp_TransactionStatus,
+      responseCode: checkVnPayPayment.vnp_ResponseCode,
+      payDate: checkVnPayPayment.vnp_PayDate,
+      transactionReferenceNumber: checkVnPayPayment.vnp_TxnRef,
+      orderInfo: checkVnPayPayment.vnp_OrderInfo,
+      transactionNo: checkVnPayPayment.vnp_TransactionNo,
+    }
+
+    const existingPayment =
+      await this.paymentRepository.findWithTransactionReferenceNumber(
+        paymentData.transactionReferenceNumber,
+      )
+    if (existingPayment) {
+      throw new ForbiddenException(
+        'Thanh toán đã được thực hiện trước đó với mã giao dịch này.',
+      )
+    }
+
+    const originalServiceCaseId = currentServiceCasePayment.split('_')[0]
+    const payment = await this.paymentRepository.createForCondition(
+      paymentData,
+      userId,
+      originalServiceCaseId,
+    )
+    if (!payment || typeof payment.save !== 'function') {
+      throw new Error('Failed to create payment document')
+    }
     return payment.save()
   }
 

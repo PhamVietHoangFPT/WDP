@@ -48,10 +48,14 @@ export class VnpayService {
       PaymentData.serviceCaseId,
     )
     const totalFee = serviceCaseFee + shippingFee
+    const isSelfSampling = await this.serviceCaseRepository.checkIsSelfSampling(
+      PaymentData.serviceCaseId,
+    )
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}_${isSelfSampling ? 'true' : 'false'}`
     const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_TxnRef: uniqueTxnRef,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,
@@ -66,14 +70,16 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = 'http://localhost:5173/payment-success/'
+    const vnp_ReturnUrl = 'http://localhost:5173/payment-success-condition/'
     const conditionFee = await this.serviceCaseRepository.getConditionFeeById(
       PaymentData.serviceCaseId,
     )
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}`
     const dataSend = {
       vnp_Amount: conditionFee,
-      vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_OrderInfo:
+        'Thanh toán chi phí phát sinh cho dịch vụ ' + PaymentData.serviceCaseId,
+      vnp_TxnRef: uniqueTxnRef,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,
