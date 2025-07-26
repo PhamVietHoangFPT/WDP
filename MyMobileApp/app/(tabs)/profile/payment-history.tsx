@@ -42,7 +42,15 @@ export default function PaymentHistoryScreen() {
   const formatDate = (date: string) =>
     date ? new Date(date).toLocaleString("vi-VN") : "—";
 
-  const renderStatus = (status: string) => {
+  const renderStatus = (status: string | undefined) => {
+    if (!status || typeof status !== "string") {
+      return (
+        <Text style={[styles.statusTag, { backgroundColor: "#95a5a6" }]}>
+          Không rõ
+        </Text>
+      );
+    }
+
     const lower = status.toLowerCase();
     const isFail = lower.includes("không");
     return (
@@ -95,14 +103,16 @@ export default function PaymentHistoryScreen() {
             </Text>
             <TouchableOpacity
               style={styles.detailBtn}
-              // onPress={() => router.push(`/payment-history/${item._id}`)}
+              onPress={() =>
+                router.push(`/profile/payment-detail?paymentId=${item._id}`)
+              }
             >
               <Text style={styles.detailText}>Xem chi tiết</Text>
             </TouchableOpacity>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Chưa có lịch sử thanh toán.</Text>
+          <Text style={styles.emptyText}>Chưa có lịch sử thanh toán!</Text>
         }
       />
     </LinearGradient>
