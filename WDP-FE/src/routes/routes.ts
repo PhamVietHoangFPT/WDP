@@ -267,17 +267,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/payment',
         component: PaymentPage,
-        role: ['Customer'],
       },
       {
         path: '/payment-success',
         component: PaymentSuccessPage,
-        role: ['Customer'],
       },
       {
         path: '/payment-success-condition',
         component: PaymentConditionSuccessPage,
-        role: ['Customer'],
       },
       {
         path: '/home-registeration',

@@ -59,7 +59,10 @@ export class TestTakerRepository implements ITestTakerRepository {
     return (
       this.testTakerModel
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        .find(filter)
+        .find({
+          ...filter,
+          deleted_at: null,
+        })
         .skip(skip)
         .limit(limit)
         .sort({ created_at: -1 })

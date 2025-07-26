@@ -89,7 +89,7 @@ export class CaseMemberController {
 
   @Post()
   @ApiBearerAuth()
-  @Roles(RoleEnum.CUSTOMER)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
   @ApiOperation({ summary: 'Tạo hồ sơ nhóm người cần xét nghiệm' })
   @ApiResponse({
     status: 201,

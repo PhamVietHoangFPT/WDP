@@ -89,7 +89,10 @@ export const SideBar = () => {
           key: 'staff/register-for-administration',
           icon: <TeamOutlined />,
           label: 'Đăng ký dịch vụ hành chính',
-          onClick: () => navigate('/staff/register-for-administration'),
+          onClick: () =>
+            navigate(
+              '/staff/register-for-administration?pageNumber=1&pageSize=12'
+            ),
         },
       ],
     },

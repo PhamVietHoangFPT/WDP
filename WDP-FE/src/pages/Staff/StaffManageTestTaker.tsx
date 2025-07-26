@@ -16,9 +16,9 @@ import {
   List,
   Divider,
   Pagination,
+  Spin,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import Cookies from 'js-cookie'
 // Import các hooks từ file API của bạn
@@ -47,8 +47,6 @@ interface TestTaker {
 }
 
 export default function StaffManageTestTaker() {
-  const navigate = useNavigate()
-
   // State để quản lý phân trang
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
@@ -162,12 +160,6 @@ export default function StaffManageTestTaker() {
       align: 'center',
       render: (_, record: TestTaker) => (
         <Space size='middle'>
-          <Tooltip title='Chỉnh sửa'>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/staff/edit-testee/${record._id}`)} // Ví dụ
-            />
-          </Tooltip>
           <Popconfirm
             title='Xóa người này?'
             description='Bạn có chắc muốn xóa người này không? Hành động này không thể hoàn tác.'
@@ -176,7 +168,7 @@ export default function StaffManageTestTaker() {
             cancelText='Hủy'
           >
             <Tooltip title='Xóa'>
-              <Button icon={<DeleteOutlined />} danger />
+              <Button icon={<DeleteOutlined />} danger loading={isDeleting} />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -185,10 +177,27 @@ export default function StaffManageTestTaker() {
   ]
 
   const innerTableColumns = columns.filter((col) => col.key !== 'created_at')
+
   const disabledDate = (current) => {
     // Trả về true (vô hiệu hóa) cho những ngày sau ngày hôm nay
     return current && current > dayjs().endOf('day')
   }
+
+  if (isLoading || isFetching) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '50vh', // Đảm bảo div có chiều cao để căn giữa
+        }}
+      >
+        <Spin size='large' />
+      </div>
+    )
+  }
+
   return (
     <Card>
       <Title level={4}>Quản lý Người Xét nghiệm</Title>
