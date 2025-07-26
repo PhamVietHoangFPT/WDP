@@ -69,6 +69,18 @@ export class FacilityController {
     }
   }
 
+  @Get('facilities-details')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết cơ sở' })
+  async getFacilitiesDetails(): Promise<ApiResponseDto<FacilityResponseDto>> {
+    const facilities = await this.facilityService.getFacilitiesDetails()
+    return {
+      data: facilities,
+      success: false,
+      message: 'Không tìm thấy thông tin chi tiết cơ sở.',
+      statusCode: HttpStatus.NOT_FOUND,
+    }
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin cơ sở theo ID' })
   findById(@Param('id') id: string): Promise<FacilityResponseDto | null> {
