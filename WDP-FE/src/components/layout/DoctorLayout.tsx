@@ -50,7 +50,7 @@ export const DoctorLayout = () => {
           }}
         >
           <Title level={4} style={{ margin: 0 }}>
-            Quản Lý Tiêm Chủng
+            Quản lý ADN
           </Title>
         </Header>
 

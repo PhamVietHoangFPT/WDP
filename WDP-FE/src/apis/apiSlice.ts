@@ -52,6 +52,7 @@ export const apiSlice = createApi({
     'results',
     'conditions',
     'kit-shippments',
+    'dashboard',
   ],
 
   endpoints: () => ({}),
