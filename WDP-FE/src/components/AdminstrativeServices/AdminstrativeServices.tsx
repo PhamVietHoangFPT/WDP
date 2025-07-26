@@ -166,48 +166,16 @@ export default function AdministrativeService() {
     })
 
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          setUserLocation([latitude, longitude])
-          setIsFiltering(false)
-          notification.success({
-            message: 'Thành công',
-            description:
-              'Đã tìm thấy vị trí của bạn và lọc các cơ sở gần nhất.',
-            placement: 'topRight',
-          })
-        },
-        (error) => {
-          setIsFiltering(false)
-          let errorMessage = 'Không thể lấy vị trí của bạn.'
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage =
-                'Bạn đã từ chối quyền truy cập vị trí. Vui lòng cấp quyền trong cài đặt trình duyệt.'
-              break
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Thông tin vị trí không khả dụng.'
-              break
-            case error.TIMEOUT:
-              errorMessage = 'Yêu cầu lấy vị trí đã hết thời gian chờ.'
-              break
-            default:
-              errorMessage = `Lỗi không xác định: ${error.message}`
-              break
-          }
-          notification.error({
-            message: 'Lỗi vị trí',
-            description: errorMessage,
-            placement: 'topRight',
-            duration: 5,
-          })
-          setUserLocation(null) // Đảm bảo clear vị trí nếu có lỗi
-          setFilteredFacilities(facilitiesData?.data || []) // Về lại danh sách gốc
-          console.error('Geolocation Error:', error)
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      )
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords
+        setUserLocation([latitude, longitude])
+        setIsFiltering(false)
+        notification.success({
+          message: 'Thành công',
+          description: 'Đã tìm thấy vị trí của bạn và lọc các cơ sở gần nhất.',
+          placement: 'topRight',
+        })
+      })
     } else {
       setIsFiltering(false)
       notification.warning({
