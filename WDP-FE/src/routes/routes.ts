@@ -1,9 +1,20 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
-import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
-import AdminManagerList from '../pages/AdminManagerList/AdminManagerList'
-import FacilitiesWithManager from '../pages/FacilitiesWithManager/FacilitiesWithManager'
-import AdminstrativeServices from '../components/AdminstrativeServices/AdminstrativeServices'
+const StaffGetServiceCaseByCustomer = lazy(
+  () =>
+    import(
+      '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
+    )
+)
+const AdminManagerList = lazy(
+  () => import('../pages/AdminManagerList/AdminManagerList')
+)
+const FacilitiesWithManager = lazy(
+  () => import('../pages/FacilitiesWithManager/FacilitiesWithManager')
+)
+const AdminstrativeServices = lazy(
+  () => import('../components/AdminstrativeServices/AdminstrativeServices')
+)
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
