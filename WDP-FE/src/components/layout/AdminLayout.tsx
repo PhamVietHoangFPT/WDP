@@ -2,37 +2,11 @@ import { Outlet } from 'react-router-dom'
 import { Layout, Typography } from 'antd'
 import {} from '@ant-design/icons'
 import { SideBar } from './SideBarAdmin/SideBarAdmin'
-// import Cookies from 'js-cookie'
-// import { useEffect } from 'react'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 export const AdminLayout = () => {
-  //   const navigate = useNavigate()
-
-  //   useEffect(() => {
-  //     // Get userData from cookies and parse it
-  //     const userDataString = Cookies.get('userData')
-
-  //     if (!userDataString) {
-  //       navigate('/')
-  //       return
-  //     }
-
-  //     let userData
-  //     try {
-  //       userData = JSON.parse(userDataString)
-  //     } catch (error) {
-  //       console.error('Failed to parse userData from cookies:', error)
-  //       navigate('/')
-  //       return
-  //     }
-
-  //     if (userData.Role !== 'Manager') {
-  //       navigate('/')
-  //     }
-  //   }, [navigate])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
