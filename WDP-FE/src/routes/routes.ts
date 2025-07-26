@@ -3,6 +3,7 @@ import type { LayoutRoute } from '../types/routes'
 import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
 import AdminManagerList from '../pages/AdminManagerList/AdminManagerList'
 import FacilitiesWithManager from '../pages/FacilitiesWithManager/FacilitiesWithManager'
+import AdminstrativeServices from '../components/AdminstrativeServices/AdminstrativeServices'
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -261,6 +262,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/home-registeration',
         component: HomeRegisteration,
+      },
+      {
+        path: '/adminstrative-services',
+        component: AdminstrativeServices,
       },
       {
         path: '/register-service-at-home/:id',

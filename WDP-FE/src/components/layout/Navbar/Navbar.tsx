@@ -58,6 +58,14 @@ const Navbar: React.FC = () => {
         // ✅ THÊM DÒNG NÀY: Dòng này sẽ đẩy mục này và tất cả các mục sau nó sang hẳn bên phải
         style: { marginLeft: 'auto' },
       },
+      
+      {
+        key: 'adminstrative-services',
+        icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
+        label: 'Dịch vụ hành chính',
+        url: '/adminstrative-services',
+      },
+
       {
         key: userData ? 'profile' : 'login',
         icon: userData ? <UserOutlined /> : <LoginOutlined />,
