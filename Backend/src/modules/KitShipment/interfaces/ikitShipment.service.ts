@@ -17,7 +17,10 @@ export interface IKitShipmentService {
   ): Promise<PaginatedResponse<KitShipmentResponseDto>>
 
   findKitShipmentById(id: string): Promise<KitShipmentResponseDto>
-
+  findKitShipmentForDeliveryStaff(
+    deliveryStaffId: string,
+    currentStatus: string,
+  ): Promise<KitShipmentResponseDto[]>
   updateKitShipment(
     id: string,
     userId: string,
