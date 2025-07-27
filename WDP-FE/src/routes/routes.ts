@@ -4,6 +4,7 @@ import StaffServiceCase from '../pages/Staff/StaffServiceCase'
 import StaffServiceCaseDetail from '../pages/Staff/StaffServiceCaseDetail'
 import StaffPaymentHistory from '../pages/Staff/PaymentHistory'
 import StaffPaymentHistoryDetail from '../pages/Staff/PaymentDetail'
+import StaffServeServiceCase from '../pages/Staff/StaffServeServiceCase'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -485,6 +486,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/payment-history/:id',
         component: StaffPaymentHistoryDetail,
+      },
+      {
+        path: '/staff/test-takers/served',
+        component: StaffServeServiceCase,
       },
     ],
   },
