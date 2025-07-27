@@ -21,6 +21,12 @@ export class Image extends BaseEntity {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, trim: true })
   kitShipment?: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, trim: true })
+  serviceCase?: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, trim: true })
+  result?: mongoose.Schema.Types.ObjectId
 }
 
 export const ImageSchema = SchemaFactory.createForClass(Image)

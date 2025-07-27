@@ -61,6 +61,28 @@ export class DeliveryStaffRepository implements IDeliveryStaffRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$caseMembers.address' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$addressId'],
+                },
+              },
+            },
+          ],
+          as: 'addresses',
+        },
+      },
+      {
+        $unwind: {
+          path: '$addresses',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       // Mo bang bookings
       {
         $lookup: {
@@ -203,6 +225,11 @@ export class DeliveryStaffRepository implements IDeliveryStaffRepository {
         $project: {
           _id: 1,
           currentStatus: 1,
+          address: {
+            _id: '$addresses._id',
+            fullAddress: '$addresses.fullAddress',
+            location: '$addresses.location',
+          },
           bookingDate: '$bookings.bookingDate',
           timeReturn: '$timeReturns.timeReturn',
           caseMember: {
