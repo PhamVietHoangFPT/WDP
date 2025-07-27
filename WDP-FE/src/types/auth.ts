@@ -8,6 +8,7 @@ export interface UserData {
   facility: {
     _id: string
     facilityName: string
+    address: string
   }
   role: string
   name: string

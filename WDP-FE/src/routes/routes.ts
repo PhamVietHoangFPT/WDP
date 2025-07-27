@@ -1,9 +1,29 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
-import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
-import AdminManagerList from '../pages/AdminManagerList/AdminManagerList'
-import FacilitiesWithManager from '../pages/FacilitiesWithManager/FacilitiesWithManager'
-import AdminstrativeServices from '../components/AdminstrativeServices/AdminstrativeServices'
+
+const StaffAdministrationRegister = lazy(
+  () => import('../pages/Staff/StaffAdministrationRegister')
+)
+
+const StaffManageTestTaker = lazy(
+  () => import('../pages/Staff/StaffManageTestTaker')
+)
+
+const StaffGetServiceCaseByCustomer = lazy(
+  () =>
+    import(
+      '../pages/StaffGetServiceCaseByCustomer/StaffGetServiceCaseByCustomer'
+    )
+)
+const AdminManagerList = lazy(
+  () => import('../pages/AdminManagerList/AdminManagerList')
+)
+const FacilitiesWithManager = lazy(
+  () => import('../pages/FacilitiesWithManager/FacilitiesWithManager')
+)
+const AdminstrativeServices = lazy(
+  () => import('../components/AdminstrativeServices/AdminstrativeServices')
+)
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -251,17 +271,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/payment',
         component: PaymentPage,
-        role: ['Customer'],
       },
       {
         path: '/payment-success',
         component: PaymentSuccessPage,
-        role: ['Customer'],
       },
       {
         path: '/payment-success-condition',
         component: PaymentConditionSuccessPage,
-        role: ['Customer'],
       },
       {
         path: '/home-registeration',
@@ -388,16 +405,6 @@ const routes: LayoutRoute[] = [
     ],
   },
   {
-    layout: DeliveryStaffLayout,
-    data: [
-      {
-        path: '/delivery-staff',
-        component: DeliveryStaffHomePage,
-        // role: ['admin'],
-      },
-    ],
-  },
-  {
     layout: SampleCollectorLayout,
     role: ['Sample Collector'],
     data: [
@@ -450,6 +457,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/update-service-case-status-for-customer',
         component: StaffGetServiceCaseByCustomer,
+      },
+      {
+        path: '/staff/manage-test-taker',
+        component: StaffManageTestTaker,
+      },
+      {
+        path: '/staff/register-for-administration',
+        component: StaffAdministrationRegister,
       },
     ],
   },

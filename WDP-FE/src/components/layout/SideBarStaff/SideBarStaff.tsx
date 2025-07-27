@@ -11,6 +11,8 @@ import {
   BarChartOutlined,
   TeamOutlined,
   InboxOutlined,
+  AppstoreOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 
@@ -71,6 +73,28 @@ export const SideBar = () => {
       label: 'Quản lý kho',
       onClick: () =>
         navigate('/staff/sampling-kit-inventory?pageNumber=1&pageSize=10'),
+    },
+    {
+      key: 'registration-submenu',
+      icon: <AppstoreOutlined />,
+      label: 'Quản lý đăng ký',
+      children: [
+        {
+          key: 'staff/manage-test-taker',
+          icon: <UserAddOutlined />,
+          label: 'Quản lý hồ sơ người xét nghiệm',
+          onClick: () => navigate('/staff/manage-test-taker'), // Sửa lại đường dẫn nếu cần
+        },
+        {
+          key: 'staff/register-for-administration',
+          icon: <TeamOutlined />,
+          label: 'Đăng ký dịch vụ hành chính',
+          onClick: () =>
+            navigate(
+              '/staff/register-for-administration?pageNumber=1&pageSize=12'
+            ),
+        },
+      ],
     },
     {
       key: 'staff/update-service-case-status-for-customer',

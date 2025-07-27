@@ -5,27 +5,10 @@ export const testTakerApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Lấy danh sách test takers
     getTestTakers: builder.query({
-      query: ({
-        accountId,
-        pageSize,
-        pageNumber,
-      }: {
-        accountId: string
-        pageSize: number | null
-        pageNumber: number | null
-      }) => {
-        let url = '/test-takers'
-        const params = []
-        if (accountId) params.push(`accountId=${encodeURIComponent(accountId)}`)
-        if (pageSize) params.push(`pageSize=${encodeURIComponent(pageSize)}`)
-        if (pageNumber)
-          params.push(`pageNumber=${encodeURIComponent(pageNumber)}`)
-        if (params.length > 0) url += `?${params.join('&')}`
-        return {
-          url,
-          method: 'GET',
-        }
-      },
+      query: ({ accountId, pageSize, pageNumber }) => ({
+        url: '/test-takers',
+        params: { accountId, pageSize, pageNumber },
+      }),
       providesTags: ['testTakers'],
     }),
 
