@@ -31,7 +31,7 @@ const deliveryStaffAPI = apiSlice.injectEndpoints({
 
     addDeliveryStaffToServiceCase: builder.mutation({
       query: ({ data, serviceCaseId, deliveryStaffId }) => ({
-        url: `/managers/service-cases/${serviceCaseId}/doctor/${deliveryStaffId}`,
+        url: `/managers/service-cases/${serviceCaseId}/delivery-staff/${deliveryStaffId}`,
         method: 'PUT',
         body: data,
       }),
