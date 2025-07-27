@@ -7,6 +7,9 @@ import { KitShipment, KitShipmentDocument } from './schemas/kitShipment.schema'
 import { CreateKitShipmentDto } from './dto/createKitShipment.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
+import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
+import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
+import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 @Injectable()
 export class KitShipmentRepository implements IKitShipmentRepository {
   constructor(
@@ -14,10 +17,16 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private kitShipmentModel: Model<KitShipmentDocument>,
     @Inject(IKitShipmentHistoryRepository)
     private kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
+    @Inject(ICaseMemberRepository)
+    private caseMemberRepository: ICaseMemberRepository,
+    @Inject(ITestTakerRepository)
+    private testTakerRepository: ITestTakerRepository,
+    @Inject(IBookingRepository)
+    private bookingRepository: IBookingRepository,
   ) { }
   async findKitShipmentForDeliveryStaff(
     deliveryStaffId: string,
-    currentStatus: string,
+    currentStatus: string
   ): Promise<KitShipmentDocument[]> {
     return await this.kitShipmentModel.aggregate([
       // B1: Match deliveryStaff và currentStatus
@@ -115,7 +124,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
                 name: '$accounts.name',
                 email: '$accounts.email',
                 phoneNumber: '$accounts.phoneNumber',
-              },
+              }
             },
             address: {
               _id: '$addresses._id',
@@ -124,14 +133,14 @@ export class KitShipmentRepository implements IKitShipmentRepository {
           },
         },
       },
-    ])
+    ]);
   }
 
   async getAccountIdByKitShipmentId(
     kitShipmentId: string,
   ): Promise<string | null> {
     try {
-      // Sử dụng aggregate để join tất cả các collection cần thiết
+      // Sử dụng aggregate để join tất cả các collection cần thiết một lần
       const result = await this.kitShipmentModel.aggregate([
         {
           $match: {
@@ -154,7 +163,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
             as: 'caseMemberData'
           }
         },
-        { $unwind: { path: '$caseMemberData', preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: '$caseMemberData', preserveNullAndEmptyArrays: false } },
         {
           $lookup: {
             from: 'bookings',
@@ -171,7 +180,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
             as: 'bookingData'
           }
         },
-        { $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: false } },
         {
           $project: {
             accountId: '$bookingData.account'
@@ -179,8 +188,8 @@ export class KitShipmentRepository implements IKitShipmentRepository {
         }
       ]);
 
-      return result.length > 0 && result[0].accountId
-        ? result[0].accountId.toString()
+      return result.length > 0 && result[0].accountId 
+        ? result[0].accountId.toString() 
         : null;
     } catch (error) {
       // Xử lý lỗi (có thể log lỗi hoặc throw custom error)
