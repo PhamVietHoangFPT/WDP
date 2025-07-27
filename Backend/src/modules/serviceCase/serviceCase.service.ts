@@ -144,6 +144,7 @@ export class ServiceCaseService implements IServiceCaseService {
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
+    deliveryStaffId?: string,
   ): Promise<ServiceCaseResponseDto | null> {
     const oldServiceCaseStatusId =
       await this.serviceCaseRepository.getCurrentStatusId(id)
@@ -173,6 +174,7 @@ export class ServiceCaseService implements IServiceCaseService {
             staffId,
             sampleCollectorId,
             doctorId,
+            deliveryStaffId,
           )
         if (!updatedServiceCase) {
           throw new Error('Cập nhật trạng thái hiện tại không thành công')
@@ -191,6 +193,7 @@ export class ServiceCaseService implements IServiceCaseService {
       staffId,
       sampleCollectorId,
       doctorId,
+      deliveryStaffId,
     )
     if (!updatedServiceCase) {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')

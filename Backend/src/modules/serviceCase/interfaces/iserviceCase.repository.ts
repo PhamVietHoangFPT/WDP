@@ -33,6 +33,7 @@ export interface IServiceCaseRepository {
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
+    deliveryStaffId?: string,
   ): Promise<ServiceCaseDocument | null>
 
   updateCondition(
