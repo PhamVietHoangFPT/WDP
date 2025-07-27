@@ -276,7 +276,7 @@ const ManagerServiceCaseWithoutDoctor: React.FC = () => {
   const disabledDate = (current: moment.Moment) => {
     // Không cho phép chọn ngày trước ngày hiện tại
     return current && current < moment().startOf('day') // Sửa thành startOf('day') để bao gồm cả ngày hiện tại
-  } 
+  }
 
   return (
     <div style={{ padding: 24 }}>

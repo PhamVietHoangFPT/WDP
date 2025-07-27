@@ -76,5 +76,5 @@ export const {
   useAddSampleCollectorToServiceCaseMutation,
   useGetKitShipmentWithoutDeliveryStaffListQuery,
   useGetDeliveryStaffListQuery,
-  useAssignDeliveryStaffToKitShipmentMutation
+  useAssignDeliveryStaffToKitShipmentMutation,
 } = sampleCollectorAPI

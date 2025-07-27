@@ -23,10 +23,10 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private testTakerRepository: ITestTakerRepository,
     @Inject(IBookingRepository)
     private bookingRepository: IBookingRepository,
-  ) { }
+  ) {}
   async findKitShipmentForDeliveryStaff(
     deliveryStaffId: string,
-    currentStatus: string
+    currentStatus: string,
   ): Promise<KitShipmentDocument[]> {
     return await this.kitShipmentModel.aggregate([
       // B1: Match deliveryStaff và currentStatus
@@ -124,7 +124,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
                 name: '$accounts.name',
                 email: '$accounts.email',
                 phoneNumber: '$accounts.phoneNumber',
-              }
+              },
             },
             address: {
               _id: '$addresses._id',
@@ -133,7 +133,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
           },
         },
       },
-    ]);
+    ])
   }
 
   async getAccountIdByKitShipmentId(
@@ -144,8 +144,8 @@ export class KitShipmentRepository implements IKitShipmentRepository {
       const result = await this.kitShipmentModel.aggregate([
         {
           $match: {
-            _id: new mongoose.Types.ObjectId(kitShipmentId)
-          }
+            _id: new mongoose.Types.ObjectId(kitShipmentId),
+          },
         },
         {
           $lookup: {
@@ -155,15 +155,20 @@ export class KitShipmentRepository implements IKitShipmentRepository {
               {
                 $match: {
                   $expr: {
-                    $eq: ['$_id', '$$caseMemberId']
-                  }
-                }
-              }
+                    $eq: ['$_id', '$$caseMemberId'],
+                  },
+                },
+              },
             ],
-            as: 'caseMemberData'
-          }
+            as: 'caseMemberData',
+          },
         },
-        { $unwind: { path: '$caseMemberData', preserveNullAndEmptyArrays: false } },
+        {
+          $unwind: {
+            path: '$caseMemberData',
+            preserveNullAndEmptyArrays: false,
+          },
+        },
         {
           $lookup: {
             from: 'bookings',
@@ -172,25 +177,27 @@ export class KitShipmentRepository implements IKitShipmentRepository {
               {
                 $match: {
                   $expr: {
-                    $eq: ['$_id', '$$bookingId']
-                  }
-                }
-              }
+                    $eq: ['$_id', '$$bookingId'],
+                  },
+                },
+              },
             ],
-            as: 'bookingData'
-          }
+            as: 'bookingData',
+          },
         },
-        { $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: false } },
+        {
+          $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: false },
+        },
         {
           $project: {
-            accountId: '$bookingData.account'
-          }
-        }
-      ]);
+            accountId: '$bookingData.account',
+          },
+        },
+      ])
 
-      return result.length > 0 && result[0].accountId 
-        ? result[0].accountId.toString() 
-        : null;
+      return result.length > 0 && result[0].accountId
+        ? result[0].accountId.toString()
+        : null
     } catch (error) {
       // Xử lý lỗi (có thể log lỗi hoặc throw custom error)
       throw new Error(`Failed to get accountId: ${error.message}`)

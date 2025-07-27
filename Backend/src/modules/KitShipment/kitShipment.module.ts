@@ -35,7 +35,6 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
     BookingModule,
     TestRequestStatusModule,
     ServiceCaseModule, // Ensure ServiceCase is imported if needed in the repository/service
-
   ],
   controllers: [KitShipmentController],
   providers: [
@@ -50,4 +49,4 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
   ],
   exports: [IKitShipmentRepository, IKitShipmentService],
 })
-export class KitShipmentModule { }
+export class KitShipmentModule {}

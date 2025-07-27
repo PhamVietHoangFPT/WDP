@@ -71,7 +71,9 @@ export default function StaffPaymentHistoryDetail() {
       </Descriptions>
       <Button
         type='primary'
-        onClick={() => navigate('/staff/payment-history?pageNumber=1&pageSize=5')}
+        onClick={() =>
+          navigate('/staff/payment-history?pageNumber=1&pageSize=5')
+        }
         style={{ marginTop: 24 }}
       >
         Quay lại danh sách

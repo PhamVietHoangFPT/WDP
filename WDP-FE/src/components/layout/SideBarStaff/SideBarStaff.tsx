@@ -99,27 +99,21 @@ export const SideBar = () => {
           icon: <TeamOutlined />,
           label: 'Lịch sử trường hợp dịch vụ',
           onClick: () =>
-            navigate(
-              '/staff/service-case-customer?pageNumber=1&pageSize=5'
-            ),
+            navigate('/staff/service-case-customer?pageNumber=1&pageSize=5'),
         },
         {
           key: 'staff/service-case',
           icon: <TeamOutlined />,
           label: 'Lịch sử thanh toán',
           onClick: () =>
-            navigate(
-              '/staff/payment-history?pageNumber=1&pageSize=5'
-            ),
+            navigate('/staff/payment-history?pageNumber=1&pageSize=5'),
         },
         {
           key: 'staff/service-case',
           icon: <TeamOutlined />,
           label: 'Hồ sơ đã phục vụ',
           onClick: () =>
-            navigate(
-              '/staff/test-takers/served?pageNumber=1&pageSize=10'
-            ),
+            navigate('/staff/test-takers/served?pageNumber=1&pageSize=10'),
         },
       ],
     },
