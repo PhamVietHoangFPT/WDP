@@ -94,6 +94,24 @@ export const SideBar = () => {
               '/staff/register-for-administration?pageNumber=1&pageSize=12'
             ),
         },
+        {
+          key: 'staff/service-case',
+          icon: <TeamOutlined />,
+          label: 'Lịch sử trường hợp dịch vụ',
+          onClick: () =>
+            navigate(
+              '/staff/service-case-customer?pageNumber=1&pageSize=5'
+            ),
+        },
+        {
+          key: 'staff/service-case',
+          icon: <TeamOutlined />,
+          label: 'Lịch sử thanh toán',
+          onClick: () =>
+            navigate(
+              '/staff/payment-history?pageNumber=1&pageSize=5'
+            ),
+        },
       ],
     },
     {
