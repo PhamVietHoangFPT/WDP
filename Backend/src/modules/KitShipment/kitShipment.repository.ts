@@ -7,9 +7,6 @@ import { KitShipment, KitShipmentDocument } from './schemas/kitShipment.schema'
 import { CreateKitShipmentDto } from './dto/createKitShipment.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
-import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
-import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
-import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 @Injectable()
 export class KitShipmentRepository implements IKitShipmentRepository {
   constructor(
@@ -17,12 +14,6 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private kitShipmentModel: Model<KitShipmentDocument>,
     @Inject(IKitShipmentHistoryRepository)
     private kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
-    @Inject(ICaseMemberRepository)
-    private caseMemberRepository: ICaseMemberRepository,
-    @Inject(ITestTakerRepository)
-    private testTakerRepository: ITestTakerRepository,
-    @Inject(IBookingRepository)
-    private bookingRepository: IBookingRepository,
   ) { }
   async findKitShipmentForDeliveryStaff(
     deliveryStaffId: string,
