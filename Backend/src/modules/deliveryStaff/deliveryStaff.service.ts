@@ -20,12 +20,15 @@ export class DeliveryStaffService implements IDeliveryStaffService {
   async findAllServiceCasesByDeliveryStaffId(
     deliveryStaffId: string,
     currentStatus: string,
+    facilityId: string,
   ): Promise<ServiceCaseResponseDto[]> {
     const serviceCases =
       await this.deliveryStaffRepository.findAllServiceCasesByDeliveryStaffId(
         deliveryStaffId,
         currentStatus,
+        facilityId,
       )
+
     if (!serviceCases || serviceCases.length === 0) {
       throw new NotFoundException(
         'Không tìm thấy hồ sơ nào tương ứng với yêu cầu của bạn.',

@@ -5,6 +5,7 @@ export interface IDeliveryStaffService {
   findAllServiceCasesByDeliveryStaffId(
     deliveryStaffId: string,
     currentStatus: string,
+    facilityId: string,
   ): Promise<ServiceCaseResponseDto[]>
   getDeliveryStaffTestRequestStatuses(): Promise<TestRequestStatusDocument[]>
 }
