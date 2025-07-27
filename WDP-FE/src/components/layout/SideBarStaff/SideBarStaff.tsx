@@ -94,6 +94,15 @@ export const SideBar = () => {
               '/staff/register-for-administration?pageNumber=1&pageSize=12'
             ),
         },
+        {
+          key: 'staff/service-case',
+          icon: <TeamOutlined />,
+          label: 'Đăng ký dịch vụ hành chính',
+          onClick: () =>
+            navigate(
+              '/staff/service-case-customer?pageNumber=1&pageSize=5'
+            ),
+        },
       ],
     },
     {
