@@ -115,6 +115,15 @@ export const SideBar = () => {
           onClick: () =>
             navigate('/staff/test-takers/served?pageNumber=1&pageSize=10'),
         },
+        {
+          key: 'staff/return-fail',
+          icon: <TeamOutlined />,
+          label: 'Giao kết quả thất bại',
+          onClick: () =>
+            navigate(
+              '/staff/return-fail'
+            ),
+        },
       ],
     },
     {

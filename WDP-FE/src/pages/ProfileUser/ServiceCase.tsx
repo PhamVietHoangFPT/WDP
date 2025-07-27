@@ -10,15 +10,20 @@ import {
   Select,
   message,
   Space,
+  Modal, // Import Modal
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useGetServiceCasesListQuery } from '../../features/customer/paymentApi'
+import {
+  useGetServiceCasesListQuery,
+  useCreatePaymentForConditionMutation,
+  useGetImageQuery, // Import useGetImageQuery
+} from '../../features/customer/paymentApi'
 import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
-import { useCreatePaymentForConditionMutation } from '../../features/customer/paymentApi'
 import { useState } from 'react'
 const { Title, Text } = Typography
 const { Option } = Select
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
+
 export default function ServiceCase() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -33,14 +38,20 @@ export default function ServiceCase() {
     pageNumber: Number(pageNumber),
     currentStatus: currentStatus,
   })
+
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
   const [createPayment, { isLoading: isPaymentLoading }] =
     useCreatePaymentForConditionMutation()
 
-  // 2. Tạo state để quản lý loading cho từng dòng cụ thể
+  // 2. Tạo state để quản lý loading cho từng dòng cụ thể khi thanh toán
   const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
     null
   )
+
+  // States for image display
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false)
+  const [imageUrls, setImageUrls] = useState<string[]>([]) // Thay đổi thành mảng các URL
+  const [loadingImageFor, setLoadingImageFor] = useState<string | null>(null) // State để quản lý loading khi lấy ảnh
 
   // 3. Tạo hàm xử lý việc thanh toán
   const handlePayment = async (serviceCaseId: string) => {
@@ -66,6 +77,38 @@ export default function ServiceCase() {
       message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
     } finally {
       setLoadingPaymentFor(null) // Tắt loading sau khi hoàn tất
+    }
+  }
+
+  // Handle viewing image - đã cập nhật để lấy nhiều ảnh
+  const handleViewImage = async (serviceCaseId: string) => {
+    setLoadingImageFor(serviceCaseId) // Bật loading cho nút xem ảnh của dòng này
+    try {
+      // Gọi API getImage
+      const response = await fetch(
+        `http://localhost:5000/images/findForServiceCase/${serviceCaseId}`
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch image data.')
+      }
+      const data = await response.json()
+
+      // Kiểm tra nếu có dữ liệu và URL hợp lệ
+      if (data && data.length > 0) {
+        const fullImageUrls = data
+          .filter((item: any) => item.url)
+          .map((item: any) => `http://localhost:5000${item.url}`)
+        setImageUrls(fullImageUrls)
+        setIsImageModalVisible(true)
+      } else {
+        message.info('Không có hình ảnh nào cho hồ sơ này.')
+        setImageUrls([]) // Đảm bảo mảng rỗng nếu không có ảnh
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy ảnh:', error)
+      message.error('Không thể tải hình ảnh. Vui lòng thử lại.')
+    } finally {
+      setLoadingImageFor(null) // Tắt loading
     }
   }
 
@@ -123,14 +166,16 @@ export default function ServiceCase() {
       key: 'created_at',
       render: (date: string) => {
         const d = new Date(date)
-        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString('vi-VN')}`
+        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString(
+          'vi-VN'
+        )}`
       },
     },
     {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
-      render: (_, record) => {
+      render: (_, record: any) => {
         const collector = record.sampleCollector
 
         // Nếu không có thông tin nhân viên, hiển thị tag
@@ -160,7 +205,7 @@ export default function ServiceCase() {
       title: 'Bác sĩ phụ trách',
       key: 'doctor',
       dataIndex: ['doctor', 'name'],
-      render: (_, record) => {
+      render: (_, record: any) => {
         const doctor = record.doctor
 
         if (!doctor) {
@@ -225,11 +270,17 @@ export default function ServiceCase() {
       title: 'Chi tiết',
       key: 'action',
       render: (_: any, record: any) => (
-        <Button
-          onClick={() => navigate(`/service-case-customer/${record._id}`)}
-        >
-          Xem chi tiết
-        </Button>
+        <Space direction='vertical'>
+          <Button onClick={() => navigate(`/service-case-customer/${record._id}`)}>
+            Xem chi tiết
+          </Button>
+          {/* <Button
+            onClick={() => handleViewImage(record._id)}
+            loading={loadingImageFor === record._id} // Thêm loading state cho nút
+          >
+            Xem hình ảnh
+          </Button> */}
+        </Space>
       ),
     },
   ]
@@ -256,7 +307,7 @@ export default function ServiceCase() {
               }}
             >
               <Option value=''>Tất cả</Option>
-              {statusData?.map((status) => (
+              {statusData?.map((status: any) => (
                 <Option key={status._id} value={status._id}>
                   {status.testRequestStatus}
                 </Option>
@@ -294,6 +345,40 @@ export default function ServiceCase() {
           }}
         />
       </Card>
+
+      {/* Modal để hiển thị hình ảnh */}
+      <Modal
+        title='Hình ảnh hồ sơ dịch vụ'
+        open={isImageModalVisible}
+        onCancel={() => {
+          setIsImageModalVisible(false)
+          setImageUrls([]) // Reset mảng URL khi đóng modal
+        }}
+        footer={null} // Không hiển thị footer
+        centered
+        width={700} // Điều chỉnh chiều rộng modal
+      >
+        {imageUrls.length > 0 ? (
+          <Space direction='vertical' style={{ width: '100%' }}>
+            {imageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`Service Case Image ${index + 1}`}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  margin: '10px auto', // Khoảng cách giữa các ảnh
+                  border: '1px solid #eee', // Thêm border cho đẹp
+                }}
+              />
+            ))}
+          </Space>
+        ) : (
+          <p>Không có hình ảnh để hiển thị.</p>
+        )}
+      </Modal>
     </div>
   )
 }

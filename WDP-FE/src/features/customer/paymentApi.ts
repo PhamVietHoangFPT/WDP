@@ -91,6 +91,16 @@ export const paymentApi = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+
+    getImage: builder.query({
+      query: (serviceCaseId) => ({
+        url: `http://localhost:5000/images/findForServiceCase/${serviceCaseId}`,
+        method: 'GET',
+        params: {
+          serviceCaseId
+        }
+      }),
+    }),
   }),
 })
 
@@ -105,4 +115,5 @@ export const {
   useGetServiceCasesListQuery,
   useGetTestRequestHistoryQuery,
   useCreateConditionPaymentHistoryMutation,
+  useGetImageQuery
 } = paymentApi
