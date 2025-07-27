@@ -60,8 +60,8 @@ const StaffApi = apiSlice.injectEndpoints({
           params: {
             accountId,
             pageNumber,
-            pageSize
-          }
+            pageSize,
+          },
         }
       },
       // Cung cấp tag với id cụ thể để caching hiệu quả hơn
@@ -77,5 +77,5 @@ export const {
   useGetAllStatusForCustomerQuery,
   useGetCustomerServiceCaseByEmailQuery,
   useUpdateServiceCaseStatusForStaffMutation,
-  useGetServeServiceCaseQuery
+  useGetServeServiceCaseQuery,
 } = StaffApi

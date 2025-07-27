@@ -110,5 +110,5 @@ const deliveryStaffAPI = apiSlice.injectEndpoints({
 export const {
   useGetDeliveryStaffListQuery,
   useAddDeliveryStaffToServiceCaseMutation,
-  useGetServiceCaseNoDeliveryStaffListQuery
+  useGetServiceCaseNoDeliveryStaffListQuery,
 } = deliveryStaffAPI

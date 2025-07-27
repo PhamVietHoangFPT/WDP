@@ -168,7 +168,9 @@ export default function StaffManageTestTaker() {
             cancelText='Hủy'
           >
             <Tooltip title='Xử lý hồ sơ'>
-              <Button danger loading={isDeleting}>Đã xử lý hồ sơ</Button>
+              <Button danger loading={isDeleting}>
+                Đã xử lý hồ sơ
+              </Button>
             </Tooltip>
           </Popconfirm>
         </Space>

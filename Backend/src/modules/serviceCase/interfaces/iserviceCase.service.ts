@@ -20,6 +20,7 @@ export interface IServiceCaseService {
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
+    deliveryStaffId?: string,
   ): Promise<ServiceCaseResponseDto | null>
 
   updateCondition(

@@ -78,14 +78,19 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     isLoading: isLoadingServices,
     isFetching: isFetchingServices,
     error: serviceCasesError,
-  } = useGetServiceCaseNoDeliveryStaffListQuery({ // Đổi hook query
+  } = useGetServiceCaseNoDeliveryStaffListQuery({
+    // Đổi hook query
     pageNumber: 1,
     pageSize: 100,
     bookingDate: selectedBookingDate,
   })
 
-  const { data: deliveryStaffsData, isLoading: isLoadingDeliveryStaffs } = // Đổi từ doctorsData và isLoadingDoctors
-    useGetDeliveryStaffListQuery({ // Đổi hook query
+  const {
+    data: deliveryStaffsData,
+    isLoading: isLoadingDeliveryStaffs,
+  } = // Đổi từ doctorsData và isLoadingDoctors
+    useGetDeliveryStaffListQuery({
+      // Đổi hook query
       pageNumber: 1,
       pageSize: 100,
     })
@@ -93,7 +98,11 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
   const [addDeliveryStaffToServiceCase, { isLoading: isAssigning }] = // Đổi hook mutation
     useAddDeliveryStaffToServiceCaseMutation() // Đổi hook mutation
 
-  const handleAssignDeliveryStaff = (serviceCase: ServiceCase, deliveryStaff: DeliveryStaff) => { // Đổi tên hàm và param
+  const handleAssignDeliveryStaff = (
+    serviceCase: ServiceCase,
+    deliveryStaff: DeliveryStaff
+  ) => {
+    // Đổi tên hàm và param
     setSelectedServiceCase(serviceCase)
     setSelectedDeliveryStaff(deliveryStaff) // Đổi từ selectedDoctor
     setConfirmModalVisible(true)
@@ -103,7 +112,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     if (!selectedServiceCase || !selectedDeliveryStaff) return // Đổi từ selectedDoctor
 
     try {
-      await addDeliveryStaffToServiceCase({ // Đổi hook mutation
+      await addDeliveryStaffToServiceCase({
+        // Đổi hook mutation
         serviceCaseId: selectedServiceCase._id,
         deliveryStaffId: selectedDeliveryStaff._id, // Đổi từ doctorId
         data: {},
@@ -127,7 +137,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     setSelectedDeliveryStaff(null) // Đổi từ selectedDoctor
   }
 
-  const getDeliveryStaffMenu = (serviceCaseId: string) => { // Đổi tên hàm
+  const getDeliveryStaffMenu = (serviceCaseId: string) => {
+    // Đổi tên hàm
     const deliveryStaffs = deliveryStaffsData?.data || [] // Đổi từ doctorsData
 
     if (deliveryStaffs.length === 0) {
@@ -136,7 +147,11 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           items={[
             {
               key: 'no-delivery-staffs', // Đổi key
-              label: <span style={{ color: '#999' }}>Không có nhân viên giao hàng nào</span>, // Đổi label
+              label: (
+                <span style={{ color: '#999' }}>
+                  Không có nhân viên giao hàng nào
+                </span>
+              ), // Đổi label
               disabled: true,
             },
           ]}
@@ -146,7 +161,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
 
     return (
       <Menu
-        items={deliveryStaffs.map((deliveryStaff: DeliveryStaff) => ({ // Đổi từ Doctor sang DeliveryStaff
+        items={deliveryStaffs.map((deliveryStaff: DeliveryStaff) => ({
+          // Đổi từ Doctor sang DeliveryStaff
           key: deliveryStaff._id,
           label: (
             <div
@@ -184,7 +200,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             {record.account.email}
           </div>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            {record.account.phoneNumber} {/* Thay record.phoneNumber bằng record.account.phoneNumber */}
+            {record.account.phoneNumber}{' '}
+            {/* Thay record.phoneNumber bằng record.account.phoneNumber */}
           </div>
         </div>
       ),
@@ -200,7 +217,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       dataIndex: 'bookingDate',
       key: 'bookingDate',
       render: (date: string, record) => {
-        const formattedDate = new Date(date).toLocaleDateString('vi-VN');
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN')
         return (
           <>
             <div>{formattedDate}</div>
@@ -208,7 +225,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               ({record.bookingTime})
             </div>
           </>
-        );
+        )
       },
       sorter: (a, b) =>
         new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
@@ -265,8 +282,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao hàng</Title> {/* Đổi Title */}
-
+      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao hàng</Title>{' '}
+      {/* Đổi Title */}
       <div
         style={{
           marginBottom: 16,
@@ -300,7 +317,6 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           </span>
         </div>
       </div>
-
       {isLoadingServices ? (
         <div style={{ textAlign: 'center', padding: '50px 0' }}>
           <Spin size='large' />
@@ -310,10 +326,12 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           <div
             style={{ fontSize: '16px', color: '#666', marginBottom: '16px' }}
           >
-            Không có dịch vụ nào chưa được gán nhân viên giao hàng {/* Đổi text */}
+            Không có dịch vụ nào chưa được gán nhân viên giao hàng{' '}
+            {/* Đổi text */}
           </div>
           <div style={{ fontSize: '14px', color: '#999' }}>
-            Tất cả dịch vụ đã được phân công nhân viên giao hàng phụ trách {/* Đổi text */}
+            Tất cả dịch vụ đã được phân công nhân viên giao hàng phụ trách{' '}
+            {/* Đổi text */}
           </div>
         </div>
       ) : serviceCasesError ? (
@@ -333,7 +351,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             loading={isFetchingServices}
             scroll={{ x: 'max-content' }}
             locale={{
-              emptyText: 'Không có dịch vụ nào chưa được gán nhân viên giao hàng', // Đổi text
+              emptyText:
+                'Không có dịch vụ nào chưa được gán nhân viên giao hàng', // Đổi text
             }}
           />
 
@@ -357,7 +376,6 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           )}
         </>
       )}
-
       <Modal
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -379,7 +397,10 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             <div style={{ marginLeft: '16px', marginTop: '8px' }}>
               <div>• Khách hàng: {selectedServiceCase?.account.name}</div>
               <div>• Email: {selectedServiceCase?.account.email}</div>
-              <div>• Số điện thoại: {selectedServiceCase?.account.phoneNumber}</div> {/* Thay selectedServiceCase?.phoneNumber */}
+              <div>
+                • Số điện thoại: {selectedServiceCase?.account.phoneNumber}
+              </div>{' '}
+              {/* Thay selectedServiceCase?.phoneNumber */}
               <div>
                 • Ngày đặt:{' '}
                 {selectedServiceCase?.bookingDate
@@ -389,7 +410,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
                   : 'N/A'}
               </div>
               <div>
-                • Giờ hẹn: {selectedServiceCase?.bookingTime || 'N/A'} {/* Thêm bookingTime */}
+                • Giờ hẹn: {selectedServiceCase?.bookingTime || 'N/A'}{' '}
+                {/* Thêm bookingTime */}
               </div>
               <div>
                 • Tổng phí:{' '}
@@ -403,9 +425,14 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           <div style={{ marginBottom: '16px' }}>
             <strong>Nhân viên giao hàng được chọn:</strong> {/* Đổi text */}
             <div style={{ marginLeft: '16px', marginTop: '8px' }}>
-              <div>• Tên: {selectedDeliveryStaff?.name}</div> {/* Đổi từ selectedDoctor */}
-              <div>• Email: {selectedDeliveryStaff?.email}</div> {/* Đổi từ selectedDoctor */}
-              <div>• Số điện thoại: {selectedDeliveryStaff?.phoneNumber}</div> {/* Đổi từ selectedDoctor */}
+              <div>• Tên: {selectedDeliveryStaff?.name}</div>{' '}
+              {/* Đổi từ selectedDoctor */}
+              <div>• Email: {selectedDeliveryStaff?.email}</div>{' '}
+              {/* Đổi từ selectedDoctor */}
+              <div>
+                • Số điện thoại: {selectedDeliveryStaff?.phoneNumber}
+              </div>{' '}
+              {/* Đổi từ selectedDoctor */}
             </div>
           </div>
 
@@ -420,8 +447,9 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           >
             <strong style={{ color: '#d46b08' }}>⚠️ Lưu ý:</strong>
             <div style={{ color: '#d46b08', marginTop: '4px' }}>
-              Sau khi gán nhân viên giao hàng, dịch vụ sẽ được chuyển sang trạng thái "Đã có
-              nhân viên giao hàng phụ trách" và không thể hoàn tác. {/* Đổi text */}
+              Sau khi gán nhân viên giao hàng, dịch vụ sẽ được chuyển sang trạng
+              thái "Đã có nhân viên giao hàng phụ trách" và không thể hoàn tác.{' '}
+              {/* Đổi text */}
             </div>
           </div>
         </div>

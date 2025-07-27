@@ -137,17 +137,33 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
+    deliveryStaffId?: string,
   ): Promise<ServiceCaseDocument | null> {
+    // 1. Tạo một object rỗng để chứa các thay đổi
+    const updatePayload: any = {
+      currentStatus: new mongoose.Types.ObjectId(currentStatus),
+    }
+
+    // 2. Chỉ thêm các trường vào object nếu chúng có giá trị
+    if (staffId) {
+      updatePayload.staff = new mongoose.Types.ObjectId(staffId)
+    }
+    if (sampleCollectorId) {
+      updatePayload.sampleCollector = new mongoose.Types.ObjectId(
+        sampleCollectorId,
+      )
+    }
+    if (doctorId) {
+      updatePayload.doctor = new mongoose.Types.ObjectId(doctorId)
+    }
+    if (deliveryStaffId) {
+      updatePayload.deliveryStaff = new mongoose.Types.ObjectId(deliveryStaffId)
+    }
+
+    // 3. Thực hiện update với object đã được xây dựng linh hoạt
     const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
       id,
-      {
-        currentStatus: new mongoose.Types.ObjectId(currentStatus),
-        staff: staffId ? new mongoose.Types.ObjectId(staffId) : null,
-        sampleCollector: sampleCollectorId
-          ? new mongoose.Types.ObjectId(sampleCollectorId)
-          : null,
-        doctor: doctorId ? new mongoose.Types.ObjectId(doctorId) : null,
-      },
+      updatePayload,
       { new: true },
     )
 
