@@ -42,7 +42,7 @@ export class ManagerController {
   constructor(
     @Inject(IManagerService)
     private readonly managerService: IManagerService,
-  ) { }
+  ) {}
 
   @Get('sample-collectors')
   @ApiBearerAuth()
@@ -71,7 +71,6 @@ export class ManagerController {
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
-  @ApiQuery({ name: 'bookingDate', required: true, type: String })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Danh sách bác sĩ',
@@ -161,7 +160,9 @@ export class ManagerController {
   @Get('kit-shipments-without-delivery-staff')
   @ApiBearerAuth()
   @Roles(RoleEnum.MANAGER)
-  @ApiOperation({ summary: 'Lấy danh sách kitshipment chưa có nhân viên giao hàng' })
+  @ApiOperation({
+    summary: 'Lấy danh sách kitshipment chưa có nhân viên giao hàng',
+  })
   @ApiQuery({
     name: 'bookingDate',
     required: true,
@@ -218,6 +219,77 @@ export class ManagerController {
       statusCode: HttpStatus.OK,
       success: true,
       message: 'Danh sách hồ sơ dịch vụ chưa có bác sĩ',
+    }
+  }
+
+  @Get('service-cases-result-without-delivery-staff')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({
+    summary: 'Lấy danh sách hồ sơ dịch vụ chưa có nhân viên giao hàng',
+  })
+  @ApiQuery({
+    name: 'bookingDate',
+    required: true,
+    type: String,
+    description: 'Ngày đặt lịch ở định dạng YYYY-MM-DD',
+    example: '2025-07-22',
+  })
+  async getAllServiceCasesWithoutDeliveryStaff(
+    @Req() req: any,
+    @Query('bookingDate') bookingDate: string,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const facilityId = req.user.facility._id
+    const data =
+      await this.managerService.getAllServiceCasesWithoutDeliveryStaff(
+        facilityId,
+        bookingDate,
+      )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách hồ sơ dịch vụ chưa có nhân viên giao hàng',
+      data: data.map((item) => new ServiceCaseResponseDto(item)),
+    }
+  }
+
+  @Put('service-cases/:serviceCaseId/delivery-staff/:deliveryStaffId')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.MANAGER)
+  @ApiOperation({
+    summary: 'Gán nhân viên giao hàng cho hồ sơ dịch vụ',
+  })
+  @ApiParam({
+    name: 'serviceCaseId',
+    description: 'ID của hồ sơ dịch vụ',
+    required: true,
+  })
+  @ApiParam({
+    name: 'deliveryStaffId',
+    description: 'ID của nhân viên giao hàng',
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cập nhật thành công',
+    type: ApiResponseDto<ServiceCaseResponseDto>,
+  })
+  async assignDeliveryStaffToServiceCase(
+    @Param('serviceCaseId') serviceCaseId: string,
+    @Param('deliveryStaffId') deliveryStaffId: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
+    const userId = req.user.id
+    const data = await this.managerService.assignShipResultToDeliverStaff(
+      serviceCaseId,
+      deliveryStaffId,
+      userId,
+    )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Cập nhật thành công',
+      data: [data],
     }
   }
 
