@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
+import DeliveryStaffKitShipment from '../pages/DeliveryStaffHomePage/DeliveryStaffKitShipment'
 import StaffServiceCase from '../pages/Staff/StaffServiceCase'
 import StaffServiceCaseDetail from '../pages/Staff/StaffServiceCaseDetail'
 import StaffPaymentHistory from '../pages/Staff/PaymentHistory'
@@ -404,6 +405,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/delivery-staff',
         component: DeliveryStaffHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/delivery-staff/kit-shipment',
+        component: DeliveryStaffKitShipment,
         // role: ['admin'],
       },
     ],

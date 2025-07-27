@@ -7,8 +7,6 @@ import { KitShipment, KitShipmentDocument } from './schemas/kitShipment.schema'
 import { CreateKitShipmentDto } from './dto/createKitShipment.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
-import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
-import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
 @Injectable()
 export class KitShipmentRepository implements IKitShipmentRepository {
   constructor(
@@ -16,11 +14,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private kitShipmentModel: Model<KitShipmentDocument>,
     @Inject(IKitShipmentHistoryRepository)
     private kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
-    @Inject(ICaseMemberRepository)
-    private caseMemberRepository: ICaseMemberRepository,
-    @Inject(ITestTakerRepository)
-    private testTakerRepository: ITestTakerRepository,
-  ) {}
+  ) { }
   async findKitShipmentForDeliveryStaff(
     deliveryStaffId: string,
     currentStatus: string,
@@ -137,30 +131,57 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     kitShipmentId: string,
   ): Promise<string | null> {
     try {
-      // Tìm kitShipment bằng ID
-      const kitShipment = await this.kitShipmentModel
-        .findOne({ _id: kitShipmentId })
-        .exec()
+      // Sử dụng aggregate để join tất cả các collection cần thiết
+      const result = await this.kitShipmentModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(kitShipmentId)
+          }
+        },
+        {
+          $lookup: {
+            from: 'casemembers',
+            let: { caseMemberId: '$caseMember' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$_id', '$$caseMemberId']
+                  }
+                }
+              }
+            ],
+            as: 'caseMemberData'
+          }
+        },
+        { $unwind: { path: '$caseMemberData', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'bookings',
+            let: { bookingId: '$caseMemberData.booking' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$_id', '$$bookingId']
+                  }
+                }
+              }
+            ],
+            as: 'bookingData'
+          }
+        },
+        { $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            accountId: '$bookingData.account'
+          }
+        }
+      ]);
 
-      if (!kitShipment || !kitShipment.caseMember) {
-        return null
-      }
-
-      // Tìm caseMember bằng caseMemberId
-      const caseMember = await this.caseMemberRepository.findById(
-        kitShipment.caseMember.toString(),
-      )
-
-      if (!caseMember || !caseMember.testTaker) {
-        return null
-      }
-
-      // Tìm testTaker bằng testTakerId
-      const testTaker = await this.testTakerRepository.findById(
-        caseMember.testTaker.toString(),
-      )
-
-      return testTaker?.account.toString() || null
+      return result.length > 0 && result[0].accountId
+        ? result[0].accountId.toString()
+        : null;
     } catch (error) {
       // Xử lý lỗi (có thể log lỗi hoặc throw custom error)
       throw new Error(`Failed to get accountId: ${error.message}`)
