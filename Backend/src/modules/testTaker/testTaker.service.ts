@@ -76,6 +76,38 @@ export class TestTakerService implements ITestTakerService {
     }
   }
 
+  async findAllDeleted(
+    query: QueryTestTakerDto,
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponseDto<TestTakerResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+
+    try {
+      const [results, total] = await Promise.all([
+        this.testTakerRepository.findAllDeleted(query, skip, pageSize),
+        this.testTakerRepository.countAll(query),
+      ])
+
+      const totalPages = Math.ceil(total / pageSize)
+
+      const data = new PaginatedResponseDto<TestTakerResponseDto>({
+        data: results.map((item) => this.mapToResponseDto(item)),
+        pagination: {
+          totalItems: total,
+          totalPages,
+          currentPage: pageNumber,
+          pageSize,
+        },
+        statusCode: 200,
+      })
+      return data
+    } catch (error) {
+      this.logger.error('Error retrieving TestTakers:', error)
+      throw new InternalServerErrorException('Không thể truy vấn danh sách.')
+    }
+  }
+
   async findById(id: string): Promise<TestTakerResponseDto> {
     const found = await this.testTakerRepository.findById(id)
     if (!found) {

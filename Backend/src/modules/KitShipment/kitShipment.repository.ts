@@ -9,7 +9,6 @@ import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
 import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
 import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
-import { access } from 'node:fs'
 @Injectable()
 export class KitShipmentRepository implements IKitShipmentRepository {
   constructor(
@@ -21,10 +20,10 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private testTakerRepository: ITestTakerRepository,
-  ) { }
+  ) {}
   async findKitShipmentForDeliveryStaff(
     deliveryStaffId: string,
-    currentStatus: string
+    currentStatus: string,
   ): Promise<KitShipmentDocument[]> {
     return await this.kitShipmentModel.aggregate([
       // B1: Match deliveryStaff và currentStatus
@@ -122,7 +121,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
                 name: '$accounts.name',
                 email: '$accounts.email',
                 phoneNumber: '$accounts.phoneNumber',
-              }
+              },
             },
             address: {
               _id: '$addresses._id',
@@ -131,7 +130,7 @@ export class KitShipmentRepository implements IKitShipmentRepository {
           },
         },
       },
-    ]);
+    ])
   }
 
   async getAccountIdByKitShipmentId(

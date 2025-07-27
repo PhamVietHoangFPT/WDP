@@ -106,6 +106,43 @@ export class TestTakerController {
     }
   }
 
+  @Get('served')
+  @UseGuards(AuthGuard)
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
+  @ApiBearerAuth('bearer')
+  @ApiOperation({ summary: 'Lấy danh sách test takers đã phục vụ' })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'pageNumber', required: false, type: Number })
+  @ApiQuery({ name: 'accountId', required: true, type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: PaginatedResponseDto<TestTakerResponseDto>,
+  })
+  async findAllDeleted(
+    @Query(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        forbidNonWhitelisted: true,
+      }),
+    )
+    query: QueryTestTakerDto & PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<TestTakerResponseDto>> {
+    const { pageNumber = 1, pageSize = 10, ...filterQuery } = query
+    const result = await this.testTakerService.findAllDeleted(
+      filterQuery, // ✅ query điều kiện lọc
+      pageNumber,
+      pageSize,
+    )
+    return {
+      ...result,
+      data: result.data.map((item) => new TestTakerResponseDto(item)),
+      success: true,
+      message: 'Lấy danh sách test takers đã phục vụ thành công',
+      statusCode: HttpStatus.OK,
+    }
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)

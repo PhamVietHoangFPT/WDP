@@ -10,6 +10,11 @@ export interface ITestTakerService {
     pageNumber: number,
     pageSize: number,
   ): Promise<PaginatedResponseDto<TestTakerResponseDto>>
+  findAllDeleted(
+    query: QueryTestTakerDto,
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponseDto<TestTakerResponseDto>>
   findById(id: string): Promise<TestTakerResponseDto>
   remove(id: string): Promise<void>
 }

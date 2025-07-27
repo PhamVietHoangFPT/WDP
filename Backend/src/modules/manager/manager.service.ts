@@ -14,7 +14,7 @@ export class ManagerService implements IManagerService {
   constructor(
     @Inject(IManagerRepository)
     private readonly managerRepository: IManagerRepository,
-  ) { }
+  ) {}
 
   private mapToResponseDto(user: Account): AccountResponseDto {
     return new AccountResponseDto({
@@ -91,6 +91,23 @@ export class ManagerService implements IManagerService {
       await this.managerRepository.assignSampleCollectorToServiceCase(
         serviceCaseId,
         sampleCollectorId,
+        userId,
+      )
+    if (!serviceCase) {
+      throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
+    }
+    return new ServiceCaseResponseDto(serviceCase)
+  }
+
+  async assignShipResultToDeliverStaff(
+    serviceCaseId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto> {
+    const serviceCase =
+      await this.managerRepository.assignShipResultToDeliverStaff(
+        serviceCaseId,
+        deliveryStaffId,
         userId,
       )
     if (!serviceCase) {
@@ -178,5 +195,22 @@ export class ManagerService implements IManagerService {
       throw new NotFoundException('Không tìm thấy nhân viên giao hàng nào')
     }
     return deliveryStaff.map((item) => new AccountResponseDto(item))
+  }
+
+  async getAllServiceCasesWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<ServiceCaseResponseDto[]> {
+    const serviceCases =
+      await this.managerRepository.getAllServiceCasesWithoutDeliveryStaff(
+        facilityId,
+        bookingDate,
+      )
+    if (!serviceCases || serviceCases.length === 0) {
+      throw new NotFoundException(
+        'Không tìm thấy hồ sơ dịch vụ nào chưa có nhân viên giao hàng',
+      )
+    }
+    return serviceCases.map((item) => new ServiceCaseResponseDto(item))
   }
 }

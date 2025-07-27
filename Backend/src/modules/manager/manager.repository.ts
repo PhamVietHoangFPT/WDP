@@ -15,7 +15,10 @@ import { IRoleRepository } from '../role/interfaces/irole.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 import { Role, RoleDocument } from '../role/schemas/role.schema'
 import { hashPassword } from 'src/utils/hashPassword'
-import { KitShipment, KitShipmentDocument } from '../KitShipment/schemas/kitShipment.schema'
+import {
+  KitShipment,
+  KitShipmentDocument,
+} from '../KitShipment/schemas/kitShipment.schema'
 
 @Injectable()
 export class ManagerRepository implements IManagerRepository {
@@ -32,7 +35,7 @@ export class ManagerRepository implements IManagerRepository {
     private readonly roleModel: Model<RoleDocument>,
     @InjectModel(KitShipment.name)
     private readonly kitShipmentModel: Model<KitShipmentDocument>,
-  ) { }
+  ) {}
 
   async assignSampleCollectorToServiceCase(
     serviceCaseId: string,
@@ -52,6 +55,26 @@ export class ManagerRepository implements IManagerRepository {
     )
     return data
   }
+
+  async assignShipResultToDeliverStaff(
+    serviceCaseId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<ServiceCaseDocument> {
+    const deliveryStaffIdObjectId = new Types.ObjectId(deliveryStaffId)
+    const userIdObjectId = new Types.ObjectId(userId)
+    const data = await this.serviceCaseModel.findByIdAndUpdate(
+      serviceCaseId,
+      {
+        deliveryStaff: deliveryStaffIdObjectId,
+        updated_by: userIdObjectId,
+        updated_at: Date.now(),
+      },
+      { new: true },
+    )
+    return data
+  }
+
   async assignDeliveryStaffToKitShipment(
     kitShipmentId: string,
     deliveryStaffId: string,
@@ -405,6 +428,207 @@ export class ManagerRepository implements IManagerRepository {
     ])
   }
 
+  async getAllServiceCasesWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<ServiceCaseDocument[]> {
+    const bookingDateConvert = new Date(bookingDate)
+    const headOrderValue = 2 // Giá trị order để lọc
+    const tailOrderValue = 11 // Giá trị order để lọc
+    return await this.serviceCaseModel.aggregate([
+      {
+        $match: {
+          deliveryStaff: null,
+        },
+      },
+      {
+        $lookup: {
+          from: 'testrequeststatuses',
+          let: { statusId: '$currentStatus' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$statusId'],
+                },
+              },
+            },
+          ],
+          as: 'testRequestStatuses',
+        },
+      },
+      {
+        $unwind: {
+          path: '$testRequestStatuses',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          'testRequestStatuses.order': {
+            $gte: headOrderValue,
+            $lte: tailOrderValue,
+          }, // Lọc theo order >= 2 và <= 12
+        },
+      },
+      // Ket noi voi casemembers
+      {
+        $lookup: {
+          from: 'casemembers',
+          let: { caseMemberId: '$caseMember' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'caseMembers',
+        },
+      },
+      // Mo mang caseMembers
+      {
+        $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true },
+      },
+      // Tim booking trong caseMembers
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { bookingId: '$caseMembers.booking' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$bookingId'],
+                },
+              },
+            },
+          ],
+          as: 'bookings',
+        },
+      },
+      // Mo mang bookings
+      {
+        $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          'bookings.bookingDate': bookingDateConvert, // Lọc theo ngày đặt lịch
+        },
+      },
+      // Ket noi voi slots
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: { $toObjectId: '$bookings.slot' } }, // Chuyển đổi trực tiếp trong let
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slots',
+        },
+      },
+      // Mo mang slots
+      {
+        $unwind: { path: '$slots', preserveNullAndEmptyArrays: true },
+      },
+      // ket noi voi slottemplates
+      {
+        $lookup: {
+          from: 'slottemplates',
+          let: { slotTemplateId: '$slots.slotTemplate' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotTemplateId'],
+                },
+              },
+            },
+          ],
+          as: 'slotTemplates',
+        },
+      },
+      // Mo mang slotTemplates
+      {
+        $unwind: { path: '$slotTemplates', preserveNullAndEmptyArrays: true },
+      },
+      // ket noi voi facilities
+      {
+        $lookup: {
+          from: 'facilities',
+          let: { facilityId: '$slotTemplates.facility' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$facilityId'] },
+                    { $eq: ['$_id', new Types.ObjectId(facilityId)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'facilities',
+        },
+      },
+      // Mo bang facilities
+      {
+        $unwind: { path: '$facilities', preserveNullAndEmptyArrays: true },
+      },
+      // Ket noi voi accounts
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accounts',
+        },
+      },
+      // Mo mang accounts
+      {
+        $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true },
+      },
+      // Chon truong can thiet
+      {
+        $project: {
+          _id: 1,
+          totalFee: 1,
+          account: {
+            _id: '$accounts._id',
+            name: '$accounts.name',
+            email: '$accounts.email',
+            phoneNumber: '$accounts.phoneNumber',
+          },
+          currentStatus: '$testRequestStatuses.testRequestStatus',
+          bookingDate: '$bookings.bookingDate',
+          bookingTime: '$slots.startTime',
+          facility: {
+            _id: '$facilities._id',
+            name: '$facilities.facilityName',
+          },
+          created_at: 1,
+        },
+      },
+    ])
+  }
+
   async getAllKitShipmentWithoutDeliveryStaff(
     facilityId: string,
     bookingDate: string,
@@ -587,7 +811,6 @@ export class ManagerRepository implements IManagerRepository {
       },
     ])
   }
-
 
   async getAllServiceCaseWithoutDoctor(
     facilityId: string,
