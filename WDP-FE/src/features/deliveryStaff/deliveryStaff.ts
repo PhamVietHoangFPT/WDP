@@ -61,7 +61,7 @@ const deliveryAPI = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['delivery-staff'],
+      invalidatesTags: ['delivery-staff','sample-collector','staff'],
     }),
   }),
 
