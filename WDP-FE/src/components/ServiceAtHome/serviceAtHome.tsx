@@ -37,8 +37,8 @@ const ServiceAtHomeForm: React.FC = () => {
   const [testTakerCount, setTestTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
     accountId: accountId,
-    pageSize: null,
-    pageNumber: null,
+    pageSize: 100,
+    pageNumber: 1,
   })
   const { data: serviceDetail } =
     useGetServiceDetailQuery<ServiceDetailResponse>(id)
