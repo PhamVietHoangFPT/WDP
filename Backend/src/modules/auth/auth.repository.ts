@@ -42,6 +42,6 @@ export class AuthRepository implements IAuthRepository {
       .populate<{
         roleId: PopulatedRoleDetails
       }>({ path: 'role', select: 'role -_id' })
-      .populate({ path: 'facility', select: 'facilityName' })
+      .populate({ path: 'facility', select: 'facilityName address' })
   }
 }

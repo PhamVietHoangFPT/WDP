@@ -11,6 +11,12 @@ export interface IManagerService {
     userId: string,
   ): Promise<ServiceCaseResponseDto>
 
+  assignShipResultToDeliverStaff(
+    serviceCaseId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto>
+
   assignDeliveryStaffToKitShipment(
     kitShipmentId: string,
     deliveryStaffId: string,
@@ -18,6 +24,7 @@ export interface IManagerService {
   ): Promise<KitShipmentResponseDto>
 
   getAllSampleCollectors(facilityId: string): Promise<AccountResponseDto[]>
+
   getAllServiceCasesWithoutSampleCollector(
     facilityId: string,
     isAtHome: boolean,
@@ -34,18 +41,28 @@ export interface IManagerService {
     userId: string,
     facilityId: string,
   ): Promise<AccountResponseDto>
+
   managerGetAllRoles(): Promise<RoleDocument[]>
+
   getAllServiceCaseWithoutDoctor(
     facilityId: string,
     bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
+
   assignDoctorToServiceCase(
     serviceCaseId: string,
     doctorId: string,
     userId: string,
   ): Promise<ServiceCaseResponseDto>
+
   getAllDoctors(facilityId: string): Promise<AccountResponseDto[]>
+
   getAllDeliveryStaff(facilityId: string): Promise<AccountResponseDto[]>
+
+  getAllServiceCasesWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<ServiceCaseResponseDto[]>
 }
 
 export const IManagerService = Symbol('IManagerService')

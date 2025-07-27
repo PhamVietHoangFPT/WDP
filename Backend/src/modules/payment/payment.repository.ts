@@ -176,7 +176,7 @@ export class PaymentRepository implements IPaymentRepository {
             {
               $match: {
                 $expr: {
-                  $eq: ['$_id', '$$caseMemberId'],
+                  $eq: ['$caseMember', '$$caseMemberId'],
                 },
               },
             },

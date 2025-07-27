@@ -15,12 +15,20 @@ export interface ITestTakerRepository {
 
   countAll(query: QueryTestTakerDto): Promise<number>
 
+  countDeleted(query: QueryTestTakerDto): Promise<number>
+
   update(
     id: string,
     updateData: Partial<CreateTestTakerDto>,
   ): Promise<TestTaker | null>
 
   delete(id: string): Promise<boolean>
+
+  findAllDeleted(
+    query: QueryTestTakerDto,
+    skip: number,
+    limit: number,
+  ): Promise<TestTaker[]>
 }
 
 export const ITestTakerRepository = Symbol('ITestTakerRepository')

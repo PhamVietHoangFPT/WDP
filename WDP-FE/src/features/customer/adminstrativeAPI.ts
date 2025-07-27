@@ -94,6 +94,4 @@ export const adminstrativeAPI = apiSlice.injectEndpoints({
   }),
 })
 
-export const {
-  useGetAllFacilitiesDetailQuery,
-} = adminstrativeAPI
+export const { useGetAllFacilitiesDetailQuery } = adminstrativeAPI
