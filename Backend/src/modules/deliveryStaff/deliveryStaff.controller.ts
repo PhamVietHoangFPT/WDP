@@ -14,8 +14,8 @@ import { IDeliveryStaffService } from './interfaces/ideliveryStaff.service'
 import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
 import { AuthGuard } from 'src/common/guard/auth.guard'
 
-@Controller('deliveryStaff')
-@ApiTags('deliveryStaff')
+@Controller('delivery-staff')
+@ApiTags('delivery-staff')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 export class DeliveryStaffController {
