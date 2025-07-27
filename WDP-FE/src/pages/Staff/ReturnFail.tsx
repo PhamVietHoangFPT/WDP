@@ -15,33 +15,35 @@ import {
   Space,
   Tooltip,
   Empty,
+  Input, // Thêm Input để nhập email
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
-  useGetAllServiceCasesForDeliveryQuery,
+  // Thay đổi import từ deliveryStaff sang staff API nếu cần, hoặc đảm bảo deliveryStaff API có đủ hook
+  // Tuy nhiên, theo API mày cung cấp, useGetServiceCaseByEmailForStaffQuery nằm trong deliveryAPI
+  // nên không cần thay đổi import, chỉ cần thêm hook mới vào.
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
-} from '../../features/deliveryStaff/deliveryStaff'
+  useGetServiceCaseByEmailForStaffQuery, // Import hook mới
+} from '../../features/deliveryStaff/deliveryStaff' // Giữ nguyên path vì API mới được inject vào đây
+
 import {
-  UserOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  PhoneOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  EnvironmentOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  CarOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
+  UserOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  CarOutlined,
 } from '@ant-design/icons'
 
 const { Title } = Typography
 
+// Cập nhật interface ServiceCase để khớp với response từ getServiceCaseByEmailForStaff
+// Data trả về ít trường hơn
 interface ServiceCase {
   _id: string
-  caseMember: {
-    testTaker: string[]
-  }
+  created_at: string
+  currentStatus: string // currentStatus giờ là string thay vì object
   bookingDate: string
-  currentStatus: {
-    _id: string
-    testRequestStatus: string
-    order: number
-  }
+  // Bỏ các trường address, account, caseMember vì chúng không có trong response của getServiceCaseByEmailForStaff
 }
 
 interface ServiceCaseStatus {
@@ -52,8 +54,9 @@ interface ServiceCaseStatus {
 
 const ReturnFail: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined)
-  const [pageNumber, setPageNumber] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(10)
+  const [customerEmail, setCustomerEmail] = useState<string>('') // State mới cho email khách hàng
+  const [pageNumber, setPageNumber] = useState<number>(1) // PageNumber và PageSize có thể không cần thiết nếu API staff không hỗ trợ phân trang
+  const [pageSize, setPageSize] = useState<number>(10) // Tùy thuộc vào API getServiceCaseByEmailForStaff có hỗ trợ hay không
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
@@ -64,14 +67,14 @@ const ReturnFail: React.FC = () => {
     isSuccess: isStatusListSuccess,
   } = useGetServiceCaseStatusListForDeliveryQuery({ pageNumber: 1, pageSize: 100 })
 
-  // Đảm bảo status mặc định được set và query chính được kích hoạt
+  // Đảm bảo status mặc định là "Giao kết quả không thành công"
   useEffect(() => {
     if (isStatusListSuccess && statusListData?.data?.length && selectedStatus === undefined) {
-      const defaultStatus = statusListData.data.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Đã có kết quả')
-      if (defaultStatus) {
-        setSelectedStatus(defaultStatus._id)
+      const defaultFailStatus = statusListData.data.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Giao kết quả không thành công')
+      if (defaultFailStatus) {
+        setSelectedStatus(defaultFailStatus._id)
       } else if (statusListData.data.length > 0) {
-        // Fallback: nếu không có "Đã có kết quả", chọn cái đầu tiên
+        // Fallback: nếu không tìm thấy, chọn cái đầu tiên (có thể không mong muốn)
         setSelectedStatus(statusListData.data[0]._id)
       }
     }
@@ -80,26 +83,36 @@ const ReturnFail: React.FC = () => {
   const {
     data: serviceCasesData,
     isLoading: isLoadingCases,
-    isFetching: isFetchingCases, // Dùng isFetching để biết khi nào đang tải lại dữ liệu
+    isFetching: isFetchingCases,
     refetch,
-  } = useGetAllServiceCasesForDeliveryQuery(
-    { serviceCaseStatus: selectedStatus, pageNumber, pageSize },
-    { skip: selectedStatus === undefined } // Bỏ qua query nếu chưa có trạng thái được chọn
+  } = useGetServiceCaseByEmailForStaffQuery( // Sử dụng hook mới
+    {
+      serviceCaseStatus: selectedStatus as string, // Đảm bảo selectedStatus có giá trị
+      email: customerEmail, // Truyền email vào query
+    },
+    // Bỏ qua query nếu chưa có trạng thái được chọn HOẶC chưa có email
+    { skip: selectedStatus === undefined || !customerEmail }
   )
 
-  // Gọi refetch khi selectedStatus, pageNumber hoặc pageSize thay đổi
+  // Gọi refetch khi selectedStatus hoặc customerEmail thay đổi
   useEffect(() => {
-    // Chỉ refetch khi selectedStatus đã được định nghĩa (nghĩa là đã có giá trị ban đầu hoặc được người dùng chọn)
-    if (selectedStatus !== undefined) {
+    if (selectedStatus !== undefined && customerEmail) { // Chỉ refetch khi có đủ cả status và email
       refetch()
     }
-  }, [selectedStatus, pageNumber, pageSize, refetch])
+  }, [selectedStatus, customerEmail, refetch])
+
 
   const [updateStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusForDeliveryMutation()
 
-  const getAvailableNextStatuses = (statusId: string) => {
-    const current = statusListData?.data?.find((s: ServiceCaseStatus) => s._id === statusId)
-    return statusListData?.data?.filter((s: ServiceCaseStatus) => s.order > (current?.order || -1)) || []
+  const getAvailableNextStatuses = (currentStatusString: string) => {
+    // Tìm ID của trạng thái "Đã trả kết quả"
+    const deliveredStatus = statusListData?.data?.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả');
+
+    // Nếu trạng thái hiện tại là "Giao kết quả không thành công" và có trạng thái "Đã trả kết quả"
+    if (currentStatusString === 'Giao kết quả không thành công' && deliveredStatus) {
+      return [deliveredStatus];
+    }
+    return [];
   }
 
   const handleStatusUpdate = async () => {
@@ -116,6 +129,7 @@ const ReturnFail: React.FC = () => {
     }
   }
 
+  // Cập nhật Columns để phù hợp với dữ liệu trả về từ API getServiceCaseByEmailForStaff
   const columns: ColumnsType<ServiceCase> = [
     {
       title: 'Mã hồ sơ',
@@ -136,58 +150,64 @@ const ReturnFail: React.FC = () => {
       render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
     },
     {
-  title: 'Trạng thái hiện tại',
-  key: 'currentStatus',
-  width: 200,
-  render: (_, record) => {
-    let color = 'default'; // Mặc định
-    if (record.currentStatus?.testRequestStatus === 'Đã có kết quả') {
-      color = 'blue';
-    } else if (record.currentStatus?.testRequestStatus === 'Đã trả kết quả') {
-      color = 'green';
-    } else {
-      color = 'red'; // Các trạng thái còn lại là màu đỏ
-    }
-    return (
-      <Tag color={color}>
-        {record.currentStatus?.testRequestStatus || '—'}
-      </Tag>
-    );
-  },
-},
+      title: 'Trạng thái hiện tại',
+      key: 'currentStatus',
+      width: 200,
+      // currentStatus trong response của staff là string, không phải object
+      render: (_, record) => {
+        let color = 'default'; // Mặc định
+        if (record.currentStatus === 'Đã có kết quả') {
+          color = 'blue';
+        } else if (record.currentStatus === 'Đã trả kết quả') {
+          color = 'green';
+        } else {
+          color = 'red'; // Các trạng thái còn lại là màu đỏ
+        }
+        return (
+          <Tag color={color}>
+            {record.currentStatus || '—'}
+          </Tag>
+        );
+      },
+    },
+    // Bỏ cột "Thông tin khách hàng" và "Địa chỉ giao hàng" vì API staff không trả về
+    // Nếu muốn hiển thị, cần lấy thông tin này từ một nguồn khác hoặc API staff cần trả về.
+
     {
       title: 'Hành động',
       key: 'actions',
       width: 250,
       render: (_, record) => {
-        const isUpdatable = record.currentStatus?.testRequestStatus === 'Đã có kết quả'
-        const availableNextStatuses = getAvailableNextStatuses(record.currentStatus?._id)
+        // Lấy trạng thái "Đã trả kết quả" từ danh sách trạng thái đầy đủ
+        const deliveredStatus = statusListData?.data?.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả');
 
-        if (!isUpdatable || availableNextStatuses.length === 0) {
-          return <Tag color='default'>Không thể cập nhật</Tag>
+        // Chỉ cho phép cập nhật nếu trạng thái hiện tại là "Giao kết quả không thành công"
+        // và tìm thấy trạng thái "Đã trả kết quả"
+        const isUpdatable = record.currentStatus === 'Giao kết quả không thành công' && deliveredStatus;
+
+        if (!isUpdatable) {
+          return <Tag color='default'>Không thể cập nhật</Tag>;
         }
 
         return (
           <Space>
-            {availableNextStatuses.map((status: ServiceCaseStatus) => (
+            {/* Chỉ hiển thị nút "Đã trả kết quả" nếu đủ điều kiện */}
+            {deliveredStatus && (
               <Button
-                key={status._id}
+                key={deliveredStatus._id}
                 onClick={() => {
-                  setSelectedServiceCase(record)
-                  setNewStatusId(status._id)
-                  setUpdateModalVisible(true)
+                  setSelectedServiceCase(record);
+                  setNewStatusId(deliveredStatus._id); // Set newStatusId là ID của "Đã trả kết quả"
+                  setUpdateModalVisible(true);
                 }}
                 type='primary'
-                danger={
-                  status.testRequestStatus.toLowerCase().includes('không thành') ||
-                  status.testRequestStatus.toLowerCase().includes('hủy')
-                }
+                // Danger không áp dụng ở đây vì đây là trạng thái thành công
               >
-                {status.testRequestStatus}
+                Đã trả kết quả
               </Button>
-            ))}
+            )}
           </Space>
-        )
+        );
       },
     },
   ]
@@ -200,9 +220,16 @@ const ReturnFail: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý hồ sơ giao kết quả</Title>
+      <Title level={2}>Quản lý hồ sơ giao kết quả không thành công (Staff)</Title>
 
       <div style={{ marginBottom: 16 }}>
+        <Input
+          placeholder="Nhập Email khách hàng"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+          style={{ width: 300, marginRight: 16 }}
+        />
+        {/* Giữ Select Status nhưng giá trị mặc định sẽ là "Giao kết quả không thành công" */}
         <Select
           value={selectedStatus}
           onChange={(value) => {
@@ -232,10 +259,11 @@ const ReturnFail: React.FC = () => {
             dataSource={serviceCasesData.data}
             columns={columns}
             rowKey='_id'
+            // Pagination có thể không cần thiết hoặc cần điều chỉnh nếu API staff không trả về totalRecords
             pagination={{
               current: pageNumber,
               pageSize,
-              total: serviceCasesData?.totalRecords || 0,
+              // serviceCasesData?.totalRecords || 0, // Comment out hoặc điều chỉnh nếu API staff không có totalRecords
               onChange: (page, size) => {
                 setPageNumber(page)
                 setPageSize(size || 10)
@@ -243,7 +271,6 @@ const ReturnFail: React.FC = () => {
               showSizeChanger: true,
               pageSizeOptions: ['10', '20', '50', '100'],
             }}
-
             locale={{ emptyText: <Empty description="Không có dữ liệu" /> }}
           />
         ) : (
@@ -270,17 +297,13 @@ const ReturnFail: React.FC = () => {
         </p>
         <p>
           Trạng thái hiện tại:{' '}
-          <Tag color='blue'>{selectedServiceCase?.currentStatus?.testRequestStatus}</Tag>
+          {/* selectedServiceCase?.currentStatus giờ là string */}
+          <Tag color='red'>{selectedServiceCase?.currentStatus}</Tag>
         </p>
         <p>
           Trạng thái mới:{' '}
           <Tag
-            color={
-              statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus.toLowerCase().includes('không thành') ||
-              statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus.toLowerCase().includes('hủy')
-                ? 'red'
-                : 'green'
-            }
+            color={'green'} // Luôn là màu xanh vì chỉ chuyển sang "Đã trả kết quả"
           >
             {statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus}
           </Tag>

@@ -1,5 +1,6 @@
 import { current } from '@reduxjs/toolkit'
 import { apiSlice } from '../../apis/apiSlice'
+import type { useGetCustomerServiceCaseByEmailQuery } from '../staff/staffAPI'
 
 const deliveryAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -37,11 +38,27 @@ const deliveryAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['delivery-staff'],
     }),
+
+
+
+    getServiceCaseByEmailForStaff: builder.query({
+      query: ({
+        serviceCaseStatus, email,
+      }: {
+        serviceCaseStatus: string, email: string
+      }) => ({
+        url: `/staff/service-cases?email=${email}&currentStatus=${serviceCaseStatus}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['staff'],
+    }),
   }),
 })
 
 export const {
   useGetAllServiceCasesForDeliveryQuery,
   useGetServiceCaseStatusListForDeliveryQuery,
-  useUpdateServiceCaseStatusForDeliveryMutation
+  useUpdateServiceCaseStatusForDeliveryMutation,
+  useGetServiceCaseByEmailForStaffQuery
 } = deliveryAPI
