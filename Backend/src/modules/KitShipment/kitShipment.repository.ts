@@ -2,13 +2,14 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { IKitShipmentRepository } from './interfaces/ikitShipment.repository'
 import { InjectModel } from '@nestjs/mongoose'
-import mongoose, { Model } from 'mongoose'
+import mongoose, { Model, Types } from 'mongoose'
 import { KitShipment, KitShipmentDocument } from './schemas/kitShipment.schema'
 import { CreateKitShipmentDto } from './dto/createKitShipment.dto'
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
 import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
 import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
+import { access } from 'node:fs'
 @Injectable()
 export class KitShipmentRepository implements IKitShipmentRepository {
   constructor(
@@ -20,7 +21,118 @@ export class KitShipmentRepository implements IKitShipmentRepository {
     private caseMemberRepository: ICaseMemberRepository,
     @Inject(ITestTakerRepository)
     private testTakerRepository: ITestTakerRepository,
-  ) {}
+  ) { }
+  async findKitShipmentForDeliveryStaff(
+    deliveryStaffId: string,
+    currentStatus: string
+  ): Promise<KitShipmentDocument[]> {
+    return await this.kitShipmentModel.aggregate([
+      // B1: Match deliveryStaff và currentStatus
+      {
+        $match: {
+          deliveryStaff: new Types.ObjectId(deliveryStaffId),
+          currentStatus: new Types.ObjectId(currentStatus),
+        },
+      },
+      // B2: Debug - Kiểm tra dữ liệu ban đầu
+      // B3: Join caseMembers (thử với pipeline và let để debug)
+      {
+        $lookup: {
+          from: 'casemembers',
+          let: { caseMemberId: '$caseMember' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$caseMemberId'],
+                },
+              },
+            },
+          ],
+          as: 'caseMembers',
+        },
+      },
+      { $unwind: { path: '$caseMembers', preserveNullAndEmptyArrays: true } },
+      // B4: Join addresses
+      {
+        $lookup: {
+          from: 'addresses',
+          let: { addressId: '$caseMembers.address' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$addressId'],
+                },
+              },
+            },
+          ],
+          as: 'addresses',
+        },
+      },
+      { $unwind: { path: '$addresses', preserveNullAndEmptyArrays: true } },
+      // B6: Join bookings
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'caseMembers.booking',
+          foreignField: '_id',
+          as: 'bookings',
+        },
+      },
+      { $unwind: { path: '$bookings', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: { $toObjectId: '$bookings.slot' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$slotId'],
+                },
+              },
+            },
+          ],
+          as: 'slots',
+        },
+      },
+      { $unwind: { path: '$slots', preserveNullAndEmptyArrays: true } },
+      // B7: Join accounts
+      {
+        $lookup: {
+          from: 'accounts',
+          localField: 'bookings.account',
+          foreignField: '_id',
+          as: 'accounts',
+        },
+      },
+      { $unwind: { path: '$accounts', preserveNullAndEmptyArrays: true } },
+      // B8: Project kết quả
+      {
+        $project: {
+          _id: 1,
+          currentStatus: 1,
+          caseMember: {
+            _id: '$caseMembers._id',
+            booking: {
+              bookingDate: '$bookings.bookingDate',
+              bookingTime: '$slots.startTime',
+              account: {
+                name: '$accounts.name',
+                email: '$accounts.email',
+                phoneNumber: '$accounts.phoneNumber',
+              }
+            },
+            address: {
+              _id: '$addresses._id',
+              fullAddress: '$addresses.fullAddress',
+            },
+          },
+        },
+      },
+    ]);
+  }
 
   async getAccountIdByKitShipmentId(
     kitShipmentId: string,
@@ -90,9 +202,11 @@ export class KitShipmentRepository implements IKitShipmentRepository {
   async create(
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
+    currentStatus: string,
   ): Promise<KitShipmentDocument> {
     const newKitShipment = new this.kitShipmentModel({
       ...createKitShipmentDto,
+      currentStatus: new mongoose.Types.ObjectId(currentStatus),
       created_by: userId,
       created_at: new Date(),
     })

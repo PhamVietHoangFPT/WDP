@@ -27,7 +27,8 @@ export class KitShipmentService implements IKitShipmentService {
     private readonly kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
-  ) {}
+  ) { }
+
 
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
@@ -38,7 +39,16 @@ export class KitShipmentService implements IKitShipmentService {
       deleted_at: kitShipment.deleted_at,
     })
   }
-
+  async findKitShipmentForDeliveryStaff(deliveryStaffId: string, currentStatus: string): Promise<KitShipmentResponseDto[]> {
+    const kitShipments = await this.kitShipmentRepository.findKitShipmentForDeliveryStaff(deliveryStaffId, currentStatus)
+    if (!kitShipments || kitShipments.length === 0) {
+      throw new NotFoundException('Không tìm thấy kit shipment cho nhân viên giao hàng.')
+    }
+    const data = kitShipments.map((kitShipment) =>
+      this.mapToResponseDto(kitShipment),
+    )
+    return data
+  }
   async findKitShipmentById(id: string): Promise<KitShipmentResponseDto> {
     //this variable is used to check if the kitShipment already exists
     const existingKitShipment = await this.kitShipmentRepository.findById(id)
@@ -61,7 +71,7 @@ export class KitShipmentService implements IKitShipmentService {
     }
     if (
       existingKitShipment.currentStatus ===
-        updateKitShipmentDto.currentStatus &&
+      updateKitShipmentDto.currentStatus &&
       existingKitShipment.caseMember === updateKitShipmentDto.caseMember &&
       existingKitShipment.deliveryStaff === updateKitShipmentDto.deliveryStaff
     ) {
@@ -198,11 +208,13 @@ export class KitShipmentService implements IKitShipmentService {
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
   ): Promise<CreateKitShipmentDto> {
-    const newService = await this.kitShipmentRepository.create(userId, {
-      ...createKitShipmentDto,
-    })
     const kitShipmentStatus =
       await this.kitShipmentStatusRepository.findByName('Chờ thanh toán')
+    const newService = await this.kitShipmentRepository.create(userId, {
+      ...createKitShipmentDto,
+    },
+      kitShipmentStatus._id.toString(),
+    )
 
     if (!kitShipmentStatus) {
       throw new NotFoundException('Trạng thái vận chuyển không tồn tại.')

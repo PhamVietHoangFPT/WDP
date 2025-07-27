@@ -15,12 +15,14 @@ import { RoleModule } from '../role/role.module'
 import { Address, AddressSchema } from '../address/schemas/address.schema'
 import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
 import { Role, RoleSchema } from '../role/schemas/role.schema'
+import { KitShipment, KitShipmentSchema } from '../KitShipment/schemas/kitShipment.schema'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
       { name: ServiceCase.name, schema: ServiceCaseSchema },
+      { name: KitShipment.name, schema: KitShipmentSchema },
       { name: Address.name, schema: AddressSchema },
       { name: Role.name, schema: RoleSchema },
     ]),
