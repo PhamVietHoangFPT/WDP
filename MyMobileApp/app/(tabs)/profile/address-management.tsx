@@ -71,7 +71,7 @@ export default function AddressScreen() {
   const loadProvinces = async () => {
     try {
       const res = await getProvinceList({ pageNumber: 1, pageSize: 1000 });
-      setProvinces(res.data || []);
+      setProvinces(res || []);
     } catch (error) {
       Alert.alert("Lỗi", "Không tải được danh sách tỉnh/thành phố.");
     }
@@ -85,7 +85,7 @@ export default function AddressScreen() {
         pageSize: 1000,
         province_code: provinceCode,
       });
-      setWards(res.data || []);
+      setWards(res || []);
     } catch (error) {
       Alert.alert("Lỗi", "Không tải được danh sách phường/xã.");
     }

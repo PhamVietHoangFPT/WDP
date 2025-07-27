@@ -8,6 +8,7 @@ import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IBlogRepository } from '../blog/interfaces/iblog.repository'
 import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
 import { CreateImageResultDto } from './dto/createResult.dto'
+import { CreateServiceCaseImageDto } from './dto/createServiceCaseImage.dto'
 
 @Injectable()
 export class ImageUploadRepository implements IImageUploadRepository {
@@ -24,7 +25,7 @@ export class ImageUploadRepository implements IImageUploadRepository {
   ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
-      ...createImageDto,
+      result: createImageDto.result,
       url,
       created_by: createdByUser,
       created_at: new Date(),
@@ -39,7 +40,7 @@ export class ImageUploadRepository implements IImageUploadRepository {
   ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
-      ...createImageDto,
+      kitShipment: createImageDto.kitShipment,
       url,
       created_by: createdByUser,
       created_at: new Date(),
@@ -62,24 +63,57 @@ export class ImageUploadRepository implements IImageUploadRepository {
     return await newImage.save()
   }
 
+  async createImageForServiceCase(
+    url: string,
+    createImageDto: CreateServiceCaseImageDto,
+    userId: string,
+  ): Promise<ImageDocument> {
+    const createdByUser = new mongoose.Types.ObjectId(userId) as any
+    const newImage = new this.imageModel({
+      url,
+      serviceCase: createImageDto.serviceCase,
+      created_by: createdByUser,
+      created_at: new Date(),
+    })
+    return await newImage.save()
+  }
+
+  async findAllImageForServiceCase(
+    serviceCaseId: string,
+  ): Promise<ImageDocument[]> {
+    return await this.imageModel
+      .find({ serviceCase: serviceCaseId, deleted_at: null })
+      .lean()
+      .exec()
+  }
+
   async findById(id: string): Promise<ImageDocument | null> {
-    return await this.imageModel.findOne({ _id: id, deleted_at: null }).exec()
+    return await this.imageModel
+      .findOne({ _id: id, deleted_at: null })
+      .lean()
+      .exec()
   }
 
   async findAllImageForBlog(blogId: string): Promise<ImageDocument[]> {
-    return await this.imageModel.find({ blog: blogId, deleted_at: null }).exec()
+    return await this.imageModel
+      .find({ blog: blogId, deleted_at: null })
+      .lean()
+      .exec()
   }
+
   async findAllImageForKitShipment(
     kitShipmentId: string,
   ): Promise<ImageDocument[]> {
     return await this.imageModel
       .find({ kitShipment: kitShipmentId, deleted_at: null })
+      .lean()
       .exec()
   }
 
   async findAllImageForResult(resultId: string): Promise<ImageDocument[]> {
     return await this.imageModel
       .find({ result: resultId, deleted_at: null })
+      .lean()
       .exec()
   }
 
