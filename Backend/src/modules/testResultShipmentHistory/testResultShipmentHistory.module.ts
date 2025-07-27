@@ -4,14 +4,14 @@ import {
   TestResultShipmentHistory,
   TestResultShipmentHistorySchema,
 } from './schemas/TestResultShipmentHistory.schema'
-import { TestResultShipmentHistoryController } from './TestResultShipmentHistory.controller'
-import { ITestResultShipmentHistoryService } from './interfaces/iTestResultShipmentHistory.service'
-import { TestResultShipmentHistoryService } from './TestResultShipmentHistory.service'
-import { ITestResultShipmentHistoryRepository } from './interfaces/iTestResultShipmentHistory.repository'
-import { TestResultShipmentHistoryRepository } from './TestResultShipmentHistory.repository'
 import { AuthModule } from '../auth/auth.module'
 import { ShipmentStatusModule } from '../shipmentStatus/shipmentStatus.modules'
 import { TestResultShipmentModule } from '../testResultShipment/testResultShipment.module'
+import { TestResultShipmentHistoryController } from './testResultShipmentHistory.controller'
+import { ITestResultShipmentHistoryRepository } from './interfaces/itestResultShipmentHistory.repository'
+import { TestResultShipmentHistoryRepository } from './testResultShipmentHistory.repository'
+import { ITestResultShipmentHistoryService } from './interfaces/itestResultShipmentHistory.service'
+import { TestResultShipmentHistoryService } from './testResultShipmentHistory.service'
 
 @Module({
   imports: [
