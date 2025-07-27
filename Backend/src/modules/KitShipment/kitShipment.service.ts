@@ -29,6 +29,7 @@ export class KitShipmentService implements IKitShipmentService {
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
   ) { }
 
+
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
       _id: kitShipment._id,
@@ -38,7 +39,16 @@ export class KitShipmentService implements IKitShipmentService {
       deleted_at: kitShipment.deleted_at,
     })
   }
-
+  async findKitShipmentForDeliveryStaff(deliveryStaffId: string, currentStatus: string): Promise<KitShipmentResponseDto[]> {
+    const kitShipments = await this.kitShipmentRepository.findKitShipmentForDeliveryStaff(deliveryStaffId, currentStatus)
+    if (!kitShipments || kitShipments.length === 0) {
+      throw new NotFoundException('Không tìm thấy kit shipment cho nhân viên giao hàng.')
+    }
+    const data = kitShipments.map((kitShipment) =>
+      this.mapToResponseDto(kitShipment),
+    )
+    return data
+  }
   async findKitShipmentById(id: string): Promise<KitShipmentResponseDto> {
     //this variable is used to check if the kitShipment already exists
     const existingKitShipment = await this.kitShipmentRepository.findById(id)

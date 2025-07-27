@@ -95,7 +95,33 @@ export class KitShipmentController {
       userId,
     )
   }
-
+  @Get('shipper')
+  @Roles(RoleEnum.DELIVERY_STAFF)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Xem tất cả kit shipment' })
+  @ApiQuery({
+    name: 'currentStatus',
+    required: false,
+    type: String,
+    description: 'Trạng thái hiện tại của kit shipment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách kitshipment.',
+    type: PaginatedResponseDto<KitShipmentResponseDto>,
+  })
+  @ApiResponse({ status: HttpStatus.OK, type: [KitShipmentResponseDto] })
+  findAllForShipper(
+    @Query('currentStatus') currentStatus: string | null,
+    @Req() req: any,
+  ): Promise<KitShipmentResponseDto[]> {
+    const userId = req.user.id
+    return this.kitshipmentService.findKitShipmentForDeliveryStaff(
+      userId,
+      currentStatus,
+    )
+  }
   @Get(':id')
   @ApiOperation({ summary: 'Tìm kit shipment' })
   @ApiResponse({ status: HttpStatus.OK, type: KitShipmentResponseDto })

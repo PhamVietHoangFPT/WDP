@@ -3,7 +3,7 @@ import type { KitShipment } from "../../types/kitShipment"
 import type { DeliveryStaff } from "../../types/deliveryStaff"
 import { useAssignDeliveryStaffToKitShipmentMutation, useGetDeliveryStaffListQuery, useGetKitShipmentWithoutDeliveryStaffListQuery } from "../../features/manager/sampleCollectorAPI"
 import type { ColumnsType } from "antd/es/table"
-import { DatePicker, Table, Tag, Spin, message, Space, Dropdown, Menu, Button, Modal } from "antd"
+import { DatePicker, Table, Tag, Spin, message, Space, Dropdown, Button, Modal } from "antd"
 import { CalendarOutlined, DownOutlined, ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons"
 
 

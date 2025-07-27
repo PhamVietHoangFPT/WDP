@@ -37,7 +37,7 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
         },
       }),
       transformResponse: (res) => res,
-      providesTags: ['kit-shipments-without-delivery-staff'],
+      providesTags: ['kit-shippments'],
     }),
 
     getDeliveryStaffList: builder.query({
@@ -46,7 +46,7 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (res) => res,
-      providesTags: ['kit-shipments-without-delivery-staff'],
+      providesTags: ['kit-shippments'],
     }),
 
     assignDeliveryStaffToKitShipment: builder.mutation({
@@ -55,7 +55,7 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
         method: 'PUT',
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['kit-shipments-without-delivery-staff'],
+      invalidatesTags: ['kit-shippments'],
     }),
 
     addSampleCollectorToServiceCase: builder.mutation({

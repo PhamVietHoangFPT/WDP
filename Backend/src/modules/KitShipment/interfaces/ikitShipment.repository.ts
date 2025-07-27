@@ -35,7 +35,10 @@ export interface IKitShipmentRepository {
     filter: Record<string, unknown>,
   ): mongoose.Query<KitShipment[], KitShipment>
   countDocuments(filter: Record<string, unknown>): Promise<number>
-
+  findKitShipmentForDeliveryStaff(
+    deliveryStaffId: string,
+    currentStatus: string,
+  ): Promise<KitShipmentDocument[]>
   updateCurrentStatus(
     id: string,
     currentStatus: string,
