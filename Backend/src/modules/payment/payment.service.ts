@@ -76,8 +76,9 @@ export class PaymentService implements IPaymentService {
       const dataSend = await this.paymentRepository.updateStatusForKitShipment(
         originalServiceCaseId,
       )
-      const kitShipmentId = dataSend.kitShipmentId
-      const customerId = dataSend.customerId
+      console.log(dataSend)
+      const kitShipmentId = dataSend[0].kitShipmentId
+      const customerId = dataSend[0].account
       let kitShipmentStatus: any = null
       if (
         paymentData.transactionStatus !== '00' &&
