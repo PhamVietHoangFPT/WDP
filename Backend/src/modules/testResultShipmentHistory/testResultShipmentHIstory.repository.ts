@@ -5,7 +5,7 @@ import {
   TestResultShipmentHistory,
   TestResultShipmentHistoryDocument,
 } from './schemas/TestResultShipmentHistory.schema'
-import { ITestResultShipmentHistoryRepository } from './interfaces/iTestResultShipmentHistory.repository'
+import { ITestResultShipmentHistoryRepository } from './interfaces/itestResultShipmentHistory.repository'
 
 @Injectable()
 export class TestResultShipmentHistoryRepository
@@ -27,7 +27,7 @@ export class TestResultShipmentHistoryRepository
         shipmentStatus: new mongoose.Types.ObjectId(shipmentStatus),
         testResultShipment: new mongoose.Types.ObjectId(testResultShipment),
         account: new mongoose.Types.ObjectId(accountId),
-        shipperId: new mongoose.Types.ObjectId(accountId),
+        shipperId: new mongoose.Types.ObjectId(shipperId),
         createdAt: new Date(),
       })
     return createdTestResultShipmentHistory.save()
