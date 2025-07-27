@@ -15,6 +15,9 @@ import { KitShipmentService } from './kitShipment.service'
 import { KitShipmentHistoryModule } from '../kitShipmentHistory/kitShipmentHistory.module'
 import { TestTakerModule } from '../testTaker/testTaker.module'
 import { BookingModule } from '../booking/booking.module'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+import { ServiceCase } from '../serviceCase/schemas/serviceCase.schema'
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 
 @Module({
   imports: [
@@ -29,7 +32,10 @@ import { BookingModule } from '../booking/booking.module'
     SamplingKitInventoryModule,
     KitShipmentHistoryModule,
     TestTakerModule,
-    BookingModule
+    BookingModule,
+    TestRequestStatusModule,
+    ServiceCaseModule, // Ensure ServiceCase is imported if needed in the repository/service
+
   ],
   controllers: [KitShipmentController],
   providers: [
