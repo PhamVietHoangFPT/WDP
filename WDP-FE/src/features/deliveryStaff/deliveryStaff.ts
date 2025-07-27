@@ -53,12 +53,25 @@ const deliveryAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['staff'],
     }),
+
+    createServiceCaseImage: builder.mutation({
+      query: (data) => ({
+        url: '/images/uploadForServiceCase',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['delivery-staff'],
+    }),
   }),
+
+  
 })
 
 export const {
   useGetAllServiceCasesForDeliveryQuery,
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
-  useGetServiceCaseByEmailForStaffQuery
+  useGetServiceCaseByEmailForStaffQuery,
+  useCreateServiceCaseImageMutation
 } = deliveryAPI

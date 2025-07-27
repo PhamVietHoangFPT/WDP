@@ -15,19 +15,24 @@ import {
   Space,
   Tooltip,
   Empty,
+  Upload, // Import Upload component từ Ant Design
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
   useGetAllServiceCasesForDeliveryQuery,
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
+  useCreateServiceCaseImageMutation // Import hook mới cho API upload ảnh
 } from '../../features/deliveryStaff/deliveryStaff'
 import {
   UserOutlined,
   PhoneOutlined,
   EnvironmentOutlined,
   CarOutlined,
+  UploadOutlined, // Icon cho nút upload
 } from '@ant-design/icons'
+import type { UploadFile } from 'antd/lib/upload/interface'
+
 
 const { Title } = Typography
 
@@ -72,6 +77,12 @@ const DeliveryStaffServiceCase: React.FC = () => {
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
 
+  // State cho modal upload ảnh
+  const [uploadModalVisible, setUploadModalVisible] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadingServiceCaseId, setUploadingServiceCaseId] = useState<string | null>(null)
+
+
   const {
     data: statusListData,
     isLoading: isLoadingStatus,
@@ -110,9 +121,12 @@ const DeliveryStaffServiceCase: React.FC = () => {
   }, [selectedStatus, pageNumber, pageSize, refetch])
 
   const [updateStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusForDeliveryMutation()
+  const [createServiceCaseImage, { isLoading: isUploadingImage }] = useCreateServiceCaseImageMutation()
+
 
   const getAvailableNextStatuses = (statusId: string) => {
     const current = statusListData?.data?.find((s: ServiceCaseStatus) => s._id === statusId)
+    // Chỉ trả về các trạng thái có order lớn hơn trạng thái hiện tại
     return statusListData?.data?.filter((s: ServiceCaseStatus) => s.order > (current?.order || -1)) || []
   }
 
@@ -127,6 +141,29 @@ const DeliveryStaffServiceCase: React.FC = () => {
       refetch() // Refetch dữ liệu sau khi cập nhật thành công
     } catch (error: any) {
       message.error(error?.data?.message || 'Cập nhật trạng thái thất bại')
+    }
+  }
+
+  const handleFileUpload = async () => {
+    if (!selectedFile || !uploadingServiceCaseId) {
+      message.error('Vui lòng chọn một file và đảm bảo có Service Case ID.')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('serviceCase', uploadingServiceCaseId) // Thêm serviceCaseId vào formData
+    formData.append('file', selectedFile) // Thêm file ảnh vào formData
+
+    try {
+      await createServiceCaseImage(formData).unwrap()
+      message.success('Tải ảnh lên thành công!')
+      setUploadModalVisible(false)
+      setSelectedFile(null)
+      setUploadingServiceCaseId(null)
+      refetch() // Refetch dữ liệu sau khi upload thành công
+    } catch (error: any) {
+      message.error(error?.data?.message || 'Tải ảnh lên thất bại.')
+      console.error('Upload failed:', error)
     }
   }
 
@@ -209,37 +246,71 @@ const DeliveryStaffServiceCase: React.FC = () => {
       key: 'actions',
       width: 250,
       render: (_, record) => {
-        const isUpdatable = record.currentStatus?.testRequestStatus === 'Đã có kết quả'
-        const availableNextStatuses = getAvailableNextStatuses(record.currentStatus?._id)
+        // Chỉ cho phép cập nhật nếu trạng thái hiện tại là 'Đã có kết quả'
+        const isUpdatable = record.currentStatus?.testRequestStatus === 'Đã có kết quả';
 
-        if (!isUpdatable || availableNextStatuses.length === 0) {
-          return <Tag color='default'>Không thể cập nhật</Tag>
-        }
+        // Lấy các trạng thái tiếp theo có thể cập nhật
+        const availableNextStatuses = getAvailableNextStatuses(record.currentStatus?._id);
+
+        // Tìm trạng thái "Đã trả kết quả" (thành công)
+        const successStatus = availableNextStatuses.find(s => s.testRequestStatus === 'Đã trả kết quả');
+        // Tìm trạng thái "Giao kết quả không thành công" hoặc "Hủy" (thất bại)
+        const failureStatus = availableNextStatuses.find(s =>
+          s.testRequestStatus.toLowerCase().includes('không thành công') ||
+          s.testRequestStatus.toLowerCase().includes('hủy')
+        );
 
         return (
-          <Space>
-            {availableNextStatuses.map((status: ServiceCaseStatus) => (
-              <Button
-                key={status._id}
-                onClick={() => {
-                  setSelectedServiceCase(record)
-                  setNewStatusId(status._id)
-                  setUpdateModalVisible(true)
-                }}
-                type='primary'
-                danger={
-                  status.testRequestStatus.toLowerCase().includes('không thành') ||
-                  status.testRequestStatus.toLowerCase().includes('hủy')
-                }
-              >
-                {status.testRequestStatus}
-              </Button>
-            ))}
+          <Space wrap> {/* Dùng Space wrap để các nút tự xuống dòng nếu không đủ chỗ */}
+            {isUpdatable && (
+              <>
+                {successStatus && (
+                  <Button
+                    key={successStatus._id}
+                    onClick={() => {
+                      setSelectedServiceCase(record);
+                      setNewStatusId(successStatus._id);
+                      setUpdateModalVisible(true);
+                    }}
+                    type='primary'
+                  >
+                    Thành công
+                  </Button>
+                )}
+                {failureStatus && (
+                  <Button
+                    key={failureStatus._id}
+                    onClick={() => {
+                      setSelectedServiceCase(record);
+                      setNewStatusId(failureStatus._id);
+                      setUpdateModalVisible(true);
+                    }}
+                    type='primary'
+                    danger // Nút thất bại thường có màu đỏ
+                  >
+                    Thất bại
+                  </Button>
+                )}
+                {/* Nút Upload ảnh */}
+                <Button
+                  key="upload-image"
+                  onClick={() => {
+                    setUploadingServiceCaseId(record._id); // Lưu ID của service case hiện tại
+                    setUploadModalVisible(true); // Mở modal upload
+                  }}
+                  icon={<UploadOutlined />}
+                  style={{ backgroundColor: '#28a745', borderColor: '#28a745', color: 'white' }} // Màu xanh lá cây
+                >
+                  
+                </Button>
+              </>
+            )}
+            {!isUpdatable && <Tag color='default'>Không thể cập nhật</Tag>}
           </Space>
-        )
+        );
       },
     },
-  ]
+  ];
 
   // === LOGIC QUAN TRỌNG ĐỂ XỬ LÝ HIỂN THỊ DỮ LIỆU VÀ TRẠNG THÁI TẢI ===
   // Xác định xem có đang tải dữ liệu hay không (bao gồm cả tải lần đầu và refetch)
@@ -301,6 +372,7 @@ const DeliveryStaffServiceCase: React.FC = () => {
         )
       )}
 
+      {/* Modal xác nhận cập nhật trạng thái */}
       <Modal
         title='Xác nhận cập nhật trạng thái'
         open={updateModalVisible}
@@ -334,6 +406,35 @@ const DeliveryStaffServiceCase: React.FC = () => {
             {statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus}
           </Tag>
         </p>
+      </Modal>
+
+      {/* Modal Upload ảnh */}
+      <Modal
+        title={`Upload ảnh cho hồ sơ: ${uploadingServiceCaseId ? uploadingServiceCaseId.substring(0, 8) + '...' : ''}`}
+        open={uploadModalVisible}
+        onOk={handleFileUpload}
+        confirmLoading={isUploadingImage}
+        onCancel={() => {
+          setUploadModalVisible(false)
+          setSelectedFile(null)
+          setUploadingServiceCaseId(null)
+        }}
+        okText='Tải lên'
+        cancelText='Hủy'
+      >
+        <p>Chọn ảnh bạn muốn tải lên cho hồ sơ này:</p>
+        <input
+          type="file"
+          accept="image/*" // Chỉ cho phép chọn file ảnh
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              setSelectedFile(e.target.files[0])
+            } else {
+              setSelectedFile(null)
+            }
+          }}
+        />
+        {selectedFile && <p>Đã chọn file: <strong>{selectedFile.name}</strong></p>}
       </Modal>
     </div>
   )
