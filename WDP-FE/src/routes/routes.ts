@@ -2,6 +2,8 @@ import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
 import StaffServiceCase from '../pages/Staff/StaffServiceCase'
 import StaffServiceCaseDetail from '../pages/Staff/StaffServiceCaseDetail'
+import StaffPaymentHistory from '../pages/Staff/PaymentHistory'
+import StaffPaymentHistoryDetail from '../pages/Staff/PaymentDetail'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -475,6 +477,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/service-case-customer/:id',
         component: StaffServiceCaseDetail,
+      },
+      {
+        path: '/staff/payment-history',
+        component: StaffPaymentHistory,
+      },
+      {
+        path: '/staff/payment-history/:id',
+        component: StaffPaymentHistoryDetail,
       },
     ],
   },

@@ -97,10 +97,19 @@ export const SideBar = () => {
         {
           key: 'staff/service-case',
           icon: <TeamOutlined />,
-          label: 'Đăng ký dịch vụ hành chính',
+          label: 'Lịch sử trường hợp dịch vụ',
           onClick: () =>
             navigate(
               '/staff/service-case-customer?pageNumber=1&pageSize=5'
+            ),
+        },
+        {
+          key: 'staff/service-case',
+          icon: <TeamOutlined />,
+          label: 'Lịch sử thanh toán',
+          onClick: () =>
+            navigate(
+              '/staff/payment-history?pageNumber=1&pageSize=5'
             ),
         },
       ],
