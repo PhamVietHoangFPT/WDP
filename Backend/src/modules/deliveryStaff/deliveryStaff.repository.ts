@@ -26,6 +26,28 @@ export class DeliveryStaffRepository implements IDeliveryStaffRepository {
           deliveryStaff: new Types.ObjectId(deliveryStaffId),
         },
       },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accountDetails',
+        },
+      },
+      {
+        $unwind: {
+          path: '$accountDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       // Mo bang testRequestStatuses
       {
         $lookup: {
@@ -229,6 +251,11 @@ export class DeliveryStaffRepository implements IDeliveryStaffRepository {
             _id: '$addresses._id',
             fullAddress: '$addresses.fullAddress',
             location: '$addresses.location',
+          },
+          account: {
+            _id: '$accountDetails._id',
+            name: '$accountDetails.name',
+            phoneNumber: '$accountDetails.phoneNumber',
           },
           bookingDate: '$bookings.bookingDate',
           timeReturn: '$timeReturns.timeReturn',
