@@ -256,6 +256,7 @@ export class DeliveryStaffRepository implements IDeliveryStaffRepository {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',
             phoneNumber: '$accountDetails.phoneNumber',
+            email: '$accountDetails.email',
           },
           bookingDate: '$bookings.bookingDate',
           timeReturn: '$timeReturns.timeReturn',
