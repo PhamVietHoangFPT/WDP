@@ -41,6 +41,7 @@ import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHis
 import { AdminModule } from './modules/admin/admin.module'
 import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipmentHistory.module'
 import { DashboardModule } from './modules/dashboard/dashboard.module'
+import { DeliveryStaffModule } from './modules/deliveryStaff/deliveryStaff.module'
 @Module({
   imports: [
     databaseConfig,
@@ -86,6 +87,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module'
     AdminModule,
     KitShipmentHistoryModule,
     DashboardModule,
+    DeliveryStaffModule,
   ],
   controllers: [AppController],
   providers: [AppService],
