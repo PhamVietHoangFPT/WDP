@@ -76,6 +76,26 @@ export const kitShipmentApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['kit-shippments'],
     }),
+
+    getKitShipmentForShipper: builder.query({
+      query: ({ currentStatus }) => ({
+        url: '/kit-shipment/shipper',
+        method: 'GET',
+        params: {
+          currentStatus,
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['kit-shippments'],
+    }),
+    getKitShipmentStatus: builder.query({
+      query: () => ({
+        url: '/kit-shipment-status',
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['kit-shippments-status'],
+    }),
   }),
 })
 
@@ -87,4 +107,6 @@ export const {
   useUpdateKitShipmentMutation,
   useDeleteKitShipmentMutation,
   useUpdateKitShipmentStatusMutation,
+  useGetKitShipmentForShipperQuery,
+  useGetKitShipmentStatusQuery
 } = kitShipmentApi

@@ -16,7 +16,7 @@ export class BookingRepository implements IBookingRepository {
     private bookingModel: Model<BookingDocument>,
     @Inject(ISlotRepository)
     private slotRepository: ISlotRepository,
-  ) {}
+  ) { }
 
   async create(
     createBookingDto: CreateBookingDto,
@@ -39,7 +39,11 @@ export class BookingRepository implements IBookingRepository {
       .populate({ path: 'slot', select: 'startTime endTime' })
       .exec()
   }
-
+  async findOnlyById(id: string): Promise<BookingDocument | null> {
+    return this.bookingModel
+      .findOne({ _id: id })
+      .exec()
+  }
   async findAll(userId: string): Promise<BookingDocument[]> {
     return this.bookingModel
       .find({ account: userId })

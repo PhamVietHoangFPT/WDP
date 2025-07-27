@@ -14,6 +14,7 @@ import { IKitShipmentService } from './interfaces/ikitShipment.service'
 import { KitShipmentService } from './kitShipment.service'
 import { KitShipmentHistoryModule } from '../kitShipmentHistory/kitShipmentHistory.module'
 import { TestTakerModule } from '../testTaker/testTaker.module'
+import { BookingModule } from '../booking/booking.module'
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
     SamplingKitInventoryModule,
     KitShipmentHistoryModule,
     TestTakerModule,
+    BookingModule
   ],
   controllers: [KitShipmentController],
   providers: [
@@ -42,4 +44,4 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
   ],
   exports: [IKitShipmentRepository, IKitShipmentService],
 })
-export class KitShipmentModule {}
+export class KitShipmentModule { }

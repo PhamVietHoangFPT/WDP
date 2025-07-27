@@ -119,7 +119,7 @@ export class KitShipmentService implements IKitShipmentService {
     const customerId =
       await this.kitShipmentRepository.getAccountIdByKitShipmentId(id)
     if (newKitShipmentStatusOrder - oldKitShipmentStatusOrder > 1) {
-      if (newKitShipmentStatusOrder === 4 && oldKitShipmentStatusOrder === 2) {
+      if (newKitShipmentStatusOrder === 6) {
         updatedKitShipment =
           await this.kitShipmentRepository.updateCurrentStatus(
             id,
