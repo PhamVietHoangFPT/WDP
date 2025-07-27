@@ -12,6 +12,7 @@ import {
   // Thêm các icon khác nếu cần cho các mục menu khác của Delivery
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
+import type { UserData } from '../../../types/auth'
 
 const { Sider } = Layout
 const { Search } = Input
@@ -23,7 +24,7 @@ export const SideBar = () => {
 
   // Lấy userData từ cookie và decode nó
   const userDataString = Cookies.get('userData')
-  let userData = {}
+  let userData: UserData | undefined
   if (userDataString) {
     try {
       // Decode URI component trước khi parse JSON
@@ -63,6 +64,12 @@ export const SideBar = () => {
       icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
       label: 'Quản trị',
       onClick: () => navigate('delivery-staff'),
+    },
+    {
+      key: 'delivery-staff/kit-shipment', // Đảm bảo key khớp với path
+      icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
+      label: 'Giao hàng bộ kit',
+      onClick: () => navigate('delivery-staff/kit-shipment'),
     },
     // Thêm các mục menu khác của Delivery vào đây nếu có
   ]

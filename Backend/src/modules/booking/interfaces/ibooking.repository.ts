@@ -11,6 +11,7 @@ export interface IBookingRepository {
     userId: string,
   ): Promise<BookingDocument>
   findById(id: string, userId: string): Promise<BookingDocument | null>
+  findOnlyById(id: string): Promise<BookingDocument | null>
   findAll(userId: string): Promise<BookingDocument[]>
   update(
     id: string,

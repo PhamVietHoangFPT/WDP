@@ -4,6 +4,7 @@ import StaffGetServiceCaseByCustomer from '../pages/StaffGetServiceCaseByCustome
 import AdminManagerList from '../pages/AdminManagerList/AdminManagerList'
 import FacilitiesWithManager from '../pages/FacilitiesWithManager/FacilitiesWithManager'
 import AdminstrativeServices from '../components/AdminstrativeServices/AdminstrativeServices'
+import DeliveryStaffKitShipment from '../pages/DeliveryStaffHomePage/DeliveryStaffKitShipment'
 
 // Các layout này được export dưới dạng named export { LayoutName }
 const AdminLayout = lazy(() =>
@@ -383,6 +384,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/delivery-staff',
         component: DeliveryStaffHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/delivery-staff/kit-shipment',
+        component: DeliveryStaffKitShipment,
         // role: ['admin'],
       },
     ],
