@@ -79,6 +79,12 @@ export const SideBar = () => {
       onClick: () => navigate('manager/service-cases-without-doctor'),
     },
     {
+      key: 'manager/service-cases-without-delivery-staff',
+      icon: <UnorderedListOutlined />,
+      label: 'Dịch vụ có chưa nhân viên giao hàng ',
+      onClick: () => navigate('manager/service-cases-without-delivery-staff'),
+    },
+    {
       key: 'manager/kit-shipment-without-delivery-staff',
       icon: <UnorderedListOutlined />,
       label: 'Quản trị dịch vụ tự lấy mẫu tại nhà',

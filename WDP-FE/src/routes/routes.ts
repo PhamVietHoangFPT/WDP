@@ -5,6 +5,7 @@ import StaffServiceCaseDetail from '../pages/Staff/StaffServiceCaseDetail'
 import StaffPaymentHistory from '../pages/Staff/PaymentHistory'
 import StaffPaymentHistoryDetail from '../pages/Staff/PaymentDetail'
 import StaffServeServiceCase from '../pages/Staff/StaffServeServiceCase'
+import ManagerServiceCaseWithoutDelivery from '../pages/ManagerServiceCaseWithoutDelivery/ManagerServiceCaseWithoutDelivery'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -396,6 +397,10 @@ const routes: LayoutRoute[] = [
       {
         path: 'manager/kit-shipment-without-delivery-staff',
         component: ManagerKitShipmentPage,
+      },
+      {
+        path: 'manager/service-cases-without-delivery-staff',
+        component: ManagerServiceCaseWithoutDelivery,
       },
     ],
   },
