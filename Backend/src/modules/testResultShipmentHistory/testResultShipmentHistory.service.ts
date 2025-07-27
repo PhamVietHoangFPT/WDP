@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
-import { ITestResultShipmentHistoryRepository } from './interfaces/iTestResultShipmentHistory.repository'
-import { ITestResultShipmentHistoryService } from './interfaces/iTestResultShipmentHistory.service'
+import { ITestResultShipmentHistoryService } from './interfaces/itestResultShipmentHistory.service'
+import { ITestResultShipmentHistoryRepository } from './interfaces/itestResultShipmentHistory.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { TestResultShipmentHistoryDocument } from './schemas/TestResultShipmentHistory.schema'
 

@@ -7,6 +7,7 @@ import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.d
 import { RoleDocument } from '../role/schemas/role.schema'
 import { ManagerCreateAccountDto } from './dto/managerCreateAccount.dto'
 import { Account } from '../account/schemas/account.schema'
+import { KitShipmentResponseDto } from '../KitShipment/dto/kitShipmentResponse.dto'
 
 @Injectable()
 export class ManagerService implements IManagerService {
@@ -64,6 +65,23 @@ export class ManagerService implements IManagerService {
     return serviceCases.map((item) => new ServiceCaseResponseDto(item))
   }
 
+  async getAllKitShipmentsWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<KitShipmentResponseDto[]> {
+    const kitShipments =
+      await this.managerRepository.getAllKitShipmentWithoutDeliveryStaff(
+        facilityId,
+        bookingDate,
+      )
+    if (!kitShipments || kitShipments.length === 0) {
+      throw new NotFoundException(
+        'Không tìm thấy kitshipment nào chưa có nhân viên giao hàng',
+      )
+    }
+    return kitShipments.map((item) => new KitShipmentResponseDto(item))
+  }
+
   async assignSampleCollectorToServiceCase(
     serviceCaseId: string,
     sampleCollectorId: string,
@@ -79,6 +97,40 @@ export class ManagerService implements IManagerService {
       throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
     }
     return new ServiceCaseResponseDto(serviceCase)
+  }
+
+  async assignShipResultToDeliverStaff(
+    serviceCaseId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<ServiceCaseResponseDto> {
+    const serviceCase =
+      await this.managerRepository.assignShipResultToDeliverStaff(
+        serviceCaseId,
+        deliveryStaffId,
+        userId,
+      )
+    if (!serviceCase) {
+      throw new NotFoundException('Không tìm thấy hồ sơ dịch vụ')
+    }
+    return new ServiceCaseResponseDto(serviceCase)
+  }
+
+  async assignDeliveryStaffToKitShipment(
+    kitShipmentId: string,
+    deliveryStaffId: string,
+    userId: string,
+  ): Promise<KitShipmentResponseDto> {
+    const kitShipment =
+      await this.managerRepository.assignDeliveryStaffToKitShipment(
+        kitShipmentId,
+        deliveryStaffId,
+        userId,
+      )
+    if (!kitShipment) {
+      throw new NotFoundException('Không tìm thấy hồ sơ vận chuyển')
+    }
+    return new KitShipmentResponseDto(kitShipment)
   }
 
   async getAllServiceCaseWithoutDoctor(
@@ -143,5 +195,22 @@ export class ManagerService implements IManagerService {
       throw new NotFoundException('Không tìm thấy nhân viên giao hàng nào')
     }
     return deliveryStaff.map((item) => new AccountResponseDto(item))
+  }
+
+  async getAllServiceCasesWithoutDeliveryStaff(
+    facilityId: string,
+    bookingDate: string,
+  ): Promise<ServiceCaseResponseDto[]> {
+    const serviceCases =
+      await this.managerRepository.getAllServiceCasesWithoutDeliveryStaff(
+        facilityId,
+        bookingDate,
+      )
+    if (!serviceCases || serviceCases.length === 0) {
+      throw new NotFoundException(
+        'Không tìm thấy hồ sơ dịch vụ nào chưa có nhân viên giao hàng',
+      )
+    }
+    return serviceCases.map((item) => new ServiceCaseResponseDto(item))
   }
 }

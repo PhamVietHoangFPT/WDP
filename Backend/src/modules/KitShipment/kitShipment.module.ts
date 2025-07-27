@@ -14,6 +14,10 @@ import { IKitShipmentService } from './interfaces/ikitShipment.service'
 import { KitShipmentService } from './kitShipment.service'
 import { KitShipmentHistoryModule } from '../kitShipmentHistory/kitShipmentHistory.module'
 import { TestTakerModule } from '../testTaker/testTaker.module'
+import { BookingModule } from '../booking/booking.module'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
+import { ServiceCase } from '../serviceCase/schemas/serviceCase.schema'
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 
 @Module({
   imports: [
@@ -28,6 +32,10 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
     SamplingKitInventoryModule,
     KitShipmentHistoryModule,
     TestTakerModule,
+    BookingModule,
+    TestRequestStatusModule,
+    ServiceCaseModule, // Ensure ServiceCase is imported if needed in the repository/service
+
   ],
   controllers: [KitShipmentController],
   providers: [
@@ -42,4 +50,4 @@ import { TestTakerModule } from '../testTaker/testTaker.module'
   ],
   exports: [IKitShipmentRepository, IKitShipmentService],
 })
-export class KitShipmentModule {}
+export class KitShipmentModule { }

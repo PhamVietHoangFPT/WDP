@@ -17,6 +17,11 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { UpdateKitShipmentDto } from './dto/updateKitShipment.dto'
 import { IKitShipmentHistoryRepository } from '../kitShipmentHistory/interfaces/iKitShipmentHistory.repository'
 import { IKitShipmentStatusRepository } from '../kitShipmentStatus/interfaces/ikitShipmentStatus.repository'
+import { ICaseMemberRepository } from '../caseMember/interfaces/icaseMember.repository'
+import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
+import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
+import { ServiceCaseResponseDto } from '../serviceCase/dto/serviceCaseResponse.dto'
+import { ServiceCase } from '../serviceCase/schemas/serviceCase.schema'
 
 @Injectable()
 export class KitShipmentService implements IKitShipmentService {
@@ -27,7 +32,12 @@ export class KitShipmentService implements IKitShipmentService {
     private readonly kitShipmentHistoryRepository: IKitShipmentHistoryRepository,
     @Inject(IKitShipmentStatusRepository)
     private readonly kitShipmentStatusRepository: IKitShipmentStatusRepository,
-  ) {}
+    @Inject(IServiceCaseRepository)
+    private readonly serviceCaseRepository: IServiceCaseRepository,
+    @Inject(ITestRequestStatusRepository)
+    private readonly testRequestStatusRepository: ITestRequestStatusRepository,
+  ) { }
+
 
   private mapToResponseDto(kitShipment: KitShipment): KitShipmentResponseDto {
     return new KitShipmentResponseDto({
@@ -38,7 +48,16 @@ export class KitShipmentService implements IKitShipmentService {
       deleted_at: kitShipment.deleted_at,
     })
   }
-
+  async findKitShipmentForDeliveryStaff(deliveryStaffId: string, currentStatus: string): Promise<KitShipmentResponseDto[]> {
+    const kitShipments = await this.kitShipmentRepository.findKitShipmentForDeliveryStaff(deliveryStaffId, currentStatus)
+    if (!kitShipments || kitShipments.length === 0) {
+      throw new NotFoundException('Không tìm thấy kit shipment cho nhân viên giao hàng.')
+    }
+    const data = kitShipments.map((kitShipment) =>
+      this.mapToResponseDto(kitShipment),
+    )
+    return data
+  }
   async findKitShipmentById(id: string): Promise<KitShipmentResponseDto> {
     //this variable is used to check if the kitShipment already exists
     const existingKitShipment = await this.kitShipmentRepository.findById(id)
@@ -61,7 +80,7 @@ export class KitShipmentService implements IKitShipmentService {
     }
     if (
       existingKitShipment.currentStatus ===
-        updateKitShipmentDto.currentStatus &&
+      updateKitShipmentDto.currentStatus &&
       existingKitShipment.caseMember === updateKitShipmentDto.caseMember &&
       existingKitShipment.deliveryStaff === updateKitShipmentDto.deliveryStaff
     ) {
@@ -87,6 +106,19 @@ export class KitShipmentService implements IKitShipmentService {
     id: string,
     currentStatus: string,
   ): Promise<KitShipmentResponseDto | null> {
+
+    const caseMember = await this.kitShipmentRepository.getCaseMemberId(id)
+    const caseMemberId = caseMember.toString()
+    const serviceCase = await this.serviceCaseRepository.findByCaseMemberId(caseMemberId)
+    
+    if (!serviceCase) {
+      throw new NotFoundException(
+        `Không tìm thấy trường hợp dịch vụ cho thành viên trường hợp với ID ${caseMemberId}.`,
+      )
+    }
+
+    const serviceCaseId = serviceCase.toString()
+
     const oldKitShipmentStatusId =
       await this.kitShipmentRepository.getCurrentStatusId(id)
 
@@ -109,7 +141,7 @@ export class KitShipmentService implements IKitShipmentService {
     const customerId =
       await this.kitShipmentRepository.getAccountIdByKitShipmentId(id)
     if (newKitShipmentStatusOrder - oldKitShipmentStatusOrder > 1) {
-      if (newKitShipmentStatusOrder === 4 && oldKitShipmentStatusOrder === 2) {
+      if (newKitShipmentStatusOrder === 6) {
         updatedKitShipment =
           await this.kitShipmentRepository.updateCurrentStatus(
             id,
@@ -126,7 +158,14 @@ export class KitShipmentService implements IKitShipmentService {
         )
       }
     }
-
+    if (newKitShipmentStatusOrder === 5) {
+      const updatedServiceCase = await this.updateCurrentStatusServiceCase(
+        serviceCaseId,
+      )
+      if (!updatedServiceCase) {
+        throw new Error('Cập nhật trạng thái hiện tại không thành công')
+      }
+    }
     updatedKitShipment = await this.kitShipmentRepository.updateCurrentStatus(
       id,
       currentStatus,
@@ -137,6 +176,27 @@ export class KitShipmentService implements IKitShipmentService {
     }
     return this.mapToResponseDto(updatedKitShipment)
   }
+
+
+
+  async updateCurrentStatusServiceCase(
+    id: string,
+  ): Promise<any | null> {
+    const newStatus = await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+      "Đã nhận mẫu"
+    )
+    let updatedServiceCase: ServiceCase | null
+
+    updatedServiceCase = await this.serviceCaseRepository.updateCurrentStatus(
+      id,
+      newStatus.toString(),
+    )
+    if (!updatedServiceCase) {
+      throw new Error('Cập nhật trạng thái hiện tại không thành công')
+    }
+    return updatedServiceCase;
+  }
+
 
   async deleteKitShipment(id: string, userId: string): Promise<any> {
     const existingService = await this.findKitShipmentById(id)
@@ -198,11 +258,13 @@ export class KitShipmentService implements IKitShipmentService {
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
   ): Promise<CreateKitShipmentDto> {
-    const newService = await this.kitShipmentRepository.create(userId, {
-      ...createKitShipmentDto,
-    })
     const kitShipmentStatus =
       await this.kitShipmentStatusRepository.findByName('Chờ thanh toán')
+    const newService = await this.kitShipmentRepository.create(userId, {
+      ...createKitShipmentDto,
+    },
+      kitShipmentStatus._id.toString(),
+    )
 
     if (!kitShipmentStatus) {
       throw new NotFoundException('Trạng thái vận chuyển không tồn tại.')

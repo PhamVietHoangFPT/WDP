@@ -51,6 +51,23 @@ const StaffApi = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['staff'],
     }),
+
+    getServeServiceCase: builder.query({
+      query: ({ accountId, pageNumber, pageSize }) => {
+        return {
+          url: `/test-takers/served?accountId=${accountId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+          method: 'GET',
+          params: {
+            accountId,
+            pageNumber,
+            pageSize
+          }
+        }
+      },
+      // Cung cấp tag với id cụ thể để caching hiệu quả hơn
+      transformResponse: (res) => res,
+      providesTags: ['staff'],
+    }),
   }),
 })
 
@@ -60,4 +77,5 @@ export const {
   useGetAllStatusForCustomerQuery,
   useGetCustomerServiceCaseByEmailQuery,
   useUpdateServiceCaseStatusForStaffMutation,
+  useGetServeServiceCaseQuery
 } = StaffApi

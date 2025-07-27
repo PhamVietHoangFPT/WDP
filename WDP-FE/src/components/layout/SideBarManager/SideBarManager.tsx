@@ -14,6 +14,7 @@ import {
   IdcardOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
+import type { UserData } from '../../../types/auth'
 
 const { Sider } = Layout
 const { Search } = Input
@@ -25,7 +26,7 @@ export const SideBar = () => {
 
   // Lấy userData từ cookie và decode nó
   const userDataString = Cookies.get('userData')
-  let userData = {}
+  let userData: UserData | undefined
   if (userDataString) {
     try {
       // Decode URI component trước khi parse JSON
@@ -76,6 +77,18 @@ export const SideBar = () => {
       icon: <UnorderedListOutlined />,
       label: 'Quản trị dịch vụ ',
       onClick: () => navigate('manager/service-cases-without-doctor'),
+    },
+    {
+      key: 'manager/service-cases-without-delivery-staff',
+      icon: <UnorderedListOutlined />,
+      label: 'Dịch vụ có chưa nhân viên giao hàng ',
+      onClick: () => navigate('manager/service-cases-without-delivery-staff'),
+    },
+    {
+      key: 'manager/kit-shipment-without-delivery-staff',
+      icon: <UnorderedListOutlined />,
+      label: 'Quản trị dịch vụ tự lấy mẫu tại nhà',
+      onClick: () => navigate('manager/kit-shipment-without-delivery-staff'),
     },
     {
       key: 'manager/create-account',

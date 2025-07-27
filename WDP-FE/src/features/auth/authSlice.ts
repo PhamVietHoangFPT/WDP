@@ -39,6 +39,7 @@ const authSlice = createSlice({
         facility: {
           _id: decodedToken.facility?._id || '',
           facilityName: decodedToken.facility?.facilityName || '',
+          address: decodedToken.facility?.address || '',
         },
         gender: decodedToken.gender,
       }

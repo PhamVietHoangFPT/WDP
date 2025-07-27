@@ -7,6 +7,7 @@ export interface IKitShipmentRepository {
   create(
     userId: string,
     createKitShipmentDto: CreateKitShipmentDto,
+    currentStatus: string,
   ): Promise<KitShipmentDocument>
   // findOneById(id: string): Promise<KitShipmentDocument | null>
   findAllKitShipments(
@@ -34,7 +35,10 @@ export interface IKitShipmentRepository {
     filter: Record<string, unknown>,
   ): mongoose.Query<KitShipment[], KitShipment>
   countDocuments(filter: Record<string, unknown>): Promise<number>
-
+  findKitShipmentForDeliveryStaff(
+    deliveryStaffId: string,
+    currentStatus: string,
+  ): Promise<KitShipmentDocument[]>
   updateCurrentStatus(
     id: string,
     currentStatus: string,

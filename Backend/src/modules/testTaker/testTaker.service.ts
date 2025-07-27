@@ -30,6 +30,7 @@ export class TestTakerService implements ITestTakerService {
       dateOfBirth: testTaker.dateOfBirth,
       account: testTaker.account,
       gender: testTaker.gender,
+      created_at: testTaker.created_at,
     })
   }
 
@@ -53,6 +54,38 @@ export class TestTakerService implements ITestTakerService {
     try {
       const [results, total] = await Promise.all([
         this.testTakerRepository.findAll(query, skip, pageSize),
+        this.testTakerRepository.countAll(query),
+      ])
+
+      const totalPages = Math.ceil(total / pageSize)
+
+      const data = new PaginatedResponseDto<TestTakerResponseDto>({
+        data: results.map((item) => this.mapToResponseDto(item)),
+        pagination: {
+          totalItems: total,
+          totalPages,
+          currentPage: pageNumber,
+          pageSize,
+        },
+        statusCode: 200,
+      })
+      return data
+    } catch (error) {
+      this.logger.error('Error retrieving TestTakers:', error)
+      throw new InternalServerErrorException('Không thể truy vấn danh sách.')
+    }
+  }
+
+  async findAllDeleted(
+    query: QueryTestTakerDto,
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<PaginatedResponseDto<TestTakerResponseDto>> {
+    const skip = (pageNumber - 1) * pageSize
+
+    try {
+      const [results, total] = await Promise.all([
+        this.testTakerRepository.findAllDeleted(query, skip, pageSize),
         this.testTakerRepository.countAll(query),
       ])
 
