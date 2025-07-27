@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Inject } from '@nestjs/common'
-import { Image, ImageDocument } from './schemas/image.schemas'
+import { ImageDocument } from './schemas/image.schemas'
 import { v4 as uuidv4 } from 'uuid'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -11,6 +11,8 @@ import { IBlogRepository } from '../blog/interfaces/iblog.repository'
 import { IKitShipmentRepository } from '../KitShipment/interfaces/ikitShipment.repository'
 import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
 import { CreateImageResultDto } from './dto/createResult.dto'
+import { CreateServiceCaseImageDto } from './dto/createServiceCaseImage.dto'
+import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 
 @Injectable()
 export class ImageUploadService implements IImageUploadService {
@@ -21,6 +23,8 @@ export class ImageUploadService implements IImageUploadService {
     private readonly blogRepository: IBlogRepository,
     @Inject(IKitShipmentRepository)
     private readonly kitShipmentRepository: IKitShipmentRepository,
+    @Inject(IServiceCaseRepository)
+    private readonly serviceCaseRepository: IServiceCaseRepository,
   ) {}
 
   async uploadFileForBlog(
@@ -124,16 +128,58 @@ export class ImageUploadService implements IImageUploadService {
     }
   }
 
-  async findAllForBlog(blogId: string): Promise<Image[]> {
+  async uploadFileForServiceCase(
+    file: Express.Multer.File,
+    createImageDto: CreateServiceCaseImageDto,
+    userId: string,
+  ): Promise<{ url: string; _id: string }> {
+    const serviceCase = await this.serviceCaseRepository.findOneById(
+      createImageDto.serviceCase,
+    )
+    if (!serviceCase) {
+      throw new NotFoundException('Service case không tồn tại')
+    }
+    const uploadDir = path.join(process.cwd(), 'uploads')
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir)
+    }
+
+    const fileName = `${uuidv4()}-${file.originalname}`
+    const filePath = path.join(uploadDir, fileName)
+    fs.writeFileSync(filePath, file.buffer)
+
+    const url = `/uploads/${fileName}`
+
+    const saved: ImageDocument =
+      await this.imageModel.createImageForServiceCase(
+        url,
+        createImageDto,
+        userId,
+      )
+
+    return {
+      url: saved.url,
+      _id: saved.id.toString(),
+    }
+  }
+
+  async findAllForServiceCase(serviceCaseId: string): Promise<ImageDocument[]> {
+    return this.imageModel.findAllImageForServiceCase(serviceCaseId)
+  }
+
+  async findAllForBlog(blogId: string): Promise<ImageDocument[]> {
     return this.imageModel.findAllImageForBlog(blogId)
   }
-  async findAllForKitShipment(kitShipmentId: string): Promise<Image[]> {
+
+  async findAllForKitShipment(kitShipmentId: string): Promise<ImageDocument[]> {
     return this.imageModel.findAllImageForKitShipment(kitShipmentId)
   }
-  async findAllForResult(resultId: string): Promise<Image[]> {
+
+  async findAllForResult(resultId: string): Promise<ImageDocument[]> {
     return this.imageModel.findAllImageForResult(resultId)
   }
-  async findById(id: string): Promise<Image | null> {
+
+  async findById(id: string): Promise<ImageDocument | null> {
     const data = await this.imageModel.findById(id)
     if (!data) {
       throw new NotFoundException('Ảnh không tồn tại')
