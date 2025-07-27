@@ -94,14 +94,22 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = 'http://localhost:8081/booking/payment-success/'
-    const totalFee = await this.serviceCaseRepository.getTotalFeeById(
+    const vnp_ReturnUrl = 'exp://172.20.10.3:8081/--/booking/payment-success'
+    const serviceCaseFee = await this.serviceCaseRepository.getTotalFeeById(
       PaymentData.serviceCaseId,
     )
+    const shippingFee = await this.serviceCaseRepository.getShippingFeeById(
+      PaymentData.serviceCaseId,
+    )
+    const totalFee = serviceCaseFee + shippingFee
+    const isSelfSampling = await this.serviceCaseRepository.checkIsSelfSampling(
+      PaymentData.serviceCaseId,
+    )
+    const uniqueTxnRef = `${PaymentData.serviceCaseId}_${Date.now()}_${isSelfSampling ? 'true' : 'false'}`
     const dataSend = {
       vnp_Amount: totalFee,
       vnp_OrderInfo: 'Thanh toán dịch vụ ' + PaymentData.serviceCaseId,
-      vnp_TxnRef: PaymentData.serviceCaseId,
+      vnp_TxnRef: uniqueTxnRef,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(expireDate),
       vnp_IpAddr,
