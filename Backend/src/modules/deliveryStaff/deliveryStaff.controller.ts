@@ -43,10 +43,12 @@ export class DeliveryStaffController {
     @Req() req: any, // Assuming req contains user info
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
     const deliveryStaffId = req.user.id
+    const facilityId = req.user.facility._id
     const serviceCases =
       await this.deliveryStaffService.findAllServiceCasesByDeliveryStaffId(
         deliveryStaffId,
         currentStatus,
+        facilityId,
       )
     return new ApiResponseDto<ServiceCaseResponseDto>({
       data: serviceCases,

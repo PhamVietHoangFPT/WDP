@@ -3,6 +3,7 @@ export interface IDeliveryStaffRepository {
   findAllServiceCasesByDeliveryStaffId(
     deliveryStaffId: string,
     currentStatus: string,
+    facilityId: string,
   ): Promise<ServiceCaseDocument[]>
 }
 
