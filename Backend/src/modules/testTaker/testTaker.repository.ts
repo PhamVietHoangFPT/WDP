@@ -72,6 +72,48 @@ export class TestTakerRepository implements ITestTakerRepository {
     )
   }
 
+  async findAllDeleted(
+    queryDto: QueryTestTakerDto,
+    skip: number,
+    limit: number,
+  ): Promise<TestTaker[]> {
+    const filter: any = {}
+    if (queryDto.name) {
+      filter.name = { $regex: queryDto.name, $options: 'i' }
+    }
+
+    if (queryDto.personalId) {
+      filter.personalId = queryDto.personalId
+    }
+
+    if (queryDto.gender !== undefined) {
+      filter.gender = queryDto.gender
+    }
+
+    if (queryDto.dateOfBirth) {
+      filter.dateOfBirth = new Date(queryDto.dateOfBirth)
+    }
+
+    if (queryDto.accountId && Types.ObjectId.isValid(queryDto.accountId)) {
+      filter.account = new Types.ObjectId(queryDto.accountId)
+    }
+
+    return (
+      this.testTakerModel
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        .find({
+          ...filter,
+          deleted_at: { $ne: null }, // Only find deleted records
+        })
+        .skip(skip)
+        .limit(limit)
+        .sort({ created_at: -1 })
+        .populate({ path: 'account', select: 'name email' })
+        .lean()
+        .exec()
+    )
+  }
+
   async countAll(queryDto: QueryTestTakerDto): Promise<number> {
     const filter: any = {}
 
@@ -98,7 +140,44 @@ export class TestTakerRepository implements ITestTakerRepository {
     return (
       this.testTakerModel
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        .countDocuments(filter)
+        .countDocuments({
+          ...filter,
+          deleted_at: null, // Only count non-deleted records
+        })
+        .exec()
+    )
+  }
+
+  async countDeleted(queryDto: QueryTestTakerDto): Promise<number> {
+    const filter: any = {}
+
+    if (queryDto.name) {
+      filter.name = { $regex: queryDto.name, $options: 'i' }
+    }
+
+    if (queryDto.personalId) {
+      filter.personalId = queryDto.personalId
+    }
+
+    if (queryDto.gender !== undefined) {
+      filter.gender = queryDto.gender
+    }
+
+    if (queryDto.dateOfBirth) {
+      filter.dateOfBirth = new Date(queryDto.dateOfBirth)
+    }
+
+    if (queryDto.accountId && Types.ObjectId.isValid(queryDto.accountId)) {
+      filter.account = new Types.ObjectId(queryDto.accountId)
+    }
+
+    return (
+      this.testTakerModel
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        .countDocuments({
+          ...filter,
+          deleted_at: { $ne: null }, // Only count deleted records
+        })
         .exec()
     )
   }
