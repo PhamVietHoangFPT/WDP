@@ -23,10 +23,10 @@ import {
   useUpdateServiceCaseStatusForDeliveryMutation,
 } from '../../features/deliveryStaff/deliveryStaff'
 import {
-  UserOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  PhoneOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  EnvironmentOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
-  CarOutlined, // Giữ lại nếu mày dùng sau này, hiện tại không dùng
+  UserOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  CarOutlined,
 } from '@ant-design/icons'
 
 const { Title } = Typography
@@ -41,6 +41,20 @@ interface ServiceCase {
     _id: string
     testRequestStatus: string
     order: number
+  }
+  address: {
+    _id: string
+    fullAddress: string
+    location: { // Thêm thông tin location vào address
+      type: string;
+      coordinates: number[];
+    }
+  }
+  account: { // Thêm thông tin account
+    _id: string;
+    name: string;
+    phoneNumber: string;
+    email: string;
   }
 }
 
@@ -136,25 +150,60 @@ const DeliveryStaffServiceCase: React.FC = () => {
       render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
     },
     {
-  title: 'Trạng thái hiện tại',
-  key: 'currentStatus',
-  width: 200,
-  render: (_, record) => {
-    let color = 'default'; // Mặc định
-    if (record.currentStatus?.testRequestStatus === 'Đã có kết quả') {
-      color = 'blue';
-    } else if (record.currentStatus?.testRequestStatus === 'Đã trả kết quả') {
-      color = 'green';
-    } else {
-      color = 'red'; // Các trạng thái còn lại là màu đỏ
-    }
-    return (
-      <Tag color={color}>
-        {record.currentStatus?.testRequestStatus || '—'}
-      </Tag>
-    );
-  },
-},
+      title: 'Trạng thái hiện tại',
+      key: 'currentStatus',
+      width: 200,
+      render: (_, record) => {
+        let color = 'default'; // Mặc định
+        if (record.currentStatus?.testRequestStatus === 'Đã có kết quả') {
+          color = 'blue';
+        } else if (record.currentStatus?.testRequestStatus === 'Đã trả kết quả') {
+          color = 'green';
+        } else {
+          color = 'red'; // Các trạng thái còn lại là màu đỏ
+        }
+        return (
+          <Tag color={color}>
+            {record.currentStatus?.testRequestStatus || '—'}
+          </Tag>
+        );
+      },
+    },
+    // --- Cột mới: Thông tin khách hàng ---
+    {
+      title: 'Thông tin khách hàng',
+      key: 'customerInfo',
+      width: 250,
+      render: (_, record) => (
+        <Space direction="vertical" size={2}>
+          <Tooltip title={`Tên: ${record.account?.name || 'N/A'}`}>
+            <div><UserOutlined /> {record.account?.name || 'N/A'}</div>
+          </Tooltip>
+          <Tooltip title={`SĐT: ${record.account?.phoneNumber || 'N/A'}`}>
+            <div><PhoneOutlined /> {record.account?.phoneNumber || 'N/A'}</div>
+          </Tooltip>
+          {record.account?.email && (
+            <Tooltip title={`Email: ${record.account.email}`}>
+              <div><EnvironmentOutlined /> {record.account.email}</div>
+            </Tooltip>
+          )}
+        </Space>
+      ),
+    },
+    // --- Cột mới: Địa chỉ giao hàng ---
+    {
+      title: 'Địa chỉ giao hàng',
+      key: 'deliveryAddress',
+      width: 300,
+      render: (_, record) => (
+        <Tooltip title={record.address?.fullAddress || 'N/A'}>
+          <Space>
+            <EnvironmentOutlined />
+            <span>{record.address?.fullAddress || 'N/A'}</span>
+          </Space>
+        </Tooltip>
+      ),
+    },
     {
       title: 'Hành động',
       key: 'actions',
