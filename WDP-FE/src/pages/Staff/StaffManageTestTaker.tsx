@@ -161,14 +161,14 @@ export default function StaffManageTestTaker() {
       render: (_, record: TestTaker) => (
         <Space size='middle'>
           <Popconfirm
-            title='Xóa người này?'
-            description='Bạn có chắc muốn xóa người này không? Hành động này không thể hoàn tác.'
+            title='Xác nhận xử lý hồ sơ ?'
+            description='Bạn có chắc muốn xác nhận xử lý hồ sơ người này không? Hành động này không thể hoàn tác.'
             onConfirm={() => handleDelete(record._id)}
-            okText='Xóa'
+            okText='Xử lý hồ sơ'
             cancelText='Hủy'
           >
-            <Tooltip title='Xóa'>
-              <Button icon={<DeleteOutlined />} danger loading={isDeleting} />
+            <Tooltip title='Xử lý hồ sơ'>
+              <Button danger loading={isDeleting}>Đã xử lý hồ sơ</Button>
             </Tooltip>
           </Popconfirm>
         </Space>
