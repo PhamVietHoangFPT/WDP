@@ -25,7 +25,7 @@ export class ImageUploadRepository implements IImageUploadRepository {
   ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
-      ...createImageDto,
+      result: createImageDto.result,
       url,
       created_by: createdByUser,
       created_at: new Date(),
@@ -40,7 +40,7 @@ export class ImageUploadRepository implements IImageUploadRepository {
   ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
-      ...createImageDto,
+      kitShipment: createImageDto.kitShipment,
       url,
       created_by: createdByUser,
       created_at: new Date(),
@@ -70,8 +70,8 @@ export class ImageUploadRepository implements IImageUploadRepository {
   ): Promise<ImageDocument> {
     const createdByUser = new mongoose.Types.ObjectId(userId) as any
     const newImage = new this.imageModel({
-      ...createImageDto,
       url,
+      serviceCase: createImageDto.serviceCase,
       created_by: createdByUser,
       created_at: new Date(),
     })
