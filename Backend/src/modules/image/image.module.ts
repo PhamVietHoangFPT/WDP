@@ -10,6 +10,7 @@ import { BlogModule } from '../blog/blog.module'
 import { IImageUploadRepository } from './interfaces/iimageUpload.repository'
 import { ImageUploadRepository } from './imageUpload.repository'
 import { KitShipmentModule } from '../KitShipment/kitShipment.module'
+import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { KitShipmentModule } from '../KitShipment/kitShipment.module'
     AuthModule,
     BlogModule,
     KitShipmentModule,
+    ServiceCaseModule,
   ],
   controllers: [ImageController],
   providers: [

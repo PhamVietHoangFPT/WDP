@@ -82,7 +82,9 @@ export default function StaffPaymentHistory() {
       title: 'Chi tiết',
       key: 'action',
       render: (_: any, record: any) => (
-        <Button onClick={() => navigate(`/staff/payment-history/${record._id}`)}>
+        <Button
+          onClick={() => navigate(`/staff/payment-history/${record._id}`)}
+        >
           Xem chi tiết
         </Button>
       ),
@@ -105,7 +107,9 @@ export default function StaffPaymentHistory() {
           pageSize={Number(pageSize)}
           total={data?.pagination?.totalItems || 0}
           onChange={(page, size) => {
-            navigate(`/staff/payment-history?pageNumber=${page}&pageSize=${size}`)
+            navigate(
+              `/staff/payment-history?pageNumber=${page}&pageSize=${size}`
+            )
           }}
           showSizeChanger
           showTotal={(total, range) =>

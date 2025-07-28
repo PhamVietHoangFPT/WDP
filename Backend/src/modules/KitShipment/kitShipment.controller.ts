@@ -42,7 +42,7 @@ export class KitShipmentController {
   constructor(
     @Inject(IKitShipmentService)
     private readonly kitshipmentService: IKitShipmentService, // <-- Thay đổi cách inject
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth('bearer')

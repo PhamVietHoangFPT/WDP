@@ -108,5 +108,5 @@ export const {
   useDeleteKitShipmentMutation,
   useUpdateKitShipmentStatusMutation,
   useGetKitShipmentForShipperQuery,
-  useGetKitShipmentStatusQuery
+  useGetKitShipmentStatusQuery,
 } = kitShipmentApi

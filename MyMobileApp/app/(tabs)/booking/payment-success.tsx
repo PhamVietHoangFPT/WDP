@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,66 +6,60 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Linking,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Linking } from "react-native";
 import { createServicePaymentHistory } from "@/service/customerApi/payment-api";
 
 export default function PaymentSuccessScreen() {
   const router = useRouter();
-
-  const [params, setParams] = useState<URLSearchParams | null>(null);
   const [status, setStatus] = useState<"success" | "error" | "processing">(
     "processing"
   );
-  const effectRan = useRef(false);
+  const [params, setParams] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    const getUrlParams = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      if (initialUrl) {
-        const queryString = initialUrl.split("?")[1] || "";
-        setParams(new URLSearchParams(queryString));
-      } else {
+    const extractParamsFromUrl = async () => {
+      try {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          const query = url.split("?")[1] || "";
+          const parsed: { [key: string]: string } = {};
+          const searchParams = new URLSearchParams(query);
+          searchParams.forEach((value, key) => {
+            parsed[key] = value;
+          });
+          setParams(parsed);
+        } else {
+          setStatus("error");
+        }
+      } catch (err) {
+        console.error("Không lấy được URL:", err);
         setStatus("error");
       }
     };
-    getUrlParams();
+
+    extractParamsFromUrl();
   }, []);
 
   useEffect(() => {
-    const callApi = async () => {
-      if (!params) return;
+    const handlePayment = async () => {
+      if (!params || !params.vnp_ResponseCode) return;
 
       try {
-        const responseCode = params.get("vnp_ResponseCode");
-
-        if (!responseCode) {
-          setStatus("error");
-          effectRan.current = true;
-          return;
-        }
-
-        // Chuyển URLSearchParams thành object để gửi API
-        const paramObj: { [key: string]: string } = {};
-        params.forEach((value, key) => {
-          paramObj[key] = value;
-        });
-
-        await createServicePaymentHistory(paramObj);
-        setStatus(responseCode === "00" ? "success" : "error");
+        await createServicePaymentHistory(params);
+        setStatus(params.vnp_ResponseCode === "00" ? "success" : "error");
       } catch (err) {
-        console.error("Không thể lưu trạng thái thanh toán:", err);
-        Alert.alert("Lỗi", "Không thể cập nhật trạng thái thanh toán");
+        console.error("Lỗi khi gọi API lưu trạng thái:", err);
+        Alert.alert("Lỗi", "Không thể cập nhật trạng thái thanh toán.");
         setStatus("error");
-      } finally {
-        effectRan.current = true;
       }
     };
 
-    if (!effectRan.current && params) {
-      callApi();
+    if (Object.keys(params).length > 0) {
+      handlePayment();
     }
   }, [params]);
 

@@ -37,10 +37,11 @@ import { ConditionModule } from './modules/condition/condition.module'
 import { StaffModule } from './modules/staff/staff.module'
 import { ShipmentStatusModule } from './modules/shipmentStatus/shipmentStatus.modules'
 import { TestResultShipmentModule } from './modules/testResultShipment/testResultShipment.module'
-import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHistory/testResultShipmentHIstory.module'
+import { TestResultShipmentHistoryModule } from './modules/testResultShipmentHistory/testResultShipmentHistory.module'
 import { AdminModule } from './modules/admin/admin.module'
 import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipmentHistory.module'
 import { DashboardModule } from './modules/dashboard/dashboard.module'
+import { DeliveryStaffModule } from './modules/deliveryStaff/deliveryStaff.module'
 @Module({
   imports: [
     databaseConfig,
@@ -86,6 +87,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module'
     AdminModule,
     KitShipmentHistoryModule,
     DashboardModule,
+    DeliveryStaffModule,
   ],
   controllers: [AppController],
   providers: [AppService],

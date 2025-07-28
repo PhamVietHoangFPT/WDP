@@ -26,8 +26,7 @@ import { CreateBlogImageDto } from './dto/createImage.dto'
 import { IImageUploadService } from './interfaces/iImageUpload.service'
 import { CreateImageKitShipmentDto } from './dto/createImageShipment.dto'
 import { CreateImageResultDto } from './dto/createResult.dto'
-import { RolesGuard } from 'src/common/guard/roles.guard'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { CreateServiceCaseImageDto } from './dto/createServiceCaseImage.dto'
 
 @ApiTags('Images')
 @Controller('images')
@@ -136,6 +135,40 @@ export class ImageController {
     }
   }
 
+  @Post('uploadForServiceCase')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        serviceCase: { type: 'string' },
+      },
+    },
+  })
+  async uploadForServiceCase(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: CreateServiceCaseImageDto,
+    @Req() req: any,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded')
+    const userId = req.user.id
+
+    const result = await this.uploadService.uploadFileForServiceCase(
+      file,
+      body,
+      userId,
+    )
+    return {
+      message: 'File uploaded successfully',
+      fileName: file.originalname,
+      imageUrl: result.url,
+    }
+  }
+
   @Get(':id')
   @ApiParam({ name: 'id', required: true })
   async findById(@Param('id') id: string) {
@@ -146,6 +179,11 @@ export class ImageController {
   @Get('findForBlog/:blogId')
   async findAllForBlog(@Param('blogId') blogId: string) {
     return this.uploadService.findAllForBlog(blogId)
+  }
+
+  @Get('findForServiceCase/:serviceCaseId')
+  async findAllForServiceCase(@Param('serviceCaseId') serviceCaseId: string) {
+    return this.uploadService.findAllForServiceCase(serviceCaseId)
   }
 
   @Get('findForKitShipment/:kitShipmentId')
