@@ -17,6 +17,7 @@ import { Calendar } from "react-native-calendars";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
+import * as WebBrowser from "expo-web-browser";
 
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 

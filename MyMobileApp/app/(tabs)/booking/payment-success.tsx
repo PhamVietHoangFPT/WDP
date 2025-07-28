@@ -7,7 +7,6 @@ import {
   Alert,
   TouchableOpacity,
   Linking,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,39 +19,65 @@ export default function PaymentSuccessScreen() {
   );
   const [params, setParams] = useState<{ [key: string]: string }>({});
 
+  // Extract query from URL
+  const extractParams = (url: string) => {
+    console.log("🔗 Received return URL from VNPay:", url);
+    const query = url.split("?")[1] || "";
+    const parsed: { [key: string]: string } = {};
+    const searchParams = new URLSearchParams(query);
+    searchParams.forEach((value, key) => {
+      parsed[key] = value;
+    });
+    console.log("📥 Parsed VNPay params:", parsed);
+    setParams(parsed);
+  };
+
+  // Lấy URL khi mở app
   useEffect(() => {
-    const extractParamsFromUrl = async () => {
-      try {
-        const url = await Linking.getInitialURL();
-        if (url) {
-          const query = url.split("?")[1] || "";
-          const parsed: { [key: string]: string } = {};
-          const searchParams = new URLSearchParams(query);
-          searchParams.forEach((value, key) => {
-            parsed[key] = value;
-          });
-          setParams(parsed);
-        } else {
-          setStatus("error");
-        }
-      } catch (err) {
-        console.error("Không lấy được URL:", err);
-        setStatus("error");
-      }
+    console.log("🚀 PaymentSuccessScreen mounted");
+
+    const getInitial = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      console.log("🌐 Initial URL:", initialUrl);
+      if (initialUrl) extractParams(initialUrl);
     };
 
-    extractParamsFromUrl();
+    getInitial();
+
+    const subscription = Linking.addEventListener("url", (event) => {
+      console.log("📡 Deep link event received:", event.url);
+      extractParams(event.url);
+    });
+
+    return () => subscription.remove();
   }, []);
 
+  // Gửi dữ liệu thanh toán
   useEffect(() => {
     const handlePayment = async () => {
       if (!params || !params.vnp_ResponseCode) return;
 
+      const paymentData = {
+        vnp_Amount: parseInt(params.vnp_Amount || "0"),
+        vnp_BankCode: params.vnp_BankCode || "",
+        vnp_BankTranNo: params.vnp_BankTranNo || "",
+        vnp_CardType: params.vnp_CardType || "",
+        vnp_OrderInfo: params.vnp_OrderInfo || "",
+        vnp_PayDate: params.vnp_PayDate || "",
+        vnp_ResponseCode: params.vnp_ResponseCode || "",
+        vnp_TmnCode: params.vnp_TmnCode || "",
+        vnp_TransactionNo: params.vnp_TransactionNo || "",
+        vnp_TransactionStatus: params.vnp_TransactionStatus || "",
+        vnp_TxnRef: params.vnp_TxnRef || "",
+        vnp_SecureHash: params.vnp_SecureHash || "",
+      };
+
       try {
-        await createServicePaymentHistory(params);
-        setStatus(params.vnp_ResponseCode === "00" ? "success" : "error");
+        console.log("📤 Sending payment data to backend:", paymentData);
+        await createServicePaymentHistory(paymentData);
+        setStatus(paymentData.vnp_ResponseCode === "00" ? "success" : "error");
       } catch (err) {
-        console.error("Lỗi khi gọi API lưu trạng thái:", err);
+        console.error("❌ Error saving payment:", err);
         Alert.alert("Lỗi", "Không thể cập nhật trạng thái thanh toán.");
         setStatus("error");
       }
@@ -76,12 +101,7 @@ export default function PaymentSuccessScreen() {
               color="#52c41a"
               style={{ marginBottom: 20 }}
             />
-            <Text
-              style={[
-                styles.messageText,
-                { color: "#52c41a", fontWeight: "bold", fontSize: 22 },
-              ]}
-            >
+            <Text style={[styles.messageText, styles.successText]}>
               🎉 Thanh toán thành công!
             </Text>
             <Text style={styles.messageText}>
@@ -99,12 +119,7 @@ export default function PaymentSuccessScreen() {
               color="#ff4d4f"
               style={{ marginBottom: 20 }}
             />
-            <Text
-              style={[
-                styles.messageText,
-                { color: "#ff4d4f", fontWeight: "bold", fontSize: 22 },
-              ]}
-            >
+            <Text style={[styles.messageText, styles.errorText]}>
               ❌ Thanh toán thất bại!
             </Text>
             <Text style={styles.messageText}>
@@ -150,6 +165,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     marginBottom: 10,
+  },
+  successText: {
+    color: "#52c41a",
+    fontWeight: "bold",
+    fontSize: 22,
+  },
+  errorText: {
+    color: "#ff4d4f",
+    fontWeight: "bold",
+    fontSize: 22,
   },
   homeButton: {
     marginTop: 30,

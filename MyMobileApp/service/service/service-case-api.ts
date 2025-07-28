@@ -25,14 +25,27 @@ export const createServiceCase = async (data: any) => {
 };
 
 // 🔍 Lấy tất cả hồ sơ dịch vụ
-export const getAllServiceCases = async () => {
+export const getAllServiceCases = async (
+  pageNumber = 1,
+  pageSize = 5,
+  currentStatus?: string | null
+) => {
   const headers = await getAuthHeader();
-  const response = await fetch(`${API_BASE_URL}/service-cases`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-  });
+
+  const params = new URLSearchParams();
+  params.append("pageNumber", pageNumber.toString());
+  params.append("pageSize", pageSize.toString());
+  params.append("currentStatus", currentStatus ?? "null");
+
+  const response = await fetch(
+    `${API_BASE_URL}/service-cases?${params.toString()}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    }
+  );
 
   if (!response.ok) throw new Error("Lỗi khi lấy danh sách hồ sơ dịch vụ");
   return response.json();

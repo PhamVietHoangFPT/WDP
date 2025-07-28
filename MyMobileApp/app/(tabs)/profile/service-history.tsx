@@ -10,22 +10,28 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-
-import { getAllServiceCases } from "@/service/service/service-case-api"; // Đường dẫn file API của bạn
 import { Ionicons } from "@expo/vector-icons";
+
+import { getAllServiceCases } from "@/service/service/service-case-api";
 
 export default function ServiceCase() {
   const router = useRouter();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber] = useState(1); // hiện tại mặc định trang 1
+  const [pageSize] = useState(5); // giống Swagger
+  const [currentStatus] = useState<string | null>(null); // có thể sau này lọc
 
   useEffect(() => {
     const fetchServiceCases = async () => {
       try {
         setLoading(true);
-        const res = await getAllServiceCases();
-        // Giả sử res.data chứa mảng service cases
-        setData(res.data || []);
+        const res = await getAllServiceCases(
+          pageNumber,
+          pageSize,
+          currentStatus
+        );
+        setData(res.data);
       } catch (error) {
         Alert.alert("Lỗi", "Không thể tải danh sách hồ sơ dịch vụ.");
       } finally {
@@ -37,7 +43,7 @@ export default function ServiceCase() {
 
   const renderStatusTag = (status: string) => {
     const lowerStatus = status?.toLowerCase() || "";
-    let color = "#999"; // default grey
+    let color = "#999"; // mặc định xám
 
     if (lowerStatus.includes("thất bại") || lowerStatus.includes("hủy")) {
       color = "#FF4D4F"; // đỏ
