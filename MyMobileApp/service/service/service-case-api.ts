@@ -47,7 +47,7 @@ export const getAllServiceCases = async (
     }
   );
 
-  if (!response.ok) throw new Error("Lỗi khi lấy danh sách hồ sơ dịch vụ!");
+  if (!response.ok) throw new Error("Lỗi khi lấy danh sách hồ sơ dịch vụ");
   return response.json();
 };
 
