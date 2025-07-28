@@ -108,7 +108,7 @@ export default function AdminManagerList() {
       icon: <ExclamationCircleOutlined />,
       content: (
         <>
-          Mày có chắc chắn muốn xóa manager **{manager.name}** không?
+          Bạn có chắc chắn muốn xóa manager **{manager.name}** không?
           {manager.facility && (
             <p style={{ color: 'red', marginTop: '10px' }}>
               Manager này hiện đang được gán cho một cơ sở. Nếu xóa, manager sẽ

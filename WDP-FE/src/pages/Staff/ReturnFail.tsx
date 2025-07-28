@@ -19,7 +19,7 @@ import {
 import type { ColumnsType } from "antd/es/table"
 import {
   // Thay đổi import từ deliveryStaff sang staff API nếu cần, hoặc đảm bảo deliveryStaff API có đủ hook
-  // Tuy nhiên, theo API mày cung cấp, useGetServiceCaseByEmailForStaffQuery nằm trong deliveryAPI
+  // Tuy nhiên, theo API bạn cung cấp, useGetServiceCaseByEmailForStaffQuery nằm trong deliveryAPI
   // nên không cần thay đổi import, chỉ cần thêm hook mới vào.
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
