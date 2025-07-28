@@ -55,6 +55,7 @@ export class ServiceCaseService implements IServiceCaseService {
         : null,
       sampleCollector: serviceCase.sampleCollector,
       doctor: serviceCase.doctor,
+      caseMember: serviceCase.caseMember,
     })
   }
 
@@ -119,6 +120,14 @@ export class ServiceCaseService implements IServiceCaseService {
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository
         .findAllServiceCases(filter)
+        .populate({
+          path: 'caseMember',
+          select: 'booking',
+          populate: {
+            path: 'booking',
+            select: 'bookingDate'
+          },
+        })
         .skip(skip)
         .limit(pageSize),
     ])

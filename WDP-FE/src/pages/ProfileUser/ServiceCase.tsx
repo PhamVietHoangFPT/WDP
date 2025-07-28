@@ -172,6 +172,21 @@ export default function ServiceCase() {
       },
     },
     {
+      title: 'Ngày đặt',
+      key: 'bookingDate',
+      render: (
+        _: any,
+        record: { caseMember: { booking: { bookingDate: string } } }
+      ) => {
+        const bookingDate = record.caseMember?.booking?.bookingDate
+        if (!bookingDate) return <Tag color='default'>Chưa đặt</Tag>
+        const date = new Date(bookingDate)
+        return (
+          <Typography.Text>{date.toLocaleDateString('vi-VN')}</Typography.Text>
+        )
+      },
+    },
+    {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
@@ -271,7 +286,9 @@ export default function ServiceCase() {
       key: 'action',
       render: (_: any, record: any) => (
         <Space direction='vertical'>
-          <Button onClick={() => navigate(`/service-case-customer/${record._id}`)}>
+          <Button
+            onClick={() => navigate(`/service-case-customer/${record._id}`)}
+          >
             Xem chi tiết
           </Button>
           {/* <Button
