@@ -94,7 +94,8 @@ export class VnpayService {
     const createDate = new Date()
     const expireDate = new Date(createDate.getTime() + 10 * 60 * 1000)
     const vnp_IpAddr = '192.168.1.1'
-    const vnp_ReturnUrl = 'exp://172.20.10.3:8081/--/booking/payment-success'
+    const vnp_ReturnUrl = 'http://localhost:8081/booking/payment-success'
+    // const vnp_ReturnUrl = 'exp://10.87.64.10:8081/--/booking/payment-success'
     const serviceCaseFee = await this.serviceCaseRepository.getTotalFeeById(
       PaymentData.serviceCaseId,
     )
