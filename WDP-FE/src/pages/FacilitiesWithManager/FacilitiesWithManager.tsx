@@ -129,7 +129,7 @@ export default function FacilitiesWithManager() {
     Modal.confirm({
       title: 'Xác nhận gỡ Manager',
       icon: <ExclamationCircleOutlined />,
-      content: `Mày có chắc chắn muốn gỡ manager "${facility.account.name}" khỏi cơ sở "${facility.facilityName}" không?`,
+      content: `Bạn có chắc chắn muốn gỡ manager "${facility.account.name}" khỏi cơ sở "${facility.facilityName}" không?`,
       okText: 'Gỡ',
       okType: 'danger',
       cancelText: 'Hủy',
