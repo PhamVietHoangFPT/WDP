@@ -9,7 +9,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
   constructor(
     @Inject(IKitShipmentHistoryRepository)
     private readonly KitShipmentHistoryRepository: IKitShipmentHistoryRepository,
-  ) {}
+  ) { }
   async findAllKitShipmentHistory(
     pageNumber: number,
     pageSize: number,
@@ -19,7 +19,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
     const skip = (pageNumber - 1) * pageSize
     const filter = {
       customer: customerId,
-      ...(kitShipmentId && { serviceCase: kitShipmentId }),
+      ...(kitShipmentId && { kitShipment: kitShipmentId }),
     }
     const [KitShipmentHistories, totalItems] = await Promise.all([
       this.KitShipmentHistoryRepository.findAllKitShipmentHistory(filter)

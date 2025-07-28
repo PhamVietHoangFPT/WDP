@@ -116,8 +116,10 @@ export class KitShipmentService implements IKitShipmentService {
   ): Promise<KitShipmentResponseDto | null> {
     const caseMember = await this.kitShipmentRepository.getCaseMemberId(id)
     const caseMemberId = caseMember.toString()
+
     const serviceCase =
       await this.serviceCaseRepository.findByCaseMemberId(caseMemberId)
+
 
     if (!serviceCase) {
       throw new NotFoundException(
