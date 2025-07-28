@@ -76,7 +76,7 @@ export class ResultService implements IResultService {
         doctorId,
       )
     const data = await this.resultRepository.create(createResultDto)
-    if (isPaymentRequired === false) {
+    if (isPaymentRequired === false || isPaymentRequired === null) {
       await this.emailService.sendEmailForResult(
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         serviceCaseData.account.toString(),
