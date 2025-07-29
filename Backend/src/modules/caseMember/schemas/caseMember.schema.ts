@@ -20,10 +20,12 @@ export class CaseMember extends BaseEntity {
   testTaker: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'SamplingKitInventory',
+    type: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'SamplingKitInventory' },
+    ],
+    default: [],
   })
-  samplingKitInventory: mongoose.Schema.Types.ObjectId
+  samplingKitInventory: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -33,11 +35,11 @@ export class CaseMember extends BaseEntity {
   booking: mongoose.Schema.Types.ObjectId
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Service',
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TestTaker' }],
     required: true,
+    default: [],
   })
-  service: mongoose.Schema.Types.ObjectId
+  service: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
     type: String,
@@ -50,6 +52,12 @@ export class CaseMember extends BaseEntity {
 
   @Prop({ type: Boolean, required: true })
   isSelfSampling: boolean
+
+  @Prop({
+    type: Boolean,
+    required: true,
+  })
+  isSingleService: boolean
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

@@ -3,20 +3,30 @@ import { IsMongoId, IsNotEmpty, IsNumber, Min } from 'class-validator'
 
 export class CreateServiceCaseDto {
   @ApiProperty({
-    example: 'YOUR_UNIQUE_SERVICE_CASE_ID',
-    description: 'ID của trường hợp dịch vụ',
+    example: 'YOUR_UNIQUE_CASE_MEMBER_ID',
+    description: 'ID của thành viên trong hồ sơ nhóm người cần xét nghiệm',
     required: true,
   })
-  @IsMongoId({ message: 'ID trường hợp dịch vụ không hợp lệ' })
+  @IsMongoId({ message: 'ID thành viên không hợp lệ' })
   caseMember: string
 
   @ApiProperty({
     example: 100000,
-    description: 'Phí vận chuyển cho dịch vụ tại nhà',
+    description: 'Phí tổng cho dịch vụ tại nhà',
     required: true,
   })
-  @IsNotEmpty({ message: 'Phí vận chuyển không được để trống' })
-  @IsNumber({}, { message: 'Phí vận chuyển phải là một con số' })
-  @Min(0, { message: 'Phí vận chuyển không được là số âm' })
+  @IsNotEmpty({ message: 'Phí tổng không được để trống' })
+  @IsNumber({}, { message: 'Phí tổng phải là một con số' })
+  @Min(0, { message: 'Phí tổng không được là số âm' })
+  totalFee: number
+
+  @ApiProperty({
+    example: 100000,
+    description: 'Phí dịch vụ phát sinh cho dịch vụ tại nhà',
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Phí dịch vụ phát sinh không được để trống' })
+  @IsNumber({}, { message: 'Phí dịch vụ phát sinh phải là một con số' })
+  @Min(0, { message: 'Phí dịch vụ phát sinh không được là số âm' })
   shippingFee: number
 }
