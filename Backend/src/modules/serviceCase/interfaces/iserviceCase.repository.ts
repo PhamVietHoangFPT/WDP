@@ -6,7 +6,6 @@ export interface IServiceCaseRepository {
   createServiceCase(
     createServiceCaseDto: CreateServiceCaseDto,
     userId: string,
-    totalFee: number,
   ): Promise<ServiceCaseDocument>
 
   findAllServiceCases(

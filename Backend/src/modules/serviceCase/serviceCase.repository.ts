@@ -67,17 +67,16 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
   async createServiceCase(
     createServiceCaseDto: CreateServiceCaseDto,
     userId: string,
-    totalFee: number,
   ): Promise<ServiceCaseDocument> {
     const testRequestStatus =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
         'Chờ thanh toán',
       )
     const createdServiceCase = await this.serviceCaseModel.create({
-      ...createServiceCaseDto,
-      created_by: userId,
-      currentStatus: testRequestStatus,
-      totalFee: totalFee,
+      caseMember: new mongoose.Types.ObjectId(createServiceCaseDto.caseMember),
+      created_by: new mongoose.Types.ObjectId(userId),
+      currentStatus: new mongoose.Types.ObjectId(testRequestStatus),
+      totalFee: createServiceCaseDto.totalFee,
       created_at: new Date(),
       shippingFee: createServiceCaseDto.shippingFee,
     })

@@ -78,17 +78,6 @@ export class ServiceCaseService implements IServiceCaseService {
         'Trường hợp xét nghiệm đã tồn tại cho nhóm thành viên này',
       )
     }
-    const numberOfTestTaker = caseMember.testTaker.length
-    const serviceId =
-      await this.caseMemberRepository.getServiceIdByCaseMemberId(
-        createServiceCaseDto.caseMember,
-      )
-    const timeReturnId = await this.serviceRepository.getTimeReturnId(serviceId)
-    const serviceTotalFee = await this.serviceRepository.getTotalFeeService(
-      serviceId,
-      timeReturnId,
-      numberOfTestTaker,
-    )
 
     const dataSend = {
       ...createServiceCaseDto,
@@ -98,7 +87,6 @@ export class ServiceCaseService implements IServiceCaseService {
     const serviceCase = await this.serviceCaseRepository.createServiceCase(
       dataSend,
       userId,
-      serviceTotalFee,
     )
     return this.mapToResponseDto(serviceCase)
   }
@@ -125,7 +113,7 @@ export class ServiceCaseService implements IServiceCaseService {
           select: 'booking',
           populate: {
             path: 'booking',
-            select: 'bookingDate'
+            select: 'bookingDate',
           },
         })
         .skip(skip)
