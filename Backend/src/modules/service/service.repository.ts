@@ -129,7 +129,16 @@ export class ServiceRepository implements IServiceRepository {
       .select('sample')
       .exec()
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    return service?.sample.toString() || null
+    return service?.sample ? service.sample.toString() : null
+  }
+
+  async getSampleIds(id: string[]): Promise<string[] | null> {
+    const services = await this.serviceModel
+      .find({ _id: { $in: id }, deleted_at: null })
+      .select('sample')
+      .exec()
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return services.map((service) => service.sample.toString()) || null
   }
 
   async checkIsAdministration(id: string): Promise<boolean> {
@@ -196,5 +205,13 @@ export class ServiceRepository implements IServiceRepository {
 
   aggregateOne(pipeline: any[]): mongoose.Aggregate<any> {
     return this.serviceModel.aggregate(pipeline)
+  }
+
+  async findByIds(serviceIds: string[]): Promise<ServiceDocument[]> {
+    return this.serviceModel
+      .find({
+        _id: { $in: serviceIds },
+      })
+      .exec()
   }
 }

@@ -55,6 +55,7 @@ export class ServiceCaseService implements IServiceCaseService {
         : null,
       sampleCollector: serviceCase.sampleCollector,
       doctor: serviceCase.doctor,
+      caseMember: serviceCase.caseMember,
     })
   }
 
@@ -77,17 +78,6 @@ export class ServiceCaseService implements IServiceCaseService {
         'Trường hợp xét nghiệm đã tồn tại cho nhóm thành viên này',
       )
     }
-    const numberOfTestTaker = caseMember.testTaker.length
-    const serviceId =
-      await this.caseMemberRepository.getServiceIdByCaseMemberId(
-        createServiceCaseDto.caseMember,
-      )
-    const timeReturnId = await this.serviceRepository.getTimeReturnId(serviceId)
-    const serviceTotalFee = await this.serviceRepository.getTotalFeeService(
-      serviceId,
-      timeReturnId,
-      numberOfTestTaker,
-    )
 
     const dataSend = {
       ...createServiceCaseDto,
@@ -97,7 +87,6 @@ export class ServiceCaseService implements IServiceCaseService {
     const serviceCase = await this.serviceCaseRepository.createServiceCase(
       dataSend,
       userId,
-      serviceTotalFee,
     )
     return this.mapToResponseDto(serviceCase)
   }
@@ -119,6 +108,14 @@ export class ServiceCaseService implements IServiceCaseService {
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository
         .findAllServiceCases(filter)
+        .populate({
+          path: 'caseMember',
+          select: 'booking',
+          populate: {
+            path: 'booking',
+            select: 'bookingDate',
+          },
+        })
         .skip(skip)
         .limit(pageSize),
     ])
@@ -144,6 +141,7 @@ export class ServiceCaseService implements IServiceCaseService {
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
+    deliveryStaffId?: string,
   ): Promise<ServiceCaseResponseDto | null> {
     const oldServiceCaseStatusId =
       await this.serviceCaseRepository.getCurrentStatusId(id)
@@ -173,6 +171,7 @@ export class ServiceCaseService implements IServiceCaseService {
             staffId,
             sampleCollectorId,
             doctorId,
+            deliveryStaffId,
           )
         if (!updatedServiceCase) {
           throw new Error('Cập nhật trạng thái hiện tại không thành công')
@@ -191,6 +190,7 @@ export class ServiceCaseService implements IServiceCaseService {
       staffId,
       sampleCollectorId,
       doctorId,
+      deliveryStaffId,
     )
     if (!updatedServiceCase) {
       throw new Error('Cập nhật trạng thái hiện tại không thành công')

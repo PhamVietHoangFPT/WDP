@@ -101,22 +101,26 @@ export class SamplingKitInventoryRepository
   }
 
   async updateInventory(
-    id: string,
+    ids: string[], // 1. Sửa tham số để nhận vào một mảng ID
     facilityId: string,
     quantity: number,
-  ): Promise<SamplingKitInventoryDocument | null> {
-    return await this.samplingKitInventoryModel
-      .findOneAndUpdate(
+  ): Promise<any> {
+    // 2. Sửa kiểu trả về cho phù hợp với updateMany
+
+    return this.samplingKitInventoryModel
+      .updateMany(
+        // Điều kiện tìm kiếm: Tìm tất cả document có _id nằm trong mảng `ids`
+        // và thuộc về đúng facilityId.
         {
-          _id: id,
-          facility: facilityId,
+          _id: { $in: ids },
+          facility: new Types.ObjectId(facilityId),
           deleted_at: null,
         },
+        // Nội dung cập nhật: Trừ đi số lượng tồn kho
         {
           $inc: { inventory: -quantity },
           $set: { updated_at: new Date() },
         },
-        { new: true },
       )
       .exec()
   }
@@ -139,20 +143,26 @@ export class SamplingKitInventoryRepository
   }
 
   async findBySampleIdAndQuantityInFacility(
-    sampleId: string,
+    sampleIds: string[],
     quantity: number,
     facilityId: string,
-  ): Promise<string | null> {
-    const samplingKitInventory = await this.samplingKitInventoryModel
-      .findOne({
-        sample: sampleId,
+  ): Promise<string[]> {
+    // ✅ 1. Sửa kiểu trả về thành mảng string
+
+    // `find` sẽ trả về một mảng các document khớp điều kiện
+    const inventories = await this.samplingKitInventoryModel
+      .find({
+        sample: { $in: sampleIds }, // Dùng $in để tìm tất cả sampleId trong mảng
         deleted_at: null,
         inventory: { $gte: quantity },
-        facility: facilityId,
+        facility: new Types.ObjectId(facilityId), // Đảm bảo facilityId là ObjectId
       })
+      .select('_id') // Chỉ lấy trường _id để tối ưu
+      .lean()
       .exec()
+
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    return samplingKitInventory ? samplingKitInventory._id.toString() : null
+    return inventories.map((inv) => inv._id.toString())
   }
 
   findAllExpiredKits(

@@ -20,7 +20,7 @@ export interface ISamplingKitInventoryRepository {
   ): Promise<SamplingKitInventoryDocument | null>
 
   updateInventory(
-    id: string,
+    id: string[],
     facilityId: string,
     quantity: number,
   ): Promise<SamplingKitInventoryDocument | null>
@@ -51,10 +51,10 @@ export interface ISamplingKitInventoryRepository {
   deleteByExpiredDate(date: Date): Promise<number>
 
   findBySampleIdAndQuantityInFacility(
-    sampleId: string,
+    sampleId: string[],
     quantity: number,
     facilityId: string,
-  ): Promise<string | null>
+  ): Promise<string[] | null>
 
   findAllExpiredKits(
     facilityId: string,

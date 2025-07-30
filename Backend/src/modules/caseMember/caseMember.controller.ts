@@ -6,7 +6,6 @@ import {
   Inject,
   Param,
   Post,
-  Put,
   Query,
   Req,
   UseGuards,
@@ -21,7 +20,6 @@ import {
   ApiQuery,
 } from '@nestjs/swagger'
 import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
-import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
 import { CaseMemberResponseDto } from './dto/caseMemberResponse.dto'
 import { ICaseMemberService } from './interfaces/icaseMember.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
@@ -132,74 +130,4 @@ export class CaseMemberController {
       success: true,
     }
   }
-
-  @Put(':id')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Cập nhật hồ sơ nhóm người cần xét nghiệm',
-  })
-  @ApiOperation({
-    summary: 'Cập nhật hồ sơ nhóm người cần xét nghiệm',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Hồ sơ nhóm người cần xét nghiệm đã được cập nhật thành công',
-    type: ApiResponseDto<CaseMemberResponseDto>,
-  })
-  async update(
-    @Param('id') id: string,
-    @Body() updateCaseMemberDto: UpdateCaseMemberDto,
-    @Req() req: any,
-  ): Promise<ApiResponseDto<CaseMemberResponseDto>> {
-    const userId = req.user.id
-    const caseMember = await this.caseMemberService.update(
-      id,
-      updateCaseMemberDto,
-      userId,
-    )
-    return new ApiResponseDto<CaseMemberResponseDto>({
-      data: [caseMember],
-      message: 'Cập nhật hồ sơ nhóm người cần xét nghiệm thành công',
-      statusCode: HttpStatus.OK,
-      success: true,
-    })
-  }
-
-  // @Put(':id/add-member')
-  // @ApiBearerAuth()
-  // @Roles(RoleEnum.CUSTOMER, RoleEnum.STAFF)
-  // @ApiParam({
-  //   name: 'id',
-  //   required: true,
-  //   description: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
-  // })
-  // @ApiOperation({
-  //   summary: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Thành viên đã được thêm vào hồ sơ nhóm người cần xét nghiệm',
-  //   type: ApiResponseDto<CaseMemberResponseDto>,
-  // })
-  // async addMember(
-  //   @Param('id') caseMemberId: string,
-  //   @Body('testTakerId') testTakerId: string,
-  //   @Req() req: any,
-  // ): Promise<ApiResponseDto<CaseMemberResponseDto>> {
-  //   const userId = req.user.id
-  //   const caseMember = await this.caseMemberService.addMember(
-  //     caseMemberId,
-  //     testTakerId,
-  //     userId,
-  //   )
-  //   return {
-  //     data: [caseMember],
-  //     message: 'Thêm thành viên vào hồ sơ nhóm người cần xét nghiệm thành công',
-  //     statusCode: HttpStatus.OK,
-  //     success: true,
-  //   }
-  // }
 }

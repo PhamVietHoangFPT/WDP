@@ -123,12 +123,15 @@ export class ServiceCaseController {
     let staffId: string | undefined
     let sampleCollectorId: string | undefined
     let doctorId: string | undefined
+    let deliveryStaffId: string | undefined
     if (req.user.role === RoleEnum.STAFF) {
       staffId = req.user.id
     } else if (req.user.role === RoleEnum.SAMPLE_COLLECTOR) {
       sampleCollectorId = req.user.id
     } else if (req.user.role === RoleEnum.DOCTOR) {
       doctorId = req.user.id
+    } else if (req.user.role === RoleEnum.DELIVERY_STAFF) {
+      deliveryStaffId = req.user.id
     }
     const updatedServiceCase =
       await this.serviceCaseService.updateCurrentStatus(
@@ -137,6 +140,7 @@ export class ServiceCaseController {
         staffId,
         sampleCollectorId,
         doctorId,
+        deliveryStaffId,
       )
     if (!updatedServiceCase) {
       return null
