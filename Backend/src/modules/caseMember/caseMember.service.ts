@@ -15,7 +15,7 @@ import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { ISamplingKitInventoryRepository } from '../samplingKitInventory/interfaces/isamplingKitInventory.repository'
 import { IServiceRepository } from '../service/interfaces/iservice.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
-
+import { v4 as uuidv4 } from 'uuid' // Import hàm tạo GUID
 @Injectable()
 export class CaseMemberService implements ICaseMemberService {
   constructor(
@@ -37,6 +37,7 @@ export class CaseMemberService implements ICaseMemberService {
       testTaker: caseMember.testTaker,
       booking: caseMember.booking,
       service: caseMember.service,
+      sampleIdentifyNumbers: caseMember.sampleIdentifyNumbers,
     })
   }
 
@@ -217,12 +218,34 @@ export class CaseMemberService implements ICaseMemberService {
       quantityNeeded, // Dùng số lượng đã được xác định ở bước 1
     )
 
-    // --- BƯỚC 3: TẠO HỒ SƠ ---
+    // --- BƯỚC 3: BẮT ĐẦU LOGIC TẠO GUID ---
+    const sampleIdentifyNumbers: string[] = []
+
+    if (dto.isSingleService) {
+      // TRƯỜNG HỢP 1: Mỗi người dùng 1 dịch vụ
+
+      // Tạo một GUID cho mỗi người
+      for (let i = 0; i < dto.testTaker.length; i++) {
+        sampleIdentifyNumbers.push(uuidv4())
+      }
+    } else {
+      // TRƯỜNG HỢP 2: Mọi người cùng dùng chung các dịch vụ
+      const numberOfServices = dto.service.length
+      const numberOfTakers = dto.testTaker.length
+
+      // Tạo (số người * số dịch vụ) GUID
+      for (let i = 0; i < numberOfTakers * numberOfServices; i++) {
+        sampleIdentifyNumbers.push(uuidv4())
+      }
+    }
+
+    // --- BƯỚC 4: TẠO HỒ SƠ ---
 
     // Tạo hồ sơ nhóm người cần xét nghiệm
     const dataSend = {
       ...dto,
       samplingKitInventory: findSamplingKitInventory,
+      sampleIdentifyNumbers: sampleIdentifyNumbers,
     }
     const caseMember = await this.caseMemberRepository.create(dataSend, userId)
     return this.mapToResponseDto(caseMember)

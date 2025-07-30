@@ -54,6 +54,14 @@ export class CaseMemberResponseDto {
   slot: mongoose.Types.ObjectId
 
   @Expose()
+  @ApiProperty({
+    example: ['12345', '123456'],
+    type: [String],
+  })
+  @Transform(transformObjectIdArray, { toPlainOnly: true })
+  sampleIdentifyNumbers: string[]
+
+  @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(transformObjectId, { toPlainOnly: true })
   created_by: mongoose.Types.ObjectId
