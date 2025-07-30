@@ -14,7 +14,7 @@ const CustomHeader = () => {
         justifyContent: 'center',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
         height: 'auto',
-        marginTop: '64px', // Đảm bảo không bị che bởi Navbar
+        marginTop: '64px',
       }}
     >
       {/* Logo */}
