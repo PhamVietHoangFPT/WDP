@@ -5,7 +5,6 @@ import {
   LogoutOutlined,
   CalendarOutlined,
   HomeFilled,
-  SmileOutlined,
 } from '@ant-design/icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBlog } from '@fortawesome/free-solid-svg-icons'
@@ -119,6 +118,11 @@ const Navbar: React.FC = () => {
   return (
     <Header
       style={{
+        position: 'fixed', // ✅ Bám lên đầu màn hình
+        top: 0,
+        left: 0,
+        width: '100%', // ✅ Đảm bảo full width
+        zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
         background: '#fff',
