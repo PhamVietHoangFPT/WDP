@@ -6,6 +6,7 @@ import { IAdnDocumentationRepository } from './interfaces/iadnDocumentation.repo
 import { Injectable, Inject } from '@nestjs/common'
 import { AdnDocumentationDocument } from './schemas/adnDocumentation.schema'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
+import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
 
 @Injectable()
 export class AdnDocumentationService implements IAdnDocumentationService {
@@ -14,6 +15,8 @@ export class AdnDocumentationService implements IAdnDocumentationService {
     private readonly adnDocumentationRepository: IAdnDocumentationRepository,
     @Inject(IServiceCaseRepository)
     private readonly serviceCaseRepository: IServiceCaseRepository,
+    @Inject(ITestRequestStatusRepository)
+    private readonly testRequestStatusRepository: ITestRequestStatusRepository,
   ) {}
 
   private mapToResponseDto(
@@ -24,15 +27,24 @@ export class AdnDocumentationService implements IAdnDocumentationService {
 
   async create(
     dto: CreateAdnDocumentationDto,
-    userId: string,
+    doctorId: string,
   ): Promise<AdnDocumentationResponseDto> {
-    const document = await this.adnDocumentationRepository.create(dto, userId)
+    const document = await this.adnDocumentationRepository.create(dto, doctorId)
     if (!document) {
       throw new Error('Không thể tạo tài liệu ADN')
     }
     await this.serviceCaseRepository.updateAdnDocumentation(
       document.serviceCase.toString(),
       document._id.toString(),
+    )
+    const newStatus =
+      await this.testRequestStatusRepository.getTestRequestStatusIdByName(
+        'Chờ duyệt kết quả',
+      )
+    await this.serviceCaseRepository.updateCurrentStatus(
+      dto.serviceCase.toString(),
+      newStatus.toString(),
+      doctorId,
     )
     return this.mapToResponseDto(document)
   }

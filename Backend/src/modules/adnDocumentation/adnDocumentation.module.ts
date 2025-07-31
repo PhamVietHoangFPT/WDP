@@ -9,6 +9,7 @@ import {
 import { AdnDocumentationService } from './adnDocumentation.service'
 import { IAdnDocumentationService } from './interfaces/iadnDocumentation.service'
 import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
+import { TestRequestStatusModule } from '../testRequestStatus/testRequestStatus.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
       { name: AdnDocumentation.name, schema: AdnDocumentationSchema },
     ]),
     ServiceCaseModule,
+    TestRequestStatusModule,
   ],
   providers: [
     {
