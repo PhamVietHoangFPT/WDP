@@ -24,6 +24,11 @@ export interface IServiceService {
   ): Promise<any>
 
   deleteService(id: string, userId: string): Promise<any>
+
+  getServiceWithSampleInventory(
+    serviceId: string,
+    facilityId: string,
+  ): Promise<any>
 }
 
 export const IServiceService = Symbol('IServiceService')

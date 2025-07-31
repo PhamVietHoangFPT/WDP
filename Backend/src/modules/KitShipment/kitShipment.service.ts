@@ -120,7 +120,6 @@ export class KitShipmentService implements IKitShipmentService {
     const serviceCase =
       await this.serviceCaseRepository.findByCaseMemberId(caseMemberId)
 
-
     if (!serviceCase) {
       throw new NotFoundException(
         `Không tìm thấy trường hợp dịch vụ cho thành viên trường hợp với ID ${caseMemberId}.`,

@@ -214,4 +214,109 @@ export class ServiceRepository implements IServiceRepository {
       })
       .exec()
   }
+
+  async getServiceWithSampleInventory(
+    serviceId: string,
+    facilityId: string,
+  ): Promise<any> {
+    const result = await this.serviceModel.aggregate([
+      // Giai đoạn 1: Tìm chính xác service cần lấy
+      {
+        $match: { _id: new mongoose.Types.ObjectId(serviceId) },
+      },
+      // Giai đoạn 2: Join với collection 'samples'
+      {
+        $lookup: {
+          from: 'samples',
+          localField: 'sample',
+          foreignField: '_id',
+          as: 'sampleDetails',
+        },
+      },
+      // ✅ GIAI ĐOẠN 2.1: Join với collection 'timereturns'
+      {
+        $lookup: {
+          from: 'timereturns', // Giả sử tên collection là 'timereturns'
+          localField: 'timeReturn',
+          foreignField: '_id',
+          as: 'timeReturnDetails',
+        },
+      },
+      // Giai đoạn 3: Join với 'samplingkitinventories'
+      {
+        $lookup: {
+          from: 'samplingkitinventories',
+          let: { sampleId: '$sample' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$sample', '$$sampleId'] },
+                    {
+                      $eq: [
+                        '$facility',
+                        new mongoose.Types.ObjectId(facilityId),
+                      ],
+                    },
+                    // Thêm điều kiện lọc deleted_at tại đây
+                    { $eq: ['$deleted_at', null] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'inventoryDetails',
+        },
+      },
+      // Giai đoạn 4: Dùng $unwind an toàn cho tất cả các kết quả join
+      {
+        $unwind: { path: '$sampleDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: {
+          path: '$timeReturnDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: '$inventoryDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Giai đoạn 5: Định dạng lại kết quả cuối cùng
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          fee: 1,
+          isAgnate: 1, // Bổ sung thêm các trường khác nếu cần
+          isAdministration: 1,
+          isSelfSampling: 1,
+          // ✅ Cập nhật lại các trường trả về
+          sample: {
+            _id: '$sampleDetails._id',
+            name: '$sampleDetails.name',
+            fee: '$sampleDetails.fee',
+          },
+          timeReturn: {
+            _id: '$timeReturnDetails._id',
+            timeReturn: '$timeReturnDetails.timeReturn',
+            timeReturnFee: '$timeReturnDetails.timeReturnFee',
+            description: '$timeReturnDetails.description',
+          },
+          sampleInventory: {
+            _id: '$inventoryDetails._id',
+            lotNumber: '$inventoryDetails.lotNumber',
+            expirationDate: '$inventoryDetails.expDate',
+            inventory: '$inventoryDetails.inventory',
+          },
+        },
+      },
+    ])
+
+    // aggregate luôn trả về một mảng
+    return result.length > 0 ? result[0] : null
+  }
 }
