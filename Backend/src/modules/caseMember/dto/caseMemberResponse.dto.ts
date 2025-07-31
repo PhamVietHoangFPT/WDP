@@ -28,9 +28,12 @@ export class CaseMemberResponseDto {
   testTaker: mongoose.Types.ObjectId[]
 
   @Expose()
-  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
-  @Transform(transformObjectId, { toPlainOnly: true })
-  samplingKitInventory: mongoose.Types.ObjectId
+  @ApiProperty({
+    example: ['605e3f5f4f3e8c1d4c9f1e1a', '605e3f5f4f3e8c1d4c9f1e1b'],
+    type: [String],
+  })
+  @Transform(transformObjectIdArray, { toPlainOnly: true })
+  samplingKitInventory: mongoose.Types.ObjectId[]
 
   @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
@@ -38,9 +41,12 @@ export class CaseMemberResponseDto {
   booking: mongoose.Types.ObjectId
 
   @Expose()
-  @ApiProperty({ example: '665b4f2a2ef540b5c6d6be3e', type: String })
-  @Transform(transformObjectId, { toPlainOnly: true })
-  service: mongoose.Types.ObjectId
+  @ApiProperty({
+    example: ['605e3f5f4f3e8c1d4c9f1e1a', '605e3f5f4f3e8c1d4c9f1e1b'],
+    type: [String],
+  })
+  @Transform(transformObjectIdArray, { toPlainOnly: true })
+  service: mongoose.Types.ObjectId[]
 
   @Expose()
   @ApiProperty({ example: '665b4f2a2ef540b5c6d6be3e', type: String })
@@ -48,18 +54,17 @@ export class CaseMemberResponseDto {
   slot: mongoose.Types.ObjectId
 
   @Expose()
+  @ApiProperty({
+    example: ['12345', '123456'],
+    type: [String],
+  })
+  @Transform(transformObjectIdArray, { toPlainOnly: true })
+  sampleIdentifyNumbers: string[]
+
+  @Expose()
   @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
   @Transform(transformObjectId, { toPlainOnly: true })
   created_by: mongoose.Types.ObjectId
-
-  @Expose()
-  @ApiProperty({
-    example: ['605e3f5f4f3e8c1d4c9f1e1c', '605e3f5f4f3e8c1d4c9f1e1d'],
-    type: [String], // SỬA: Khai báo đây là mảng các chuỗi
-    required: false,
-  })
-  @Transform(transformObjectIdArray, { toPlainOnly: true }) // SỬA: Dùng hàm transform cho mảng
-  image?: mongoose.Types.ObjectId[]
 
   constructor(partial: Partial<CaseMember>) {
     Object.assign(this, partial)

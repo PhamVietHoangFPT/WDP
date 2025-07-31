@@ -9,11 +9,12 @@ import { IKitShipmentHistoryRepository } from './interfaces/iKitShipmentHistory.
 
 @Injectable()
 export class KitShipmentHistoryRepository
-  implements IKitShipmentHistoryRepository {
+  implements IKitShipmentHistoryRepository
+{
   constructor(
     @InjectModel(KitShipmentHistory.name)
     private KitShipmentHistoryModel: Model<KitShipmentHistoryDocument>,
-  ) { }
+  ) {}
 
   async createKitShipmentHistory(
     kitShipmentStatus: string,

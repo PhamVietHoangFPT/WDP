@@ -6,7 +6,6 @@ export interface IServiceCaseRepository {
   createServiceCase(
     createServiceCaseDto: CreateServiceCaseDto,
     userId: string,
-    totalFee: number,
   ): Promise<ServiceCaseDocument>
 
   findAllServiceCases(
@@ -84,5 +83,10 @@ export interface IServiceCaseRepository {
   ): Promise<any>
 
   checkIsSelfSampling(serviceCaseId: string): Promise<boolean | null>
+
+  updateAdnDocumentation(
+    serviceCaseId: string,
+    adnDocumentationId: string,
+  ): Promise<ServiceCaseDocument | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

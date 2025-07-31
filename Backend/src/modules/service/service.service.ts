@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ConflictException,
   Inject,
@@ -14,7 +15,6 @@ import { PaginatedResponse } from 'src/common/interfaces/paginated-response.inte
 import { isMongoId } from 'class-validator'
 import { FindAllServiceQueryDto } from './dto/find-all-service-query.dto'
 import { ITimeReturnRepository } from '../timeReturn/interfaces/itimeReturn.repository'
-import mongoose from 'mongoose'
 
 @Injectable()
 export class ServiceService implements IServiceService {
@@ -235,6 +235,7 @@ export class ServiceService implements IServiceService {
       throw new InternalServerErrorException('Lỗi khi thay đổi dịch vụ.')
     }
   }
+
   async deleteService(id: string, userId: string): Promise<ServiceResponseDto> {
     //this variable is used to check if the Service already exists
     const existingService = await this.findServiceById(id)
@@ -251,5 +252,22 @@ export class ServiceService implements IServiceService {
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi xóa dịch vụ.')
     }
+  }
+
+  async getServiceWithSampleInventory(
+    serviceId: string,
+    facilityId: string,
+  ): Promise<any> {
+    if (!serviceId || !isMongoId(serviceId)) {
+      throw new ConflictException('ID dịch vụ không hợp lệ.')
+    }
+    const service = await this.serviceRepository.getServiceWithSampleInventory(
+      serviceId,
+      facilityId,
+    )
+    if (!service) {
+      throw new ConflictException('Không tìm thấy dịch vụ hoặc mẫu.')
+    }
+    return service
   }
 }

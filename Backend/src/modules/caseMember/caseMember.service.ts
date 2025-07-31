@@ -3,19 +3,19 @@ import {
   NotFoundException,
   Inject,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common'
-import { CaseMember, CaseMemberDocument } from './schemas/caseMember.schema'
+import { CaseMember } from './schemas/caseMember.schema'
 import { ICaseMemberRepository } from './interfaces/icaseMember.repository'
 import { ICaseMemberService } from './interfaces/icaseMember.service'
 import { CreateCaseMemberDto } from './dto/createCaseMember.dto'
-import { UpdateCaseMemberDto } from './dto/updateCaseMember.dto'
 import { CaseMemberResponseDto } from './dto/caseMemberResponse.dto'
 import { ITestTakerRepository } from '../testTaker/interfaces/itestTaker.repository'
 import { IBookingRepository } from '../booking/interfaces/ibooking.repository'
 import { ISamplingKitInventoryRepository } from '../samplingKitInventory/interfaces/isamplingKitInventory.repository'
 import { IServiceRepository } from '../service/interfaces/iservice.repository'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
-
+import { v4 as uuidv4 } from 'uuid' // Import hàm tạo GUID
 @Injectable()
 export class CaseMemberService implements ICaseMemberService {
   constructor(
@@ -37,7 +37,24 @@ export class CaseMemberService implements ICaseMemberService {
       testTaker: caseMember.testTaker,
       booking: caseMember.booking,
       service: caseMember.service,
+      sampleIdentifyNumbers: caseMember.sampleIdentifyNumbers,
     })
+  }
+
+  private checkAnyServiceIsAdministration = async (
+    serviceIds: string[],
+  ): Promise<boolean> => {
+    // Lặp qua từng ID trong mảng
+    for (const serviceId of serviceIds) {
+      const isAdmin =
+        await this.serviceRepository.checkIsAdministration(serviceId)
+      // Nếu tìm thấy BẤT KỲ dịch vụ nào là hành chính, trả về true ngay lập tức
+      if (isAdmin) {
+        return true
+      }
+    }
+    // Nếu vòng lặp kết thúc mà không tìm thấy, có nghĩa là không có cái nào
+    return false
   }
 
   async findAllCaseMembers(
@@ -92,9 +109,9 @@ export class CaseMemberService implements ICaseMemberService {
       )
     }
 
-    if (dto.testTaker.length > 3) {
+    if (dto.testTaker.length >= 3) {
       throw new ConflictException(
-        'Một hồ sơ nhóm người cần xét nghiệm chỉ có tối đa 3 thành viên',
+        'Một hồ sơ nhóm người cần xét nghiệm chỉ có tối đa 2 thành viên',
       )
     }
 
@@ -121,16 +138,16 @@ export class CaseMemberService implements ICaseMemberService {
     )
 
     // Kiểm tra xem dịch vụ có tồn tại không
-    const service = await this.serviceRepository.findById(dto.service)
+    const service = await this.serviceRepository.findByIds(dto.service)
 
     if (!service) {
       throw new NotFoundException('Không tìm thấy dịch vụ')
     }
 
     // Kiểm tra xem dịch vụ này có được sử dụng tại nhà không
-    const isServiceNotAtHome =
-      await this.serviceRepository.checkIsAdministration(dto.service)
-
+    const isServiceNotAtHome = await this.checkAnyServiceIsAdministration(
+      dto.service,
+    )
     if (isServiceNotAtHome === true && dto.isAtHome === true) {
       throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
@@ -138,203 +155,99 @@ export class CaseMemberService implements ICaseMemberService {
       throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
     }
     // Lấy sample để tìm sampling kit
-    const sampleId = await this.serviceRepository.getSampleId(dto.service)
+    const sampleIds = await this.serviceRepository.getSampleIds(dto.service)
 
-    // Lấy kho mẫu kit xét nghiệm theo sampleId và số lượng trong facility
-    const findSamplingKitInventory =
-      await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
-        sampleId.toString(),
-        dto.testTaker.length,
-        facilityId,
-      )
+    let quantityNeeded: number
+    let findSamplingKitInventory: string[] | null
+    const isSingleService = dto.isSingleService
+    if (isSingleService) {
+      // TRƯỜNG HỢP 1: Mỗi người dùng 1 dịch vụ
 
-    if (!findSamplingKitInventory) {
-      throw new NotFoundException('Mẫu kit xét nghiệm hiện không đủ trong kho')
+      // Logic yêu cầu số lượng dịch vụ phải bằng số lượng người xét nghiệm
+      if (sampleIds.length !== dto.testTaker.length) {
+        throw new BadRequestException(
+          'Số lượng dịch vụ phải bằng số lượng người xét nghiệm.',
+        )
+      }
+
+      // Mỗi dịch vụ chỉ cần 1 kit
+      quantityNeeded = 1
+
+      // Tìm các kit, đảm bảo mỗi loại đều có đủ hàng
+      findSamplingKitInventory =
+        await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
+          sampleIds,
+          quantityNeeded,
+          facilityId,
+        )
+
+      // Nếu số lượng kit tìm thấy không khớp, tức là có loại kit đã hết hàng
+      if (findSamplingKitInventory.length !== sampleIds.length) {
+        throw new NotFoundException(
+          'Một hoặc nhiều mẫu kit xét nghiệm không đủ trong kho.',
+        )
+      }
+    } else {
+      // TRƯỜNG HỢP 2: Tất cả mọi người cùng dùng chung các dịch vụ
+
+      // Số lượng cần cho mỗi loại kit là tổng số người xét nghiệm
+      quantityNeeded = dto.testTaker.length
+
+      // Tìm các kit, đảm bảo mỗi loại đều có đủ hàng cho tất cả mọi người
+      findSamplingKitInventory =
+        await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
+          sampleIds,
+          quantityNeeded,
+          facilityId,
+        )
+
+      // Nếu số lượng kit tìm thấy không khớp, tức là có loại kit đã hết hàng
+      if (findSamplingKitInventory.length !== sampleIds.length) {
+        throw new NotFoundException(
+          'Một hoặc nhiều mẫu kit xét nghiệm không đủ trong kho cho tất cả mọi người.',
+        )
+      }
     }
 
-    // Cập nhật số lượng mẫu kit trong kho
+    // --- BƯỚC 2: CẬP NHẬT SỐ LƯỢNG TỒN KHO ---
+
+    // Cập nhật số lượng cho tất cả các kit đã tìm thấy ở trên
     await this.samplingKitInventoryRepository.updateInventory(
       findSamplingKitInventory,
       facilityId,
-      dto.testTaker.length,
+      quantityNeeded, // Dùng số lượng đã được xác định ở bước 1
     )
+
+    // --- BƯỚC 3: BẮT ĐẦU LOGIC TẠO GUID ---
+    const sampleIdentifyNumbers: string[] = []
+
+    if (dto.isSingleService) {
+      // TRƯỜNG HỢP 1: Mỗi người dùng 1 dịch vụ
+
+      // Tạo một GUID cho mỗi người
+      for (let i = 0; i < dto.testTaker.length; i++) {
+        sampleIdentifyNumbers.push(uuidv4())
+      }
+    } else {
+      // TRƯỜNG HỢP 2: Mọi người cùng dùng chung các dịch vụ
+      const numberOfServices = dto.service.length
+      const numberOfTakers = dto.testTaker.length
+
+      // Tạo (số người * số dịch vụ) GUID
+      for (let i = 0; i < numberOfTakers * numberOfServices; i++) {
+        sampleIdentifyNumbers.push(uuidv4())
+      }
+    }
+
+    // --- BƯỚC 4: TẠO HỒ SƠ ---
 
     // Tạo hồ sơ nhóm người cần xét nghiệm
     const dataSend = {
       ...dto,
       samplingKitInventory: findSamplingKitInventory,
+      sampleIdentifyNumbers: sampleIdentifyNumbers,
     }
     const caseMember = await this.caseMemberRepository.create(dataSend, userId)
-    return this.mapToResponseDto(caseMember)
-  }
-
-  async update(
-    id: string,
-    dto: UpdateCaseMemberDto,
-    userId: string,
-  ): Promise<CaseMemberResponseDto> {
-    // Kiểm tra số lượng thành viên trong nhóm người cần xét nghiệm
-    if (dto.testTaker.length <= 1) {
-      throw new ConflictException(
-        'Hồ sơ nhóm người cần xét nghiệm cần ít nhất 2 thành viên',
-      )
-    }
-
-    if (dto.testTaker.length > 3) {
-      throw new ConflictException(
-        'Một hồ sơ nhóm người cần xét nghiệm chỉ có tối đa 3 thành viên',
-      )
-    }
-
-    // Kiểm tra lịch hẹn có tồn tại không
-    const bookingExist = await this.bookingRepository.checkExistById(
-      dto.booking,
-    )
-
-    if (!bookingExist) {
-      throw new NotFoundException('Không tìm thấy hồ sơ đặt lịch hẹn')
-    }
-
-    // Kiểm tra ngày giờ của lịch hẹn
-    const bookingExistDate = await this.bookingRepository.getBookingDateById(
-      dto.booking,
-    )
-    if (new Date(bookingExistDate) < new Date()) {
-      throw new ConflictException('Lịch hẹn đã qua thời gian sử dụng')
-    }
-
-    // Lấy cơ sở từ lịch hẹn
-    const facilityId = await this.bookingRepository.getFacilityIdByBookingId(
-      dto.booking,
-    )
-
-    // Kiểm tra xem dịch vụ có tồn tại không
-    const service = await this.serviceRepository.findById(dto.service)
-
-    if (!service) {
-      throw new NotFoundException('Không tìm thấy dịch vụ')
-    }
-
-    // Kiểm tra xem dịch vụ này có được sử dụng tại nhà không
-    const isServiceAtHome = await this.serviceRepository.checkIsAdministration(
-      dto.service,
-    )
-
-    const oldCaseMemberIsAtHome =
-      await this.caseMemberRepository.getIsSelfSampling(id)
-
-    if (isServiceAtHome && oldCaseMemberIsAtHome === true) {
-      throw new ConflictException('Dịch vụ này không được sử dụng tại nhà')
-    }
-    const oldCaseMemberIsSelfSampling =
-      await this.caseMemberRepository.getIsAtHome(id)
-
-    if (isServiceAtHome && oldCaseMemberIsSelfSampling === true) {
-      throw new ConflictException('Dịch vụ này không được tự lấy mẫu')
-    }
-    // Lấy số lượng nhóm người cần xét nghiệm
-    const oldCaseMember = await this.caseMemberRepository.findById(id)
-    if (!oldCaseMember) {
-      throw new NotFoundException(
-        'Không tìm thấy hồ sơ nhóm người cần xét nghiệm',
-      )
-    }
-    const oldTestTakerCount = oldCaseMember.testTaker.length
-    // Cập nhật số lượng mẫu kit xét nghiệm
-
-    let numberOfTestTakerToUpdate: number
-    let findSamplingKitInventory: string | null
-    // Nếu số lượng testTaker không thay đổi, lấy kho mẫu kit xét nghiệm theo caseMemberId
-    if (oldTestTakerCount === dto.testTaker.length) {
-      numberOfTestTakerToUpdate = 0
-      findSamplingKitInventory =
-        await this.caseMemberRepository.getSamplingKitInventoryIdByCaseMemberId(
-          id,
-        )
-    } else {
-      // Nếu số lượng testTaker thay đổi, tính số lượng cần cập nhật
-      numberOfTestTakerToUpdate = dto.testTaker.length - oldTestTakerCount
-      // Nếu samplingKit cũ vẫn còn đủ số lượng
-      const oldSamplingKitInventory =
-        await this.caseMemberRepository.getSamplingKitInventoryIdByCaseMemberId(
-          id,
-        )
-      const oldSamplingKitInventoryDoc =
-        await this.samplingKitInventoryRepository.findById(
-          oldSamplingKitInventory,
-        )
-      if (!oldSamplingKitInventoryDoc) {
-        throw new NotFoundException('Không tìm thấy kho mẫu kit xét nghiệm')
-      }
-      if (oldSamplingKitInventoryDoc.inventory >= numberOfTestTakerToUpdate) {
-        // Nếu kho mẫu kit xét nghiệm cũ vẫn đủ số lượng, không cần tìm kho mới
-        findSamplingKitInventory = oldSamplingKitInventory
-        const updateInventory =
-          await this.samplingKitInventoryRepository.updateInventory(
-            findSamplingKitInventory,
-            facilityId,
-            numberOfTestTakerToUpdate,
-          )
-        if (!updateInventory) {
-          // Nếu kho mẫu kit xét nghiệm cũ không đủ số lượng, cần tìm kho mới
-          // Lấy sample để tìm sampling kit
-          const sampleId = await this.serviceRepository.getSampleId(dto.service)
-          // Lấy kho mẫu kit xét nghiệm theo sampleId và số lượng trong facility
-          findSamplingKitInventory =
-            await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
-              sampleId.toString(),
-              numberOfTestTakerToUpdate,
-              facilityId,
-            )
-          if (!findSamplingKitInventory) {
-            throw new NotFoundException(
-              'Mẫu kit xét nghiệm hiện không đủ trong kho',
-            )
-          }
-          await this.samplingKitInventoryRepository.updateInventory(
-            findSamplingKitInventory,
-            facilityId,
-            numberOfTestTakerToUpdate,
-          )
-        }
-      } else {
-        // Nếu kho mẫu kit xét nghiệm cũ không đủ số lượng, cần tìm kho mới
-        // Lấy sample để tìm sampling kit
-        const sampleId = await this.serviceRepository.getSampleId(dto.service)
-        // Lấy kho mẫu kit xét nghiệm theo sampleId và số lượng trong facility
-        findSamplingKitInventory =
-          await this.samplingKitInventoryRepository.findBySampleIdAndQuantityInFacility(
-            sampleId.toString(),
-            numberOfTestTakerToUpdate,
-            facilityId,
-          )
-        if (!findSamplingKitInventory) {
-          throw new NotFoundException(
-            'Mẫu kit xét nghiệm hiện không đủ trong kho',
-          )
-        }
-        await this.samplingKitInventoryRepository.updateInventory(
-          findSamplingKitInventory,
-          facilityId,
-          numberOfTestTakerToUpdate,
-        )
-      }
-    }
-
-    const dataSend = {
-      ...dto,
-      samplingKitInventory: findSamplingKitInventory,
-    }
-    const caseMember = await this.caseMemberRepository.update(
-      id,
-      dataSend,
-      userId,
-    )
-    if (!caseMember) {
-      throw new NotFoundException(
-        'Không tìm thấy hồ sơ nhóm người cần xét nghiệm',
-      )
-    }
     return this.mapToResponseDto(caseMember)
   }
 
@@ -351,34 +264,5 @@ export class CaseMemberService implements ICaseMemberService {
       }
       console.error('Error finding case member:', error)
     }
-  }
-
-  async addMember(
-    caseMemberId: string,
-    testTakerId: string,
-    userId: string,
-  ): Promise<CaseMemberDocument | null> {
-    const testTaker = await this.testTakerRepository.findById(testTakerId)
-    if (!testTaker) {
-      throw new NotFoundException('Không tìm thấy hồ sơ người cần xét nghiệm')
-    }
-    const caseMember = await this.caseMemberRepository.findById(caseMemberId)
-    if (!caseMember) {
-      throw new NotFoundException(
-        'Không tìm thấy hồ sơ nhóm người cần xét nghiệm',
-      )
-    }
-    const count =
-      await this.caseMemberRepository.countMemberInCase(caseMemberId)
-    if (count > 3) {
-      throw new NotFoundException(
-        'Một hồ sơ nhóm người cần xét nghiệm chỉ có tối đa 3 thành viên',
-      )
-    }
-    return this.caseMemberRepository.addMember(
-      caseMemberId,
-      testTakerId,
-      userId,
-    )
   }
 }

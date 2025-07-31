@@ -22,6 +22,7 @@ export interface IServiceRepository {
   ): Promise<ServiceDocument | null>
   deleteServiceById(id: string, userId: string): Promise<ServiceDocument | null>
   findById(id: string): Promise<ServiceDocument | null>
+  getSampleIds(id: string[]): Promise<string[] | null>
   getSampleId(id: string): Promise<string | null>
   checkIsAdministration(id: string): Promise<boolean>
   getTotalFeeService(
@@ -37,5 +38,10 @@ export interface IServiceRepository {
   findByName(name: string): Promise<ServiceDocument | null>
   aggregate(pipeline: any[]): mongoose.Aggregate<any[]>
   aggregateOne(pipeline: any[]): mongoose.Aggregate<any>
+  findByIds(serviceIds: string[]): Promise<ServiceDocument[]>
+  getServiceWithSampleInventory(
+    serviceId: string,
+    facilityId: string,
+  ): Promise<any>
 }
 export const IServiceRepository = Symbol('IServiceRepository')

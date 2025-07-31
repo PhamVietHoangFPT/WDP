@@ -1,9 +1,23 @@
-import { Card, Table, Typography, Button, Pagination, Tag, Tooltip } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import {
+  Card,
+  Table,
+  Typography,
+  Button,
+  Pagination,
+  Tag,
+  Tooltip,
+  Select,
+  DatePicker,
+  Space,
+} from 'antd'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useGetPaymentListQuery } from '../../features/customer/paymentApi'
-import { useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import dayjs from 'dayjs'
 
 const { Title } = Typography
+const { RangePicker } = DatePicker
+const { Option } = Select
 
 export default function PaymentHistory() {
   const navigate = useNavigate()
@@ -14,6 +28,26 @@ export default function PaymentHistory() {
   const { data, isLoading } = useGetPaymentListQuery({
     pageSize: Number(pageSize),
     pageNumber: Number(pageNumber),
+  })
+
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [dateRange, setDateRange] = useState<any>(null)
+
+  const filteredData = (data?.data || []).filter((item) => {
+    let statusMatch = true
+    let dateMatch = true
+
+    if (statusFilter) {
+      statusMatch = item.transactionStatus === statusFilter
+    }
+
+    if (dateRange) {
+      const date = dayjs(item.payDate)
+      dateMatch =
+        date.isAfter(dateRange[0], 'day') && date.isBefore(dateRange[1], 'day')
+    }
+
+    return statusMatch && dateMatch
   })
 
   const columns = [
@@ -41,42 +75,43 @@ export default function PaymentHistory() {
       dataIndex: 'payDate',
       key: 'payDate',
       render: (date: string) =>
-        date ? new Date(date).toLocaleString('vi-VN') : '—',
+        date ? dayjs(date).format('HH:mm DD-MM-YYYY') : '—',
     },
     {
       title: 'Trạng thái',
       dataIndex: 'transactionStatus',
       key: 'transactionStatus',
       align: 'center',
-      // ✅ Sửa lại signature để nhận cả `status` và `record`
       render: (status: string, record: { responseCode?: string }) => {
-        // Case 1: Không có trạng thái
         if (!status) {
           return <Tag color='default'>Chưa xác định</Tag>
         }
 
-        // Logic chọn màu vẫn như cũ
         const lowerStatus = status.toLowerCase()
         let color = 'green'
-        if (lowerStatus.includes('lỗi') || lowerStatus.includes('hủy')) {
+        if (lowerStatus.includes('lỗi') || lowerStatus.includes('không')) {
           color = 'red'
         } else if (lowerStatus.includes('chờ')) {
           color = 'blue'
         }
 
-        // ✅ Dùng Tooltip để hiển thị lý do (responseCode) khi người dùng di chuột vào
-        // Nếu không có responseCode, chỉ hiển thị Tag bình thường
-        if (record.responseCode && record.responseCode !== status) {
-          return (
-            <Tooltip title={`Lý do: ${record.responseCode}`}>
-              <Tag color={color}>{status}</Tag>
-            </Tooltip>
-          )
-        }
-
-        // Trả về Tag nếu không có responseCode hoặc responseCode trùng với status
-        return <Tag color={color}>{status}</Tag>
+        return record.responseCode && record.responseCode !== status ? (
+          <Tooltip title={`Lý do: ${record.responseCode}`}>
+            <Tag color={color}>{status}</Tag>
+          </Tooltip>
+        ) : (
+          <Tag color={color}>{status}</Tag>
+        )
       },
+      filters: [
+        { text: 'Giao dịch thành công', value: 'Giao dịch thành công' },
+        { text: 'LGiao dịch bị lỗi', value: 'Giao dịch bị lỗi' },
+        {
+          text: 'Giao dịch không thành công',
+          value: 'Giao dịch không thành công',
+        },
+      ],
+      onFilter: (value, record) => record.transactionStatus === value,
     },
     {
       title: 'Chi tiết',
@@ -91,15 +126,44 @@ export default function PaymentHistory() {
 
   return (
     <div>
-      <Card style={{ margin: '40px auto' }}>
+      <Card
+        style={{
+          margin: '40px auto',
+          padding: 24,
+          borderRadius: 12,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        }}
+      >
         <Title level={3}>Lịch sử thanh toán</Title>
+
+        <Space style={{ marginBottom: 16 }} wrap>
+          <Select
+            allowClear
+            placeholder='Lọc theo trạng thái'
+            onChange={(value) => setStatusFilter(value)}
+            style={{ width: 220 }}
+          >
+            <Option value='Giao dịch thành công'>Giao dịch thành công</Option>
+            <Option value='Giao dịch bị lỗi'>Giao dịch bị lỗi</Option>
+            <Option value='Giao dịch không thành công'>
+              Giao dịch không thành công
+            </Option>
+          </Select>
+
+          <RangePicker
+            format='DD-MM-YYYY'
+            onChange={(dates) => setDateRange(dates)}
+          />
+        </Space>
+
         <Table
           loading={isLoading}
           rowKey='_id'
-          dataSource={data?.data || []}
+          dataSource={filteredData}
           columns={columns}
           pagination={false}
         />
+
         <Pagination
           current={Number(pageNumber)}
           pageSize={Number(pageSize)}
