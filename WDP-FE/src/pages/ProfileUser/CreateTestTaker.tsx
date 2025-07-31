@@ -7,6 +7,9 @@ import {
   Card,
   Typography,
   notification,
+  Row,
+  Col,
+  Divider,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -28,9 +31,7 @@ export default function CreateTesteeForm() {
       const decoded: any = jwtDecode(token)
       const accountId = decoded?.id
 
-      if (!accountId) {
-        throw new Error('Không tìm thấy account ID trong token.')
-      }
+      if (!accountId) throw new Error('Không tìm thấy account ID trong token.')
 
       const genderBoolean =
         values.gender === 'male'
@@ -66,18 +67,18 @@ export default function CreateTesteeForm() {
   }
 
   return (
-    <div>
+    <div style={{ padding: '40px 20px' }}>
       <Card
         style={{
-          maxWidth: 900,
-          margin: '40px auto',
-          padding: 24,
-          borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          maxWidth: 800,
+          margin: 'auto',
+          padding: '40px 32px',
+          borderRadius: 16,
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
         }}
       >
         <Title level={3} style={{ textAlign: 'center', marginBottom: 32 }}>
-          Tạo Người Test ADN
+          🧬 Tạo Hồ Sơ Người Test ADN
         </Title>
 
         <Form
@@ -86,57 +87,74 @@ export default function CreateTesteeForm() {
           onFinish={handleSubmit}
           autoComplete='off'
         >
-          <Form.Item
-            name='name'
-            label='Họ và Tên'
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
-          >
-            <Input placeholder='Nhập họ tên đầy đủ' />
-          </Form.Item>
+          <Row gutter={24}>
+            <Col span={24}>
+              <Form.Item
+                name='name'
+                label='Họ và Tên'
+                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+              >
+                <Input placeholder='Nhập họ tên đầy đủ' />
+              </Form.Item>
+            </Col>
 
-          <Form.Item
-            name='personalId'
-            label='Số định danh cá nhân'
-            rules={[
-              { required: true, message: 'Vui lòng nhập số định danh' },
-              { len: 12, message: 'Số định danh phải đủ 12 chữ số' },
-            ]}
-          >
-            <Input placeholder='Ví dụ: 012345678901' maxLength={12} />
-          </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                name='personalId'
+                label='Số định danh cá nhân'
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số định danh' },
+                  { len: 12, message: 'Số định danh phải đủ 12 chữ số' },
+                ]}
+              >
+                <Input placeholder='012345678901' maxLength={12} />
+              </Form.Item>
+            </Col>
 
-          <Form.Item
-            name='gender'
-            label='Giới tính'
-            rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
-          >
-            <Select placeholder='Chọn giới tính'>
-              <Option value='male'>Nam</Option>
-              <Option value='female'>Nữ</Option>
-              <Option value='other'>Khác</Option>
-            </Select>
-          </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                name='gender'
+                label='Giới tính'
+                rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
+              >
+                <Select placeholder='Chọn giới tính'>
+                  <Option value='male'>Nam</Option>
+                  <Option value='female'>Nữ</Option>
+                  <Option value='other'>Khác</Option>
+                </Select>
+              </Form.Item>
+            </Col>
 
-          <Form.Item
-            name='dayOfBirth'
-            label='Ngày sinh'
-            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
-          >
-            <DatePicker
-              style={{ width: '100%' }}
-              format='DD/MM/YYYY'
-              disabledDate={(current) => current && current > dayjs()}
-            />
-          </Form.Item>
+            <Col span={24}>
+              <Form.Item
+                name='dayOfBirth'
+                label='Ngày sinh'
+                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+              >
+                <DatePicker
+                  style={{ width: '100%' }}
+                  format='DD/MM/YYYY'
+                  disabledDate={(current) => current && current > dayjs()}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Divider />
 
           <Form.Item style={{ textAlign: 'center' }}>
             <Button
               type='primary'
               htmlType='submit'
-              style={{ width: 200 }}
+              style={{
+                width: 220,
+                height: 45,
+                fontSize: 16,
+                fontWeight: 500,
+              }}
               loading={isLoading}
             >
-              Tạo Người Test
+              ➕ Tạo Người Test
             </Button>
           </Form.Item>
         </Form>

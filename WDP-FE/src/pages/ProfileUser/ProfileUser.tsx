@@ -1,14 +1,18 @@
 import Cookies from 'js-cookie'
-import { Card, Descriptions, Avatar, Typography, Button, Layout } from 'antd'
 import {
-  UserOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  ManOutlined,
-  WomanOutlined,
-} from '@ant-design/icons'
+  Card,
+  Form,
+  Input,
+  Avatar,
+  Typography,
+  Button,
+  Layout,
+  Row,
+  Col,
+} from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
+import { EditOutlined } from '@ant-design/icons'
 
 const { Title } = Typography
 const { Content } = Layout
@@ -20,7 +24,7 @@ interface DecodedToken {
   gender?: boolean
   role?: string
   exp?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export default function ProfileUser() {
@@ -52,67 +56,87 @@ export default function ProfileUser() {
     )
   }
 
-  //   const items: MenuProps['items'] = [
-  //     {
-  //       key: 'profile',
-  //       label: 'Thông tin cá nhân',
-  //     },
-  //     {
-  //       key: 'create-testee',
-  //       label: 'Tạo người test ADN',
-  //       onClick: () => navigate('/create-testee'),
-  //     },
-  //   ]
-
   return (
     <Layout>
       <Content style={{ padding: '40px 24px' }}>
         <Card
+          title={
+            <span style={{ fontWeight: 'bold' }}>👤 Thông tin cá nhân</span>
+          }
           style={{
-            maxWidth: 600,
+            maxWidth: 800,
             margin: 'auto',
             padding: 24,
             borderRadius: 12,
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <Avatar size={80} icon={<UserOutlined />} />
-            <Title level={3} style={{ marginTop: 12 }}>
-              {decoded.name || 'Không rõ tên'}
-            </Title>
-            <div style={{ fontSize: 14, color: '#888' }}>
-              {decoded.role || 'Vai trò'}
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: 24,
+              position: 'relative',
+            }}
+          >
+            <Avatar
+              size={96}
+              src='https://tse1.explicit.bing.net/th/id/OIP.lvzPu-WOW4Iv7QyjP-IkrgHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3'
+              style={{ border: '2px solid #d9d9d9' }}
+            />
+            <EditOutlined
+              style={{
+                position: 'absolute',
+                right: 'calc(50% - 48px)',
+                top: '70px',
+                background: '#fff',
+                padding: 6,
+                borderRadius: '50%',
+                boxShadow: '0 0 6px rgba(0,0,0,0.2)',
+                cursor: 'pointer',
+              }}
+            />
+          </div>
+
+          <Form layout='vertical'>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item label='Họ và Tên' name='username'>
+                  <Input
+                    placeholder='Username'
+                    defaultValue={decoded.name}
+                    readOnly
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label='Số điện thoại' name='phoneNumber'>
+                  <Input
+                    placeholder='Mobile No'
+                    defaultValue={decoded.phoneNumber}
+                    readOnly
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label='Email' name='email'>
+                  <Input
+                    placeholder='Email'
+                    defaultValue={decoded.email}
+                    readOnly
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' onClick={() => navigate('/edit-profile')}>
+                Chỉnh sửa thông tin
+              </Button>
             </div>
-          </div>
-
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label='Email'>
-              <MailOutlined /> {decoded.email}
-            </Descriptions.Item>
-            <Descriptions.Item label='Số điện thoại'>
-              <PhoneOutlined /> {decoded.phoneNumber || 'Chưa cập nhật'}
-            </Descriptions.Item>
-            <Descriptions.Item label='Giới tính'>
-              {decoded.gender === true ? (
-                <>
-                  <ManOutlined /> Nam
-                </>
-              ) : decoded.gender === false ? (
-                <>
-                  <WomanOutlined /> Nữ
-                </>
-              ) : (
-                'Chưa rõ'
-              )}
-            </Descriptions.Item>
-          </Descriptions>
-
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <Button type='primary' onClick={() => navigate('/')}>
-              Về trang chủ
-            </Button>
-          </div>
+          </Form>
         </Card>
       </Content>
     </Layout>
