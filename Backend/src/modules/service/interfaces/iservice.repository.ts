@@ -39,5 +39,9 @@ export interface IServiceRepository {
   aggregate(pipeline: any[]): mongoose.Aggregate<any[]>
   aggregateOne(pipeline: any[]): mongoose.Aggregate<any>
   findByIds(serviceIds: string[]): Promise<ServiceDocument[]>
+  getServiceWithSampleInventory(
+    serviceId: string,
+    facilityId: string,
+  ): Promise<any>
 }
 export const IServiceRepository = Symbol('IServiceRepository')

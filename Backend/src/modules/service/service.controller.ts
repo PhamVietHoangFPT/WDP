@@ -29,7 +29,6 @@ import { CreateServiceDto } from './dto/createService.dto'
 import { ServiceResponseDto } from './dto/serviceResponse.dto'
 import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 import { UpdateServiceDto } from './dto/updateService.dto'
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'
 import { FindAllServiceQueryDto } from './dto/find-all-service-query.dto'
 
 @ApiTags('services')
@@ -49,6 +48,31 @@ export class ServiceController {
   create(@Body() createConditionDto: CreateServiceDto, @Req() req: any) {
     const user = req.user.id // Lấy thông tin người dùng từ request
     return this.serviceService.createService(user, createConditionDto)
+  }
+
+  @Get('service-with-sample-inventory')
+  @ApiQuery({
+    name: 'serviceId',
+    required: true,
+    type: String,
+    description: 'ID của dịch vụ',
+  })
+  @ApiQuery({
+    name: 'facilityId',
+    required: true,
+    type: String,
+    description: 'ID của cơ sở y tế',
+  })
+  @ApiOperation({ summary: 'Lấy dịch vụ với kho mẫu' })
+  @ApiResponse({ status: HttpStatus.OK, type: ServiceResponseDto })
+  async getServiceWithSampleInventory(
+    @Query('serviceId') serviceId: string,
+    @Query('facilityId') facilityId: string,
+  ): Promise<any> {
+    return this.serviceService.getServiceWithSampleInventory(
+      serviceId,
+      facilityId,
+    )
   }
 
   @Get(':id')
