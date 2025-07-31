@@ -103,6 +103,14 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       },
       {
         $lookup: {
+          from: 'testtakers',
+          localField: 'caseMemberDetails.testTaker',
+          foreignField: '_id',
+          as: 'allTestTakerDetails', // Lưu tất cả vào một mảng tạm
+        },
+      },
+      {
+        $lookup: {
           from: 'addresses',
           let: { addressId: '$caseMemberDetails.address' },
           pipeline: [
@@ -148,45 +156,26 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $lookup: {
           from: 'services',
-          let: { serviceId: '$caseMemberDetails.service' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$serviceId'],
-                },
-              },
-            },
-          ],
-          as: 'serviceDetails',
+          localField: 'caseMemberDetails.service', // `service` là một mảng các ID
+          foreignField: '_id',
+          as: 'serviceDetails', // Kết quả trả về sẽ là một mảng các object service
         },
-      },
-      // Mo mang serviceDetails
-      {
-        $unwind: { path: '$serviceDetails', preserveNullAndEmptyArrays: true },
       },
       // Mo bang time return
       {
         $lookup: {
           from: 'timereturns',
-          let: { timeReturnId: '$serviceDetails.timeReturn' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$timeReturnId'],
-                },
-              },
-            },
-          ],
-          as: 'timeReturnDetails',
+          localField: 'serviceDetails.timeReturn',
+          foreignField: '_id',
+          as: 'allTimeReturnDetails', // Lưu tất cả vào một mảng tạm
         },
       },
-      // Mo mang timeReturnDetails
       {
-        $unwind: {
-          path: '$timeReturnDetails',
-          preserveNullAndEmptyArrays: true,
+        $lookup: {
+          from: 'samples',
+          localField: 'serviceDetails.sample',
+          foreignField: '_id',
+          as: 'allSampleDetails', // Lưu tất cả vào một mảng tạm
         },
       },
       // Chon truong can thiet
@@ -204,11 +193,96 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
               location: '$addressDetails.location',
             },
           },
-          timeReturn: {
-            $concat: [
-              { $toString: '$timeReturnDetails.timeReturn' }, // Chuyển số/value thành chuỗi
-              ' ngày', // Nối với đơn vị " ngày"
-            ],
+          services: {
+            $map: {
+              input: '$serviceDetails',
+              as: 'service',
+              in: {
+                _id: '$$service._id',
+                name: '$$service.name',
+                fee: '$$service.fee',
+                sample: {
+                  $let: {
+                    // Tìm object sample tương ứng trong mảng allSampleDetails
+                    vars: {
+                      matchingSample: {
+                        $first: {
+                          $filter: {
+                            input: '$allSampleDetails',
+                            as: 'sd',
+                            cond: { $eq: ['$$sd._id', '$$service.sample'] },
+                          },
+                        },
+                      },
+                    },
+                    // Nếu tìm thấy, chỉ lấy các trường cần thiết
+                    in: {
+                      _id: '$$matchingSample._id',
+                      name: '$$matchingSample.name',
+                      fee: '$$matchingSample.fee',
+                    },
+                  },
+                },
+                // ✅ LOGIC MỚI ĐỂ LẤY VÀ ĐỊNH DẠNG timeReturn
+                timeReturn: {
+                  $let: {
+                    // 1. Tìm object timeReturn tương ứng trong mảng allTimeReturnDetails
+                    vars: {
+                      matchingTimeReturn: {
+                        $first: {
+                          $filter: {
+                            input: '$allTimeReturnDetails',
+                            as: 'trd',
+                            cond: {
+                              $eq: ['$$trd._id', '$$service.timeReturn'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                    // 2. Nếu tìm thấy, thực hiện $concat
+                    in: {
+                      $concat: [
+                        { $toString: '$$matchingTimeReturn.timeReturn' },
+                        ' ngày',
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          caseMember: {
+            testTakers: {
+              $map: {
+                input: '$caseMemberDetails.testTaker', // Lặp qua mảng ID gốc
+                as: 'takerId',
+                in: {
+                  $let: {
+                    // Tìm object testTaker tương ứng trong mảng allTestTakerDetails
+                    vars: {
+                      matchingTaker: {
+                        $first: {
+                          $filter: {
+                            input: '$allTestTakerDetails',
+                            as: 'ttd',
+                            cond: { $eq: ['$$ttd._id', '$$takerId'] },
+                          },
+                        },
+                      },
+                    },
+                    // Nếu tìm thấy, chỉ lấy các trường cần thiết
+                    in: {
+                      _id: '$$matchingTaker._id',
+                      name: '$$matchingTaker.name',
+                      personalId: '$$matchingTaker.personalId',
+                    },
+                  },
+                },
+              },
+            },
+            sampleIdentifyNumbers: '$caseMemberDetails.sampleIdentifyNumbers',
+            isSelfSampling: '$caseMemberDetails.isSelfSampling',
           },
         },
       },

@@ -2,7 +2,7 @@ import { ServiceCaseResponseDto } from 'src/modules/serviceCase/dto/serviceCaseR
 import { TestRequestStatusDocument } from 'src/modules/testRequestStatus/schemas/testRequestStatus.schema'
 
 export interface IDoctorService {
-  getAllServiceCasesWithoutResults(
+  getAllServiceCasesWithoutAdnDocumentation(
     facilityId: string,
     doctorId: string,
     currentStatus: string,

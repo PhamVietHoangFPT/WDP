@@ -73,6 +73,12 @@ export class ServiceCase extends BaseEntity {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'AdnDocumentation',
+  })
+  adnDocumentation: mongoose.Schema.Types.ObjectId
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Condition',
   })
   condition: mongoose.Schema.Types.ObjectId

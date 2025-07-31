@@ -18,6 +18,7 @@ import {
   TestRequestStatusSchema,
 } from '../testRequestStatus/schemas/testRequestStatus.schema'
 import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
+import { AdnDocumentationModule } from '../adnDocumentation/adnDocumentation.module'
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -35,6 +36,7 @@ import { ServiceCaseModule } from '../serviceCase/serviceCase.module'
     ResultModule,
     TestRequestStatusModule,
     ServiceCaseModule,
+    AdnDocumentationModule,
   ],
   controllers: [DoctorController],
   providers: [
