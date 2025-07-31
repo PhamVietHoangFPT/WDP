@@ -129,7 +129,6 @@ const SampleCollectorServiceCase: React.FC = () => {
       }).unwrap()
       message.success("Cập nhật trạng thái thành công!")
       setUpdateModalVisible(false)
-      setSelectedServiceCase(null)
       setNewStatusId("")
     } catch (error: any) {
       console.error("Update status error:", error)
@@ -221,11 +220,14 @@ const SampleCollectorServiceCase: React.FC = () => {
           </Space>
           {fullAddress && (
             <Tooltip title={fullAddress}>
-              <Space style={{ maxWidth: 250 }}>
+              <Space style={{ maxWidth: 250, alignItems: "start"}}>
                 <EnvironmentOutlined />
-                <Typography.Text type="secondary" ellipsis>
-                  {fullAddress}
-                </Typography.Text>
+                {/* su dung div de xuong dong */}
+                <div style={{ wordWrap: 'break-word' }}>
+                  <Typography.Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>
+                    {fullAddress}
+                  </Typography.Text>
+                </div>
               </Space>
             </Tooltip>
           )}
@@ -259,7 +261,6 @@ const SampleCollectorServiceCase: React.FC = () => {
             <div key={taker._id}>
               <Text strong>{taker.name}</Text>
               <div style={{ fontSize: "12px", color: "#666" }}>
-                {/* Lấy các mã mẫu tương ứng */}
                 {sampleIdentifyNumbers
                   .filter((_, i) => (i % 2) === (index % 2))
                   .map((sampleId, i) => (
