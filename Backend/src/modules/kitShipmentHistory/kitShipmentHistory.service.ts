@@ -9,7 +9,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
   constructor(
     @Inject(IKitShipmentHistoryRepository)
     private readonly KitShipmentHistoryRepository: IKitShipmentHistoryRepository,
-  ) { }
+  ) {}
   async findAllKitShipmentHistory(
     pageNumber: number,
     pageSize: number,
