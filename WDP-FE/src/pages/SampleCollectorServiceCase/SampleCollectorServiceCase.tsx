@@ -26,13 +26,22 @@ import {
 import { useCreateServiceCaseImageMutation } from "../../features/deliveryStaff/deliveryStaff"
 import { UserOutlined, PhoneOutlined, EnvironmentOutlined, CarOutlined, UploadOutlined } from "@ant-design/icons"
 
-const { Title } = Typography
+const { Title, Text } = Typography
 
 interface ServiceCase {
   _id: string
   statusDetails: string
   bookingDate: string
-  currentStatus?: string // Add current status ID if available
+  currentStatus?: string
+  caseMember: {
+    testTakers: {
+      _id: string
+      name: string
+      personalId: string
+    }[]
+    sampleIdentifyNumbers: string[]
+    isSelfSampling: boolean
+  }
 }
 
 interface ServiceCaseStatus {
@@ -50,13 +59,13 @@ const SampleCollectorServiceCase: React.FC = () => {
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>("")
 
-  // Fetch service case status list for dropdown
+  // Fetch du lieu cho dropdown status
   const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
     pageNumber: 1,
     pageSize: 100,
   })
 
-  // Fetch service cases based on selected status
+  // Fetch service cases theo status
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
@@ -69,18 +78,15 @@ const SampleCollectorServiceCase: React.FC = () => {
     },
   )
 
-  // Update service case status mutation
   const [updateServiceCaseStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusMutation()
 
-  // Create service case image mutation
   const [createServiceCaseImage, { isLoading: isUploading }] = useCreateServiceCaseImageMutation()
 
-  // Reset page number when status changes
   useEffect(() => {
     setPageNumber(1)
   }, [selectedStatus])
 
-  // Get status color based on status name
+  // Mau sac cho cac status
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Chờ xử lý":
@@ -89,18 +95,22 @@ const SampleCollectorServiceCase: React.FC = () => {
         return "blue"
       case "Đã nhận mẫu":
         return "green"
+      case "Check-in":
+        return "purple"
+      case "Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)":
+        return "cyan"
       default:
         return "default"
     }
   }
 
-  // Get current status order
+  // Get order hien tai cua status
   const getCurrentStatusOrder = (statusName: string) => {
     const status = statusListData?.data?.find((s: ServiceCaseStatus) => s.testRequestStatus === statusName)
     return status?.order || 0
   }
 
-  // Get available next statuses (only higher order)
+  // Get nhung status tiep theo co the cap nhat duoc
   const getAvailableNextStatuses = (currentStatusName: string) => {
     const currentOrder = getCurrentStatusOrder(currentStatusName)
     return [...(statusListData?.data || [])]
@@ -201,17 +211,14 @@ const SampleCollectorServiceCase: React.FC = () => {
 
       return (
         <Space direction="vertical" size={4}>
-          {/* Tên khách hàng */}
           <Space>
             <UserOutlined />
             <Typography.Text strong>{account.name}</Typography.Text>
           </Space>
-          {/* Số điện thoại */}
           <Space>
             <PhoneOutlined />
             <Typography.Text>{account.phoneNumber}</Typography.Text>
           </Space>
-          {/* Địa chỉ */}
           {fullAddress && (
             <Tooltip title={fullAddress}>
               <Space style={{ maxWidth: 250 }}>
@@ -222,11 +229,10 @@ const SampleCollectorServiceCase: React.FC = () => {
               </Space>
             </Tooltip>
           )}
-          {/* ✅ NÚT CHỈ ĐƯỜNG ĐƯỢC THÊM VÀO ĐÂY */}
           {canNavigate && (
             <Button
               icon={<CarOutlined />}
-              size="small" // Dùng nút nhỏ để vừa vặn hơn
+              size="small"
               onClick={handleDirectionsClick}
               style={{ marginTop: "4px" }}
             >
@@ -237,6 +243,36 @@ const SampleCollectorServiceCase: React.FC = () => {
       )
     },
   }
+
+  const testTakersColumns = {
+    title: "Người xét nghiệm & Mã mẫu",
+    key: "testTakers",
+    render: (_, record) => {
+      const { testTakers, sampleIdentifyNumbers } = record.caseMember
+      if (!testTakers || testTakers.length === 0) {
+        return "—"
+      }
+
+      return (
+        <Space direction="vertical" size={4}>
+          {testTakers.map((taker, index) => (
+            <div key={taker._id}>
+              <Text strong>{taker.name}</Text>
+              <div style={{ fontSize: "12px", color: "#666" }}>
+                {/* Lấy các mã mẫu tương ứng */}
+                {sampleIdentifyNumbers
+                  .filter((_, i) => (i % 2) === (index % 2))
+                  .map((sampleId, i) => (
+                    <div key={i}>{sampleId}</div>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </Space>
+      )
+    },
+  }
+
 
   const columns: ColumnsType<ServiceCase> = [
     {
@@ -284,6 +320,7 @@ const SampleCollectorServiceCase: React.FC = () => {
       },
     },
     ...(isAtHome ? [customerCollumns] : []),
+    testTakersColumns,
     {
       title: "Hành động",
       key: "actions",
@@ -302,7 +339,7 @@ const SampleCollectorServiceCase: React.FC = () => {
             <Upload
               beforeUpload={(file) => {
                 handleImageUpload(file, record)
-                return false // Prevent default upload behavior
+                return false
               }}
               showUploadList={false}
               accept="image/*"
@@ -317,7 +354,6 @@ const SampleCollectorServiceCase: React.FC = () => {
     },
   ]
 
-  // Handle service cases data properly - ensure we get fresh data for each filter
   const serviceCases = selectedStatus && serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
 
   const totalItems = serviceCases.length
@@ -325,11 +361,9 @@ const SampleCollectorServiceCase: React.FC = () => {
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
 
-  // Get current status name for display
   const currentStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === selectedStatus)?.testRequestStatus || ""
 
-  // Get new status name for modal
   const newStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === newStatusId)?.testRequestStatus || ""
 
@@ -433,7 +467,6 @@ const SampleCollectorServiceCase: React.FC = () => {
         </>
       )}
 
-      {/* Confirmation Modal */}
       <Modal
         title="Xác nhận cập nhật trạng thái"
         open={updateModalVisible}
