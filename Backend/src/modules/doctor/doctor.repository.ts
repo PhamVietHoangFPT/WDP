@@ -14,7 +14,7 @@ export class DoctorRepository implements IDoctorRepository {
     private readonly serviceCaseModel: Model<ServiceCaseDocument>,
   ) {}
 
-  async getAllServiceCasesWithoutResults(
+  async getAllServiceCasesWithoutAdnDocumentation(
     facilityId: string,
     doctorId: string,
     currentStatus: string,
@@ -25,7 +25,7 @@ export class DoctorRepository implements IDoctorRepository {
         $match: {
           currentStatus: new Types.ObjectId(currentStatus), // Loc theo currentStatus
           doctor: new Types.ObjectId(doctorId),
-          result: { $exists: resultExists },
+          adnDocumentation: { $exists: resultExists },
         },
       },
       // Mo bang testRequestStatuses
@@ -200,6 +200,17 @@ export class DoctorRepository implements IDoctorRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $lookup: {
+          from: 'testtakers',
+          // localField là trường chứa mảng các ID trong document hiện tại
+          localField: 'caseMembers.testTaker',
+          // foreignField là trường ID trong collection 'testtakers' để so khớp
+          foreignField: '_id',
+          // 'as' là tên của trường mới sẽ chứa mảng các document testTaker đã được populate
+          as: 'populatedTestTakers',
+        },
+      },
       // Chon truong can thiet
       {
         $project: {
@@ -208,7 +219,24 @@ export class DoctorRepository implements IDoctorRepository {
           bookingDate: '$bookings.bookingDate',
           timeReturn: '$timeReturns.timeReturn',
           caseMember: {
-            testTaker: '$caseMembers.testTaker',
+            testTakers: {
+              $map: {
+                // input là mảng nguồn
+                input: '$populatedTestTakers',
+                // as là tên biến đại diện cho mỗi phần tử trong mảng
+                as: 'taker',
+                // in là cấu trúc của object mới sẽ được tạo ra
+                in: {
+                  _id: '$$taker._id',
+                  name: '$$taker.name',
+                  personalId: '$$taker.personalId',
+                  dateOfBirth: '$$taker.dateOfBirth',
+                  gender: '$$taker.gender',
+                },
+              },
+            },
+            sampleIdentifyNumbers: '$caseMembers.sampleIdentifyNumbers',
+            isSelfSampling: '$caseMembers.isSelfSampling',
           },
         },
       },
