@@ -133,7 +133,7 @@ export default function ProfileUser() {
 
             <div style={{ textAlign: 'right' }}>
               <Button type='primary' onClick={() => navigate('/edit-profile')}>
-                Chỉnh sửa thông tin:
+                Chỉnh sửa thông tin
               </Button>
             </div>
           </Form>
