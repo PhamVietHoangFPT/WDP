@@ -90,6 +90,7 @@ const DeliveryStaffServiceCase: React.FC = () => {
   } = useGetServiceCaseStatusListForDeliveryQuery({ pageNumber: 1, pageSize: 100 })
 
   // Đảm bảo status mặc định được set và query chính được kích hoạt
+  // Check de gan mac dinh la status "Da co ket qua"
   useEffect(() => {
     if (isStatusListSuccess && statusListData?.data?.length && selectedStatus === undefined) {
       const defaultStatus = statusListData.data.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Đã có kết quả')

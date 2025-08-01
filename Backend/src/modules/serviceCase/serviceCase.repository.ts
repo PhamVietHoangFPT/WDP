@@ -73,6 +73,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
         'Chờ thanh toán',
       )
     const createdServiceCase = await this.serviceCaseModel.create({
+      account: new mongoose.Types.ObjectId(userId),
       caseMember: new mongoose.Types.ObjectId(createServiceCaseDto.caseMember),
       created_by: new mongoose.Types.ObjectId(userId),
       currentStatus: new mongoose.Types.ObjectId(testRequestStatus),
@@ -504,5 +505,18 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     }
 
     return selfSamplingValue
+  }
+
+  async updateAdnDocumentation(
+    serviceCaseId: string,
+    adnDocumentationId: string,
+  ): Promise<ServiceCaseDocument | null> {
+    const updatedServiceCase = await this.serviceCaseModel.findByIdAndUpdate(
+      new Types.ObjectId(serviceCaseId),
+      { adnDocumentation: new Types.ObjectId(adnDocumentationId) },
+      { new: true },
+    )
+
+    return updatedServiceCase
   }
 }

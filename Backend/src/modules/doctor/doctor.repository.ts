@@ -14,7 +14,7 @@ export class DoctorRepository implements IDoctorRepository {
     private readonly serviceCaseModel: Model<ServiceCaseDocument>,
   ) {}
 
-  async getAllServiceCasesWithoutResults(
+  async getAllServiceCasesWithoutAdnDocumentation(
     facilityId: string,
     doctorId: string,
     currentStatus: string,
@@ -25,8 +25,28 @@ export class DoctorRepository implements IDoctorRepository {
         $match: {
           currentStatus: new Types.ObjectId(currentStatus), // Loc theo currentStatus
           doctor: new Types.ObjectId(doctorId),
-          result: { $exists: resultExists },
+          adnDocumentation: { $exists: resultExists },
         },
+      },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$account' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'accountDetails',
+        },
+      },
+      // Mo mang accountDetails
+      {
+        $unwind: { path: '$accountDetails', preserveNullAndEmptyArrays: true },
       },
       // Mo bang testRequestStatuses
       {
@@ -161,54 +181,130 @@ export class DoctorRepository implements IDoctorRepository {
       },
       {
         $lookup: {
-          from: 'services',
-          let: { serviceId: '$caseMembers.service' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$serviceId'],
-                },
-              },
-            },
-          ],
-          as: 'services',
+          from: 'testtakers',
+          // localField là trường chứa mảng các ID trong document hiện tại
+          localField: 'caseMembers.testTaker',
+          // foreignField là trường ID trong collection 'testtakers' để so khớp
+          foreignField: '_id',
+          // 'as' là tên của trường mới sẽ chứa mảng các document testTaker đã được populate
+          as: 'populatedTestTakers',
         },
-      },
-      {
-        $unwind: { path: '$services', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
+          from: 'services',
+          localField: 'caseMembers.service', // `service` là một mảng các ID
+          foreignField: '_id',
+          as: 'serviceDetails', // Kết quả trả về sẽ là một mảng các object service
+        },
+      },
+      // Mo bang time return
+      {
+        $lookup: {
           from: 'timereturns',
-          let: { timeReturnId: '$services.timeReturn' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$timeReturnId'],
-                },
-              },
-            },
-          ],
-          as: 'timeReturns',
+          localField: 'serviceDetails.timeReturn',
+          foreignField: '_id',
+          as: 'allTimeReturnDetails', // Lưu tất cả vào một mảng tạm
         },
       },
       {
-        $unwind: {
-          path: '$timeReturns',
-          preserveNullAndEmptyArrays: true,
+        $lookup: {
+          from: 'samples',
+          localField: 'serviceDetails.sample',
+          foreignField: '_id',
+          as: 'allSampleDetails', // Lưu tất cả vào một mảng tạm
         },
       },
       // Chon truong can thiet
       {
         $project: {
           _id: 1,
-          currentStatus: 1,
+          currentStatus: '$currentStatus.testRequestStatus',
           bookingDate: '$bookings.bookingDate',
-          timeReturn: '$timeReturns.timeReturn',
+          accountDetails: {
+            _id: '$accountDetails._id',
+            name: '$accountDetails.name',
+            phoneNumber: '$accountDetails.phoneNumber',
+          },
+          services: {
+            $map: {
+              input: '$serviceDetails',
+              as: 'service',
+              in: {
+                _id: '$$service._id',
+                name: '$$service.name',
+                fee: '$$service.fee',
+                sample: {
+                  $let: {
+                    // Tìm object sample tương ứng trong mảng allSampleDetails
+                    vars: {
+                      matchingSample: {
+                        $first: {
+                          $filter: {
+                            input: '$allSampleDetails',
+                            as: 'sd',
+                            cond: { $eq: ['$$sd._id', '$$service.sample'] },
+                          },
+                        },
+                      },
+                    },
+                    // Nếu tìm thấy, chỉ lấy các trường cần thiết
+                    in: {
+                      _id: '$$matchingSample._id',
+                      name: '$$matchingSample.name',
+                      fee: '$$matchingSample.fee',
+                    },
+                  },
+                },
+                // ✅ LOGIC MỚI ĐỂ LẤY VÀ ĐỊNH DẠNG timeReturn
+                timeReturn: {
+                  $let: {
+                    // 1. Tìm object timeReturn tương ứng trong mảng allTimeReturnDetails
+                    vars: {
+                      matchingTimeReturn: {
+                        $first: {
+                          $filter: {
+                            input: '$allTimeReturnDetails',
+                            as: 'trd',
+                            cond: {
+                              $eq: ['$$trd._id', '$$service.timeReturn'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                    // 2. Nếu tìm thấy, thực hiện $concat
+                    in: {
+                      $concat: [
+                        { $toString: '$$matchingTimeReturn.timeReturn' },
+                        ' ngày',
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
           caseMember: {
-            testTaker: '$caseMembers.testTaker',
+            testTakers: {
+              $map: {
+                // input là mảng nguồn
+                input: '$populatedTestTakers',
+                // as là tên biến đại diện cho mỗi phần tử trong mảng
+                as: 'taker',
+                // in là cấu trúc của object mới sẽ được tạo ra
+                in: {
+                  _id: '$$taker._id',
+                  name: '$$taker.name',
+                  personalId: '$$taker.personalId',
+                  dateOfBirth: '$$taker.dateOfBirth',
+                  gender: '$$taker.gender',
+                },
+              },
+            },
+            sampleIdentifyNumbers: '$caseMembers.sampleIdentifyNumbers',
+            isSelfSampling: '$caseMembers.isSelfSampling',
+            isSingleService: '$caseMembers.isSingleService',
           },
         },
       },

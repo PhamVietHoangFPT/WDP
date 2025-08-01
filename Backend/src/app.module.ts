@@ -42,6 +42,7 @@ import { AdminModule } from './modules/admin/admin.module'
 import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipmentHistory.module'
 import { DashboardModule } from './modules/dashboard/dashboard.module'
 import { DeliveryStaffModule } from './modules/deliveryStaff/deliveryStaff.module'
+import { AdnDocumentationModule } from './modules/adnDocumentation/adnDocumentation.module'
 @Module({
   imports: [
     databaseConfig,
@@ -88,6 +89,7 @@ import { DeliveryStaffModule } from './modules/deliveryStaff/deliveryStaff.modul
     KitShipmentHistoryModule,
     DashboardModule,
     DeliveryStaffModule,
+    AdnDocumentationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

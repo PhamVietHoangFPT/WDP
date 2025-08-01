@@ -18,14 +18,14 @@ export class DoctorService implements IDoctorService {
     private readonly testRequestStatusModel: Model<TestRequestStatusDocument>,
   ) {}
 
-  async getAllServiceCasesWithoutResults(
+  async getAllServiceCasesWithoutAdnDocumentation(
     facilityId: string,
     doctorId: string,
     currentStatus: string,
     resultExists: boolean,
   ): Promise<ServiceCaseResponseDto[]> {
     const serviceCases =
-      await this.doctorRepository.getAllServiceCasesWithoutResults(
+      await this.doctorRepository.getAllServiceCasesWithoutAdnDocumentation(
         facilityId,
         doctorId,
         currentStatus,

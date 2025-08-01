@@ -1,7 +1,7 @@
 import { ServiceCaseDocument } from 'src/modules/serviceCase/schemas/serviceCase.schema'
 
 export interface IDoctorRepository {
-  getAllServiceCasesWithoutResults(
+  getAllServiceCasesWithoutAdnDocumentation(
     facilityId: string,
     doctorId: string,
     currentStatus: string,

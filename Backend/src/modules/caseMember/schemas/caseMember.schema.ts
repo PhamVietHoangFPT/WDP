@@ -65,6 +65,9 @@ export class CaseMember extends BaseEntity {
     required: true,
   })
   address: mongoose.Schema.Types.ObjectId
+
+  @Prop({ type: [String], default: [] })
+  sampleIdentifyNumbers: string[]
 }
 
 export const CaseMemberSchema = SchemaFactory.createForClass(CaseMember)
