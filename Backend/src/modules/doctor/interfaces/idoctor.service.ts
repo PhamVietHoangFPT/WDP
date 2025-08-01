@@ -3,7 +3,6 @@ import { TestRequestStatusDocument } from 'src/modules/testRequestStatus/schemas
 
 export interface IDoctorService {
   getAllServiceCasesWithoutAdnDocumentation(
-    facilityId: string,
     doctorId: string,
     currentStatus: string,
     resultExists: boolean,

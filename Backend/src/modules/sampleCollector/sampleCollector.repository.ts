@@ -155,6 +155,21 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
       },
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: '$bookingDetails.slot' },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ['$_id', '$$slotId'] } },
+            },
+          ],
+          as: 'slotDetails',
+        },
+      },
+      {
+        $unwind: { path: '$slotDetails', preserveNullAndEmptyArrays: true },
+      },
       // Mo bang services
       {
         $lookup: {
@@ -186,7 +201,10 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
         $project: {
           _id: 1,
           currentStatus: '$statusDetails.testRequestStatus',
-          bookingDate: '$bookingDetails.bookingDate',
+          bookingDetails: {
+            bookingDate: '$bookingDetails.bookingDate',
+            slotTime: '$slotDetails.startTime',
+          },
           accountDetails: {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',
