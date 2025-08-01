@@ -1,4 +1,3 @@
-"use client"
 import type React from "react"
 import { useState, useEffect } from "react"
 import {
@@ -31,9 +30,11 @@ const { Title, Text } = Typography
 
 interface ServiceCase {
   _id: string
-  statusDetails: string
-  bookingDate: string
   currentStatus?: string
+  bookingDetails: {
+    bookingDate: string
+    slotTime: string
+  }
   accountDetails: {
     _id: string
     name: string
@@ -54,15 +55,15 @@ interface ServiceCase {
     }[]
     sampleIdentifyNumbers: string[]
     isSelfSampling: boolean
-    isSingleService: boolean // Thêm trường isSingleService
+    isSingleService: boolean
   }
   services: {
     _id: string
     fee: number
-    name?: string // Thêm trường name cho dịch vụ
+    name?: string
     sample: {
       _id: string
-      name: string // Tên mẫu xét nghiệm
+      name: string
       fee: number
     }
     timeReturn: string
@@ -83,12 +84,10 @@ const SampleCollectorServiceCase: React.FC = () => {
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>("")
-
   const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
     pageNumber: 1,
     pageSize: 100,
   })
-
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
@@ -100,7 +99,6 @@ const SampleCollectorServiceCase: React.FC = () => {
       skip: !selectedStatus,
     },
   )
-
   const [updateServiceCaseStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusMutation()
   const [createServiceCaseImage, { isLoading: isUploading }] = useCreateServiceCaseImageMutation()
 
@@ -139,7 +137,6 @@ const SampleCollectorServiceCase: React.FC = () => {
 
   const handleStatusUpdate = async () => {
     if (!selectedServiceCase || !newStatusId) return
-
     try {
       await updateServiceCaseStatus({
         id: selectedServiceCase._id,
@@ -158,7 +155,6 @@ const SampleCollectorServiceCase: React.FC = () => {
     const formData = new FormData()
     formData.append("serviceCase", serviceCase._id)
     formData.append("file", file)
-
     try {
       await createServiceCaseImage(formData).unwrap()
       message.success("Upload ảnh thành công!")
@@ -169,7 +165,7 @@ const SampleCollectorServiceCase: React.FC = () => {
   }
 
   const getStatusUpdateMenu = (record: ServiceCase) => {
-    const availableStatuses = getAvailableNextStatuses(record.statusDetails)
+    const availableStatuses = getAvailableNextStatuses(record.currentStatus || "")
     if (availableStatuses.length === 0) {
       return (
         <Menu
@@ -183,7 +179,6 @@ const SampleCollectorServiceCase: React.FC = () => {
         />
       )
     }
-
     return (
       <Menu
         items={availableStatuses.map((status: ServiceCaseStatus) => ({
@@ -209,7 +204,6 @@ const SampleCollectorServiceCase: React.FC = () => {
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
-
   const currentStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === selectedStatus)?.testRequestStatus || ""
   const newStatusName =
@@ -218,7 +212,6 @@ const SampleCollectorServiceCase: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý trường hợp dịch vụ</Title>
-
       <Flex
         justify="space-between"
         align="center"
@@ -256,7 +249,6 @@ const SampleCollectorServiceCase: React.FC = () => {
             ]}
           />
         </Flex>
-
         <Flex align="center" gap={8}>
           {selectedStatus && (
             <Tag color={getStatusColor(currentStatusName)}>
@@ -266,7 +258,6 @@ const SampleCollectorServiceCase: React.FC = () => {
           {!selectedStatus && <span style={{ fontSize: "14px", color: "#666" }}>Chọn trạng thái để xem dịch vụ</span>}
         </Flex>
       </Flex>
-
       {!selectedStatus ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
@@ -307,29 +298,18 @@ const SampleCollectorServiceCase: React.FC = () => {
               const fullAddress = account?.address?.fullAddress
               const coordinates = account?.address?.location?.coordinates
               const canNavigate = fullAddress && coordinates
-
               const handleDirectionsClick = () => {
                 if (!canNavigate) return
                 const encodedAddress = encodeURIComponent(fullAddress)
                 const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
                 window.open(mapsUrl, "_blank", "noopener,noreferrer")
               }
-
-              const availableStatuses = getAvailableNextStatuses(record.statusDetails)
+              const availableStatuses = getAvailableNextStatuses(record.currentStatus || "")
               const canUpdate = availableStatuses.length > 0
-
-              const bookingDate = new Date(record.bookingDate)
-              const now = new Date()
-              const diffInHours = Math.floor((now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60))
-              const diffInDays = Math.floor(diffInHours / 24)
-              const createdTime = diffInDays > 0 ? `${diffInDays} ngày trước` : (diffInHours > 0 ? `${diffInHours} giờ trước` : "Vừa tạo")
-
-              // Logic mới để hiển thị mẫu xét nghiệm
               const renderSampleNames = (index: number) => {
                 if (!record.services || record.services.length === 0) {
                   return <Text type="secondary">Không có mẫu</Text>
                 }
-                
                 if (isSingleService) {
                   const service = record.services[index]
                   return service ? <Text type="secondary">{service.sample.name}</Text> : null
@@ -339,7 +319,6 @@ const SampleCollectorServiceCase: React.FC = () => {
                   ))
                 }
               }
-
               return (
                 <List.Item>
                   <Card
@@ -348,20 +327,14 @@ const SampleCollectorServiceCase: React.FC = () => {
                         Mã dịch vụ: {record._id}
                       </div>
                     }
-                    extra={<Tag color={getStatusColor(record.statusDetails)}>{record.statusDetails}</Tag>}
-                    style={{ width: "100%" }}
                   >
                     <Flex vertical gap={12}>
-                      {/* Day la code cua ngay dat va thoi gian tao */}
                       <Flex justify="space-between" align="center">
                         <Space>
-                          <Typography.Text strong>Ngày đặt:</Typography.Text>
-                          <Text>{bookingDate.toLocaleDateString("vi-VN")}</Text>
+                          <Typography.Text strong>Ngày giờ hẹn:</Typography.Text>
+                          <Text>{new Date(record.bookingDetails.bookingDate).toLocaleDateString("vi-VN")} - {record.bookingDetails.slotTime}</Text>
                         </Space>
-                        <Tag>{createdTime}</Tag>
                       </Flex>
-                      
-                      {/* Thong tin cua khach hang */}
                       {isAtHome && account && (
                         <Card size="small" title="Thông tin khách hàng">
                           <Flex vertical gap={4}>
@@ -398,8 +371,6 @@ const SampleCollectorServiceCase: React.FC = () => {
                           </Flex>
                         </Card>
                       )}
-
-                      {/* Nguoi xet nghiem, ma mau */}
                       {(testTakers && testTakers.length > 0) && (
                         <Card size="small" style={{height: "300px"}} title="Người xét nghiệm & Mã mẫu">
                           {testTakers.map((taker, index) => (
@@ -416,7 +387,6 @@ const SampleCollectorServiceCase: React.FC = () => {
                                   <Text type="secondary">Không có mã mẫu</Text>
                                 )}
                               </div>
-                              {/* Thêm phần hiển thị tên mẫu xét nghiệm */}
                               <div style={{ fontSize: "12px", color: "#999", marginTop: 4 }}>
                                 {renderSampleNames(index)}
                               </div>
@@ -425,12 +395,10 @@ const SampleCollectorServiceCase: React.FC = () => {
                         </Card>
                       )}
                       {(!testTakers || testTakers.length === 0) && (
-                         <Card size="small" title="Người xét nghiệm & Mã mẫu">
-                           <Text type="secondary">—</Text>
-                         </Card>
+                        <Card size="small" title="Người xét nghiệm & Mã mẫu">
+                          <Text type="secondary">—</Text>
+                        </Card>
                       )}
-
-                      {/* Cac hanh dong */}
                       <Flex gap={8} style={{ marginTop: 12 }}>
                         <Dropdown overlay={getStatusUpdateMenu(record)} trigger={["click"]} disabled={!canUpdate}>
                           <Button type="primary" disabled={!canUpdate}>
@@ -456,7 +424,6 @@ const SampleCollectorServiceCase: React.FC = () => {
               )
             }}
           />
-
           {totalItems > 0 && (
             <Pagination
               current={pageNumber}
@@ -474,7 +441,6 @@ const SampleCollectorServiceCase: React.FC = () => {
           )}
         </>
       )}
-
       <Modal
         title="Xác nhận cập nhật trạng thái"
         open={updateModalVisible}
@@ -494,8 +460,8 @@ const SampleCollectorServiceCase: React.FC = () => {
           </p>
           <p>
             <strong>Trạng thái hiện tại:</strong>{" "}
-            <Tag color={getStatusColor(selectedServiceCase?.statusDetails || "")}>
-              {selectedServiceCase?.statusDetails}
+            <Tag color={getStatusColor(selectedServiceCase?.currentStatus || "")}>
+              {selectedServiceCase?.currentStatus}
             </Tag>
           </p>
           <p>
