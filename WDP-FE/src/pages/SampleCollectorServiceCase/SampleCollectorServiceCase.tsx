@@ -222,7 +222,6 @@ const SampleCollectorServiceCase: React.FC = () => {
             <Tooltip title={fullAddress}>
               <Space style={{ maxWidth: 250, alignItems: "start"}}>
                 <EnvironmentOutlined />
-                {/* su dung div de xuong dong */}
                 <div style={{ wordWrap: 'break-word' }}>
                   <Typography.Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>
                     {fullAddress}
@@ -252,7 +251,12 @@ const SampleCollectorServiceCase: React.FC = () => {
     render: (_, record) => {
       const { testTakers, sampleIdentifyNumbers } = record.caseMember
       if (!testTakers || testTakers.length === 0) {
-        return "—"
+        return ""
+      }
+      
+      // Dieu kien xem api co tra ve sampleIdentifyNumbers hay khong
+      if (!sampleIdentifyNumbers || sampleIdentifyNumbers.length === 0) {
+        return "Không có mã mẫu"
       }
 
       return (
@@ -261,6 +265,7 @@ const SampleCollectorServiceCase: React.FC = () => {
             <div key={taker._id}>
               <Text strong>{taker.name}</Text>
               <div style={{ fontSize: "12px", color: "#666" }}>
+                {/* Lấy các mã mẫu tương ứng */}
                 {sampleIdentifyNumbers
                   .filter((_, i) => (i % 2) === (index % 2))
                   .map((sampleId, i) => (
