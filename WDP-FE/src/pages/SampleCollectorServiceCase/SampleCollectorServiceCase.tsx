@@ -84,6 +84,10 @@ const SampleCollectorServiceCase: React.FC = () => {
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>("")
+  const [uploadModalVisible, setUploadModalVisible] = useState(false)
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+
   const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
     pageNumber: 1,
     pageSize: 100,
@@ -151,13 +155,19 @@ const SampleCollectorServiceCase: React.FC = () => {
     }
   }
 
-  const handleImageUpload = async (file: File, serviceCase: ServiceCase) => {
+  const handleImageUpload = async () => {
+    if (!fileToUpload || !selectedServiceCase) return
+
     const formData = new FormData()
-    formData.append("serviceCase", serviceCase._id)
-    formData.append("file", file)
+    formData.append("serviceCase", selectedServiceCase._id)
+    formData.append("file", fileToUpload)
+
     try {
       await createServiceCaseImage(formData).unwrap()
       message.success("Upload ảnh thành công!")
+      setUploadModalVisible(false)
+      setFileToUpload(null)
+      setPreviewImage(null)
     } catch (error: any) {
       console.error("Upload image error:", error)
       message.error(error?.data?.message || "Upload ảnh thất bại!")
@@ -197,6 +207,18 @@ const SampleCollectorServiceCase: React.FC = () => {
         }))}
       />
     )
+  }
+
+  const handleBeforeUpload = (file: File, record: ServiceCase) => {
+    setFileToUpload(file)
+    setSelectedServiceCase(record)
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      setPreviewImage(reader.result as string)
+      setUploadModalVisible(true)
+    }
+    return false // Prevent default upload behavior
   }
 
   const serviceCases = selectedStatus && serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
@@ -406,10 +428,7 @@ const SampleCollectorServiceCase: React.FC = () => {
                           </Button>
                         </Dropdown>
                         <Upload
-                          beforeUpload={(file) => {
-                            handleImageUpload(file, record)
-                            return false
-                          }}
+                          beforeUpload={(file) => handleBeforeUpload(file, record)}
                           showUploadList={false}
                           accept="image/*"
                         >
@@ -476,6 +495,43 @@ const SampleCollectorServiceCase: React.FC = () => {
             }}
           >
             <strong>⚠️ Lưu ý:</strong> Việc cập nhật trạng thái không thể hoàn tác sau khi thực hiện!
+          </div>
+        </div>
+      </Modal>
+
+      {/* New Modal for Image Upload Confirmation */}
+      <Modal
+        title="Xác nhận tải ảnh lên"
+        open={uploadModalVisible}
+        onOk={handleImageUpload}
+        onCancel={() => {
+          setUploadModalVisible(false)
+          setFileToUpload(null)
+          setPreviewImage(null)
+          setSelectedServiceCase(null)
+        }}
+        confirmLoading={isUploading}
+        okText="Tải lên"
+        cancelText="Hủy"
+      >
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <p>Bạn có chắc chắn muốn tải ảnh này lên cho dịch vụ có mã <strong>{selectedServiceCase?._id}</strong> không?</p>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{ maxWidth: "100%", maxHeight: "300px", marginTop: "16px", border: "1px solid #ddd" }}
+            />
+          )}
+          <div
+            style={{
+              marginTop: "16px",
+              padding: "12px",
+              backgroundColor: "#fff7e6",
+              borderRadius: "6px",
+            }}
+          >
+            <strong>⚠️ Lưu ý:</strong> Vui lòng đảm bảo đây là ảnh chính xác cần tải lên!
           </div>
         </div>
       </Modal>
