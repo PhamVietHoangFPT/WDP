@@ -15,7 +15,6 @@ export class DoctorRepository implements IDoctorRepository {
   ) {}
 
   async getAllServiceCasesWithoutAdnDocumentation(
-    facilityId: string,
     doctorId: string,
     currentStatus: string,
     resultExists: boolean,
@@ -129,56 +128,6 @@ export class DoctorRepository implements IDoctorRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // Mo bang slotTemplates
-      {
-        $lookup: {
-          from: 'slottemplates',
-          let: { slotTemplateId: '$slots.slotTemplate' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$slotTemplateId'],
-                },
-              },
-            },
-          ],
-          as: 'slotTemplates',
-        },
-      },
-      // Mo mang slotTemplates
-      {
-        $unwind: { path: '$slotTemplates', preserveNullAndEmptyArrays: true },
-      },
-      // Mo bang facilities
-      {
-        $lookup: {
-          from: 'facilities',
-          let: { facilityId: '$slotTemplates.facility' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$_id', '$$facilityId'] },
-                    { $eq: ['$_id', new Types.ObjectId(facilityId)] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'facilities',
-        },
-      },
-      // Mo bang facilities
-      {
-        $unwind: { path: '$facilities', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $match: {
-          'facilities._id': new Types.ObjectId(facilityId), // Loc theo facilityId
-        },
-      },
       {
         $lookup: {
           from: 'testtakers',
@@ -220,7 +169,10 @@ export class DoctorRepository implements IDoctorRepository {
         $project: {
           _id: 1,
           currentStatus: '$currentStatus.testRequestStatus',
-          bookingDate: '$bookings.bookingDate',
+          bookingDetails: {
+            bookingDate: '$bookings.bookingDate',
+            slotTime: '$slots.startTime',
+          },
           accountDetails: {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',

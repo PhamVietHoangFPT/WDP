@@ -2,50 +2,31 @@ import { apiSlice } from '../../apis/apiSlice'
 
 const doctorAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getServiceCaseWithoutResultsList: builder.query({
-      query: ({ currentStatus, resultExists }) => ({
-        url: `doctors/service-cases-without-results?currentStatus=${currentStatus}&resultExists=${resultExists}`,
-        method: 'GET',
-      }),
-      transformResponse: (res) => res,
-      providesTags: ['doctor'],
-    }),
-
+    // Lấy danh sách trạng thái yêu cầu
     getAllRequestStatusList: builder.query({
-      query: ({ pageNumber, pageSize }) => ({
+      query: () => ({
         url: '/doctors/test-request-statuses',
         method: 'GET',
-        params: {
-          pageNumber,
-          pageSize,
-        },
       }),
       transformResponse: (res) => res,
       providesTags: ['doctor'],
     }),
 
-    updateServiceCaseStatus: builder.mutation({
-      query: ({ id, currentStatus }) => ({
-        url: `/service-cases/${id}/status/${currentStatus}`,
-        method: 'PATCH',
+    // Lấy danh sách hồ sơ dịch vụ chưa có tài liệu ADN
+    getServiceCasesWithoutAdn: builder.query({
+      query: ({ currentStatus, resultExists }) => ({
+        url: '/doctors/service-cases-without-adn-documentation',
+        method: 'GET',
+        params: { currentStatus, resultExists },
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['doctor'],
+      providesTags: ['doctor'],
     }),
 
-    getTestTaker: builder.query({
-      query: (id: string) => ({
-        url: `/test-takers/${id}`,
-        method: 'GET',
-      }),
-      // QUAN TRỌNG: transformResponse để lấy data[0]
-      transformResponse: (res: any) => res.data?.[0], // API trả về {data: [{...}]}, cần lấy object bên trong
-      providesTags: (result, error, id) => [{ type: 'doctor', id }], // Caching từng testTaker theo ID
-    }),
-
-    createServiceCaseResult: builder.mutation({
+    // Tạo tài liệu ADN mới
+    createAdnDocumentation: builder.mutation({
       query: (data) => ({
-        url: '/doctors/results',
+        url: '/doctors/adn-documentation',
         method: 'POST',
         body: data,
       }),
@@ -53,23 +34,38 @@ const doctorAPI = apiSlice.injectEndpoints({
       invalidatesTags: ['doctor'],
     }),
 
-    getResultById: builder.query({
-      query: (id: string) => ({
-        url: `results/for-customer/${id}`,
-        method: 'GET',
+    // Lấy tài liệu ADN theo ID
+    getAdnDocumentationById: builder.query({
+      query: (id) => `/doctors/adn-documentation/${id}`,
+      transformResponse: (res) => res,
+      providesTags: ['doctor'],
+    }),
+
+    // Lấy tài liệu ADN theo serviceCaseId
+    getAdnDocumentationByServiceCaseId: builder.query({
+      query: (serviceCaseId) =>
+        `/doctors/adn-documentation/service-case/${serviceCaseId}`,
+      transformResponse: (res) => res,
+      providesTags: ['doctor'],
+    }),
+
+    // Cập nhật condition của hồ sơ
+    updateServiceCaseCondition: builder.mutation({
+      query: ({ serviceCaseId, condition }) => ({
+        url: `/doctors/serviceCase/${serviceCaseId}/condition/${condition}`,
+        method: 'PATCH',
       }),
       transformResponse: (res) => res,
-      providesTags: ['results'],
+      invalidatesTags: ['doctor'],
     }),
   }),
 })
 
 export const {
-  useGetServiceCaseWithoutResultsListQuery,
   useGetAllRequestStatusListQuery,
-  useUpdateServiceCaseStatusMutation,
-  useGetTestTakerQuery,
-  useLazyGetTestTakerQuery,
-  useCreateServiceCaseResultMutation,
-  useGetResultByIdQuery,
+  useGetServiceCasesWithoutAdnQuery,
+  useCreateAdnDocumentationMutation,
+  useGetAdnDocumentationByIdQuery,
+  useGetAdnDocumentationByServiceCaseIdQuery,
+  useUpdateServiceCaseConditionMutation,
 } = doctorAPI
