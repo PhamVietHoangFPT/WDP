@@ -104,9 +104,12 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $lookup: {
           from: 'testtakers',
+          // localField là trường chứa mảng các ID trong document hiện tại
           localField: 'caseMemberDetails.testTaker',
+          // foreignField là trường ID trong collection 'testtakers' để so khớp
           foreignField: '_id',
-          as: 'allTestTakerDetails', // Lưu tất cả vào một mảng tạm
+          // 'as' là tên của trường mới sẽ chứa mảng các document testTaker đã được populate
+          as: 'populatedTestTakers',
         },
       },
       {
@@ -182,7 +185,7 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $project: {
           _id: 1,
-          statusDetails: '$statusDetails.testRequestStatus',
+          currentStatus: '$statusDetails.testRequestStatus',
           bookingDate: '$bookingDetails.bookingDate',
           accountDetails: {
             _id: '$accountDetails._id',
@@ -255,34 +258,20 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
           caseMember: {
             testTakers: {
               $map: {
-                input: '$caseMemberDetails.testTaker', // Lặp qua mảng ID gốc
-                as: 'takerId',
+                input: '$populatedTestTakers',
+                as: 'taker',
                 in: {
-                  $let: {
-                    // Tìm object testTaker tương ứng trong mảng allTestTakerDetails
-                    vars: {
-                      matchingTaker: {
-                        $first: {
-                          $filter: {
-                            input: '$allTestTakerDetails',
-                            as: 'ttd',
-                            cond: { $eq: ['$$ttd._id', '$$takerId'] },
-                          },
-                        },
-                      },
-                    },
-                    // Nếu tìm thấy, chỉ lấy các trường cần thiết
-                    in: {
-                      _id: '$$matchingTaker._id',
-                      name: '$$matchingTaker.name',
-                      personalId: '$$matchingTaker.personalId',
-                    },
-                  },
+                  _id: '$$taker._id',
+                  name: '$$taker.name',
+                  personalId: '$$taker.personalId',
+                  dateOfBirth: '$$taker.dateOfBirth',
+                  gender: '$$taker.gender',
                 },
               },
             },
             sampleIdentifyNumbers: '$caseMemberDetails.sampleIdentifyNumbers',
             isSelfSampling: '$caseMemberDetails.isSelfSampling',
+            isSingleService: '$caseMemberDetails.isSingleService',
           },
         },
       },
