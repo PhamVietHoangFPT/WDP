@@ -218,7 +218,7 @@ const SampleCollectorServiceCase: React.FC = () => {
       setPreviewImage(reader.result as string)
       setUploadModalVisible(true)
     }
-    return false // Prevent default upload behavior
+    return false // ngan viec tu dong upload neu khong qua modal xac nhan
   }
 
   const serviceCases = selectedStatus && serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
@@ -303,7 +303,7 @@ const SampleCollectorServiceCase: React.FC = () => {
               gutter: 16,
               xs: 1,
               sm: 1,
-              md: 2,
+              md: 1,
               lg: 1,
               xl: 1,
               xxl: 1,
@@ -499,7 +499,7 @@ const SampleCollectorServiceCase: React.FC = () => {
         </div>
       </Modal>
 
-      {/* New Modal for Image Upload Confirmation */}
+      {/* Modal de xac nhan anh muon upload */}
       <Modal
         title="Xác nhận tải ảnh lên"
         open={uploadModalVisible}
