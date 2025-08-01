@@ -89,6 +89,14 @@ const DoctorHomePage = lazy(
 const DoctorUpdateConditionPage = lazy(
   () => import('../pages/DoctorUpdateCondition/doctorUpdateCondition')
 )
+const ServiceCaseAlreadyHasAdn = lazy(
+  () =>
+    import('../pages/DoctorServiceCaseWithoutResult/ServiceCaseAlreadyHasAdn')
+)
+const ServiceCaseNeedCreateAdn = lazy(
+  () =>
+    import('../pages/DoctorServiceCaseWithoutResult/ServiceCaseNeedCreateAdn')
+)
 const FacilityDetailAdmin = lazy(
   () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
 )
@@ -458,6 +466,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor/service-cases-condition',
         component: DoctorUpdateConditionPage,
+      },
+      {
+        path: '/doctor/service-cases-without-adn-documentation-true',
+        component: ServiceCaseAlreadyHasAdn,
+      },
+      {
+        path: '/doctor/service-cases-without-adn-documentation-false',
+        component: ServiceCaseNeedCreateAdn,
       },
     ],
   },

@@ -75,10 +75,18 @@ export const SideBar = () => {
       onClick: () => navigate('doctor'),
     },
     {
-      key: 'doctor/service-cases-without-results', // Đảm bảo key khớp với path
+      key: '/doctor/service-cases-without-adn-documentation-false', // Đảm bảo key khớp với path
       icon: <MenuUnfoldOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
       label: 'Hồ sơ chưa có kết quả',
-      onClick: () => navigate('doctor/service-cases-without-results'),
+      onClick: () =>
+        navigate('/doctor/service-cases-without-adn-documentation-false'),
+    },
+    {
+      key: '/doctor/service-cases-without-adn-documentation-true', // Đảm bảo key khớp với path
+      icon: <MenuUnfoldOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
+      label: 'Hồ sơ đã có kết quả',
+      onClick: () =>
+        navigate('/doctor/service-cases-without-adn-documentation-true'),
     },
     // Thêm các mục menu khác của Doctor vào đây nếu có
   ]
