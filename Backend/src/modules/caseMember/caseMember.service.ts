@@ -202,7 +202,7 @@ export class CaseMemberService implements ICaseMemberService {
         )
 
       // Nếu số lượng kit tìm thấy không khớp, tức là có loại kit đã hết hàng
-      if (findSamplingKitInventory.length !== sampleIds.length) {
+      if (findSamplingKitInventory.length < sampleIds.length) {
         throw new NotFoundException(
           'Một hoặc nhiều mẫu kit xét nghiệm không đủ trong kho cho tất cả mọi người.',
         )
