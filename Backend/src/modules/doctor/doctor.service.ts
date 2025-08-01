@@ -19,14 +19,12 @@ export class DoctorService implements IDoctorService {
   ) {}
 
   async getAllServiceCasesWithoutAdnDocumentation(
-    facilityId: string,
     doctorId: string,
     currentStatus: string,
     resultExists: boolean,
   ): Promise<ServiceCaseResponseDto[]> {
     const serviceCases =
       await this.doctorRepository.getAllServiceCasesWithoutAdnDocumentation(
-        facilityId,
         doctorId,
         currentStatus,
         resultExists,

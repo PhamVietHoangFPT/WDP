@@ -173,11 +173,9 @@ export class DoctorController {
     @Query('currentStatus') currentStatus: string,
     @Query('resultExists') resultExists: boolean, // Default to false if not provided
   ): Promise<ApiResponseDto<ServiceCaseResponseDto>> {
-    const facilityId = req.user.facility._id
     const doctorId = req.user.id // Assuming the user is a doctor
     const data =
       await this.doctorService.getAllServiceCasesWithoutAdnDocumentation(
-        facilityId,
         doctorId,
         currentStatus,
         resultExists,
