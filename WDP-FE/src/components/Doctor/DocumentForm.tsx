@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Input, Button, message, Typography, Space } from 'antd'
+import { Table, Input, Button, message, Typography } from 'antd'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 import { useCreateAdnDocumentationMutation } from '../../features/doctor/doctorAPI'
@@ -33,6 +33,14 @@ const lociList = [
   'Y-indel',
 ]
 
+// Hàm lấy cookie
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
+
 export default function CreateAdnDocumentPage() {
   const { serviceCaseId } = useParams()
   const navigate = useNavigate()
@@ -48,16 +56,36 @@ export default function CreateAdnDocumentPage() {
     const { caseMember, services } = serviceCase
     const testTakers = caseMember?.testTakers || []
     const sampleIds = caseMember?.sampleIdentifyNumbers || []
+    const isSingleService = caseMember?.isSingleService || false
 
-    const generated = sampleIds.map((sampleId: string, index: number) => {
-      const taker = testTakers[index]
-      const sample = services[index]?.sample
-      return {
-        sampleIdentifyNumber: `${taker?.name || 'Mẫu'} - ${sample?.name || 'Không rõ'} (ID: ${sampleId})`,
-        realSampleId: sampleId,
-        markers: [],
-      }
-    })
+    const generated: any[] = []
+
+    if (isSingleService) {
+      // Trường hợp mỗi người 1 mẫu
+      sampleIds.forEach((sampleId: any, index: number) => {
+        const taker = testTakers[index] || null
+        const sample = services[index % services.length]?.sample
+
+        generated.push({
+          sampleIdentifyNumber: `${taker?.name || 'Mẫu'} - ${sample?.name || 'Không rõ'} (ID: ${sampleId})`,
+          realSampleId: sampleId,
+          markers: [],
+        })
+      })
+    } else {
+      // Trường hợp nhiều mẫu, phân luân phiên: testTaker[0], testTaker[1], testTaker[0], testTaker[1],...
+      sampleIds.forEach((sampleId: any, index: number) => {
+        const taker = testTakers[index % testTakers.length]
+        const service = services[Math.floor(index / testTakers.length)]
+        const sample = service?.sample
+
+        generated.push({
+          sampleIdentifyNumber: `${taker?.name || 'Mẫu'} - ${sample?.name || 'Không rõ'} (ID: ${sampleId})`,
+          realSampleId: sampleId,
+          markers: [],
+        })
+      })
+    }
 
     setProfiles(generated)
   }, [serviceCase])
@@ -65,36 +93,67 @@ export default function CreateAdnDocumentPage() {
   const handleAlleleChange = (
     value: string,
     sampleIndex: number,
-    locus: string
+    locus: string,
+    alleleIndex: number
   ) => {
     const updated = [...profiles]
     const markerIndex = updated[sampleIndex].markers.findIndex(
       (m: any) => m.locus === locus
     )
+
+    const newValue = value.trim()
+
     if (markerIndex !== -1) {
-      updated[sampleIndex].markers[markerIndex].alleles = value.split(',')
+      const alleles = [...updated[sampleIndex].markers[markerIndex].alleles]
+      alleles[alleleIndex] = newValue
+      updated[sampleIndex].markers[markerIndex].alleles = alleles
     } else {
-      updated[sampleIndex].markers.push({ locus, alleles: value.split(',') })
+      const alleles = alleleIndex === 0 ? [newValue, ''] : ['', newValue]
+      updated[sampleIndex].markers.push({ locus, alleles })
     }
+
     setProfiles(updated)
   }
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem('accessToken')
-    if (!token || !serviceCaseId) return
+    const token = getCookie('userToken')
+    if (!token || !serviceCaseId) {
+      message.error('Thiếu token hoặc mã hồ sơ')
+      return
+    }
 
-    const doctorId = jwtDecode<any>(token).userId
+    const doctorId = jwtDecode<any>(token).id
+
+    const cleanedProfiles = profiles.map((p) => ({
+      ...p,
+      markers: p.markers
+        .filter(
+          (m: any) => m.alleles && m.alleles.filter((a: string) => a).length > 0
+        )
+        .map((m: any) => ({
+          locus: m.locus,
+          alleles: m.alleles.filter((a: string) => a),
+        })),
+    }))
+
+    if (cleanedProfiles.every((p) => p.markers.length === 0)) {
+      message.warning('Bạn chưa nhập dữ liệu allele')
+      return
+    }
+
     const body = {
       serviceCase: serviceCaseId,
       doctor: doctorId,
-      profiles,
+      profiles: cleanedProfiles,
     }
-    console.log('Body gửi lên:', JSON.stringify(body, null, 2))
+
     try {
+      console.log('Body gửi lên:', JSON.stringify(body, null, 2))
       await createAdnDocumentation(body).unwrap()
       message.success('Tạo tài liệu thành công')
       navigate(-1)
     } catch (error: any) {
+      console.error('Lỗi gửi tài liệu:', error)
       message.error(error?.data?.message || 'Tạo tài liệu thất bại')
     }
   }
@@ -112,13 +171,22 @@ export default function CreateAdnDocumentPage() {
       render: (_: any, record: any) => {
         const marker = sample.markers.find((m: any) => m.locus === record.locus)
         return (
-          <Input
-            placeholder='Alleles, ví dụ: 13,15.3'
-            defaultValue={marker?.alleles?.join(',')}
-            onChange={(e) =>
-              handleAlleleChange(e.target.value, sampleIndex, record.locus)
-            }
-          />
+          <div style={{ display: 'flex', gap: 4 }}>
+            <Input
+              placeholder='Allele 1'
+              value={marker?.alleles?.[0] || ''}
+              onChange={(e) =>
+                handleAlleleChange(e.target.value, sampleIndex, record.locus, 0)
+              }
+            />
+            <Input
+              placeholder='Allele 2'
+              value={marker?.alleles?.[1] || ''}
+              onChange={(e) =>
+                handleAlleleChange(e.target.value, sampleIndex, record.locus, 1)
+              }
+            />
+          </div>
         )
       },
     })),
@@ -141,6 +209,7 @@ export default function CreateAdnDocumentPage() {
         columns={columns}
         pagination={false}
         bordered
+        scroll={{ x: true }}
       />
 
       <div style={{ textAlign: 'right', marginTop: 16 }}>
