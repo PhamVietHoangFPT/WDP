@@ -10,6 +10,10 @@ export interface ISampleCollectorService {
   getAllServiceCaseStatusForSampleCollector(): Promise<
     TestRequestStatusDocument[]
   >
+  getAllServiceCasesForSampleCollector(
+    sampleCollectorId: string,
+    isAtHome: boolean,
+  ): Promise<ServiceCaseDocument[]>
 }
 
 export const ISampleCollectorService = Symbol('ISampleCollectorService')
