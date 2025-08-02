@@ -52,6 +52,23 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       providesTags: ['sample-collector'],
     }),
+
+
+    getImageByServiceCase: builder.query({
+      query: ({
+        imageUrl,
+      }: {
+        imageUrl: string
+      }) => ({
+        url: `/images/findForServiceCaseByCreatedBy/${imageUrl}`,
+        method: 'GET',
+        params: {
+          imageUrl,
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['sample-collector'],
+    }),
   }),
 })
 
@@ -60,4 +77,5 @@ export const {
   useGetAllServiceCasesQuery,
   useUpdateServiceCaseStatusMutation,
   useGetAllDoneServiceCasesQuery,
+  useGetImageByServiceCaseQuery,
 } = sampleCollectorAPI
