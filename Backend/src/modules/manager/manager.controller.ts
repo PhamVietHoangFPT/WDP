@@ -38,6 +38,7 @@ import { KitShipmentResponseDto } from '../KitShipment/dto/kitShipmentResponse.d
 @ApiTags('managers')
 @Controller('managers')
 @UseGuards(AuthGuard, RolesGuard, FacilityAccessGuard)
+@Roles(RoleEnum.MANAGER, RoleEnum.DOCTOR_MANAGER)
 export class ManagerController {
   constructor(
     @Inject(IManagerService)
@@ -46,7 +47,6 @@ export class ManagerController {
 
   @Get('sample-collectors')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách nhân viên lấy mẫu' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -69,7 +69,6 @@ export class ManagerController {
 
   @Get('doctors')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách bác sĩ' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -92,7 +91,6 @@ export class ManagerController {
 
   @Get('delivery-staff')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách nhân viên giao hàng' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -116,7 +114,6 @@ export class ManagerController {
 
   @Get('service-cases-without-sample-collector')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ chưa có nhân viên lấy mẫu' })
   @ApiQuery({
     name: 'isAtHome',
@@ -159,7 +156,6 @@ export class ManagerController {
 
   @Get('kit-shipments-without-delivery-staff')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Lấy danh sách kitshipment chưa có nhân viên giao hàng',
   })
@@ -196,7 +192,6 @@ export class ManagerController {
 
   @Get('service-cases-without-doctor')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ dịch vụ chưa có bác sĩ' })
   @ApiQuery({
     name: 'bookingDate',
@@ -224,7 +219,6 @@ export class ManagerController {
 
   @Get('service-cases-result-without-delivery-staff')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Lấy danh sách hồ sơ dịch vụ chưa có nhân viên giao hàng',
   })
@@ -255,7 +249,6 @@ export class ManagerController {
 
   @Put('service-cases/:serviceCaseId/delivery-staff/:deliveryStaffId')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Gán nhân viên giao hàng cho hồ sơ dịch vụ',
   })
@@ -295,7 +288,6 @@ export class ManagerController {
 
   @Put('service-cases/:serviceCaseId/sample-collector/:sampleCollectorId')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Gán nhân viên lấy mẫu cho hồ sơ dịch vụ',
   })
@@ -335,7 +327,6 @@ export class ManagerController {
 
   @Put('kit-shipments/:kitShipmentId/delivery-staff/:deliveryStaffId')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Gán nhân viên giao hàng cho hồ sơ vận chuyển',
   })
@@ -375,7 +366,6 @@ export class ManagerController {
 
   @Put('service-cases/:serviceCaseId/doctor/:doctorId')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({
     summary: 'Gán bác sĩ cho hồ sơ dịch vụ',
   })
@@ -415,7 +405,6 @@ export class ManagerController {
 
   @Post('create-account')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Tạo tài khoản mới' })
   @ApiBody({
     description: 'Thông tin tài khoản mới',
@@ -447,7 +436,6 @@ export class ManagerController {
 
   @Get('roles')
   @ApiBearerAuth()
-  @Roles(RoleEnum.MANAGER)
   @ApiOperation({ summary: 'Quản lý lấy danh sách vai trò' })
   @ApiResponse({
     status: HttpStatus.OK,
