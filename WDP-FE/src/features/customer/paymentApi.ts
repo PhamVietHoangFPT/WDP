@@ -101,10 +101,18 @@ export const paymentApi = apiSlice.injectEndpoints({
         }
       }),
     }),
+
+    getServiceCaseById: builder.query({
+      query: (id: string) => ({
+        url: `/service-cases/${id}`,
+        method: 'GET',
+      }),
+    }),
   }),
 })
 
 export const {
+  useGetServiceCaseByIdQuery,
   useGetVnpayBanksQuery,
   useCreatePaymentUrlMutation,
   useCreateServicePaymentHistoryMutation,
