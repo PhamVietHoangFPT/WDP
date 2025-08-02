@@ -35,7 +35,7 @@ export class CaseMember extends BaseEntity {
   booking: mongoose.Schema.Types.ObjectId
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TestTaker' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Service' }],
     required: true,
     default: [],
   })

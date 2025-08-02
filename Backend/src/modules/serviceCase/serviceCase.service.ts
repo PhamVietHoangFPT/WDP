@@ -110,11 +110,32 @@ export class ServiceCaseService implements IServiceCaseService {
         .findAllServiceCases(filter)
         .populate({
           path: 'caseMember',
-          select: 'booking',
-          populate: {
-            path: 'booking',
-            select: 'bookingDate',
-          },
+          // 1. Thêm 'service' vào đây
+          select: 'booking testTaker service',
+          populate: [
+            {
+              path: 'booking',
+              select: 'bookingDate',
+            },
+            {
+              path: 'testTaker',
+              select: 'name personalId',
+            },
+            {
+              path: 'service',
+              select: 'name fee sample timeReturn',
+              populate: [
+                {
+                  path: 'sample',
+                  select: 'name',
+                },
+                {
+                  path: 'timeReturn',
+                  select: 'timeReturn',
+                },
+              ],
+            },
+          ],
         })
         .skip(skip)
         .limit(pageSize),
