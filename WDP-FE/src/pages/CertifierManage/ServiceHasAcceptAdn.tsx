@@ -122,7 +122,7 @@ export default function ServiceHasAcceptAdn() {
           type='primary'
           size='small'
           onClick={() =>
-            navigate(`/certifier/adn-result/${record._id}`, {
+            navigate(`/certifier/view-adn-documentation/${record._id}`, {
               state: { serviceCase: record },
             })
           }

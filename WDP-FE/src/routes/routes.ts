@@ -100,6 +100,9 @@ const CertifierHomePage = lazy(
 const DocumentFormAccept = lazy(
   () => import('../components/Certifier/DocumentFormAccept')
 )
+const DoneDocumentForm = lazy(
+  () => import('../components/Certifier/DoneDocumentForm')
+)
 const ServiceCaseNeedAcceptAdn = lazy(
   () => import('../pages/CertifierManage/ServiceCaseNeedAcceptAdn')
 )
@@ -519,6 +522,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/certifier/service-cases-without-adn-documentation-true',
         component: ServiceHasAcceptAdn,
+        // role: ['admin'],
+      },
+      {
+        path: '/certifier/view-adn-documentation/:serviceCaseId',
+        component: DoneDocumentForm,
         // role: ['admin'],
       },
     ],
