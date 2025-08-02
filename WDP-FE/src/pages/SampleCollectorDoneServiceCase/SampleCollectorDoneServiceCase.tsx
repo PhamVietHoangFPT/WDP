@@ -14,7 +14,6 @@ import {
   Flex,
 } from "antd"
 import {
-  useGetServiceCaseStatusListQuery,
   useGetAllDoneServiceCasesQuery,
 } from "../../features/sampleCollector/sampleCollectorAPI"
 import { UserOutlined, PhoneOutlined, EnvironmentOutlined, CarOutlined } from "@ant-design/icons"
@@ -74,10 +73,6 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
 
-  const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
-    pageNumber: 1,
-    pageSize: 100,
-  })
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
