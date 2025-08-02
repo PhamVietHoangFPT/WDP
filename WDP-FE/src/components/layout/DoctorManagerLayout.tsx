@@ -69,7 +69,7 @@ export const DoctorManagerLayout = () => {
 
         <Footer style={{ textAlign: 'center', padding: '12px 50px' }}>
           <Text type='secondary'>
-            © 2025 GeneXis Manager Portal. All rights reserved.
+            © 2025 GeneXis Doctor Manager Portal. All rights reserved.
           </Text>
         </Footer>
       </Layout>
