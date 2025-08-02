@@ -34,6 +34,13 @@ export class AdnDocumentationRepository implements IAdnDocumentationRepository {
     serviceCaseId: string,
   ): Promise<AdnDocumentationDocument | null> {
     // Kiểu trả về giờ là object hoặc null
-    return this.AdnDocModel.findOne({ serviceCaseId }).exec()
+    return this.AdnDocModel.findOne({
+      serviceCase: new mongoose.Types.ObjectId(serviceCaseId),
+    })
+      .select(
+        '-created_by -updated_by -created_at -updated_at -deleted_at -deleted_by -__v',
+      ) // Loại bỏ trường __v
+      .lean()
+      .exec()
   }
 }
