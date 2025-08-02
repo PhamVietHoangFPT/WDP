@@ -433,7 +433,7 @@ const routes: LayoutRoute[] = [
 
   {
     layout: DoctorManagerLayout,
-    // role: ['Doctor Manager'],
+    role: ['Doctor Manager'],
     data: [
       {
         path: '/doctor-manager',
