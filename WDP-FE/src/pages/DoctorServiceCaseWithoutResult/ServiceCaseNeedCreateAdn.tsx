@@ -27,7 +27,10 @@ interface ServiceCase {
     testRequestStatus: string
     order: number
   }
-  bookingDate: string
+  bookingDetails: {
+    bookingDate: string
+    slotTime: string
+  }
   caseMember: {
     testTakers: {
       _id: string
@@ -138,8 +141,15 @@ export default function ServiceCaseNeedCreateAdn() {
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'bookingDate',
-      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
+      dataIndex: 'bookingDetails',
+      render: (bookingDetails: ServiceCase['bookingDetails']) =>
+        new Date(bookingDetails.bookingDate).toLocaleDateString('vi-VN'),
+    },
+    {
+      title: 'Ca đặt',
+      dataIndex: 'bookingDetails',
+      render: (bookingDetails: ServiceCase['bookingDetails']) =>
+        bookingDetails.slotTime,
     },
     {
       title: 'Người xét nghiệm',
@@ -265,13 +275,13 @@ export default function ServiceCaseNeedCreateAdn() {
         </Select>
       </div>
 
-      {error && (
+      {/* {error && (
         <Alert
           type='error'
           message='Lỗi khi tải hồ sơ'
           description={(error as any)?.data?.message || 'Không rõ lỗi'}
         />
-      )}
+      )} */}
 
       {isLoading ? (
         <Spin />
@@ -280,6 +290,7 @@ export default function ServiceCaseNeedCreateAdn() {
           columns={columns}
           dataSource={(serviceCaseData?.data as ServiceCase[]) || []}
           rowKey='_id'
+          locale={{ emptyText: 'Chưa có hồ sơ nào.' }}
           pagination={{
             current: pageNumber,
             pageSize,
