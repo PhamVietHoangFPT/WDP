@@ -45,6 +45,26 @@ export class CertifierRepository implements ICertifierRepository {
       {
         $unwind: { path: '$accountDetails', preserveNullAndEmptyArrays: true },
       },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$doctor' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'doctorDetails',
+        },
+      },
+      // Mo mang doctorDetails
+      {
+        $unwind: { path: '$doctorDetails', preserveNullAndEmptyArrays: true },
+      },
       // Mo bang testRequestStatuses
       {
         $lookup: {
@@ -167,6 +187,8 @@ export class CertifierRepository implements ICertifierRepository {
         $project: {
           _id: 1,
           currentStatus: '$currentStatus.testRequestStatus',
+          adnDocumentation: 1,
+          result: 1,
           bookingDetails: {
             bookingDate: '$bookings.bookingDate',
             slotTime: '$slots.startTime',
@@ -175,6 +197,12 @@ export class CertifierRepository implements ICertifierRepository {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',
             phoneNumber: '$accountDetails.phoneNumber',
+          },
+          doctorDetails: {
+            _id: '$doctorDetails._id',
+            name: '$doctorDetails.name',
+            phoneNumber: '$doctorDetails.phoneNumber',
+            email: '$doctorDetails.email',
           },
           services: {
             $map: {
