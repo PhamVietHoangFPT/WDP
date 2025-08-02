@@ -36,6 +36,15 @@ const certifierAPI = apiSlice.injectEndpoints({
       providesTags: ['certifier'],
     }),
 
+    getResultForCustomer: builder.query({
+      query: (resultId: string) => ({
+        url: `/results/for-customer/${resultId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['certifier'],
+    }),
+
     // Tạo kết quả cho hồ sơ dịch vụ
     createCertifierResult: builder.mutation({
       query: (data) => ({
@@ -54,4 +63,5 @@ export const {
   useGetTestRequestStatusesQuery,
   useGetAdnDocumentationByServiceCaseIdQuery,
   useCreateCertifierResultMutation,
+  useGetResultForCustomerQuery,
 } = certifierAPI
