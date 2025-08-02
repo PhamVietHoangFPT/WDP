@@ -39,6 +39,11 @@ export interface IImageUploadRepository {
   findAllImageForKitShipment(kitShipmentId: string): Promise<ImageDocument[]>
 
   findAllImageForResult(kitShipmentId: string): Promise<ImageDocument[]>
+
+  findByCreatedBy(
+    userId: string,
+    serviceCaseId: string,
+  ): Promise<ImageDocument[]>
 }
 
 export const IImageUploadRepository = Symbol('IImageUploadRepository')

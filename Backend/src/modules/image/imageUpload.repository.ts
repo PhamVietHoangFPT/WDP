@@ -127,4 +127,18 @@ export class ImageUploadRepository implements IImageUploadRepository {
       .exec()
     return result
   }
+
+  async findByCreatedBy(
+    userId: string,
+    serviceCaseId: string,
+  ): Promise<ImageDocument[]> {
+    return await this.imageModel
+      .find({
+        created_by: userId,
+        serviceCase: serviceCaseId,
+        deleted_at: null,
+      })
+      .lean()
+      .exec()
+  }
 }

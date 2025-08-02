@@ -92,4 +92,31 @@ export class SampleCollectorController {
       success: true,
     })
   }
+
+  @Get('all-service-cases')
+  @ApiBearerAuth('bearer')
+  @Roles(RoleEnum.SAMPLE_COLLECTOR)
+  @ApiQuery({
+    name: 'isAtHome',
+    required: true,
+    description: 'Lọc theo trường hợp dịch vụ tại nhà',
+    type: Boolean,
+  })
+  async getAllServiceCasesForSampleCollector(
+    @Req() req: any,
+    @Query('isAtHome') isAtHome: boolean,
+  ): Promise<ApiResponseDto<ServiceCaseDocument>> {
+    const sampleCollectorId = req.user.id
+    const data =
+      await this.sampleCollectorService.getAllServiceCasesForSampleCollector(
+        sampleCollectorId,
+        isAtHome,
+      )
+    return {
+      data,
+      statusCode: 200,
+      message: 'Lấy tất cả trường hợp dịch vụ thành công',
+      success: true,
+    }
+  }
 }

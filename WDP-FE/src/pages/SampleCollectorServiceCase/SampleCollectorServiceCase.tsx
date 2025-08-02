@@ -1,8 +1,6 @@
-"use client"
 import type React from "react"
 import { useState, useEffect } from "react"
 import {
-  Table,
   Typography,
   Spin,
   Pagination,
@@ -16,8 +14,10 @@ import {
   Space,
   Tooltip,
   Upload,
+  Card,
+  List,
+  Flex,
 } from "antd"
-import type { ColumnsType } from "antd/es/table"
 import {
   useGetServiceCaseStatusListQuery,
   useGetAllServiceCasesQuery,
@@ -30,9 +30,23 @@ const { Title, Text } = Typography
 
 interface ServiceCase {
   _id: string
-  statusDetails: string
-  bookingDate: string
   currentStatus?: string
+  bookingDetails: {
+    bookingDate: string
+    slotTime: string
+  }
+  accountDetails: {
+    _id: string
+    name: string
+    phoneNumber: string
+    address: {
+      fullAddress: string
+      location: {
+        type: string
+        coordinates: number[]
+      }
+    }
+  }
   caseMember: {
     testTakers: {
       _id: string
@@ -41,7 +55,19 @@ interface ServiceCase {
     }[]
     sampleIdentifyNumbers: string[]
     isSelfSampling: boolean
+    isSingleService: boolean
   }
+  services: {
+    _id: string
+    fee: number
+    name?: string
+    sample: {
+      _id: string
+      name: string
+      fee: number
+    }
+    timeReturn: string
+  }[]
 }
 
 interface ServiceCaseStatus {
@@ -58,14 +84,14 @@ const SampleCollectorServiceCase: React.FC = () => {
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>("")
+  const [uploadModalVisible, setUploadModalVisible] = useState(false)
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
-  // Fetch du lieu cho dropdown status
   const { data: statusListData, isLoading: isLoadingStatus } = useGetServiceCaseStatusListQuery({
     pageNumber: 1,
     pageSize: 100,
   })
-
-  // Fetch service cases theo status
   const {
     data: serviceCasesData,
     isLoading: isLoadingServices,
@@ -77,16 +103,13 @@ const SampleCollectorServiceCase: React.FC = () => {
       skip: !selectedStatus,
     },
   )
-
   const [updateServiceCaseStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusMutation()
-
   const [createServiceCaseImage, { isLoading: isUploading }] = useCreateServiceCaseImageMutation()
 
   useEffect(() => {
     setPageNumber(1)
   }, [selectedStatus])
 
-  // Mau sac cho cac status
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Chờ xử lý":
@@ -104,13 +127,11 @@ const SampleCollectorServiceCase: React.FC = () => {
     }
   }
 
-  // Get order hien tai cua status
   const getCurrentStatusOrder = (statusName: string) => {
     const status = statusListData?.data?.find((s: ServiceCaseStatus) => s.testRequestStatus === statusName)
     return status?.order || 0
   }
 
-  // Get nhung status tiep theo co the cap nhat duoc
   const getAvailableNextStatuses = (currentStatusName: string) => {
     const currentOrder = getCurrentStatusOrder(currentStatusName)
     return [...(statusListData?.data || [])]
@@ -118,10 +139,8 @@ const SampleCollectorServiceCase: React.FC = () => {
       .sort((a: ServiceCaseStatus, b: ServiceCaseStatus) => a.order - b.order)
   }
 
-  // Handle status update
   const handleStatusUpdate = async () => {
     if (!selectedServiceCase || !newStatusId) return
-
     try {
       await updateServiceCaseStatus({
         id: selectedServiceCase._id,
@@ -136,24 +155,27 @@ const SampleCollectorServiceCase: React.FC = () => {
     }
   }
 
-  // Handle image upload
-  const handleImageUpload = async (file: File, serviceCase: ServiceCase) => {
+  const handleImageUpload = async () => {
+    if (!fileToUpload || !selectedServiceCase) return
+
     const formData = new FormData()
-    formData.append("serviceCase", serviceCase._id)
-    formData.append("file", file)
+    formData.append("serviceCase", selectedServiceCase._id)
+    formData.append("file", fileToUpload)
 
     try {
       await createServiceCaseImage(formData).unwrap()
       message.success("Upload ảnh thành công!")
+      setUploadModalVisible(false)
+      setFileToUpload(null)
+      setPreviewImage(null)
     } catch (error: any) {
       console.error("Upload image error:", error)
       message.error(error?.data?.message || "Upload ảnh thất bại!")
     }
   }
 
-  // Get status update menu
   const getStatusUpdateMenu = (record: ServiceCase) => {
-    const availableStatuses = getAvailableNextStatuses(record.statusDetails)
+    const availableStatuses = getAvailableNextStatuses(record.currentStatus || "")
     if (availableStatuses.length === 0) {
       return (
         <Menu
@@ -167,7 +189,6 @@ const SampleCollectorServiceCase: React.FC = () => {
         />
       )
     }
-
     return (
       <Menu
         items={availableStatuses.map((status: ServiceCaseStatus) => ({
@@ -188,207 +209,46 @@ const SampleCollectorServiceCase: React.FC = () => {
     )
   }
 
-  const customerCollumns = {
-    title: "Thông tin Khách hàng",
-    key: "customerInfo",
-    dataIndex: ["accountDetails", "name"],
-    render: (_, record) => {
-      const account = record.accountDetails
-      if (!account) {
-        return "—"
-      }
-      const fullAddress = account.address?.fullAddress
-      const coordinates = account.address?.location?.coordinates
-      const canNavigate = fullAddress && coordinates
-
-      const handleDirectionsClick = () => {
-        if (!canNavigate) return
-        const encodedAddress = encodeURIComponent(fullAddress)
-        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
-        window.open(mapsUrl, "_blank", "noopener,noreferrer")
-      }
-
-      return (
-        <Space direction="vertical" size={4}>
-          <Space>
-            <UserOutlined />
-            <Typography.Text strong>{account.name}</Typography.Text>
-          </Space>
-          <Space>
-            <PhoneOutlined />
-            <Typography.Text>{account.phoneNumber}</Typography.Text>
-          </Space>
-          {fullAddress && (
-            <Tooltip title={fullAddress}>
-              <Space style={{ maxWidth: 250, alignItems: "start"}}>
-                <EnvironmentOutlined />
-                {/* su dung div de xuong dong */}
-                <div style={{ wordWrap: 'break-word' }}>
-                  <Typography.Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>
-                    {fullAddress}
-                  </Typography.Text>
-                </div>
-              </Space>
-            </Tooltip>
-          )}
-          {canNavigate && (
-            <Button
-              icon={<CarOutlined />}
-              size="small"
-              onClick={handleDirectionsClick}
-              style={{ marginTop: "4px" }}
-            >
-              Chỉ đường
-            </Button>
-          )}
-        </Space>
-      )
-    },
+  const handleBeforeUpload = (file: File, record: ServiceCase) => {
+    setFileToUpload(file)
+    setSelectedServiceCase(record)
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      setPreviewImage(reader.result as string)
+      setUploadModalVisible(true)
+    }
+    return false // ngan viec tu dong upload neu khong qua modal xac nhan
   }
-
-  const testTakersColumns = {
-    title: "Người xét nghiệm & Mã mẫu",
-    key: "testTakers",
-    render: (_, record) => {
-      const { testTakers, sampleIdentifyNumbers } = record.caseMember
-      if (!testTakers || testTakers.length === 0) {
-        return "—"
-      }
-
-      return (
-        <Space direction="vertical" size={4}>
-          {testTakers.map((taker, index) => (
-            <div key={taker._id}>
-              <Text strong>{taker.name}</Text>
-              <div style={{ fontSize: "12px", color: "#666" }}>
-                {sampleIdentifyNumbers
-                  .filter((_, i) => (i % 2) === (index % 2))
-                  .map((sampleId, i) => (
-                    <div key={i}>{sampleId}</div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </Space>
-      )
-    },
-  }
-
-
-  const columns: ColumnsType<ServiceCase> = [
-    {
-      title: "Mã dịch vụ",
-      dataIndex: "_id",
-      key: "_id",
-      render: (id: string) => <div style={{ fontFamily: "monospace", fontSize: "12px" }}>{id}</div>,
-    },
-    {
-      title: "Ngày đặt",
-      dataIndex: "bookingDate",
-      key: "bookingDate",
-      render: (date: string) => {
-        const bookingDate = new Date(date)
-        return (
-          <div>
-            <div style={{ fontWeight: "bold" }}>{bookingDate.toLocaleDateString("vi-VN")}</div>
-            <div style={{ fontSize: "12px", color: "#666" }}>
-              {bookingDate.toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </div>
-          </div>
-        )
-      },
-      sorter: (a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
-    },
-    {
-      title: "Thời gian tạo",
-      key: "createdTime",
-      render: (_, record) => {
-        const now = new Date()
-        const bookingDate = new Date(record.bookingDate)
-        const diffInHours = Math.floor((now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60))
-        const diffInDays = Math.floor(diffInHours / 24)
-
-        if (diffInDays > 0) {
-          return `${diffInDays} ngày trước`
-        } else if (diffInHours > 0) {
-          return `${diffInHours} giờ trước`
-        } else {
-          return "Vừa tạo"
-        }
-      },
-    },
-    ...(isAtHome ? [customerCollumns] : []),
-    testTakersColumns,
-    {
-      title: "Hành động",
-      key: "actions",
-      render: (_, record) => {
-        const availableStatuses = getAvailableNextStatuses(record.statusDetails)
-        const canUpdate = availableStatuses.length > 0
-
-        return (
-          <Space direction="vertical" size="small">
-            <Dropdown overlay={getStatusUpdateMenu(record)} trigger={["click"]} disabled={!canUpdate}>
-              <Button type="primary" disabled={!canUpdate}>
-                {canUpdate ? "Cập nhật trạng thái" : "Không thể cập nhật"}
-              </Button>
-            </Dropdown>
-
-            <Upload
-              beforeUpload={(file) => {
-                handleImageUpload(file, record)
-                return false
-              }}
-              showUploadList={false}
-              accept="image/*"
-            >
-              <Button icon={<UploadOutlined />} loading={isUploading} size="small">
-                Upload ảnh
-              </Button>
-            </Upload>
-          </Space>
-        )
-      },
-    },
-  ]
 
   const serviceCases = selectedStatus && serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
-
   const totalItems = serviceCases.length
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedData = serviceCases.slice(startIndex, endIndex)
-
   const currentStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === selectedStatus)?.testRequestStatus || ""
-
   const newStatusName =
     statusListData?.data?.find((status: ServiceCaseStatus) => status._id === newStatusId)?.testRequestStatus || ""
 
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý trường hợp dịch vụ</Title>
-
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 8,
-        }}
+      <Flex
+        justify="space-between"
+        align="center"
+        style={{ marginBottom: 16 }}
+        gap={8}
+        wrap="wrap"
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Flex align="center" gap={8} wrap="wrap">
           <span>Lọc theo trạng thái:</span>
           <Select
             value={selectedStatus}
             onChange={(value) => {
               setSelectedStatus(value)
             }}
-            style={{ width: 250 }}
+            style={{ minWidth: 250 }}
             placeholder="Chọn trạng thái dịch vụ"
             loading={isLoadingStatus}
             disabled={isLoadingStatus}
@@ -404,24 +264,22 @@ const SampleCollectorServiceCase: React.FC = () => {
           <Select
             value={isAtHome}
             onChange={setIsAtHome}
-            style={{ width: 200 }}
+            style={{ minWidth: 200 }}
             options={[
               { value: true, label: "🏠 Dịch vụ tại nhà" },
               { value: false, label: "🏥 Dịch vụ tại cơ sở" },
             ]}
           />
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        </Flex>
+        <Flex align="center" gap={8}>
           {selectedStatus && (
             <Tag color={getStatusColor(currentStatusName)}>
               {currentStatusName}: {totalItems} dịch vụ
             </Tag>
           )}
           {!selectedStatus && <span style={{ fontSize: "14px", color: "#666" }}>Chọn trạng thái để xem dịch vụ</span>}
-        </div>
-      </div>
-
+        </Flex>
+      </Flex>
       {!selectedStatus ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
@@ -440,14 +298,149 @@ const SampleCollectorServiceCase: React.FC = () => {
         </div>
       ) : (
         <>
-          <Table
+          <List
+            grid={{
+              gutter: 16,
+              xs: 1,
+              sm: 1,
+              md: 1,
+              lg: 1,
+              xl: 1,
+              xxl: 1,
+            }}
             dataSource={paginatedData}
-            columns={columns}
-            rowKey="_id"
-            pagination={false}
             loading={isFetchingServices}
             locale={{
               emptyText: `Không có dịch vụ nào với trạng thái "${currentStatusName}"`,
+            }}
+            renderItem={(item) => {
+              const record = item
+              const { testTakers, sampleIdentifyNumbers, isSingleService } = record.caseMember
+              const account = record.accountDetails
+              const fullAddress = account?.address?.fullAddress
+              const coordinates = account?.address?.location?.coordinates
+              const canNavigate = fullAddress && coordinates
+              const handleDirectionsClick = () => {
+                if (!canNavigate) return
+                const encodedAddress = encodeURIComponent(fullAddress)
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
+                window.open(mapsUrl, "_blank", "noopener,noreferrer")
+              }
+              const availableStatuses = getAvailableNextStatuses(record.currentStatus || "")
+              const canUpdate = availableStatuses.length > 0
+              const renderSampleNames = (index: number) => {
+                if (!record.services || record.services.length === 0) {
+                  return <Text type="secondary">Không có mẫu</Text>
+                }
+                if (isSingleService) {
+                  const service = record.services[index]
+                  return service ? <Text type="secondary">{service.sample.name}</Text> : null
+                } else {
+                  return record.services.map((service, i) => (
+                    <Text key={i} type="secondary" style={{ display: 'block' }}>{service.sample.name}</Text>
+                  ))
+                }
+              }
+              return (
+                <List.Item>
+                  <Card
+                    title={
+                      <div style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: "bold" }}>
+                        Mã dịch vụ: {record._id}
+                      </div>
+                    }
+                  >
+                    <Flex vertical gap={12}>
+                      <Flex justify="space-between" align="center">
+                        <Space>
+                          <Typography.Text strong>Ngày giờ hẹn:</Typography.Text>
+                          <Text>{new Date(record.bookingDetails.bookingDate).toLocaleDateString("vi-VN")} - {record.bookingDetails.slotTime}</Text>
+                        </Space>
+                      </Flex>
+                      {isAtHome && account && (
+                        <Card size="small" title="Thông tin khách hàng">
+                          <Flex vertical gap={4}>
+                            <Space>
+                              <UserOutlined />
+                              <Typography.Text strong>{account.name}</Typography.Text>
+                            </Space>
+                            <Space>
+                              <PhoneOutlined />
+                              <Typography.Text>{account.phoneNumber}</Typography.Text>
+                            </Space>
+                            {fullAddress && (
+                              <Tooltip title={fullAddress}>
+                                <Space style={{ maxWidth: "100%", alignItems: "start"}}>
+                                  <EnvironmentOutlined />
+                                  <div style={{ wordWrap: 'break-word', flex: 1 }}>
+                                    <Typography.Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>
+                                      {fullAddress}
+                                    </Typography.Text>
+                                  </div>
+                                </Space>
+                              </Tooltip>
+                            )}
+                            {canNavigate && (
+                              <Button
+                                icon={<CarOutlined />}
+                                size="small"
+                                onClick={handleDirectionsClick}
+                                style={{ marginTop: "4px" }}
+                              >
+                                Chỉ đường
+                              </Button>
+                            )}
+                          </Flex>
+                        </Card>
+                      )}
+                      {(testTakers && testTakers.length > 0) && (
+                        <Card size="small" style={{height: "300px"}} title="Người xét nghiệm & Mã mẫu">
+                          {testTakers.map((taker, index) => (
+                            <div key={taker._id} style={{ marginBottom: index < testTakers.length - 1 ? 8 : 0 }}>
+                              <Text strong>{taker.name}</Text>
+                              <div style={{ fontSize: "12px", color: "#666" }}>
+                                {sampleIdentifyNumbers && sampleIdentifyNumbers.length > 0 ? (
+                                  sampleIdentifyNumbers
+                                    .filter((_, i) => (i % 2) === (index % 2))
+                                    .map((sampleId, i) => (
+                                      <div key={i}>{sampleId}</div>
+                                    ))
+                                ) : (
+                                  <Text type="secondary">Không có mã mẫu</Text>
+                                )}
+                              </div>
+                              <div style={{ fontSize: "12px", color: "#999", marginTop: 4 }}>
+                                {renderSampleNames(index)}
+                              </div>
+                            </div>
+                          ))}
+                        </Card>
+                      )}
+                      {(!testTakers || testTakers.length === 0) && (
+                        <Card size="small" title="Người xét nghiệm & Mã mẫu">
+                          <Text type="secondary">—</Text>
+                        </Card>
+                      )}
+                      <Flex gap={8} style={{ marginTop: 12 }}>
+                        <Dropdown overlay={getStatusUpdateMenu(record)} trigger={["click"]} disabled={!canUpdate}>
+                          <Button type="primary" disabled={!canUpdate}>
+                            {canUpdate ? "Cập nhật trạng thái" : "Không thể cập nhật"}
+                          </Button>
+                        </Dropdown>
+                        <Upload
+                          beforeUpload={(file) => handleBeforeUpload(file, record)}
+                          showUploadList={false}
+                          accept="image/*"
+                        >
+                          <Button icon={<UploadOutlined />} loading={isUploading}>
+                            Upload ảnh
+                          </Button>
+                        </Upload>
+                      </Flex>
+                    </Flex>
+                  </Card>
+                </List.Item>
+              )
             }}
           />
           {totalItems > 0 && (
@@ -467,7 +460,6 @@ const SampleCollectorServiceCase: React.FC = () => {
           )}
         </>
       )}
-
       <Modal
         title="Xác nhận cập nhật trạng thái"
         open={updateModalVisible}
@@ -487,8 +479,8 @@ const SampleCollectorServiceCase: React.FC = () => {
           </p>
           <p>
             <strong>Trạng thái hiện tại:</strong>{" "}
-            <Tag color={getStatusColor(selectedServiceCase?.statusDetails || "")}>
-              {selectedServiceCase?.statusDetails}
+            <Tag color={getStatusColor(selectedServiceCase?.currentStatus || "")}>
+              {selectedServiceCase?.currentStatus}
             </Tag>
           </p>
           <p>
@@ -503,6 +495,43 @@ const SampleCollectorServiceCase: React.FC = () => {
             }}
           >
             <strong>⚠️ Lưu ý:</strong> Việc cập nhật trạng thái không thể hoàn tác sau khi thực hiện!
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de xac nhan anh muon upload */}
+      <Modal
+        title="Xác nhận tải ảnh lên"
+        open={uploadModalVisible}
+        onOk={handleImageUpload}
+        onCancel={() => {
+          setUploadModalVisible(false)
+          setFileToUpload(null)
+          setPreviewImage(null)
+          setSelectedServiceCase(null)
+        }}
+        confirmLoading={isUploading}
+        okText="Tải lên"
+        cancelText="Hủy"
+      >
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <p>Bạn có chắc chắn muốn tải ảnh này lên cho dịch vụ có mã <strong>{selectedServiceCase?._id}</strong> không?</p>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{ maxWidth: "100%", maxHeight: "300px", marginTop: "16px", border: "1px solid #ddd" }}
+            />
+          )}
+          <div
+            style={{
+              marginTop: "16px",
+              padding: "12px",
+              backgroundColor: "#fff7e6",
+              borderRadius: "6px",
+            }}
+          >
+            <strong>⚠️ Lưu ý:</strong> Vui lòng đảm bảo đây là ảnh chính xác cần tải lên!
           </div>
         </div>
       </Modal>

@@ -11,6 +11,7 @@ import {
   Body,
   Inject,
   Req,
+  Query,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import {
@@ -19,6 +20,7 @@ import {
   ApiTags,
   ApiParam,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger'
 import { ImageUploadService } from './imageUpload.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
@@ -169,13 +171,6 @@ export class ImageController {
     }
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', required: true })
-  async findById(@Param('id') id: string) {
-    const image = await this.uploadService.findById(id)
-    return image
-  }
-
   @Get('findForBlog/:blogId')
   async findAllForBlog(@Param('blogId') blogId: string) {
     return this.uploadService.findAllForBlog(blogId)
@@ -184,6 +179,29 @@ export class ImageController {
   @Get('findForServiceCase/:serviceCaseId')
   async findAllForServiceCase(@Param('serviceCaseId') serviceCaseId: string) {
     return this.uploadService.findAllForServiceCase(serviceCaseId)
+  }
+
+  @Get('findForServiceCaseByCreatedBy/:serviceCaseId')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'serviceCaseId',
+    required: true,
+    description: 'ID của service case',
+  })
+  async findByCreatedBy(
+    @Req() req: any,
+    @Param('serviceCaseId') serviceCaseId: string,
+  ) {
+    const userId = req.user.id
+    return this.uploadService.findByCreatedBy(userId, serviceCaseId)
+  }
+
+  @Get(':id')
+  @ApiParam({ name: 'id', required: true })
+  async findById(@Param('id') id: string) {
+    const image = await this.uploadService.findById(id)
+    return image
   }
 
   @Get('findForKitShipment/:kitShipmentId')

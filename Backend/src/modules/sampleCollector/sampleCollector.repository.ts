@@ -25,12 +25,17 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
     serviceCaseStatus: string,
     isAtHome: boolean,
   ): Promise<ServiceCaseDocument[]> {
+    const filter: any = {
+      sampleCollector: new Types.ObjectId(sampleCollectorId),
+    }
+
+    // Chỉ thêm điều kiện lọc currentStatus nếu nó không phải là chuỗi rỗng
+    if (serviceCaseStatus) {
+      filter.currentStatus = new Types.ObjectId(serviceCaseStatus)
+    }
     return this.serviceCaseModel.aggregate([
       {
-        $match: {
-          sampleCollector: new Types.ObjectId(sampleCollectorId),
-          currentStatus: new Types.ObjectId(serviceCaseStatus),
-        },
+        $match: filter,
       },
       {
         $lookup: {
@@ -155,6 +160,21 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
       {
         $unwind: { path: '$bookingDetails', preserveNullAndEmptyArrays: true },
       },
+      {
+        $lookup: {
+          from: 'slots',
+          let: { slotId: '$bookingDetails.slot' },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ['$_id', '$$slotId'] } },
+            },
+          ],
+          as: 'slotDetails',
+        },
+      },
+      {
+        $unwind: { path: '$slotDetails', preserveNullAndEmptyArrays: true },
+      },
       // Mo bang services
       {
         $lookup: {
@@ -186,7 +206,10 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
         $project: {
           _id: 1,
           currentStatus: '$statusDetails.testRequestStatus',
-          bookingDate: '$bookingDetails.bookingDate',
+          bookingDetails: {
+            bookingDate: '$bookingDetails.bookingDate',
+            slotTime: '$slotDetails.startTime',
+          },
           accountDetails: {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',

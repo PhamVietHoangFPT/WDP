@@ -195,4 +195,17 @@ export class ImageUploadService implements IImageUploadService {
     await this.imageModel.deleteById(id, userId)
     return true
   }
+
+  async findByCreatedBy(
+    userId: string,
+    serviceCaseId: string,
+  ): Promise<ImageDocument[]> {
+    const data = await this.imageModel.findByCreatedBy(userId, serviceCaseId)
+
+    if (!data) {
+      throw new NotFoundException('Không tìm thấy ảnh nào')
+    }
+
+    return data
+  }
 }
