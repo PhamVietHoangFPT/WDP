@@ -153,6 +153,23 @@ export class ServiceCaseController {
     }
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết của một hồ sơ dịch vụ' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: 'ID của hồ sơ dịch vụ cần lấy thông tin',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin chi tiết của hồ sơ dịch vụ.',
+    type: ServiceCaseResponseDto,
+  })
+  findOne(@Param('id') id: string): Promise<ServiceCaseResponseDto | null> {
+    return this.serviceCaseService.findServiceCaseById(id)
+  }
+
   @Post('Test')
   test(): Promise<void> {
     return this.serviceCaseService.handleCron()

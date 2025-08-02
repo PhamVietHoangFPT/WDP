@@ -51,6 +51,11 @@ export class ServiceCaseResponseDto {
   @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   currentStatus: mongoose.Schema.Types.ObjectId
 
+  @Expose()
+  @ApiProperty({ example: '605e3f5f4f3e8c1d4c9f1e1a', type: String })
+  @Transform(({ value }) => value.toString(), { toPlainOnly: true })
+  adnDocumentation: mongoose.Schema.Types.ObjectId
+
   constructor(partial: Partial<ServiceCase>) {
     Object.assign(this, partial)
   }

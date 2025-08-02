@@ -88,5 +88,7 @@ export interface IServiceCaseRepository {
     serviceCaseId: string,
     adnDocumentationId: string,
   ): Promise<ServiceCaseDocument | null>
+
+  findById(id: string): Promise<ServiceCaseDocument | null>
 }
 export const IServiceCaseRepository = Symbol('IServiceCaseRepository')

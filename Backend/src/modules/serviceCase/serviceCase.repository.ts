@@ -61,6 +61,36 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
       .populate({ path: 'currentStatus', select: 'testRequestStatus -_id' })
       .populate({ path: 'doctor', select: 'name -_id' })
       .populate({ path: 'sampleCollector', select: 'phoneNumber name -_id' })
+      .populate({
+        path: 'caseMember',
+        // 1. Thêm 'service' vào đây
+        select:
+          'booking testTaker service isSelfSampling isSingleService isAtHome',
+        populate: [
+          {
+            path: 'booking',
+            select: 'bookingDate',
+          },
+          {
+            path: 'testTaker',
+            select: 'name personalId',
+          },
+          {
+            path: 'service',
+            select: 'name fee sample timeReturn',
+            populate: [
+              {
+                path: 'sample',
+                select: 'name',
+              },
+              {
+                path: 'timeReturn',
+                select: 'timeReturn',
+              },
+            ],
+          },
+        ],
+      })
       .lean()
   }
 
@@ -518,5 +548,77 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
     )
 
     return updatedServiceCase
+  }
+
+  async findById(id: string): Promise<ServiceCaseDocument | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      console.warn('Id không hợp lệ')
+      return null
+    }
+    return (
+      this.serviceCaseModel
+        .findById(id)
+        // Chọn các trường ở cấp cao nhất và loại bỏ __v
+        .select(
+          '-__v -created_by -updated_by -deleted_at -deleted_by -updated_at',
+        )
+
+        // Populate các trường cấp cao nhất
+        .populate({ path: 'account', select: 'name phoneNumber' })
+        .populate({ path: 'currentStatus', select: 'testRequestStatus' })
+        .populate({ path: 'doctor', select: 'name email phoneNumber' })
+        .populate({ path: 'sampleCollector', select: 'name email phoneNumber' })
+
+        // ✅ Sửa lại populate cho 'result' để thêm nested populate
+        .populate({
+          path: 'result',
+          select: 'adnPercentage conclusion certifierId', // Chọn các trường cần thiết từ result
+          populate: {
+            path: 'certifierId', // Populate người xác nhận bên trong result
+            select: 'name', // Chỉ lấy tên của người xác nhận
+          },
+        })
+
+        // Populate adnDocumentation và chọn lọc trường
+        .populate({
+          path: 'adnDocumentation',
+          select: 'profiles conclusion doctor',
+          populate: {
+            path: 'doctor',
+            select: 'name',
+          },
+        })
+
+        // Populate lồng nhau cho caseMember (giữ nguyên cấu trúc)
+        .populate({
+          path: 'caseMember',
+          select:
+            'booking testTaker service isSelfSampling isSingleService isAtHome',
+          populate: [
+            {
+              path: 'booking',
+              select: 'bookingDate',
+            },
+            {
+              path: 'testTaker',
+              select: 'name personalId',
+            },
+            {
+              path: 'service',
+              select: 'name fee sample timeReturn',
+              populate: [
+                {
+                  path: 'sample',
+                  select: 'name',
+                },
+                {
+                  path: 'timeReturn',
+                  select: 'timeReturn',
+                },
+              ],
+            },
+          ],
+        })
+    )
   }
 }
