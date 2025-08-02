@@ -89,7 +89,7 @@ export default function CreateAdnDocumentPage() {
       doctor: doctorId,
       profiles,
     }
-
+    console.log('Body gửi lên:', JSON.stringify(body, null, 2))
     try {
       await createAdnDocumentation(body).unwrap()
       message.success('Tạo tài liệu thành công')
