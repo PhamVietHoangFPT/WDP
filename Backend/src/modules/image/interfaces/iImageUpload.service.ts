@@ -41,7 +41,10 @@ export interface IImageUploadService {
 
   deleteById(id: string, userId: string): Promise<boolean>
 
-  findByCreatedBy(userId: string): Promise<ImageDocument[]>
+  findByCreatedBy(
+    userId: string,
+    serviceCaseId: string,
+  ): Promise<ImageDocument[]>
 }
 
 export const IImageUploadService = Symbol('IImageUploadService')
