@@ -1,31 +1,35 @@
-import { Card, Typography, Timeline, Spin, Button, Image, Space } from 'antd' // Import Image and Space
-import { useParams } from 'react-router-dom'
-import { useGetTestRequestHistoryQuery, useGetImageQuery } from '../../features/customer/paymentApi' // Import useGetImageQuery
-import Cookies from 'js-cookie'
-import { useState, useEffect } from 'react' // Import useState and useEffect
+import { Card, Typography, Timeline, Spin, Button, Image, Space, Row, Col, Descriptions, Tag, Table, Divider } from 'antd';
+import { useParams } from 'react-router-dom';
+import { useGetTestRequestHistoryQuery, useGetImageQuery, useGetServiceCaseByIdQuery } from '../../features/customer/paymentApi';
+import Cookies from 'js-cookie';
+import { useState, useEffect } from 'react';
+import { UserOutlined, PhoneOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
 export default function ServiceCaseDetail() {
-  const { id } = useParams() // serviceCaseId
-  const userData = Cookies.get('userData')
+  const { id } = useParams();
+  const userData = Cookies.get('userData');
 
-  let accountId = ''
+  let accountId = '';
   try {
-    accountId = userData ? JSON.parse(userData).id : ''
+    accountId = userData ? JSON.parse(userData).id : '';
   } catch (error) {
-    console.error('Failed to parse userData cookie:', error)
+    console.error('Failed to parse userData cookie:', error);
   }
 
-  const { data, isLoading } = useGetTestRequestHistoryQuery({
+  const { data: historyData, isLoading: isLoadingHistory } = useGetTestRequestHistoryQuery({
     accountId,
     serviceCaseId: id,
-  })
+  });
 
-  // Sử dụng useGetImageQuery để lấy danh sách ảnh
+  const { data: serviceCaseData, isLoading: isLoadingServiceCase } = useGetServiceCaseByIdQuery(id as string, {
+    skip: !id,
+  });
+
   const { data: imageData, isLoading: isLoadingImages } = useGetImageQuery(id as string, {
-    skip: !id, // Chỉ gọi API khi có id
-  })
+    skip: !id,
+  });
 
   const [fullImageUrls, setFullImageUrls] = useState<string[]>([]);
 
@@ -38,72 +42,243 @@ export default function ServiceCaseDetail() {
     }
   }, [imageData]);
 
-
-  const sortedData = [...(data?.data || [])].sort(
+  const sortedHistoryData = [...(historyData?.data || [])].sort(
     (a, b) => a.testRequestStatus.order - b.testRequestStatus.order
-  )
+  );
+
+  if (isLoadingHistory || isLoadingServiceCase) {
+    return <Spin tip="Đang tải..." style={{ display: 'block', marginTop: '50px' }} />;
+  }
+
+  const serviceCase = serviceCaseData;
+
+  const feeColumns = [
+    {
+      title: 'Chi phí dịch vụ',
+      dataIndex: ['caseMember', 'service'],
+      key: 'service',
+      render: (services: any[]) => (
+        <Space direction="vertical">
+          {services?.map((service, index) => (
+            <Text key={index}>{service.name} ({service.sample.name})</Text>
+          ))}
+          <Text strong>Phí ship:</Text>
+          <Text strong>Tổng cộng:</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Số tiền (VNĐ)',
+      dataIndex: ['caseMember', 'service'],
+      key: 'fee',
+      align: 'right' as const,
+      render: (services: any[], record: any) => {
+        const serviceTotal = services?.reduce((sum, s) => sum + s.fee, 0);
+        const shippingFee = record.shippingFee;
+        const total = serviceTotal + shippingFee;
+        return (
+          <Space direction="vertical">
+            {services?.map((service, index) => (
+              <Text key={index}>{service.fee.toLocaleString('vi-VN')} ₫</Text>
+            ))}
+            <Text>{shippingFee.toLocaleString('vi-VN')} ₫</Text>
+            <Divider style={{ margin: '4px 0' }} />
+            <Text strong>{total.toLocaleString('vi-VN')} ₫</Text>
+          </Space>
+        )
+      }
+    }
+  ];
+
+  const markerColumns = [
+    {
+      title: 'Locus',
+      dataIndex: 'locus',
+      key: 'locus',
+    },
+    {
+      title: 'Alleles',
+      dataIndex: 'alleles',
+      key: 'alleles',
+      render: (alleles: string[]) => alleles.join(', '),
+    },
+  ];
 
   return (
-    <div>
-      <Card style={{ margin: '30px auto', maxWidth: 800 }}>
-        <Title level={3} style={{ paddingBottom: '30px' }}>
-          Trạng thái hồ sơ
-        </Title>
-        {isLoading ? (
-          <Spin />
-        ) : (
-          <Timeline mode='left'>
-            {sortedData.map((item, index) => (
-              <Timeline.Item
-                key={item._id}
-                color={index === sortedData.length - 1 ? 'green' : 'blue'}
-              >
-                <Text strong>
-                  {new Date(item.created_at).toLocaleString('vi-VN')}
-                </Text>
-                <br />
-                <Text>{item.testRequestStatus.testRequestStatus}</Text>
-              </Timeline.Item>
-            ))}
-          </Timeline>
-        )}
+    <div style={{ padding: '20px' }}>
+      <Title level={2}>Chi tiết hồ sơ dịch vụ</Title>
+      <Row gutter={16}>
+        {/* Thanh trạng thái */}
+        <Col span={6}>
+          <Card style={{ marginBottom: '20px' }}>
+            <Title level={4}>Trạng thái hồ sơ</Title>
+            {isLoadingHistory ? (
+              <Spin />
+            ) : (
+              <Timeline mode='left'>
+                {sortedHistoryData.map((item, index) => (
+                  <Timeline.Item
+                    key={item._id}
+                    color={index === sortedHistoryData.length - 1 ? 'green' : 'blue'}
+                  >
+                    <Text strong>{new Date(item.created_at).toLocaleString('vi-VN')}</Text>
+                    <br />
+                    <Text>{item.testRequestStatus.testRequestStatus}</Text>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            )}
+          </Card>
+        </Col>
 
-        {/* --- Hiển thị ảnh --- */}
-        <Title level={4} style={{ marginTop: '40px', marginBottom: '20px' }}>
-          Hình ảnh liên quan
-        </Title>
-        {isLoadingImages ? (
-          <Spin />
-        ) : fullImageUrls.length > 0 ? (
-          <Space wrap size={16}> {/* Display images in a flex container */}
-            {fullImageUrls.map((url, index) => (
-              <Image
-                key={index}
-                src={url}
-                alt={`Service Case Image ${index + 1}`}
-                // style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'cover'}}
-                // Optional: add preview prop for full-size viewing
-                preview={{ visible: false }} // Keep it false initially
-                onClick={() => {
-                  // Open full image in new tab or show in custom modal if needed
-                  window.open(url, '_blank');
-                }}
-              />
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">Chưa có hình ảnh nào cho hồ sơ này.</Text>
-        )}
-        {/* --- Kết thúc phần hiển thị ảnh --- */}
+        {/* Phần chi tiết */}
+        <Col span={18}>
+          <Card>
+            <Title level={4}>Thông tin chung</Title>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Mã hồ sơ">{serviceCase?._id}</Descriptions.Item>
+              <Descriptions.Item label="Ngày tạo">
+                {serviceCase?.created_at && new Date(serviceCase.created_at).toLocaleString('vi-VN')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Ngày đặt">
+                {serviceCase?.caseMember?.booking?.bookingDate && new Date(serviceCase.caseMember.booking.bookingDate).toLocaleDateString('vi-VN')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Trạng thái hiện tại">
+                <Tag color="blue">{serviceCase?.currentStatus?.testRequestStatus}</Tag>
+              </Descriptions.Item>
+            </Descriptions>
 
-        <Button
-          type='primary'
-          style={{ marginTop: 16 }}
-          onClick={() => window.history.back()}
-        >
-          Trở về
-        </Button>
-      </Card>
+            <Divider />
+
+            <Title level={4}>Thông tin khách hàng</Title>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Tên tài khoản">{serviceCase?.account?.name}</Descriptions.Item>
+              <Descriptions.Item label="Số điện thoại">{serviceCase?.account?.phoneNumber}</Descriptions.Item>
+            </Descriptions>
+
+            <Divider />
+
+            <Title level={4}>Thông tin người xét nghiệm</Title>
+            <Descriptions bordered size="small" column={1}>
+              {serviceCase?.caseMember?.testTaker.map((taker: any) => (
+                <Descriptions.Item key={taker._id} label="Họ và tên">{taker.name} (CMND/CCCD: {taker.personalId})</Descriptions.Item>
+              ))}
+            </Descriptions>
+
+            <Divider />
+
+            <Title level={4}>Dịch vụ đã chọn</Title>
+            <Descriptions bordered size="small" column={1}>
+              {serviceCase?.caseMember?.service.map((service: any) => (
+                <Descriptions.Item key={service._id} label="Dịch vụ">
+                  {service.name} (Loại mẫu: {service.sample.name}) - Thời gian trả kết quả: {service.timeReturn.timeReturn} ngày
+                </Descriptions.Item>
+              ))}
+              <Descriptions.Item label="Hình thức lấy mẫu">
+                {serviceCase?.caseMember?.isAtHome ? <Tag color="green">Lấy mẫu tại nhà</Tag> : <Tag>Lấy mẫu tại trung tâm</Tag>}
+              </Descriptions.Item>
+            </Descriptions>
+            
+            <Divider />
+
+            <Title level={4}>Chi phí</Title>
+            <Table
+              dataSource={[serviceCase]}
+              columns={feeColumns}
+              pagination={false}
+              showHeader={false}
+              style={{ marginBottom: 20 }}
+            />
+            {serviceCase?.condition && (
+              <>
+                <Text strong type="danger">Chi phí phát sinh:</Text>
+                <Text type="danger"> {serviceCase.condition.toLocaleString('vi-VN')} ₫</Text>
+              </>
+            )}
+
+            <Divider />
+
+            <Title level={4}>Thông tin nhân sự</Title>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Nhân viên lấy mẫu">
+                {serviceCase?.sampleCollector ? (
+                  <Space direction="vertical">
+                    <Text strong>{serviceCase.sampleCollector.name}</Text>
+                    <Text type="secondary"><PhoneOutlined /> {serviceCase.sampleCollector.phoneNumber}</Text>
+                  </Space>
+                ) : <Tag>Chưa chỉ định</Tag>}
+              </Descriptions.Item>
+              <Descriptions.Item label="Bác sĩ phụ trách">
+                {serviceCase?.doctor ? (
+                  <Space direction="vertical">
+                    <Text strong>{serviceCase.doctor.name}</Text>
+                    <Text type="secondary"><PhoneOutlined /> {serviceCase.doctor.phoneNumber}</Text>
+                  </Space>
+                ) : <Tag>Chưa chỉ định</Tag>}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider />
+
+            <Title level={4}>Kết quả xét nghiệm</Title>
+            {serviceCase?.result ? (
+              <>
+                <Descriptions bordered size="small" column={1} style={{ marginBottom: 20 }}>
+                  <Descriptions.Item label="Kết luận">{serviceCase.result.conclusion}</Descriptions.Item>
+                  <Descriptions.Item label="Phần trăm ADN phù hợp">{serviceCase.result.adnPercentage}%</Descriptions.Item>
+                  <Descriptions.Item label="Người xác nhận">{serviceCase.result.certifierId.name}</Descriptions.Item>
+                </Descriptions>
+                <Title level={5}>Hồ sơ ADN</Title>
+                {serviceCase.adnDocumentation?.profiles.map((profile: any, index: number) => (
+                  <div key={index} style={{ marginBottom: 20, border: '1px solid #f0f0f0', padding: 10 }}>
+                    <Text strong>{profile.sampleIdentifyNumber}</Text>
+                    <Table
+                      dataSource={profile.markers}
+                      columns={markerColumns}
+                      pagination={false}
+                      size="small"
+                      rowKey="locus"
+                    />
+                  </div>
+                ))}
+              </>
+            ) : (
+              <Text type="secondary">Chưa có kết quả xét nghiệm.</Text>
+            )}
+
+            <Divider />
+            
+            <Title level={4}>Hình ảnh hồ sơ</Title>
+            {isLoadingImages ? (
+              <Spin />
+            ) : fullImageUrls.length > 0 ? (
+              <Space wrap size={16}>
+                {fullImageUrls.map((url, index) => (
+                  <Image
+                    key={index}
+                    src={url}
+                    alt={`Service Case Image ${index + 1}`}
+                    style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'cover' }}
+                    preview={{ visible: false }}
+                    onClick={() => {
+                      window.open(url, '_blank');
+                    }}
+                  />
+                ))}
+              </Space>
+            ) : (
+              <Text type="secondary">Chưa có hình ảnh nào cho hồ sơ này.</Text>
+            )}
+          </Card>
+        </Col>
+      </Row>
+      <Button
+        type='primary'
+        style={{ marginTop: 16 }}
+        onClick={() => window.history.back()}
+      >
+        Trở về
+      </Button>
     </div>
-  )
+  );
 }
