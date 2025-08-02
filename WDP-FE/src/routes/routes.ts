@@ -97,6 +97,7 @@ const ServiceCaseNeedCreateAdn = lazy(
   () =>
     import('../pages/DoctorServiceCaseWithoutResult/ServiceCaseNeedCreateAdn')
 )
+const DocumentForm = lazy(() => import('../components/Doctor/DocumentForm'))
 const FacilityDetailAdmin = lazy(
   () => import('../pages/FacilityDetailAdmin/FacilityDetailAdmin')
 )
@@ -474,6 +475,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor/service-cases-without-adn-documentation-false',
         component: ServiceCaseNeedCreateAdn,
+      },
+      {
+        path: '/doctor/create-adn-document/:serviceCaseId',
+        component: DocumentForm,
       },
     ],
   },

@@ -58,6 +58,15 @@ const doctorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['doctor'],
     }),
+    // Cập nhật trạng thái của hồ sơ
+    updateServiceCaseStatus: builder.mutation({
+      query: ({ id, currentStatus }) => ({
+        url: `/service-cases/${id}/status/${currentStatus}`,
+        method: 'PATCH',
+      }),
+      transformResponse: (res) => res,
+      invalidatesTags: ['doctor'],
+    }),
   }),
 })
 
@@ -68,4 +77,5 @@ export const {
   useGetAdnDocumentationByIdQuery,
   useGetAdnDocumentationByServiceCaseIdQuery,
   useUpdateServiceCaseConditionMutation,
+  useUpdateServiceCaseStatusMutation,
 } = doctorAPI

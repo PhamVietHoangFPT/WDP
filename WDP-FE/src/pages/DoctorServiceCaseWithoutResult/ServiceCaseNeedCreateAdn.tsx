@@ -1,16 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Table, Typography, Select, Tag, Spin, Alert, Button } from 'antd'
+import {
+  Table,
+  Typography,
+  Select,
+  Tag,
+  Spin,
+  Alert,
+  Button,
+  message,
+  Modal,
+} from 'antd'
 import {
   useGetAllRequestStatusListQuery,
   useGetServiceCasesWithoutAdnQuery,
+  useUpdateServiceCaseStatusMutation,
 } from '../../features/doctor/doctorAPI'
+import { useNavigate } from 'react-router-dom'
 
 const { Title } = Typography
+const { confirm } = Modal
 
-// Interfaces
 interface ServiceCase {
   _id: string
-  currentStatus: string
+  currentStatus: {
+    _id: string
+    testRequestStatus: string
+    order: number
+  }
   bookingDate: string
   caseMember: {
     testTakers: {
@@ -46,10 +62,11 @@ interface RequestStatus {
 
 export default function ServiceCaseNeedCreateAdn() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const resultExists = false
-
+  const navigate = useNavigate()
   const { data: statusData, isLoading: loadingStatus } =
     useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
 
@@ -57,19 +74,57 @@ export default function ServiceCaseNeedCreateAdn() {
     data: serviceCaseData,
     isLoading,
     error,
+    refetch,
   } = useGetServiceCasesWithoutAdnQuery(
     { currentStatus: selectedStatus, resultExists },
     { skip: !selectedStatus }
   )
 
+  const [updateStatus, { isLoading: updating }] =
+    useUpdateServiceCaseStatusMutation()
+
+  const handleUpdateStatus = (id: string, newStatus: string) => {
+    confirm({
+      title: 'Bạn có chắc chắn muốn cập nhật trạng thái?',
+      content: 'Thao tác này không thể hoàn tác.',
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          await updateStatus({ id, currentStatus: newStatus }).unwrap()
+          message.success('Cập nhật trạng thái thành công!')
+          refetch()
+        } catch (err: any) {
+          console.log(err)
+          message.error(err?.data?.message || 'Lỗi khi cập nhật trạng thái')
+        }
+      },
+    })
+  }
+
   useEffect(() => {
     if (statusData?.data?.length && !selectedStatus) {
-      const defaultStatus = statusData.data.find(
-        (s: RequestStatus) => s._id !== '684e9057e4331a7fdfb9b12e'
-      )
-      if (defaultStatus) setSelectedStatus(defaultStatus._id)
+      const defaultStatus =
+        statusData.data.find(
+          (s: RequestStatus) => s.testRequestStatus === 'Đã nhận mẫu'
+        ) ||
+        statusData.data.find(
+          (s: RequestStatus) => s._id !== '684e9057e4331a7fdfb9b12e'
+        )
+      if (defaultStatus) {
+        setSelectedStatus(defaultStatus._id)
+        setSelectedOrder(defaultStatus.order)
+      }
     }
   }, [statusData, selectedStatus])
+
+  const filteredStatuses = useMemo(
+    () =>
+      (statusData?.data as RequestStatus[])?.filter(
+        (s) => s._id !== '684e9057e4331a7fdfb9b12e'
+      ),
+    [statusData]
+  )
 
   const columns = [
     {
@@ -80,11 +135,6 @@ export default function ServiceCaseNeedCreateAdn() {
           {id}
         </span>
       ),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'currentStatus',
-      render: (text: string) => <Tag color='blue'>{text}</Tag>,
     },
     {
       title: 'Ngày đặt',
@@ -131,6 +181,56 @@ export default function ServiceCaseNeedCreateAdn() {
     {
       title: 'Hành động',
       key: 'actions',
+      render: (_: any, record: ServiceCase) => {
+        const selectedStatusObj = filteredStatuses.find(
+          (s) => s._id === selectedStatus
+        )
+        const selectedOrder = selectedStatusObj?.order ?? -1
+
+        if (selectedOrder === 7) {
+          return (
+            <Button
+              type='primary'
+              size='small'
+              onClick={() =>
+                navigate(`/doctor/create-adn-document/${record._id}`, {
+                  state: { serviceCase: record },
+                })
+              }
+            >
+              Nhập kết quả phân tích
+            </Button>
+          )
+        }
+
+        if (selectedOrder === 8) {
+          return <Tag color='orange'>Đang chờ duyệt kết quả</Tag>
+        }
+
+        const availableStatusOptions = filteredStatuses.filter(
+          (s) => s.order > selectedOrder
+        )
+
+        return (
+          <Select
+            placeholder='Chọn trạng thái mới'
+            style={{ width: 180 }}
+            size='small'
+            loading={updating}
+            onChange={(newStatus) => handleUpdateStatus(record._id, newStatus)}
+          >
+            {availableStatusOptions.map((status) => (
+              <Select.Option key={status._id} value={status._id}>
+                {status.testRequestStatus}
+              </Select.Option>
+            ))}
+          </Select>
+        )
+      },
+    },
+    {
+      title: '',
+      key: 'details',
       render: (_: any, record: ServiceCase) => (
         <Button
           type='link'
@@ -142,14 +242,6 @@ export default function ServiceCaseNeedCreateAdn() {
     },
   ]
 
-  const filteredStatuses = useMemo(
-    () =>
-      (statusData?.data as RequestStatus[])?.filter(
-        (s) => s._id !== '684e9057e4331a7fdfb9b12e'
-      ),
-    [statusData]
-  )
-
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>📄 Hồ sơ chưa có tài liệu ADN</Title>
@@ -157,7 +249,11 @@ export default function ServiceCaseNeedCreateAdn() {
       <div style={{ marginBottom: 16 }}>
         <Select
           value={selectedStatus}
-          onChange={setSelectedStatus}
+          onChange={(value) => {
+            setSelectedStatus(value)
+            const found = statusData?.data?.find((s) => s._id === value)
+            setSelectedOrder(found?.order || null)
+          }}
           style={{ width: 250 }}
           loading={loadingStatus}
         >
