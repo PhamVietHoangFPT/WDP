@@ -114,9 +114,38 @@ export default function ServiceCase() {
 
   const columns = [
     {
-      title: 'Mã hồ sơ',
-      dataIndex: '_id',
-      key: '_id',
+      title: 'Tên người xét nghiệm',
+      key: 'testTakerNames',
+      render: (_: any, record: any) => {
+        const testTakers = record.caseMember?.testTaker || []
+        if (testTakers.length === 0) {
+          return <Text type="secondary">Chưa có</Text>
+        }
+        return (
+          <Space direction="vertical">
+            {testTakers.map((taker: any) => (
+              <Text key={taker._id}>{taker.name}</Text>
+            ))}
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Tên dịch vụ',
+      key: 'serviceNames',
+      render: (_: any, record: any) => {
+        const services = record.caseMember?.service || []
+        if (services.length === 0) {
+          return <Text type="secondary">Chưa có</Text>
+        }
+        return (
+          <Space direction="vertical">
+            {services.map((service: any) => (
+              <Text key={service._id}>{service.sample.name}</Text>
+            ))}
+          </Space>
+        )
+      },
     },
     {
       title: 'Số tiền (VNĐ)',
@@ -291,12 +320,12 @@ export default function ServiceCase() {
           >
             Xem chi tiết
           </Button>
-          {/* <Button
+          <Button
             onClick={() => handleViewImage(record._id)}
             loading={loadingImageFor === record._id} // Thêm loading state cho nút
           >
             Xem hình ảnh
-          </Button> */}
+          </Button>
         </Space>
       ),
     },
