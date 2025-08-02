@@ -20,7 +20,7 @@ export class UpdateResultDto {
   })
   @Transform(({ value }) => value?.toString(), { toPlainOnly: true })
   @IsNotEmpty({ message: 'Doctor ID không được để trống' })
-  doctorId: mongoose.Schema.Types.ObjectId
+  certifierId: mongoose.Schema.Types.ObjectId
 
   @ApiProperty({ example: 'Kết quả xét nghiệm ADN', required: true })
   @IsString()

@@ -9,7 +9,7 @@ export interface IAdnDocumentationRepository {
   findById(id: string): Promise<AdnDocumentationDocument | null>
   findByServiceCaseId(
     serviceCaseId: string,
-  ): Promise<AdnDocumentationDocument[]>
+  ): Promise<AdnDocumentationDocument | null>
 }
 
 export const IAdnDocumentationRepository = Symbol('IAdnDocumentationRepository')

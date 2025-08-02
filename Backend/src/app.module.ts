@@ -43,6 +43,7 @@ import { KitShipmentHistoryModule } from './modules/kitShipmentHistory/kitShipme
 import { DashboardModule } from './modules/dashboard/dashboard.module'
 import { DeliveryStaffModule } from './modules/deliveryStaff/deliveryStaff.module'
 import { AdnDocumentationModule } from './modules/adnDocumentation/adnDocumentation.module'
+import { CertifierModule } from './modules/certifier/certifier.module'
 @Module({
   imports: [
     databaseConfig,
@@ -90,6 +91,7 @@ import { AdnDocumentationModule } from './modules/adnDocumentation/adnDocumentat
     DashboardModule,
     DeliveryStaffModule,
     AdnDocumentationModule,
+    CertifierModule,
   ],
   controllers: [AppController],
   providers: [AppService],
