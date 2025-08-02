@@ -11,6 +11,7 @@ import {
   Body,
   Inject,
   Req,
+  Query,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import {
@@ -19,6 +20,7 @@ import {
   ApiTags,
   ApiParam,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger'
 import { ImageUploadService } from './imageUpload.service'
 import { AuthGuard } from 'src/common/guard/auth.guard'
@@ -182,9 +184,17 @@ export class ImageController {
   @Get('findForServiceCaseByCreatedBy')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  async findByCreatedBy(@Req() req: any) {
+  @ApiQuery({
+    name: 'serviceCaseId',
+    required: true,
+    description: 'ID của service case',
+  })
+  async findByCreatedBy(
+    @Req() req: any,
+    @Query('serviceCaseId') serviceCaseId: string,
+  ) {
     const userId = req.user.id
-    return this.uploadService.findByCreatedBy(userId)
+    return this.uploadService.findByCreatedBy(userId, serviceCaseId)
   }
 
   @Get(':id')
