@@ -12,6 +12,7 @@ import ReturnFail from '../pages/Staff/ReturnFail'
 import SampleCollectorDoneServiceCase from '../pages/SampleCollectorDoneServiceCase/SampleCollectorDoneServiceCase'
 import { DoctorManagerLayout } from '../components/layout/DoctorManagerLayout'
 import DoctorManagerHomePage from '../pages/DoctorManagerHomePage/DoctorManagerHomePage'
+import StaffServiceCaseByCustomerDetail from '../pages/StaffGetServiceCaseByCustomer/StaffServiceCaseByCustomerDetail'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -612,6 +613,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/return-fail',
         component: ReturnFail,
+      },
+      {
+        path: '/staff/service-case-detail/:id',
+        component: StaffServiceCaseByCustomerDetail,
       },
     ],
   },

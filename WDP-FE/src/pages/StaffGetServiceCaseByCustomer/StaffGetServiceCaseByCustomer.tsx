@@ -18,12 +18,13 @@ import {
   Tooltip,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { SearchOutlined, ReloadOutlined, ProfileOutlined } from '@ant-design/icons'
 import {
   useGetCustomerServiceCaseByEmailQuery,
   useGetAllStatusForCustomerQuery,
   useUpdateServiceCaseStatusForStaffMutation,
 } from '../../features/staff/staffAPI'
+import { useNavigate } from 'react-router-dom'
 
 interface ServiceCase {
   _id: string
@@ -57,6 +58,7 @@ const { Title } = Typography
 const { Option } = Select
 
 const StaffGetServiceCaseByCustomer: React.FC = () => {
+  const navigate = useNavigate()
   const [form] = Form.useForm()
   const [customerEmail, setCustomerEmail] = useState<string>('')
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<
@@ -100,7 +102,6 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
     newStatusId: string
   }) => {
     try {
-      // Truyền newStatusId trực tiếp lên API
       await updateServiceCaseStatus({ id, currentStatus: newStatusId }).unwrap()
       message.success('Cập nhật trạng thái thành công!')
       refetch()
@@ -115,7 +116,6 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
   const handleSearch = () => {
     const values = form.getFieldsValue()
     setCustomerEmail(values.email)
-    // Khi lọc theo trạng thái, vẫn gửi _id lên backend
     setSelectedStatusFilter(values.currentStatus || [])
     setCurrentPage(1)
   }
@@ -128,6 +128,10 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
       id: serviceCaseId,
       newStatusId: newStatusId,
     })
+  }
+  
+  const handleViewDetail = (id: string) => {
+    navigate(`/staff/service-case-detail/${id}`)
   }
 
   const serviceCases = serviceCasesResponse?.data || []
@@ -208,23 +212,27 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
           }
         }
 
-        // Không cần tìm currentStatusId nếu không muốn set initial value
-        // const currentStatusId = allStatuses?.find(s => s.testRequestStatus === record.currentStatus)?._id;
-
         if (!availableStatuses || availableStatuses.length === 0) {
-          // Sửa điều kiện này
-          return <Tag color='default'>Không thể cập nhật</Tag>
+          return (
+            <Space size='middle'>
+              <Button onClick={() => handleViewDetail(record._id)} icon={<ProfileOutlined />}>
+                Chi tiết
+              </Button>
+              <Tag color='default'>Không thể cập nhật</Tag>
+            </Space>
+          )
         }
 
         return (
           <Space size='middle'>
+            <Button onClick={() => handleViewDetail(record._id)} icon={<ProfileOutlined />}>
+              Chi tiết
+            </Button>
             <Popconfirm
               title='Cập nhật trạng thái?'
               description={
                 <Form
                   layout='vertical'
-                  // Bỏ initialValues để không hiển thị giá trị mặc định nào trong dropdown khi mở
-                  // initialValues={{ newStatus: currentStatusId }} // Đã bỏ dòng này
                   onFinish={(values) =>
                     handleUpdateStatus(record._id, values.newStatus)
                   }
@@ -240,7 +248,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
                       placeholder='Chọn trạng thái'
                       loading={isLoadingStatuses}
                       disabled={isLoadingStatuses || isErrorStatuses}
-                      optionLabelProp='children' // Đảm bảo hiển thị testRequestStatus
+                      optionLabelProp='children'
                     >
                       {availableStatuses.map((status: Status) => (
                         <Option key={status._id} value={status._id}>
