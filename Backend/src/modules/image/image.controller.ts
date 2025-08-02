@@ -181,17 +181,17 @@ export class ImageController {
     return this.uploadService.findAllForServiceCase(serviceCaseId)
   }
 
-  @Get('findForServiceCaseByCreatedBy')
+  @Get('findForServiceCaseByCreatedBy/:serviceCaseId')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiQuery({
+  @ApiParam({
     name: 'serviceCaseId',
     required: true,
     description: 'ID của service case',
   })
   async findByCreatedBy(
     @Req() req: any,
-    @Query('serviceCaseId') serviceCaseId: string,
+    @Param('serviceCaseId') serviceCaseId: string,
   ) {
     const userId = req.user.id
     return this.uploadService.findByCreatedBy(userId, serviceCaseId)
