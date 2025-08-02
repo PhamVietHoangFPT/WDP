@@ -169,13 +169,6 @@ export class ImageController {
     }
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', required: true })
-  async findById(@Param('id') id: string) {
-    const image = await this.uploadService.findById(id)
-    return image
-  }
-
   @Get('findForBlog/:blogId')
   async findAllForBlog(@Param('blogId') blogId: string) {
     return this.uploadService.findAllForBlog(blogId)
@@ -184,6 +177,21 @@ export class ImageController {
   @Get('findForServiceCase/:serviceCaseId')
   async findAllForServiceCase(@Param('serviceCaseId') serviceCaseId: string) {
     return this.uploadService.findAllForServiceCase(serviceCaseId)
+  }
+
+  @Get('findForServiceCaseByCreatedBy')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  async findByCreatedBy(@Req() req: any) {
+    const userId = req.user.id
+    return this.uploadService.findByCreatedBy(userId)
+  }
+
+  @Get(':id')
+  @ApiParam({ name: 'id', required: true })
+  async findById(@Param('id') id: string) {
+    const image = await this.uploadService.findById(id)
+    return image
   }
 
   @Get('findForKitShipment/:kitShipmentId')

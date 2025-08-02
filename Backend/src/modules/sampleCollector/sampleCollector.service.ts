@@ -26,9 +26,26 @@ export class SampleCollectorService implements ISampleCollectorService {
     }
     return data
   }
+
   async getAllServiceCaseStatusForSampleCollector(): Promise<
     TestRequestStatusDocument[]
   > {
     return this.sampleCollectorRepository.getAllServiceCaseStatusForSampleCollector()
+  }
+
+  async getAllServiceCasesForSampleCollector(
+    sampleCollectorId: string,
+    isAtHome: boolean,
+  ): Promise<ServiceCaseDocument[]> {
+    const data =
+      await this.sampleCollectorRepository.getAllServiceCaseForSampleCollector(
+        sampleCollectorId,
+        '',
+        isAtHome,
+      )
+    if (!data || data.length === 0) {
+      throw new NotFoundException('Không tìm thấy trường hợp dịch vụ nào')
+    }
+    return data
   }
 }
