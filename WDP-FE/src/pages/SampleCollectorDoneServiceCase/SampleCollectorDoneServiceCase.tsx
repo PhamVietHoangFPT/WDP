@@ -299,6 +299,7 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                       )}
                       <Flex style={{ marginTop: 12 }}>
                         <Button
+                          type="primary"
                           icon={<EyeOutlined />}
                           onClick={() => showImageModal(record._id)}
                         >
