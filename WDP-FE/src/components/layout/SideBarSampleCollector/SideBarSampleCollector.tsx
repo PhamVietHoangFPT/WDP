@@ -80,12 +80,12 @@ export const SideBar = () => {
       label: 'Quản trị mẫu thu ',
       onClick: () => navigate('sample-collector/service-cases'),
     },
-    // {
-    //   key: 'manager/create-account',
-    //   icon: <BarChartOutlined />,
-    //   label: 'Quản trị tài khoản',
-    //   onClick: () => navigate('manager/create-account'),
-    // },
+    {
+      key: 'sample-collector/service-cases-done',
+      icon: <BarChartOutlined />,
+      label: 'Quản trị mẫu thu đã hoàn thành',
+      onClick: () => navigate('sample-collector/service-cases-done'),
+    },
   ]
   return (
     <Sider

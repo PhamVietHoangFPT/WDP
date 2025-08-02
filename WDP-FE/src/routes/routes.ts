@@ -9,6 +9,7 @@ import StaffServeServiceCase from '../pages/Staff/StaffServeServiceCase'
 import ManagerServiceCaseWithoutDelivery from '../pages/ManagerServiceCaseWithoutDelivery/ManagerServiceCaseWithoutDelivery'
 import DeliveryStaffServiceCase from '../pages/DeliveryStaffServiceCase/DeliveryStaffServiceCase'
 import ReturnFail from '../pages/Staff/ReturnFail'
+import SampleCollectorDoneServiceCase from '../pages/SampleCollectorDoneServiceCase/SampleCollectorDoneServiceCase'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -448,6 +449,11 @@ const routes: LayoutRoute[] = [
       {
         path: '/sample-collector/service-cases',
         component: SampleCollectorServiceCase,
+        // role: ['admin'],
+      },
+      {
+        path: '/sample-collector/service-cases-done',
+        component: SampleCollectorDoneServiceCase,
         // role: ['admin'],
       },
     ],
