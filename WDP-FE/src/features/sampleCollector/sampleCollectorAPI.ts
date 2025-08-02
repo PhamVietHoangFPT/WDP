@@ -1,4 +1,3 @@
-import { ServiceCase } from './../../../../Backend/src/modules/serviceCase/schemas/serviceCase.schema';
 import { apiSlice } from '../../apis/apiSlice'
 
 const sampleCollectorAPI = apiSlice.injectEndpoints({

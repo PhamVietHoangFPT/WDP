@@ -12,11 +12,20 @@ import {
   Card,
   List,
   Flex,
+  Modal,
+  Image,
 } from "antd"
 import {
   useGetAllDoneServiceCasesQuery,
+  useGetImageByServiceCaseQuery,
 } from "../../features/sampleCollector/sampleCollectorAPI"
-import { UserOutlined, PhoneOutlined, EnvironmentOutlined, CarOutlined } from "@ant-design/icons"
+import {
+  UserOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  CarOutlined,
+  EyeOutlined,
+} from "@ant-design/icons"
 
 const { Title, Text } = Typography
 
@@ -62,16 +71,17 @@ interface ServiceCase {
   }[]
 }
 
-interface ServiceCaseStatus {
+interface Image {
   _id: string
-  testRequestStatus: string
-  order: number
+  url: string
 }
 
 const SampleCollectorDoneServiceCase: React.FC = () => {
   const [isAtHome, setIsAtHome] = useState<boolean>(true)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [selectedServiceCaseId, setSelectedServiceCaseId] = useState<string | null>(null)
 
   const {
     data: serviceCasesData,
@@ -79,6 +89,21 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
     isFetching: isFetchingServices,
     error: serviceCasesError,
   } = useGetAllDoneServiceCasesQuery({ isAtHome: isAtHome })
+
+  const { data: imagesData, isLoading: isLoadingImages } = useGetImageByServiceCaseQuery(
+    { ServiceCaseId: selectedServiceCaseId! },
+    { skip: !selectedServiceCaseId }
+  )
+
+  const showImageModal = (serviceCaseId: string) => {
+    setSelectedServiceCaseId(serviceCaseId)
+    setIsModalVisible(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalVisible(false)
+    setSelectedServiceCaseId(null)
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -126,9 +151,7 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
           />
         </Flex>
         <Flex align="center" gap={8}>
-          <Tag>
-            Tổng cộng: {totalItems} dịch vụ
-          </Tag>
+          <Tag>Tổng cộng: {totalItems} dịch vụ</Tag>
         </Flex>
       </Flex>
       {isLoadingServices ? (
@@ -138,7 +161,9 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
       ) : serviceCasesError || totalItems === 0 ? (
         <div style={{ textAlign: "center", padding: "50px 0" }}>
           <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
-            {`Không có dịch vụ nào đã hoàn thành với loại hình "${isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"}"`}
+            {`Không có dịch vụ nào đã hoàn thành với loại hình "${
+              isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"
+            }"`}
           </div>
         </div>
       ) : (
@@ -156,7 +181,9 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
             dataSource={paginatedData}
             loading={isFetchingServices}
             locale={{
-              emptyText: `Không có dịch vụ nào đã hoàn thành với loại hình "${isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"}"`,
+              emptyText: `Không có dịch vụ nào đã hoàn thành với loại hình "${
+                isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"
+              }"`,
             }}
             renderItem={(item) => {
               const record = item
@@ -180,7 +207,9 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                   return service ? <Text type="secondary">{service.sample.name}</Text> : null
                 } else {
                   return record.services.map((service, i) => (
-                    <Text key={i} type="secondary" style={{ display: 'block' }}>{service.sample.name}</Text>
+                    <Text key={i} type="secondary" style={{ display: "block" }}>
+                      {service.sample.name}
+                    </Text>
                   ))
                 }
               }
@@ -197,7 +226,10 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                       <Flex justify="space-between" align="center">
                         <Space>
                           <Typography.Text strong>Ngày giờ hẹn:</Typography.Text>
-                          <Text>{new Date(record.bookingDetails.bookingDate).toLocaleDateString("vi-VN")} - {record.bookingDetails.slotTime}</Text>
+                          <Text>
+                            {new Date(record.bookingDetails.bookingDate).toLocaleDateString("vi-VN")} -{" "}
+                            {record.bookingDetails.slotTime}
+                          </Text>
                         </Space>
                         <Tag color={getStatusColor(record.currentStatus || "")}>
                           {record.currentStatus}
@@ -216,10 +248,10 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                             </Space>
                             {fullAddress && (
                               <Tooltip title={fullAddress}>
-                                <Space style={{ maxWidth: "100%", alignItems: "start"}}>
+                                <Space style={{ maxWidth: "100%", alignItems: "start" }}>
                                   <EnvironmentOutlined />
-                                  <div style={{ wordWrap: 'break-word', flex: 1 }}>
-                                    <Typography.Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>
+                                  <div style={{ wordWrap: "break-word", flex: 1 }}>
+                                    <Typography.Text type="secondary" style={{ whiteSpace: "pre-wrap" }}>
                                       {fullAddress}
                                     </Typography.Text>
                                   </div>
@@ -239,18 +271,16 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                           </Flex>
                         </Card>
                       )}
-                      {(testTakers && testTakers.length > 0) && (
-                        <Card size="small" style={{height: "300px"}} title="Người xét nghiệm & Mã mẫu">
+                      {testTakers && testTakers.length > 0 && (
+                        <Card size="small" style={{ height: "300px" }} title="Người xét nghiệm & Mã mẫu">
                           {testTakers.map((taker, index) => (
                             <div key={taker._id} style={{ marginBottom: index < testTakers.length - 1 ? 8 : 0 }}>
                               <Text strong>{taker.name}</Text>
                               <div style={{ fontSize: "12px", color: "#666" }}>
                                 {sampleIdentifyNumbers && sampleIdentifyNumbers.length > 0 ? (
                                   sampleIdentifyNumbers
-                                    .filter((_, i) => (i % 2) === (index % 2))
-                                    .map((sampleId, i) => (
-                                      <div key={i}>{sampleId}</div>
-                                    ))
+                                    .filter((_, i) => i % 2 === index % 2)
+                                    .map((sampleId, i) => <div key={i}>{sampleId}</div>)
                                 ) : (
                                   <Text type="secondary">Không có mã mẫu</Text>
                                 )}
@@ -267,6 +297,14 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                           <Text type="secondary">—</Text>
                         </Card>
                       )}
+                      <Flex style={{ marginTop: 12 }}>
+                        <Button
+                          icon={<EyeOutlined />}
+                          onClick={() => showImageModal(record._id)}
+                        >
+                          Xem ảnh
+                        </Button>
+                      </Flex>
                     </Flex>
                   </Card>
                 </List.Item>
@@ -290,6 +328,36 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
           )}
         </>
       )}
+
+      {/* Modal để hiển thị ảnh */}
+      <Modal
+        title={`Ảnh của dịch vụ: ${selectedServiceCaseId}`}
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={800}
+      >
+        {isLoadingImages ? (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <Spin />
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
+            {imagesData && imagesData.length > 0 ? (
+              imagesData.map((image: Image) => (
+                <Image
+                  key={image._id}
+                  src={`http://localhost:5000${image.url}`}
+                  alt="Service Case"
+                  width={200}
+                />
+              ))
+            ) : (
+              <Text>Không có ảnh nào được tìm thấy cho dịch vụ này.</Text>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }
