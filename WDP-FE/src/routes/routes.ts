@@ -97,8 +97,17 @@ const DoctorHomePage = lazy(
 const CertifierHomePage = lazy(
   () => import('../pages/CertifierHomePage/CertifierHomePage')
 )
+const DocumentFormAccept = lazy(
+  () => import('../components/Certifier/DocumentFormAccept')
+)
+const DoneDocumentForm = lazy(
+  () => import('../components/Certifier/DoneDocumentForm')
+)
 const ServiceCaseNeedAcceptAdn = lazy(
   () => import('../pages/CertifierManage/ServiceCaseNeedAcceptAdn')
+)
+const ServiceHasAcceptAdn = lazy(
+  () => import('../pages/CertifierManage/ServiceHasAcceptAdn')
 )
 const DoctorUpdateConditionPage = lazy(
   () => import('../pages/DoctorUpdateCondition/doctorUpdateCondition')
@@ -503,6 +512,21 @@ const routes: LayoutRoute[] = [
       {
         path: '/certifier/service-cases-without-adn-documentation-false',
         component: ServiceCaseNeedAcceptAdn,
+        // role: ['admin'],
+      },
+      {
+        path: '/certifier/adn-result/:serviceCaseId',
+        component: DocumentFormAccept,
+        // role: ['admin'],
+      },
+      {
+        path: '/certifier/service-cases-without-adn-documentation-true',
+        component: ServiceHasAcceptAdn,
+        // role: ['admin'],
+      },
+      {
+        path: '/certifier/view-adn-documentation/:serviceCaseId',
+        component: DoneDocumentForm,
         // role: ['admin'],
       },
     ],

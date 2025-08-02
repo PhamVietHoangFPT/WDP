@@ -56,6 +56,7 @@ export class ServiceCaseService implements IServiceCaseService {
       sampleCollector: serviceCase.sampleCollector,
       doctor: serviceCase.doctor,
       caseMember: serviceCase.caseMember,
+      adnDocumentation: serviceCase.adnDocumentation,
     })
   }
 
@@ -108,14 +109,6 @@ export class ServiceCaseService implements IServiceCaseService {
       this.serviceCaseRepository.countDocuments(filter),
       this.serviceCaseRepository
         .findAllServiceCases(filter)
-        .populate({
-          path: 'caseMember',
-          select: 'booking',
-          populate: {
-            path: 'booking',
-            select: 'bookingDate',
-          },
-        })
         .skip(skip)
         .limit(pageSize),
     ])
@@ -349,5 +342,15 @@ export class ServiceCaseService implements IServiceCaseService {
         )
       }
     }
+  }
+
+  async findServiceCaseById(
+    id: string,
+  ): Promise<ServiceCaseResponseDto | null> {
+    const serviceCase = await this.serviceCaseRepository.findById(id)
+    if (!serviceCase) {
+      return null
+    }
+    return this.mapToResponseDto(serviceCase)
   }
 }
