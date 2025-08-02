@@ -56,20 +56,34 @@ export default function CreateAdnDocumentPage() {
     const { caseMember, services } = serviceCase
     const testTakers = caseMember?.testTakers || []
     const sampleIds = caseMember?.sampleIdentifyNumbers || []
+    const isSingleService = caseMember?.isSingleService || false
 
     const generated: any[] = []
 
-    for (let i = 0; i < sampleIds.length; i++) {
-      const sampleId = sampleIds[i]
-      const takerIndex = i % testTakers.length
-      const taker = testTakers[takerIndex]
-      const service = services[i % services.length]
-      const sampleName = service?.sample?.name || 'Không rõ'
+    if (isSingleService) {
+      // Trường hợp mỗi người 1 mẫu
+      sampleIds.forEach((sampleId: any, index: number) => {
+        const taker = testTakers[index] || null
+        const sample = services[index % services.length]?.sample
 
-      generated.push({
-        sampleIdentifyNumber: `${taker.name} - ${sampleName} (ID: ${sampleId})`,
-        realSampleId: sampleId,
-        markers: [],
+        generated.push({
+          sampleIdentifyNumber: `${taker?.name || 'Mẫu'} - ${sample?.name || 'Không rõ'} (ID: ${sampleId})`,
+          realSampleId: sampleId,
+          markers: [],
+        })
+      })
+    } else {
+      // Trường hợp nhiều mẫu, phân luân phiên: testTaker[0], testTaker[1], testTaker[0], testTaker[1],...
+      sampleIds.forEach((sampleId: any, index: number) => {
+        const taker = testTakers[index % testTakers.length]
+        const service = services[Math.floor(index / testTakers.length)]
+        const sample = service?.sample
+
+        generated.push({
+          sampleIdentifyNumber: `${taker?.name || 'Mẫu'} - ${sample?.name || 'Không rõ'} (ID: ${sampleId})`,
+          realSampleId: sampleId,
+          markers: [],
+        })
       })
     }
 
