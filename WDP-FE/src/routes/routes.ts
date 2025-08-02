@@ -53,6 +53,11 @@ const DoctorLayout = lazy(() =>
     default: module.DoctorLayout,
   }))
 )
+const CertifierLayout = lazy(() =>
+  import('../components/layout/CertifierLayout').then((module) => ({
+    default: module.CertifierLayout,
+  }))
+)
 const ManagerLayout = lazy(() =>
   import('../components/layout/ManagerLayout').then((module) => ({
     default: module.ManagerLayout,
@@ -88,6 +93,12 @@ const DeliveryStaffHomePage = lazy(
 )
 const DoctorHomePage = lazy(
   () => import('../pages/DoctorHomePage/DoctorHomePage')
+)
+const CertifierHomePage = lazy(
+  () => import('../pages/CertifierHomePage/CertifierHomePage')
+)
+const ServiceCaseNeedAcceptAdn = lazy(
+  () => import('../pages/CertifierManage/ServiceCaseNeedAcceptAdn')
 )
 const DoctorUpdateConditionPage = lazy(
   () => import('../pages/DoctorUpdateCondition/doctorUpdateCondition')
@@ -420,7 +431,6 @@ const routes: LayoutRoute[] = [
     ],
   },
 
-
   {
     layout: DoctorManagerLayout,
     // role: ['Doctor Manager'],
@@ -439,7 +449,6 @@ const routes: LayoutRoute[] = [
       },
     ],
   },
-
 
   {
     layout: DeliveryStaffLayout,
@@ -478,6 +487,22 @@ const routes: LayoutRoute[] = [
       {
         path: '/sample-collector/service-cases-done',
         component: SampleCollectorDoneServiceCase,
+        // role: ['admin'],
+      },
+    ],
+  },
+  {
+    layout: CertifierLayout,
+    role: ['Certifier'],
+    data: [
+      {
+        path: '/certifier',
+        component: CertifierHomePage,
+        // role: ['admin'],
+      },
+      {
+        path: '/certifier/service-cases-without-adn-documentation-false',
+        component: ServiceCaseNeedAcceptAdn,
         // role: ['admin'],
       },
     ],

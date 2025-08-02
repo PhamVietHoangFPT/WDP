@@ -1,6 +1,4 @@
-import { current } from '@reduxjs/toolkit'
 import { apiSlice } from '../../apis/apiSlice'
-import type { useGetCustomerServiceCaseByEmailQuery } from '../staff/staffAPI'
 
 const deliveryAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -18,11 +16,7 @@ const deliveryAPI = apiSlice.injectEndpoints({
     }),
 
     getAllServiceCasesForDelivery: builder.query({
-      query: ({
-        serviceCaseStatus,
-      }: {
-        serviceCaseStatus: string
-      }) => ({
+      query: ({ serviceCaseStatus }: { serviceCaseStatus: string }) => ({
         url: `/delivery-staff/service-cases?currentStatus=${serviceCaseStatus}`,
         method: 'GET',
       }),
@@ -39,13 +33,13 @@ const deliveryAPI = apiSlice.injectEndpoints({
       invalidatesTags: ['delivery-staff'],
     }),
 
-
-
     getServiceCaseByEmailForStaff: builder.query({
       query: ({
-        serviceCaseStatus, email,
+        serviceCaseStatus,
+        email,
       }: {
-        serviceCaseStatus: string, email: string
+        serviceCaseStatus: string
+        email: string
       }) => ({
         url: `/staff/service-cases?email=${email}&currentStatus=${serviceCaseStatus}`,
         method: 'GET',
@@ -61,11 +55,9 @@ const deliveryAPI = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (res) => res,
-      invalidatesTags: ['delivery-staff','sample-collector','staff'],
+      invalidatesTags: ['delivery-staff', 'sample-collector', 'staff'],
     }),
   }),
-
-  
 })
 
 export const {
@@ -73,5 +65,5 @@ export const {
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
   useGetServiceCaseByEmailForStaffQuery,
-  useCreateServiceCaseImageMutation
+  useCreateServiceCaseImageMutation,
 } = deliveryAPI

@@ -56,6 +56,7 @@ export const apiSlice = createApi({
     'delivery-staff',
     'kit-shipments-without-delivery-staff',
     'kit-shippments-status',
+    'certifier',
   ],
 
   endpoints: () => ({}),
