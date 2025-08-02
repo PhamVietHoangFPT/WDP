@@ -1,17 +1,20 @@
 import { useState } from 'react' // Thêm useEffect
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Input, Button, Tooltip, Divider } from 'antd' // Thêm Spin
+import { Layout, Menu, Input, Avatar, Button, Tooltip, Divider } from 'antd' // Thêm Spin
 import {
   SearchOutlined,
+  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MedicineBoxOutlined,
   BarChartOutlined,
   ExperimentOutlined,
-  // Thêm các icon khác nếu cần cho các mục menu khác
+  UnorderedListOutlined,
+  IdcardOutlined,
 } from '@ant-design/icons'
 import Cookies from 'js-cookie'
+import type { UserData } from '../../../types/auth'
 
 const { Sider } = Layout
 const { Search } = Input
@@ -22,16 +25,8 @@ export const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   // Lấy userData từ cookie và decode nó
-  interface Facility {
-    facilityName?: string
-  }
-  interface UserData {
-    name?: string
-    email?: string
-    facility?: Facility
-  }
   const userDataString = Cookies.get('userData')
-  let userData: UserData = {}
+  let userData: UserData | undefined
   if (userDataString) {
     try {
       // Decode URI component trước khi parse JSON
@@ -44,13 +39,10 @@ export const SideBar = () => {
   // Get the current selected keys based on the pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname
-    if (pathname === '/sample-collector') return ['sample-collector'] // Điều chỉnh để khớp với path của Sample Collector
+    if (pathname === '/manager') return ['manager'] // Điều chỉnh để khớp với path chính của Manager
 
     // Check if pathname includes any of these paths
-    const paths = [
-      // 'sample-collector', // Thêm 'sample-collector' vào đây để highlight menu
-      'service-cases', // Thêm path con của sample-collector
-    ]
+    const paths = ['samples', 'service-cases-without-doctor', 'create-account']
 
     for (const path of paths) {
       if (pathname.includes(path)) {
@@ -69,24 +61,25 @@ export const SideBar = () => {
   // Define the menu items
   const items = [
     {
-      key: 'sample-collector',
+      key: 'doctor-manager',
       icon: <BarChartOutlined />,
-      label: 'Trang chủ',
-      onClick: () => navigate('sample-collector'), // Đảm bảo đường dẫn đúng
+      label: 'Quản trị',
+      onClick: () => navigate('doctor-manager'),
     },
     {
-      key: 'sample-collector/service-cases',
+      key: 'doctor-manager/samples',
       icon: <ExperimentOutlined />,
-      label: 'Quản trị mẫu thu ',
-      onClick: () => navigate('sample-collector/service-cases'),
+      label: 'Dịch vụ chưa có nhân viên lấy mẫu',
+      onClick: () => navigate('doctor-manager/samples'),
     },
     {
-      key: 'sample-collector/service-cases-done',
-      icon: <BarChartOutlined />,
-      label: 'Quản trị mẫu thu đã hoàn thành',
-      onClick: () => navigate('sample-collector/service-cases-done'),
+      key: 'doctor-manager/service-cases-without-doctor',
+      icon: <UnorderedListOutlined />,
+      label: 'Dịch vụ chưa có bác sĩ',
+      onClick: () => navigate('doctor-manager/service-cases-without-doctor'),
     },
   ]
+
   return (
     <Sider
       width={250}
@@ -160,6 +153,7 @@ export const SideBar = () => {
         style={{ borderRight: 0 }}
         items={items}
       />
+
       {/* User Profile */}
       <div
         style={{
@@ -171,14 +165,23 @@ export const SideBar = () => {
           backgroundColor: '#fff',
         }}
       >
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: collapsed ? 0 : 12,
+          }}
+        >
+          <Avatar icon={<UserOutlined />} />
           {!collapsed && (
             <div style={{ marginLeft: 12 }}>
               <div style={{ fontWeight: 500, fontSize: 14, color: 'black' }}>
-                {userData?.name || 'Sample Collector User'}
+                {/* Sửa userData?.Name thành userData?.name để khớp với cookie */}
+                {userData?.name || 'Manager User'}
               </div>
               <div style={{ fontSize: 12, color: 'black' }}>
-                {userData?.email || 'samplecollector@vaccitrack.com'}
+                {/* Sửa userData?.Email thành userData?.email để khớp với cookie */}
+                {userData?.email || 'manager@vaccitrack.com'}
               </div>
               <div style={{ fontSize: 12, color: 'gray', marginTop: 4 }}>
                 {userData?.facility?.facilityName || 'No Facility'}
