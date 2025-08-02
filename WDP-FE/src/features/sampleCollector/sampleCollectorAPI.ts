@@ -1,3 +1,4 @@
+import { ServiceCase } from './../../../../Backend/src/modules/serviceCase/schemas/serviceCase.schema';
 import { apiSlice } from '../../apis/apiSlice'
 
 const sampleCollectorAPI = apiSlice.injectEndpoints({
@@ -56,14 +57,14 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
 
     getImageByServiceCase: builder.query({
       query: ({
-        imageUrl,
+        ServiceCaseId,
       }: {
-        imageUrl: string
+        ServiceCaseId: string
       }) => ({
-        url: `/images/findForServiceCaseByCreatedBy/${imageUrl}`,
+        url: `/images/findForServiceCaseByCreatedBy/${ServiceCaseId}`,
         method: 'GET',
         params: {
-          imageUrl,
+          ServiceCaseId,
         },
       }),
       transformResponse: (res) => res,
