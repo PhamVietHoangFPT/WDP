@@ -13,15 +13,19 @@ export default function DoneDocumentForm() {
   const location = useLocation()
   const serviceCase = location.state?.serviceCase
 
+  // Gọi ADN documentation
   const {
     data: documentation,
     isLoading: isLoadingDoc,
-    refetch,
+    refetch: refetchDoc,
   } = useGetAdnDocumentationByServiceCaseIdQuery(serviceCaseId!, {
     skip: !serviceCaseId,
   })
 
+  // Dùng result từ serviceCase
   const resultId = serviceCase?.result
+
+  // Gọi kết quả giám định
   const {
     data: resultData,
     isLoading: isLoadingResult,
@@ -30,13 +34,22 @@ export default function DoneDocumentForm() {
     skip: !resultId,
   })
 
+  // Gọi lại dữ liệu khi serviceCaseId hoặc resultId thay đổi
   useEffect(() => {
-    if (serviceCaseId) refetch()
-    if (resultId) refetchResult()
+    if (serviceCaseId) {
+      refetchDoc()
+    }
+    if (resultId) {
+      refetchResult()
+    }
+
+    console.log('🧪 serviceCase:', serviceCase)
+    console.log('🧬 resultId from serviceCase:', resultId)
+    console.log('📦 resultData:', resultData)
   }, [serviceCaseId, resultId])
 
   const profiles = documentation?.data?.[0]?.profiles || []
-  const result = resultData?.data
+  const result = resultData
 
   return (
     <div style={{ padding: 24 }}>
@@ -96,11 +109,11 @@ export default function DoneDocumentForm() {
             <Card title='📋 Kết luận giám định'>
               <p>
                 <strong>% trùng khớp:</strong>{' '}
-                {result?.adnPercentage || 'Không có dữ liệu'}
+                {result?.adnPercentage ?? 'Không có dữ liệu'}
               </p>
               <p>
                 <strong>Ghi chú:</strong>{' '}
-                {result?.conclusion || 'Không có dữ liệu'}
+                {result?.conclusion ?? 'Không có dữ liệu'}
               </p>
             </Card>
           </Col>
