@@ -3,7 +3,7 @@ import { IAdnDocumentationService } from './interfaces/iadnDocumentation.service
 import { CreateAdnDocumentationDto } from './dto/createAdnDocumentation.dto'
 import { AdnDocumentationResponseDto } from './dto/adnDocumentationResponse.dto'
 import { IAdnDocumentationRepository } from './interfaces/iadnDocumentation.repository'
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, NotFoundException } from '@nestjs/common'
 import { AdnDocumentationDocument } from './schemas/adnDocumentation.schema'
 import { IServiceCaseRepository } from '../serviceCase/interfaces/iserviceCase.repository'
 import { ITestRequestStatusRepository } from '../testRequestStatus/interfaces/itestRequestStatus.repository'
@@ -57,9 +57,14 @@ export class AdnDocumentationService implements IAdnDocumentationService {
 
   async findByServiceCaseId(
     serviceCaseId: string,
-  ): Promise<AdnDocumentationResponseDto[]> {
-    const documents =
+  ): Promise<AdnDocumentationResponseDto | null> {
+    const document =
       await this.adnDocumentationRepository.findByServiceCaseId(serviceCaseId)
-    return documents.map((doc) => this.mapToResponseDto(doc))
+    if (!document) {
+      throw new NotFoundException(
+        'Không tìm thấy tài liệu ADN cho hồ sơ dịch vụ này.',
+      )
+    }
+    return this.mapToResponseDto(document)
   }
 }

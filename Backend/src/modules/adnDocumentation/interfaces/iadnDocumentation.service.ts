@@ -11,7 +11,7 @@ export interface IAdnDocumentationService {
 
   findByServiceCaseId(
     serviceCaseId: string,
-  ): Promise<AdnDocumentationResponseDto[]>
+  ): Promise<AdnDocumentationResponseDto>
 }
 
 export const IAdnDocumentationService = Symbol('IAdnDocumentationService')

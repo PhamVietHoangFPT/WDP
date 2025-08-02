@@ -38,6 +38,37 @@ const sampleCollectorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['sample-collector'],
     }),
+
+
+    getAllDoneServiceCases: builder.query({
+      query: ({
+        isAtHome,
+      }: {
+        isAtHome: boolean
+      }) => ({
+        url: `/sample-collector/all-service-cases?isAtHome=${isAtHome}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['sample-collector'],
+    }),
+
+
+    getImageByServiceCase: builder.query({
+      query: ({
+        ServiceCaseId,
+      }: {
+        ServiceCaseId: string
+      }) => ({
+        url: `/images/findForServiceCaseByCreatedBy/${ServiceCaseId}`,
+        method: 'GET',
+        params: {
+          ServiceCaseId,
+        },
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['sample-collector'],
+    }),
   }),
 })
 
@@ -45,4 +76,6 @@ export const {
   useGetServiceCaseStatusListQuery,
   useGetAllServiceCasesQuery,
   useUpdateServiceCaseStatusMutation,
+  useGetAllDoneServiceCasesQuery,
+  useGetImageByServiceCaseQuery,
 } = sampleCollectorAPI
