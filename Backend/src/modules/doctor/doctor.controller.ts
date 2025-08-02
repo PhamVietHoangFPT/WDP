@@ -134,7 +134,7 @@ export class DoctorController {
   })
   async findByServiceCaseId(
     @Param('serviceCaseId') serviceCaseId: string,
-  ): Promise<ApiResponseDto<AdnDocumentationResponseDto[]>> {
+  ): Promise<ApiResponseDto<AdnDocumentationResponseDto>> {
     const data =
       await this.adnDocumentationService.findByServiceCaseId(serviceCaseId)
     return {

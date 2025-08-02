@@ -19,8 +19,8 @@ export class ResultRepository implements IResultRepository {
     const newResult = new this.resultModel({
       adnPercentage: createResultDto.adnPercentage,
       conclusion: createResultDto.conclusion,
-      doctorId: createResultDto.doctorId,
-      created_by: createResultDto.doctorId,
+      certifierId: createResultDto.certifierId,
+      created_by: createResultDto.certifierId,
       created_at: new Date(),
     })
     // Cập nhật service case với ID của kết quả mới
@@ -38,7 +38,7 @@ export class ResultRepository implements IResultRepository {
       .findById(id)
       .select('adnPercentage conclusion')
       .populate({
-        path: 'doctorId',
+        path: 'certifierId',
         select: 'name',
       })
       .exec()
@@ -54,9 +54,9 @@ export class ResultRepository implements IResultRepository {
         {
           adnPercentage: updateResultDto.adnPercentage,
           conclusion: updateResultDto.conclusion,
-          updated_by: updateResultDto.doctorId,
+          updated_by: updateResultDto.certifierId,
           updated_at: new Date(),
-          doctorId: updateResultDto.doctorId,
+          certifierId: updateResultDto.certifierId,
         },
         { new: true },
       )

@@ -32,7 +32,8 @@ export class AdnDocumentationRepository implements IAdnDocumentationRepository {
 
   async findByServiceCaseId(
     serviceCaseId: string,
-  ): Promise<AdnDocumentationDocument[]> {
-    return this.AdnDocModel.find({ serviceCaseId }).exec()
+  ): Promise<AdnDocumentationDocument | null> {
+    // Kiểu trả về giờ là object hoặc null
+    return this.AdnDocModel.findOne({ serviceCaseId }).exec()
   }
 }

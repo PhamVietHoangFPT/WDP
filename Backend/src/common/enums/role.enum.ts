@@ -6,4 +6,6 @@ export enum RoleEnum {
   DELIVERY_STAFF = 'Delivery Staff',
   CUSTOMER = 'Customer',
   SAMPLE_COLLECTOR = 'Sample Collector',
+  CERTIFIER = 'Certifier',
+  DOCTOR_MANAGER = 'Doctor Manager',
 }

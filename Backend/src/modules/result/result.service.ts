@@ -109,13 +109,6 @@ export class ResultService implements IResultService {
       throw new NotFoundException(`Không tìm thấy kết quả với ID ${id}.`)
     }
 
-    if (
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
-      existingResult.doctorId.toString() !== updateResultDto.doctorId.toString()
-    ) {
-      throw new ForbiddenException('Bạn không có quyền cập nhật kết quả này.')
-    }
-
     // Kiểm tra xem kết quả đã được cập nhật hay chưa
     const isUpdated = await this.resultRepository.checkIsUpdated(id)
     if (isUpdated) {
