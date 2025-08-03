@@ -12,6 +12,7 @@ import {
   Button,
   Space,
   Card,
+  Tooltip,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
@@ -39,6 +40,7 @@ interface ServicePrice {
 
 const Price: React.FC = () => {
   const [form] = Form.useForm();
+  // Sửa lỗi cú pháp: chỉ cần một lần khai báo currentPage
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [filters, setFilters] = useState({
@@ -50,7 +52,6 @@ const Price: React.FC = () => {
     isAgnate: undefined,
   });
 
-  // filter này sẽ lấy các giá trị từ state và bỏ đi các giá trị undefined, null hoặc rỗng
   const queryParams = Object.fromEntries(
     Object.entries({
       ...filters,
@@ -99,6 +100,14 @@ const Price: React.FC = () => {
   const showTotal = (total: number, range: [number, number]) =>
     `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} dịch vụ`;
 
+  // Hàm tính tổng giá tiền
+  const calculateTotalPrice = (record: ServicePrice) => {
+    const serviceFee = record.fee || 0;
+    const sampleFee = record.sample?.fee || 0;
+    const timeReturnFee = record.timeReturn?.timeReturnFee || 0;
+    return serviceFee + sampleFee + timeReturnFee;
+  };
+
   const columns: ColumnsType<ServicePrice> = [
     {
       title: 'Tên Dịch Vụ',
@@ -117,6 +126,24 @@ const Price: React.FC = () => {
       key: 'fee',
       render: (fee: number) => <strong>{fee.toLocaleString('vi-VN')} VNĐ</strong>,
       sorter: (a, b) => a.fee - b.fee,
+    },
+    {
+      title: 'Tổng Giá Tiền',
+      key: 'totalPrice',
+      render: (_, record) => (
+        <Tooltip
+          title={
+            <>
+              <div>Phí dịch vụ: {record.fee.toLocaleString('vi-VN')} VNĐ</div>
+              <div>Phí lấy mẫu: {record.sample?.fee.toLocaleString('vi-VN')} VNĐ</div>
+              <div>Phí trả nhanh: {record.timeReturn?.timeReturnFee.toLocaleString('vi-VN')} VNĐ</div>
+            </>
+          }
+        >
+          <strong>{calculateTotalPrice(record).toLocaleString('vi-VN')} VNĐ</strong>
+        </Tooltip>
+      ),
+      sorter: (a, b) => calculateTotalPrice(a) - calculateTotalPrice(b),
     },
     {
       title: 'Thời Gian Trả Kết Quả',
@@ -209,7 +236,7 @@ const Price: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Space style={{marginTop: 30, marginLeft: 500}}>
+              <Space style={{ marginTop: 30, marginLeft: 500 }}>
                 <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
                   Tìm kiếm
                 </Button>
