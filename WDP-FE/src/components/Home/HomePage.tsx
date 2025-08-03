@@ -102,7 +102,7 @@ const Homepage: React.FC = () => {
         <Content
           title='CÁC DỊCH VỤ'
           btnContent='Xem tất cả dịch vụ'
-          linkURL='/sessions'
+          linkURL='/price'
         />
         {isLoading ? (
           <LoadingOutlined
