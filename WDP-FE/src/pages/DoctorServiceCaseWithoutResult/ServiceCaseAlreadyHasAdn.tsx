@@ -4,12 +4,23 @@ import {
   useGetAllRequestStatusListQuery,
   useGetServiceCasesWithoutAdnQuery,
 } from '../../features/doctor/doctorAPI'
+import { PhoneOutlined } from '@ant-design/icons'
+
+import { useNavigate } from 'react-router-dom'
 
 const { Title } = Typography
 
 interface ServiceCase {
   _id: string
-  bookingDate: string
+  doctorDetails: {
+    name: string
+    phoneNumber: string
+    email: string
+  }
+  bookingDetails: {
+    bookingDate: string
+    slotTime: string
+  }
   caseMember: {
     testTakers: {
       _id: string
@@ -36,6 +47,7 @@ interface ServiceCase {
 export default function ServiceCaseAlreadyHasAdn() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [resultExists] = useState(true)
+  const navigate = useNavigate()
 
   const { data: statusData, isLoading: loadingStatus } =
     useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
@@ -62,8 +74,15 @@ export default function ServiceCaseAlreadyHasAdn() {
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'bookingDate',
-      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
+      dataIndex: 'bookingDetails',
+      render: (bookingDetails: ServiceCase['bookingDetails']) =>
+        new Date(bookingDetails.bookingDate).toLocaleDateString('vi-VN'),
+    },
+    {
+      title: 'Ca đặt',
+      dataIndex: 'bookingDetails',
+      render: (bookingDetails: ServiceCase['bookingDetails']) =>
+        bookingDetails.slotTime,
     },
     {
       title: 'Người xét nghiệm',
@@ -83,9 +102,10 @@ export default function ServiceCaseAlreadyHasAdn() {
       dataIndex: 'accountDetails',
       render: (acc: ServiceCase['accountDetails']) => (
         <div>
-          {acc.name}
+          <strong>{acc.name}</strong>
           <br />
-          <span style={{ fontSize: 12, color: '#888' }}>{acc.phoneNumber}</span>
+          <PhoneOutlined />
+          {acc.phoneNumber}
         </div>
       ),
     },
@@ -102,18 +122,19 @@ export default function ServiceCaseAlreadyHasAdn() {
         </ul>
       ),
     },
-    {
-      title: 'Trạng thái',
-      dataIndex: ['currentStatus', 'testRequestStatus'],
-      render: (text: string) => <span style={{ color: 'green' }}>{text}</span>,
-    },
+
     {
       title: '',
       key: 'details',
       render: (_: any, record: ServiceCase) => (
         <Button
-          type='link'
-          onClick={() => alert(`Xem chi tiết: ${record._id}`)}
+          type='primary'
+          size='small'
+          onClick={() =>
+            navigate(`/doctor/view-adn-documentation/${record._id}`, {
+              state: { serviceCase: record },
+            })
+          }
         >
           Chi tiết
         </Button>
