@@ -20,21 +20,20 @@ import {
   useGetServiceCaseByIdQuery,
 } from '../../features/customer/paymentApi'
 import Cookies from 'js-cookie'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { PhoneOutlined } from '@ant-design/icons'
+import html2pdf from 'html2pdf.js'
 
 const { Title, Text } = Typography
 
 export default function ServiceCaseDetail() {
   const { id } = useParams()
   const userData = Cookies.get('userData')
-
+  const pdfRef = useRef(null)
   let accountId = ''
   try {
     accountId = userData ? JSON.parse(userData).id : ''
-  } catch (error) {
-    console.error('Failed to parse userData cookie:', error)
-  }
+  } catch {}
 
   const { data: historyData, isLoading: isLoadingHistory } =
     useGetTestRequestHistoryQuery({
@@ -119,6 +118,27 @@ export default function ServiceCaseDetail() {
     },
   ]
 
+  const exportPDF = () => {
+    if (!pdfRef.current) return
+    setTimeout(() => {
+      html2pdf()
+        .from(pdfRef.current)
+        .set({
+          margin: 10,
+          filename: 'service-case.pdf',
+          html2canvas: {
+            scale: 3,
+            useCORS: true,
+            scrollY: 0,
+            scrollX: 0,
+            windowHeight: document.body.scrollHeight + 500,
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        })
+        .save()
+    }, 300)
+  }
+
   const markerColumns = [
     {
       title: 'Locus',
@@ -129,7 +149,36 @@ export default function ServiceCaseDetail() {
       title: 'Alleles',
       dataIndex: 'alleles',
       key: 'alleles',
-      render: (alleles: string[]) => alleles.join(', '),
+      render: (alleles: string[]) => (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            value={alleles[0] || ''}
+            disabled
+            style={{
+              minWidth: 60,
+              height: 28,
+              border: '1px solid #d9d9d9',
+              borderRadius: 4,
+              padding: '0 8px',
+              fontSize: '14px',
+              textAlign: 'center',
+            }}
+          />
+          <input
+            value={alleles[1] || ''}
+            disabled
+            style={{
+              minWidth: 60,
+              height: 28,
+              border: '1px solid #d9d9d9',
+              borderRadius: 4,
+              padding: '0 8px',
+              fontSize: '14px',
+              textAlign: 'center',
+            }}
+          />
+        </div>
+      ),
     },
   ]
 
@@ -137,7 +186,6 @@ export default function ServiceCaseDetail() {
     <div style={{ padding: '20px' }}>
       <Title level={2}>Chi tiết hồ sơ dịch vụ</Title>
       <Row gutter={16}>
-        {/* Thanh trạng thái */}
         <Col span={6}>
           <Card style={{ marginBottom: '20px' }}>
             <Title level={4}>Trạng thái hồ sơ</Title>
@@ -163,10 +211,8 @@ export default function ServiceCaseDetail() {
             )}
           </Card>
         </Col>
-
-        {/* Phần chi tiết */}
         <Col span={18}>
-          <Card>
+          <Card style={{ marginBottom: 16 }} ref={pdfRef}>
             <Title level={4}>Thông tin chung</Title>
             <Descriptions bordered size='small' column={1}>
               <Descriptions.Item label='Mã hồ sơ'>
@@ -188,9 +234,7 @@ export default function ServiceCaseDetail() {
                 </Tag>
               </Descriptions.Item>
             </Descriptions>
-
             <Divider />
-
             <Title level={4}>Thông tin khách hàng</Title>
             <Descriptions bordered size='small' column={1}>
               <Descriptions.Item label='Tên tài khoản'>
@@ -200,32 +244,16 @@ export default function ServiceCaseDetail() {
                 {serviceCase?.account?.phoneNumber}
               </Descriptions.Item>
             </Descriptions>
-
             <Divider />
-
             <Title level={4}>Thông tin người xét nghiệm</Title>
-            {serviceCase?.caseMember?.testTaker.map((taker: any) => (
-              <Descriptions
-                key={taker._id}
-                title={<Typography.Text strong>{taker.name}</Typography.Text>}
-                bordered
-                size='small'
-                column={1}
-                style={{ marginBottom: 24 }}
-              >
-                <Descriptions.Item label='CMND/CCCD'>
-                  {taker.personalId}
+            <Descriptions bordered size='small' column={1}>
+              {serviceCase?.caseMember?.testTaker.map((taker: any) => (
+                <Descriptions.Item key={taker._id} label='Họ và tên'>
+                  {taker.name} (CMND/CCCD: {taker.personalId})
                 </Descriptions.Item>
-                <Descriptions.Item label='Ngày sinh'>
-                  {taker.dateOfBirth
-                    ? new Date(taker.dateOfBirth).toLocaleDateString('vi-VN')
-                    : 'N/A'}
-                </Descriptions.Item>
-              </Descriptions>
-            ))}
-
+              ))}
+            </Descriptions>
             <Divider />
-
             <Title level={4}>Dịch vụ đã chọn</Title>
             <Descriptions bordered size='small' column={1}>
               {serviceCase?.caseMember?.service.map((service: any) => (
@@ -242,9 +270,7 @@ export default function ServiceCaseDetail() {
                 )}
               </Descriptions.Item>
             </Descriptions>
-
             <Divider />
-
             <Title level={4}>Chi phí</Title>
             <Table
               dataSource={[serviceCase]}
@@ -264,9 +290,7 @@ export default function ServiceCaseDetail() {
                 </Text>
               </>
             )}
-
             <Divider />
-
             <Title level={4}>Thông tin nhân sự</Title>
             <Descriptions bordered size='small' column={1}>
               <Descriptions.Item label='Nhân viên lấy mẫu'>
@@ -295,9 +319,7 @@ export default function ServiceCaseDetail() {
                 )}
               </Descriptions.Item>
             </Descriptions>
-
             <Divider />
-
             <Title level={4}>Kết quả xét nghiệm</Title>
             {serviceCase?.result ? (
               <>
@@ -317,42 +339,34 @@ export default function ServiceCaseDetail() {
                     {serviceCase.result.certifierId.name}
                   </Descriptions.Item>
                 </Descriptions>
-                <Title level={5}>Hồ sơ xét nghiệm các mẫu ADN</Title>
-                <Row gutter={[24, 24]}>
-                  {serviceCase.adnDocumentation?.profiles.map(
-                    (profile: any, index: number) => (
-                      // Mỗi item trong mảng giờ là một cột (Col)
-                      <Col key={index} xs={24} lg={12}>
-                        <div
-                          style={{
-                            border: '1px solid #f0f0f0',
-                            padding: 10,
-                            height: '100%', // Đảm bảo các ô có chiều cao bằng nhau
-                          }}
-                        >
-                          <Text strong>{profile.sampleIdentifyNumber}</Text>
-                          <Table
-                            dataSource={profile.markers}
-                            columns={markerColumns}
-                            pagination={false}
-                            size='small'
-                            rowKey='locus'
-                          />
-                        </div>
-                      </Col>
-                    )
-                  )}
-                </Row>
+                <Title level={5}>Hồ sơ ADN</Title>
+                {serviceCase.adnDocumentation?.profiles.map(
+                  (profile: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        marginBottom: 20,
+                        border: '1px solid #f0f0f0',
+                        padding: 10,
+                      }}
+                    >
+                      <Text strong>{profile.sampleIdentifyNumber}</Text>
+                      <Table
+                        dataSource={profile.markers}
+                        columns={markerColumns}
+                        pagination={false}
+                        size='small'
+                        rowKey='locus'
+                      />
+                    </div>
+                  )
+                )}
               </>
             ) : (
               <Text type='secondary'>Chưa có kết quả xét nghiệm.</Text>
             )}
-
             <Divider />
-
-            <Title level={4}>
-              Hình ảnh minh chứng trong quá trình làm hồ sơ
-            </Title>
+            <Title level={4}>Hình ảnh hồ sơ</Title>
             {isLoadingImages ? (
               <Spin />
             ) : fullImageUrls.length > 0 ? (
@@ -368,9 +382,7 @@ export default function ServiceCaseDetail() {
                       objectFit: 'cover',
                     }}
                     preview={{ visible: false }}
-                    onClick={() => {
-                      window.open(url, '_blank')
-                    }}
+                    onClick={() => window.open(url, '_blank')}
                   />
                 ))}
               </Space>
@@ -380,13 +392,18 @@ export default function ServiceCaseDetail() {
           </Card>
         </Col>
       </Row>
-      <Button
-        type='primary'
-        style={{ marginTop: 16 }}
-        onClick={() => window.history.back()}
-      >
-        Trở về
-      </Button>
+      <Row justify='space-between' style={{ marginTop: 16 }}>
+        <Col>
+          <Button type='primary' onClick={() => window.history.back()}>
+            Trở về
+          </Button>
+        </Col>
+        <Col>
+          <Button type='primary' danger onClick={exportPDF}>
+            📄 Xuất PDF
+          </Button>
+        </Col>
+      </Row>
     </div>
   )
 }

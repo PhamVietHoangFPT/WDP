@@ -133,9 +133,7 @@ const Homepage: React.FC = () => {
           margin: '0 auto',
         }}
       >
-        <Content
-          title='CÁC CHI NHÁNH HOẠT ĐỘNG'
-        />
+        <Content title='CÁC CHI NHÁNH HOẠT ĐỘNG' />
         {isFacilitiesLoading ? (
           <LoadingOutlined
             style={{

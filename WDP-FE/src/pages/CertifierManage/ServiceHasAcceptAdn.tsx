@@ -1,6 +1,6 @@
-import React from 'react'
 import { Table, Typography, Button, Spin } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { MailOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useGetServiceCasesWithoutResultQuery } from '../../features/certifier/certifierApi'
 
 const { Title } = Typography
@@ -11,6 +11,11 @@ interface ServiceCase {
     _id: string
     testRequestStatus: string
     order: number
+  }
+  doctorDetails: {
+    name: string
+    phoneNumber: string
+    email: string
   }
   bookingDetails: {
     bookingDate: string
@@ -46,14 +51,11 @@ export default function ServiceHasAcceptAdn() {
   const navigate = useNavigate()
   const currentStatus = '684e9057e4331a7fdfb9b12e' // Đã có kết quả
 
-  const {
-    data: serviceCaseData,
-    isLoading,
-    error,
-  } = useGetServiceCasesWithoutResultQuery(
-    { currentStatus, resultExists: true },
-    { skip: !currentStatus }
-  )
+  const { data: serviceCaseData, isLoading } =
+    useGetServiceCasesWithoutResultQuery(
+      { currentStatus, resultExists: true },
+      { skip: !currentStatus }
+    )
 
   const columns = [
     {
@@ -78,6 +80,23 @@ export default function ServiceHasAcceptAdn() {
         bookingDetails.slotTime,
     },
     {
+      title: 'Bác sĩ xét nghiệm',
+      dataIndex: 'doctorDetails',
+      render: (doctor: ServiceCase['doctorDetails']) => (
+        <div>
+          <div>
+            <strong>{doctor.name}</strong>
+          </div>
+          <div>
+            <MailOutlined /> {doctor.email}
+          </div>
+          <div>
+            <PhoneOutlined /> {doctor.phoneNumber}
+          </div>
+        </div>
+      ),
+    },
+    {
       title: 'Người xét nghiệm',
       dataIndex: 'caseMember',
       render: (caseMember: ServiceCase['caseMember']) => (
@@ -95,9 +114,10 @@ export default function ServiceHasAcceptAdn() {
       dataIndex: 'accountDetails',
       render: (acc: ServiceCase['accountDetails']) => (
         <div>
-          {acc.name}
+          <strong>{acc.name}</strong>
           <br />
-          <span style={{ fontSize: 12, color: '#888' }}>{acc.phoneNumber}</span>
+          <PhoneOutlined />
+          {acc.phoneNumber}
         </div>
       ),
     },
@@ -135,7 +155,7 @@ export default function ServiceHasAcceptAdn() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>📄 Hồ sơ chờ duyệt kết quả ADN</Title>
+      <Title level={3}>📄 Hồ sơ đã có kết quả ADN</Title>
 
       {isLoading ? (
         <Spin />

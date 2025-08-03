@@ -1,7 +1,21 @@
 import React from 'react'
-import { Card, Carousel } from 'antd'
-import type { Facility } from '../../types/facilities'
+import { Card, Typography } from 'antd'
 import { EnvironmentOutlined, PhoneOutlined } from '@ant-design/icons'
+
+const { Text, Paragraph } = Typography
+
+interface Facility {
+  _id: string
+  facilityName: string
+  phoneNumber: string
+  address: {
+    fullAddress: string
+    location: {
+      type: string
+      coordinates: [number, number] // [longitude, latitude]
+    }
+  }
+}
 
 interface FacilityCardSliderProps {
   facilities: Facility[]
@@ -11,77 +25,61 @@ const FacilityCardSlider: React.FC<FacilityCardSliderProps> = ({
   facilities,
 }) => {
   return (
-    <Carousel
-      autoplay
-      dots
-      style={{ padding: '16px 0' }}
-      slidesToShow={Math.min(facilities.length, 4)}
-      responsive={[
-        {
-          breakpoint: 992,
-          settings: {
-            slidesToShow: 2,
-          },
-        },
-        {
-          breakpoint: 768,
-          settings: {
-            slidesToShow: 1,
-          },
-        },
-      ]}
+    <div
+      style={{
+        display: 'flex',
+        gap: '24px',
+        overflowX: 'auto',
+        padding: '8px',
+      }}
     >
       {facilities.map((facility) => (
-        <div key={facility._id}>
-          <Card
-            hoverable
-            style={{
-              margin: '0 8px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            }}
-            cover={
-              <img
-                alt='facility'
-                src='https://tse4.mm.bing.net/th/id/OIP.bmQljgLBVDgv1jz4pWuWhAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3'
-                style={{
-                  height: '150px',
-                  objectFit: 'cover',
-                  borderTopLeftRadius: '8px',
-                  borderTopRightRadius: '8px',
-                }}
-              />
-            }
-          >
-            <Card.Meta
-              title={
-                <p
-                  style={{
-                    color: '#1565C0',
-                    fontWeight: 'bold',
-                    marginBottom: 4,
-                  }}
-                >
-                  {facility.facilityName}
-                </p>
-              }
-              description={
-                <>
-                  <p style={{ marginBottom: 4 }}>
-                    <EnvironmentOutlined />{' '}
-                    {facility.address?.fullAddress || 'Không có địa chỉ'}
-                  </p>
-                  <p>
-                    <PhoneOutlined />{' '}
-                    {facility.phoneNumber || 'Chưa có số điện thoại'}
-                  </p>
-                </>
-              }
-            />
-          </Card>
-        </div>
+        <Card
+          key={facility._id}
+          title={
+            <Text strong ellipsis={{ tooltip: facility.facilityName }}>
+              {facility.facilityName}
+            </Text>
+          }
+          style={{
+            minWidth: 300,
+            maxWidth: 350,
+            borderRadius: 12,
+            overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          }}
+          bodyStyle={{ padding: 16 }}
+        >
+          {/* Google Maps Embed */}
+          {facility.address?.location?.coordinates?.length === 2 ? (
+            <iframe
+              src={`https://maps.google.com/maps?q=${facility.address.location.coordinates[1]},${facility.address.location.coordinates[0]}&z=15&output=embed`}
+              width='100%'
+              height='180'
+              style={{ border: 0, borderRadius: 8, marginBottom: 12 }}
+              loading='lazy'
+              title={`Google Map for ${facility.facilityName}`}
+            ></iframe>
+          ) : (
+            <Paragraph type='secondary' italic>
+              Không có vị trí bản đồ.
+            </Paragraph>
+          )}
+
+          {/* Địa chỉ */}
+          <Paragraph style={{ marginBottom: 8 }}>
+            <EnvironmentOutlined style={{ marginRight: 8, color: '#52c41a' }} />
+            {facility.address.fullAddress}
+          </Paragraph>
+
+          {/* Số điện thoại */}
+          <Paragraph style={{ marginBottom: 0 }}>
+            <PhoneOutlined style={{ marginRight: 8, color: '#faad14' }} />
+            {facility.phoneNumber}
+          </Paragraph>
+        </Card>
       ))}
-    </Carousel>
+    </div>
   )
 }
 
