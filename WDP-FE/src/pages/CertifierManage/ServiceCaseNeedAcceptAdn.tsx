@@ -1,8 +1,12 @@
+import React, { useEffect, useState } from 'react'
 import { Table, Typography, Button, Spin } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { MailOutlined, PhoneOutlined } from '@ant-design/icons'
 
-import { useGetServiceCasesWithoutResultQuery } from '../../features/certifier/certifierApi'
+import {
+  useGetServiceCasesWithoutResultQuery,
+  useGetTestRequestStatusesQuery,
+} from '../../features/certifier/certifierApi'
 
 const { Title } = Typography
 
@@ -50,13 +54,27 @@ interface ServiceCase {
 
 export default function ServiceCaseNeedAcceptAdn() {
   const navigate = useNavigate()
-  const currentStatus = '684e9057e4331a7fdfb9b12d' // Chờ duyệt kết quả
+  const [statusId, setStatusId] = useState<string | null>(null)
+
+  const { data: statusData, isLoading: loadingStatus } =
+    useGetTestRequestStatusesQuery({ pageNumber: 1, pageSize: 100 })
 
   const { data: serviceCaseData, isLoading } =
     useGetServiceCasesWithoutResultQuery(
-      { currentStatus, resultExists: false },
-      { skip: !currentStatus }
+      { currentStatus: statusId, resultExists: false },
+      { skip: !statusId }
     )
+
+  useEffect(() => {
+    if (statusData?.data?.length) {
+      const found = statusData.data.find(
+        (s) => s.testRequestStatus === 'Chờ duyệt kết quả'
+      )
+      if (found) {
+        setStatusId(found._id)
+      }
+    }
+  }, [statusData])
 
   const columns = [
     {
@@ -117,8 +135,7 @@ export default function ServiceCaseNeedAcceptAdn() {
         <div>
           <strong>{acc.name}</strong>
           <br />
-          <PhoneOutlined />
-          {acc.phoneNumber}
+          <PhoneOutlined /> {acc.phoneNumber}
         </div>
       ),
     },
@@ -158,7 +175,7 @@ export default function ServiceCaseNeedAcceptAdn() {
     <div style={{ padding: 24 }}>
       <Title level={3}>📄 Hồ sơ chờ duyệt kết quả ADN</Title>
 
-      {isLoading ? (
+      {isLoading || loadingStatus ? (
         <Spin />
       ) : (
         <Table
