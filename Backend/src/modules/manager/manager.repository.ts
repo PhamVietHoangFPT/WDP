@@ -128,45 +128,12 @@ export class ManagerRepository implements IManagerRepository {
           facility: facilityIdObject,
         },
       },
-      // Giai đoạn 2: Kết nối với collection 'addresses'
-      {
-        $lookup: {
-          from: 'addresses',
-          let: { accountIdVar: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$account', '$$accountIdVar'],
-                },
-              },
-            },
-          ],
-          as: 'address',
-        },
-      },
-      // Giai đoạn 3: Mở mảng 'address'
-      {
-        $unwind: { path: '$address', preserveNullAndEmptyArrays: true },
-      },
-      // Giai đoạn 4: Lọc so sánh ID
-      {
-        $match: {
-          $expr: {
-            // $eq dùng để kiểm tra sự bằng nhau (equals)
-            // So sánh trường 'account' trong 'address' với '_id' của 'account' gốc
-            $eq: ['$address.account', '$_id'],
-          },
-        },
-      },
-      // Giai đoạn 5: Chọn lọc và định dạng kết quả
       {
         $project: {
           _id: 1,
           email: 1,
           name: 1,
           phoneNumber: 1,
-          addressInfo: '$address.fullAddress', // Lấy toàn bộ thông tin địa chỉ
         },
       },
     ])
@@ -187,27 +154,6 @@ export class ManagerRepository implements IManagerRepository {
           facility: facilityIdObject,
         },
       },
-      // Giai đoạn 2: Kết nối với collection 'addresses'
-      {
-        $lookup: {
-          from: 'addresses',
-          let: { accountIdVar: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$account', '$$accountIdVar'],
-                },
-              },
-            },
-          ],
-          as: 'address',
-        },
-      },
-      // Giai đoạn 3: Mở mảng 'address'
-      {
-        $unwind: { path: '$address', preserveNullAndEmptyArrays: true },
-      },
       // Giai đoạn 5: Chọn lọc và định dạng kết quả
       {
         $project: {
@@ -215,7 +161,6 @@ export class ManagerRepository implements IManagerRepository {
           email: 1,
           name: 1,
           phoneNumber: 1,
-          addressInfo: '$address.fullAddress', // Lấy toàn bộ thông tin địa chỉ
         },
       },
     ])
@@ -227,8 +172,8 @@ export class ManagerRepository implements IManagerRepository {
     bookingDate: string,
   ): Promise<ServiceCase[]> {
     const bookingDateConvert = new Date(bookingDate)
-    const headOrderValue = 2
-    const tailOrderValue = 12
+    const headOrderValue = 1
+    const tailOrderValue = 10
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
@@ -433,8 +378,8 @@ export class ManagerRepository implements IManagerRepository {
     bookingDate: string,
   ): Promise<ServiceCaseDocument[]> {
     const bookingDateConvert = new Date(bookingDate)
-    const headOrderValue = 2 // Giá trị order để lọc
-    const tailOrderValue = 11 // Giá trị order để lọc
+    const headOrderValue = 1 // Giá trị order để lọc
+    const tailOrderValue = 10 // Giá trị order để lọc
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
@@ -817,8 +762,8 @@ export class ManagerRepository implements IManagerRepository {
     bookingDate: string,
   ): Promise<ServiceCase[]> {
     const bookingDateConvert = new Date(bookingDate)
-    const headOrderValue = 2 // Giá trị order để lọc
-    const tailOrderValue = 11 // Giá trị order để lọc
+    const headOrderValue = 1 // Giá trị order để lọc
+    const tailOrderValue = 10 // Giá trị order để lọc
     return await this.serviceCaseModel.aggregate([
       {
         $match: {
@@ -1026,27 +971,6 @@ export class ManagerRepository implements IManagerRepository {
           facility: facilityIdObject,
         },
       },
-      // Giai đoạn 2: Kết nối với collection 'addresses'
-      {
-        $lookup: {
-          from: 'addresses',
-          let: { accountIdVar: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$account', '$$accountIdVar'],
-                },
-              },
-            },
-          ],
-          as: 'address',
-        },
-      },
-      // Giai đoạn 3: Mở mảng 'address'
-      {
-        $unwind: { path: '$address', preserveNullAndEmptyArrays: true },
-      },
       // Giai đoạn 5: Chọn lọc và định dạng kết quả
       {
         $project: {
@@ -1054,7 +978,6 @@ export class ManagerRepository implements IManagerRepository {
           email: 1,
           name: 1,
           phoneNumber: 1,
-          addressInfo: '$address.fullAddress', // Lấy toàn bộ thông tin địa chỉ
         },
       },
     ])

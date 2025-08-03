@@ -100,7 +100,11 @@ export class ServiceCaseService implements IServiceCaseService {
   ): Promise<PaginatedResponse<ServiceCaseResponseDto>> {
     const skip = (pageNumber - 1) * pageSize
     let filter = {}
-    if (currentStatus !== 'null') {
+    if (
+      currentStatus !== 'null' &&
+      currentStatus !== null &&
+      currentStatus !== ''
+    ) {
       filter = { currentStatus: currentStatus, created_by: userId }
     } else {
       filter = { created_by: userId }

@@ -66,18 +66,7 @@ export const SideBar = () => {
       label: 'Quản trị',
       onClick: () => navigate('manager'),
     },
-    {
-      key: 'manager/samples',
-      icon: <ExperimentOutlined />,
-      label: 'Dịch vụ chưa có nhân viên lấy mẫu',
-      onClick: () => navigate('manager/samples'),
-    },
-    {
-      key: 'manager/service-cases-without-doctor',
-      icon: <UnorderedListOutlined />,
-      label: 'Dịch vụ chưa có bác sĩ',
-      onClick: () => navigate('manager/service-cases-without-doctor'),
-    },
+    
     {
       key: 'manager/service-cases-without-delivery-staff',
       icon: <UnorderedListOutlined />,

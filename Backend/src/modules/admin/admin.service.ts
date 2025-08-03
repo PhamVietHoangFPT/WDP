@@ -17,6 +17,7 @@ import { AccountResponseDto } from '../account/dto/accountResponse.dto'
 import { FacilityResponseDto } from '../facility/dto/facilityResponse.dto'
 import { isMongoId } from 'class-validator'
 import { Types } from 'mongoose'
+import { hashPassword } from 'src/utils/hashPassword'
 
 @Injectable()
 export class AdminService implements IAdminService {
@@ -78,11 +79,19 @@ export class AdminService implements IAdminService {
     if (!managerRoleId) {
       throw new NotFoundException('Role "Manager" không tồn tại')
     }
-    return this.adminRepository.createManagerAccount(
-      createManagerDto,
+    let password = createManagerDto.password
+    const hashedPassword = await hashPassword(password)
+    password = hashedPassword
+    const sendData = {
+      ...createManagerDto,
+      password: password,
+    }
+    const data = await this.adminRepository.createManagerAccount(
+      sendData,
       userId,
       managerRoleId,
     )
+    return data
   }
 
   async deleteManagerAccount(
