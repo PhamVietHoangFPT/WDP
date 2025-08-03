@@ -67,6 +67,16 @@ const doctorAPI = apiSlice.injectEndpoints({
       transformResponse: (res) => res,
       invalidatesTags: ['doctor'],
     }),
+
+    // Lấy kết quả xét nghiệm ADN theo ID
+    getResultById: builder.query({
+      query: (resultId) => ({
+        url: `/results/for-customer/${resultId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res) => res,
+      providesTags: ['results'],
+    }),
   }),
 })
 
@@ -78,4 +88,5 @@ export const {
   useGetAdnDocumentationByServiceCaseIdQuery,
   useUpdateServiceCaseConditionMutation,
   useUpdateServiceCaseStatusMutation,
+  useGetResultByIdQuery,
 } = doctorAPI

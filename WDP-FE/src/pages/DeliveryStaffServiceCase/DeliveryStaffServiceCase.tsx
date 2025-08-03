@@ -22,7 +22,7 @@ import {
   useGetAllServiceCasesForDeliveryQuery,
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
-  useCreateServiceCaseImageMutation // Import hook mới cho API upload ảnh
+  useCreateServiceCaseImageMutation, // Import hook mới cho API upload ảnh
 } from '../../features/deliveryStaff/deliveryStaff'
 import {
   UserOutlined,
@@ -32,7 +32,6 @@ import {
   UploadOutlined, // Icon cho nút upload
 } from '@ant-design/icons'
 import type { UploadFile } from 'antd/lib/upload/interface'
-
 
 const { Title } = Typography
 
@@ -50,16 +49,18 @@ interface ServiceCase {
   address: {
     _id: string
     fullAddress: string
-    location: { // Thêm thông tin location vào address
-      type: string;
-      coordinates: number[];
+    location: {
+      // Thêm thông tin location vào address
+      type: string
+      coordinates: number[]
     }
   }
-  account: { // Thêm thông tin account
-    _id: string;
-    name: string;
-    phoneNumber: string;
-    email: string;
+  account: {
+    // Thêm thông tin account
+    _id: string
+    name: string
+    phoneNumber: string
+    email: string
   }
 }
 
@@ -70,30 +71,43 @@ interface ServiceCaseStatus {
 }
 
 const DeliveryStaffServiceCase: React.FC = () => {
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined)
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
+    undefined
+  )
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
-  const [selectedServiceCase, setSelectedServiceCase] = useState<ServiceCase | null>(null)
+  const [selectedServiceCase, setSelectedServiceCase] =
+    useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
 
   // State cho modal upload ảnh
   const [uploadModalVisible, setUploadModalVisible] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploadingServiceCaseId, setUploadingServiceCaseId] = useState<string | null>(null)
-
+  const [uploadingServiceCaseId, setUploadingServiceCaseId] = useState<
+    string | null
+  >(null)
 
   const {
     data: statusListData,
     isLoading: isLoadingStatus,
     isSuccess: isStatusListSuccess,
-  } = useGetServiceCaseStatusListForDeliveryQuery({ pageNumber: 1, pageSize: 100 })
+  } = useGetServiceCaseStatusListForDeliveryQuery({
+    pageNumber: 1,
+    pageSize: 100,
+  })
 
   // Đảm bảo status mặc định được set và query chính được kích hoạt
   // Check de gan mac dinh la status "Da co ket qua"
   useEffect(() => {
-    if (isStatusListSuccess && statusListData?.data?.length && selectedStatus === undefined) {
-      const defaultStatus = statusListData.data.find((s: ServiceCaseStatus) => s.testRequestStatus === 'Đã có kết quả')
+    if (
+      isStatusListSuccess &&
+      statusListData?.data?.length &&
+      selectedStatus === undefined
+    ) {
+      const defaultStatus = statusListData.data.find(
+        (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã có kết quả'
+      )
       if (defaultStatus) {
         setSelectedStatus(defaultStatus._id)
       } else if (statusListData.data.length > 0) {
@@ -121,20 +135,30 @@ const DeliveryStaffServiceCase: React.FC = () => {
     }
   }, [selectedStatus, pageNumber, pageSize, refetch])
 
-  const [updateStatus, { isLoading: isUpdating }] = useUpdateServiceCaseStatusForDeliveryMutation()
-  const [createServiceCaseImage, { isLoading: isUploadingImage }] = useCreateServiceCaseImageMutation()
-
+  const [updateStatus, { isLoading: isUpdating }] =
+    useUpdateServiceCaseStatusForDeliveryMutation()
+  const [createServiceCaseImage, { isLoading: isUploadingImage }] =
+    useCreateServiceCaseImageMutation()
 
   const getAvailableNextStatuses = (statusId: string) => {
-    const current = statusListData?.data?.find((s: ServiceCaseStatus) => s._id === statusId)
+    const current = statusListData?.data?.find(
+      (s: ServiceCaseStatus) => s._id === statusId
+    )
     // Chỉ trả về các trạng thái có order lớn hơn trạng thái hiện tại
-    return statusListData?.data?.filter((s: ServiceCaseStatus) => s.order > (current?.order || -1)) || []
+    return (
+      statusListData?.data?.filter(
+        (s: ServiceCaseStatus) => s.order > (current?.order || -1)
+      ) || []
+    )
   }
 
   const handleStatusUpdate = async () => {
     if (!selectedServiceCase || !newStatusId) return
     try {
-      await updateStatus({ id: selectedServiceCase._id, currentStatus: newStatusId }).unwrap()
+      await updateStatus({
+        id: selectedServiceCase._id,
+        currentStatus: newStatusId,
+      }).unwrap()
       message.success('Cập nhật trạng thái thành công')
       setUpdateModalVisible(false)
       setSelectedServiceCase(null)
@@ -192,19 +216,21 @@ const DeliveryStaffServiceCase: React.FC = () => {
       key: 'currentStatus',
       width: 200,
       render: (_, record) => {
-        let color = 'default'; // Mặc định
+        let color = 'default' // Mặc định
         if (record.currentStatus?.testRequestStatus === 'Đã có kết quả') {
-          color = 'blue';
-        } else if (record.currentStatus?.testRequestStatus === 'Đã trả kết quả') {
-          color = 'green';
+          color = 'blue'
+        } else if (
+          record.currentStatus?.testRequestStatus === 'Đã trả kết quả'
+        ) {
+          color = 'green'
         } else {
-          color = 'red'; // Các trạng thái còn lại là màu đỏ
+          color = 'red' // Các trạng thái còn lại là màu đỏ
         }
         return (
           <Tag color={color}>
             {record.currentStatus?.testRequestStatus || '—'}
           </Tag>
-        );
+        )
       },
     },
     // --- Cột mới: Thông tin khách hàng ---
@@ -213,16 +239,22 @@ const DeliveryStaffServiceCase: React.FC = () => {
       key: 'customerInfo',
       width: 250,
       render: (_, record) => (
-        <Space direction="vertical" size={2}>
+        <Space direction='vertical' size={2}>
           <Tooltip title={`Tên: ${record.account?.name || 'N/A'}`}>
-            <div><UserOutlined /> {record.account?.name || 'N/A'}</div>
+            <div>
+              <UserOutlined /> {record.account?.name || 'N/A'}
+            </div>
           </Tooltip>
           <Tooltip title={`SĐT: ${record.account?.phoneNumber || 'N/A'}`}>
-            <div><PhoneOutlined /> {record.account?.phoneNumber || 'N/A'}</div>
+            <div>
+              <PhoneOutlined /> {record.account?.phoneNumber || 'N/A'}
+            </div>
           </Tooltip>
           {record.account?.email && (
             <Tooltip title={`Email: ${record.account.email}`}>
-              <div><EnvironmentOutlined /> {record.account.email}</div>
+              <div>
+                <EnvironmentOutlined /> {record.account.email}
+              </div>
             </Tooltip>
           )}
         </Space>
@@ -248,30 +280,38 @@ const DeliveryStaffServiceCase: React.FC = () => {
       width: 250,
       render: (_, record) => {
         // Chỉ cho phép cập nhật nếu trạng thái hiện tại là 'Đã có kết quả'
-        const isUpdatable = record.currentStatus?.testRequestStatus === 'Đã có kết quả';
+        const isUpdatable =
+          record.currentStatus?.testRequestStatus === 'Đã có kết quả'
 
         // Lấy các trạng thái tiếp theo có thể cập nhật
-        const availableNextStatuses = getAvailableNextStatuses(record.currentStatus?._id);
+        const availableNextStatuses = getAvailableNextStatuses(
+          record.currentStatus?._id
+        )
 
         // Tìm trạng thái "Đã trả kết quả" (thành công)
-        const successStatus = availableNextStatuses.find(s => s.testRequestStatus === 'Đã trả kết quả');
+        const successStatus = availableNextStatuses.find(
+          (s) => s.testRequestStatus === 'Đã trả kết quả'
+        )
         // Tìm trạng thái "Giao kết quả không thành công" hoặc "Hủy" (thất bại)
-        const failureStatus = availableNextStatuses.find(s =>
-          s.testRequestStatus.toLowerCase().includes('không thành công') ||
-          s.testRequestStatus.toLowerCase().includes('hủy')
-        );
+        const failureStatus = availableNextStatuses.find(
+          (s) =>
+            s.testRequestStatus.toLowerCase().includes('không thành công') ||
+            s.testRequestStatus.toLowerCase().includes('hủy')
+        )
 
         return (
-          <Space wrap> {/* Dùng Space wrap để các nút tự xuống dòng nếu không đủ chỗ */}
+          <Space wrap>
+            {' '}
+            {/* Dùng Space wrap để các nút tự xuống dòng nếu không đủ chỗ */}
             {isUpdatable && (
               <>
                 {successStatus && (
                   <Button
                     key={successStatus._id}
                     onClick={() => {
-                      setSelectedServiceCase(record);
-                      setNewStatusId(successStatus._id);
-                      setUpdateModalVisible(true);
+                      setSelectedServiceCase(record)
+                      setNewStatusId(successStatus._id)
+                      setUpdateModalVisible(true)
                     }}
                     type='primary'
                   >
@@ -282,9 +322,9 @@ const DeliveryStaffServiceCase: React.FC = () => {
                   <Button
                     key={failureStatus._id}
                     onClick={() => {
-                      setSelectedServiceCase(record);
-                      setNewStatusId(failureStatus._id);
-                      setUpdateModalVisible(true);
+                      setSelectedServiceCase(record)
+                      setNewStatusId(failureStatus._id)
+                      setUpdateModalVisible(true)
                     }}
                     type='primary'
                     danger // Nút thất bại thường có màu đỏ
@@ -294,30 +334,33 @@ const DeliveryStaffServiceCase: React.FC = () => {
                 )}
                 {/* Nút Upload ảnh */}
                 <Button
-                  key="upload-image"
+                  key='upload-image'
                   onClick={() => {
-                    setUploadingServiceCaseId(record._id); // Lưu ID của service case hiện tại
-                    setUploadModalVisible(true); // Mở modal upload
+                    setUploadingServiceCaseId(record._id) // Lưu ID của service case hiện tại
+                    setUploadModalVisible(true) // Mở modal upload
                   }}
                   icon={<UploadOutlined />}
-                  style={{ backgroundColor: '#28a745', borderColor: '#28a745', color: 'white' }} // Màu xanh lá cây
-                >
-                  
-                </Button>
+                  style={{
+                    backgroundColor: '#28a745',
+                    borderColor: '#28a745',
+                    color: 'white',
+                  }} // Màu xanh lá cây
+                ></Button>
               </>
             )}
             {!isUpdatable && <Tag color='default'>Không thể cập nhật</Tag>}
           </Space>
-        );
+        )
       },
     },
-  ];
+  ]
 
   // === LOGIC QUAN TRỌNG ĐỂ XỬ LÝ HIỂN THỊ DỮ LIỆU VÀ TRẠNG THÁI TẢI ===
   // Xác định xem có đang tải dữ liệu hay không (bao gồm cả tải lần đầu và refetch)
-  const isCurrentlyLoading = isLoadingCases || isFetchingCases;
+  const isCurrentlyLoading = isLoadingCases || isFetchingCases
   // Kiểm tra xem có dữ liệu hợp lệ để hiển thị không
-  const hasDataToShow = serviceCasesData?.data && serviceCasesData.data.length > 0;
+  const hasDataToShow =
+    serviceCasesData?.data && serviceCasesData.data.length > 0
 
   return (
     <div style={{ padding: 24 }}>
@@ -345,32 +388,32 @@ const DeliveryStaffServiceCase: React.FC = () => {
 
       {isCurrentlyLoading ? (
         // Hiển thị Spin khi đang tải (tải lần đầu hoặc đang refetch)
-        <Spin tip="Đang tải dữ liệu..." style={{ display: 'block', margin: '50px auto' }} />
+        <Spin
+          tip='Đang tải dữ liệu...'
+          style={{ display: 'block', margin: '50px auto' }}
+        />
+      ) : // Nếu không tải, kiểm tra xem có dữ liệu để hiển thị hay không
+      hasDataToShow ? (
+        <Table
+          dataSource={serviceCasesData.data}
+          columns={columns}
+          rowKey='_id'
+          pagination={{
+            current: pageNumber,
+            pageSize,
+            total: serviceCasesData?.totalRecords || 0,
+            onChange: (page, size) => {
+              setPageNumber(page)
+              setPageSize(size || 10)
+            },
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50', '100'],
+          }}
+          locale={{ emptyText: <Empty description='Không có dữ liệu' /> }}
+        />
       ) : (
-        // Nếu không tải, kiểm tra xem có dữ liệu để hiển thị hay không
-        hasDataToShow ? (
-          <Table
-            dataSource={serviceCasesData.data}
-            columns={columns}
-            rowKey='_id'
-            pagination={{
-              current: pageNumber,
-              pageSize,
-              total: serviceCasesData?.totalRecords || 0,
-              onChange: (page, size) => {
-                setPageNumber(page)
-                setPageSize(size || 10)
-              },
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50', '100'],
-            }}
-
-            locale={{ emptyText: <Empty description="Không có dữ liệu" /> }}
-          />
-        ) : (
-          // Không tải và không có dữ liệu -> hiển thị Empty
-          <Empty description='Không có dữ liệu' />
-        )
+        // Không tải và không có dữ liệu -> hiển thị Empty
+        <Empty description='Không có dữ liệu' />
       )}
 
       {/* Modal xác nhận cập nhật trạng thái */}
@@ -392,19 +435,30 @@ const DeliveryStaffServiceCase: React.FC = () => {
         </p>
         <p>
           Trạng thái hiện tại:{' '}
-          <Tag color='blue'>{selectedServiceCase?.currentStatus?.testRequestStatus}</Tag>
+          <Tag color='blue'>
+            {selectedServiceCase?.currentStatus?.testRequestStatus}
+          </Tag>
         </p>
         <p>
           Trạng thái mới:{' '}
           <Tag
             color={
-              statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus.toLowerCase().includes('không thành') ||
-              statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus.toLowerCase().includes('hủy')
+              statusListData?.data
+                ?.find((s) => s._id === newStatusId)
+                ?.testRequestStatus.toLowerCase()
+                .includes('không thành') ||
+              statusListData?.data
+                ?.find((s) => s._id === newStatusId)
+                ?.testRequestStatus.toLowerCase()
+                .includes('hủy')
                 ? 'red'
                 : 'green'
             }
           >
-            {statusListData?.data?.find((s) => s._id === newStatusId)?.testRequestStatus}
+            {
+              statusListData?.data?.find((s) => s._id === newStatusId)
+                ?.testRequestStatus
+            }
           </Tag>
         </p>
       </Modal>
@@ -425,8 +479,8 @@ const DeliveryStaffServiceCase: React.FC = () => {
       >
         <p>Chọn ảnh bạn muốn tải lên cho hồ sơ này:</p>
         <input
-          type="file"
-          accept="image/*" // Chỉ cho phép chọn file ảnh
+          type='file'
+          accept='image/*' // Chỉ cho phép chọn file ảnh
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
               setSelectedFile(e.target.files[0])
@@ -435,7 +489,11 @@ const DeliveryStaffServiceCase: React.FC = () => {
             }
           }}
         />
-        {selectedFile && <p>Đã chọn file: <strong>{selectedFile.name}</strong></p>}
+        {selectedFile && (
+          <p>
+            Đã chọn file: <strong>{selectedFile.name}</strong>
+          </p>
+        )}
       </Modal>
     </div>
   )
