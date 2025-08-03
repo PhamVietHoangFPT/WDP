@@ -5,7 +5,6 @@ import {
   useGetServiceCasesWithoutAdnQuery,
 } from '../../features/doctor/doctorAPI'
 import { PhoneOutlined } from '@ant-design/icons'
-
 import { useNavigate } from 'react-router-dom'
 
 const { Title } = Typography
@@ -44,6 +43,12 @@ interface ServiceCase {
   }
 }
 
+interface RequestStatus {
+  _id: string
+  testRequestStatus: string
+  order: number
+}
+
 export default function ServiceCaseAlreadyHasAdn() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [resultExists] = useState(true)
@@ -58,9 +63,17 @@ export default function ServiceCaseAlreadyHasAdn() {
       { skip: !selectedStatus }
     )
 
+  // Tìm ID dựa trên tên trạng thái
   useEffect(() => {
-    setSelectedStatus('684e9057e4331a7fdfb9b12e') // Mặc định chọn trạng thái "Đã có kết quả"
-  }, [])
+    if (statusData?.data?.length) {
+      const targetStatus = statusData.data.find(
+        (s: RequestStatus) => s.testRequestStatus === 'Đã có kết quả'
+      )
+      if (targetStatus) {
+        setSelectedStatus(targetStatus._id)
+      }
+    }
+  }, [statusData])
 
   const columns = [
     {
@@ -104,8 +117,7 @@ export default function ServiceCaseAlreadyHasAdn() {
         <div>
           <strong>{acc.name}</strong>
           <br />
-          <PhoneOutlined />
-          {acc.phoneNumber}
+          <PhoneOutlined /> {acc.phoneNumber}
         </div>
       ),
     },
@@ -122,7 +134,6 @@ export default function ServiceCaseAlreadyHasAdn() {
         </ul>
       ),
     },
-
     {
       title: '',
       key: 'details',
@@ -153,9 +164,13 @@ export default function ServiceCaseAlreadyHasAdn() {
           style={{ width: 250 }}
           loading={loadingStatus}
         >
-          <Select.Option value='684e9057e4331a7fdfb9b12e'>
-            Đã có kết quả
-          </Select.Option>
+          {statusData?.data
+            ?.filter((s) => s.testRequestStatus === 'Đã có kết quả')
+            .map((s) => (
+              <Select.Option key={s._id} value={s._id}>
+                {s.testRequestStatus}
+              </Select.Option>
+            ))}
         </Select>
       </div>
 

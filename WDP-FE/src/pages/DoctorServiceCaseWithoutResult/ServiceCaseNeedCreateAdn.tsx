@@ -69,6 +69,7 @@ export default function ServiceCaseNeedCreateAdn() {
   const [pageSize, setPageSize] = useState<number>(10)
   const resultExists = false
   const navigate = useNavigate()
+
   const { data: statusData, isLoading: loadingStatus } =
     useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
 
@@ -97,7 +98,6 @@ export default function ServiceCaseNeedCreateAdn() {
           message.success('Cập nhật trạng thái thành công!')
           refetch()
         } catch (err: any) {
-          console.log(err)
           message.error(err?.data?.message || 'Lỗi khi cập nhật trạng thái')
         }
       },
@@ -106,13 +106,9 @@ export default function ServiceCaseNeedCreateAdn() {
 
   useEffect(() => {
     if (statusData?.data?.length && !selectedStatus) {
-      const defaultStatus =
-        statusData.data.find(
-          (s: RequestStatus) => s.testRequestStatus === 'Đã nhận mẫu'
-        ) ||
-        statusData.data.find(
-          (s: RequestStatus) => s._id !== '688f552b8bd4809753741bd5'
-        )
+      const defaultStatus = statusData.data.find(
+        (s: RequestStatus) => s.testRequestStatus === 'Đã nhận mẫu'
+      )
       if (defaultStatus) {
         setSelectedStatus(defaultStatus._id)
         setSelectedOrder(defaultStatus.order)
@@ -121,10 +117,7 @@ export default function ServiceCaseNeedCreateAdn() {
   }, [statusData, selectedStatus])
 
   const filteredStatuses = useMemo(
-    () =>
-      (statusData?.data as RequestStatus[])?.filter(
-        (s) => s._id !== '688f552b8bd4809753741bd5'
-      ),
+    () => (statusData?.data as RequestStatus[]) || [],
     [statusData]
   )
 
@@ -191,12 +184,12 @@ export default function ServiceCaseNeedCreateAdn() {
       title: 'Hành động',
       key: 'actions',
       render: (_: any, record: ServiceCase) => {
-        const selectedStatusObj = filteredStatuses.find(
+        const currentStatus = filteredStatuses.find(
           (s) => s._id === selectedStatus
         )
-        const selectedOrder = selectedStatusObj?.order ?? -1
+        const currentOrder = currentStatus?.order ?? -1
 
-        if (selectedOrder === 6) {
+        if (currentOrder === 6) {
           return (
             <Button
               type='primary'
@@ -212,12 +205,13 @@ export default function ServiceCaseNeedCreateAdn() {
           )
         }
 
-        if (selectedOrder === 7) {
-          return <Tag color='orange'>Đang chờ duyệt kết quả</Tag>
+        if (currentOrder === 7) {
+          return <Tag color='orange'>Chờ duyệt kết quả</Tag>
         }
 
-        const availableStatusOptions = filteredStatuses.filter(
-          (s) => s.order > selectedOrder
+        const nextStatuses = filteredStatuses.filter(
+          (s) =>
+            s.order > currentOrder && s.testRequestStatus !== 'Đã có kết quả'
         )
 
         return (
@@ -228,7 +222,7 @@ export default function ServiceCaseNeedCreateAdn() {
             loading={updating}
             onChange={(newStatus) => handleUpdateStatus(record._id, newStatus)}
           >
-            {availableStatusOptions.map((status) => (
+            {nextStatuses.map((status) => (
               <Select.Option key={status._id} value={status._id}>
                 {status.testRequestStatus}
               </Select.Option>
@@ -266,21 +260,15 @@ export default function ServiceCaseNeedCreateAdn() {
           style={{ width: 250 }}
           loading={loadingStatus}
         >
-          {filteredStatuses?.map((s) => (
-            <Select.Option key={s._id} value={s._id}>
-              {s.testRequestStatus}
-            </Select.Option>
-          ))}
+          {filteredStatuses
+            ?.filter((s) => s.testRequestStatus !== 'Đã có kết quả')
+            .map((s) => (
+              <Select.Option key={s._id} value={s._id}>
+                {s.testRequestStatus}
+              </Select.Option>
+            ))}
         </Select>
       </div>
-
-      {/* {error && (
-        <Alert
-          type='error'
-          message='Lỗi khi tải hồ sơ'
-          description={(error as any)?.data?.message || 'Không rõ lỗi'}
-        />
-      )} */}
 
       {isLoading ? (
         <Spin />

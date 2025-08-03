@@ -10,6 +10,7 @@ import {
   Input,
   Button,
   message,
+  Modal,
 } from 'antd'
 import Cookies from 'js-cookie'
 import {
@@ -20,11 +21,11 @@ import { jwtDecode } from 'jwt-decode'
 
 const { Title } = Typography
 const { TextArea } = Input
+const { confirm } = Modal
 
 interface DecodedToken {
   _id: string
   role: string
-  // các field khác nếu cần
 }
 
 export default function DocumentFormAccept() {
@@ -51,36 +52,45 @@ export default function DocumentFormAccept() {
 
   const profiles = documentation?.data?.[0]?.profiles || []
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!adnPercentage || !conclusion || !serviceCaseId) {
       return message.warning(
         'Vui lòng nhập đầy đủ thông tin trước khi gửi kết quả'
       )
     }
 
-    try {
-      const token = Cookies.get('userToken')
-      if (!token) return message.error('Không tìm thấy token đăng nhập')
+    confirm({
+      title: 'Xác nhận gửi kết quả?',
+      content:
+        'Vui lòng xác nhận các thông tin. Khi đã bấm gửi, bạn phải chịu trách nhiệm với kết quả. Hành động không thể hoàn tác.',
+      okText: 'Xác nhận gửi',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          const token = Cookies.get('userToken')
+          if (!token) return message.error('Không tìm thấy token đăng nhập')
 
-      const decoded = jwtDecode(token) as DecodedToken
-      const certifierId = decoded.id
+          const decoded = jwtDecode(token) as DecodedToken
+          const certifierId = (decoded as any).id
 
-      const requestData = {
-        adnPercentage,
-        conclusion,
-        serviceCase: serviceCaseId,
-        certifierId,
-      }
+          const requestData = {
+            adnPercentage,
+            conclusion,
+            serviceCase: serviceCaseId,
+            certifierId,
+          }
 
-      console.log('📤 Dữ liệu gửi đi:', requestData) // 👈 log tại đây
+          console.log('📤 Dữ liệu gửi đi:', requestData)
 
-      await createResult(requestData).unwrap()
+          await createResult(requestData).unwrap()
 
-      message.success('Tạo kết quả thành công')
-    } catch (err) {
-      console.error('❌ Tạo kết quả lỗi:', err) // 👈 log lỗi nếu có
-      message.error('Tạo kết quả thất bại')
-    }
+          message.success('Tạo kết quả thành công')
+        } catch (err) {
+          console.error('❌ Tạo kết quả lỗi:', err)
+          message.error('Tạo kết quả thất bại')
+        }
+      },
+    })
   }
 
   return (
