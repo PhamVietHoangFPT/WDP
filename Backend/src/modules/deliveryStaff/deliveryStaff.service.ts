@@ -43,7 +43,7 @@ export class DeliveryStaffService implements IDeliveryStaffService {
     TestRequestStatusDocument[]
   > {
     return this.testRequestStatusModel
-      .find({ order: { $in: [9, 10] } })
+      .find({ order: { $in: [8, 9, 10] } })
       .sort({ order: 1 })
       .lean()
       .exec()

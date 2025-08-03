@@ -48,7 +48,7 @@ export class CertifierService implements ICertifierService {
   > {
     // Assuming there's a method in the repository to get test request statuses
     return this.testRequestStatusModel
-      .find({ order: { $in: [6, 7, 8, 9] } })
+      .find({ order: { $in: [5, 6, 7, 8] } })
       .sort({ order: 1 })
       .exec()
   }
