@@ -301,12 +301,13 @@ export default function ServiceCase() {
 
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
-          <Button
-            type='primary'
-            onClick={() => navigate(`/service-case-customer/${record._id}`)}
-          >
-            Xem kết quả
-          </Button>
+          <span
+    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+  >
+    <Tag color="success">
+      Đã có kết quả
+    </Tag>
+  </span>
         )
       },
     },

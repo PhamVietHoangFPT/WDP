@@ -71,9 +71,38 @@ export default function StaffServiceCase() {
 
   const columns = [
     {
-      title: 'Mã hồ sơ',
-      dataIndex: '_id',
-      key: '_id',
+      title: 'Tên người xét nghiệm',
+      key: 'testTakerNames',
+      render: (_: any, record: any) => {
+        const testTakers = record.caseMember?.testTaker || []
+        if (testTakers.length === 0) {
+          return <Text type='secondary'>Chưa có</Text>
+        }
+        return (
+          <Space direction='vertical'>
+            {testTakers.map((taker: any) => (
+              <Text key={taker._id}>{taker.name}</Text>
+            ))}
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Tên dịch vụ',
+      key: 'serviceNames',
+      render: (_: any, record: any) => {
+        const services = record.caseMember?.service || []
+        if (services.length === 0) {
+          return <Text type='secondary'>Chưa có</Text>
+        }
+        return (
+          <Space direction='vertical'>
+            {services.map((service: any) => (
+              <Text key={service._id}>{service.sample.name}</Text>
+            ))}
+          </Space>
+        )
+      },
     },
     {
       title: 'Số tiền (VNĐ)',
@@ -123,14 +152,31 @@ export default function StaffServiceCase() {
       key: 'created_at',
       render: (date: string) => {
         const d = new Date(date)
-        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString('vi-VN')}`
+        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString(
+          'vi-VN'
+        )}`
+      },
+    },
+    {
+      title: 'Ngày đặt',
+      key: 'bookingDate',
+      render: (
+        _: any,
+        record: { caseMember: { booking: { bookingDate: string } } }
+      ) => {
+        const bookingDate = record.caseMember?.booking?.bookingDate
+        if (!bookingDate) return <Tag color='default'>Chưa đặt</Tag>
+        const date = new Date(bookingDate)
+        return (
+          <Typography.Text>{date.toLocaleDateString('vi-VN')}</Typography.Text>
+        )
       },
     },
     {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
-      render: (_, record) => {
+      render: (_, record: any) => {
         const collector = record.sampleCollector
 
         // Nếu không có thông tin nhân viên, hiển thị tag
@@ -160,7 +206,7 @@ export default function StaffServiceCase() {
       title: 'Bác sĩ phụ trách',
       key: 'doctor',
       dataIndex: ['doctor', 'name'],
-      render: (_, record) => {
+      render: (_, record: any) => {
         const doctor = record.doctor
 
         if (!doctor) {
@@ -212,12 +258,13 @@ export default function StaffServiceCase() {
 
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
-          <Button
-            type='primary'
-            onClick={() => navigate(`/result/${record.result}`)}
-          >
-            Xem kết quả
-          </Button>
+          <span
+    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+  >
+    <Tag color="success">
+      Đã có kết quả
+    </Tag>
+  </span>
         )
       },
     },
@@ -225,11 +272,19 @@ export default function StaffServiceCase() {
       title: 'Chi tiết',
       key: 'action',
       render: (_: any, record: any) => (
-        <Button
-          onClick={() => navigate(`/staff/service-case-customer/${record._id}`)}
-        >
-          Xem chi tiết
-        </Button>
+        <Space direction='vertical'>
+          <Button
+            onClick={() => navigate(`/staff/service-case-customer/${record._id}`)}
+          >
+            Xem chi tiết
+          </Button>
+          {/* <Button
+            onClick={() => handleViewImage(record._id)}
+            loading={loadingImageFor === record._id} // Thêm loading state cho nút
+          >
+            Xem hình ảnh
+          </Button> */}
+        </Space>
       ),
     },
   ]
