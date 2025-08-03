@@ -419,14 +419,7 @@ const routes: LayoutRoute[] = [
         path: '/manager',
         component: ManagerHomePage,
       },
-      {
-        path: '/manager/samples',
-        component: ManagerServiceCaseWithoutSampleCollector,
-      },
-      {
-        path: '/manager/service-cases-without-doctor',
-        component: ManagerServiceCaseWithoutDoctor,
-      },
+      
       {
         path: '/manager/create-account',
         component: ManagerCreateAccount,
