@@ -90,7 +90,7 @@ export default function ServiceCaseDetail() {
               {service.name} ({service.sample.name})
             </Text>
           ))}
-          <Text strong>Phí ship:</Text>
+          <Text strong>Phí dịch vụ phát sinh:</Text>
           <Text strong>Tổng cộng:</Text>
         </Space>
       ),

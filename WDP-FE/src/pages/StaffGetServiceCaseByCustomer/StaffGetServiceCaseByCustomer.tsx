@@ -18,7 +18,11 @@ import {
   Tooltip,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { SearchOutlined, ReloadOutlined, ProfileOutlined } from '@ant-design/icons'
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  ProfileOutlined,
+} from '@ant-design/icons'
 import {
   useGetCustomerServiceCaseByEmailQuery,
   useGetAllStatusForCustomerQuery,
@@ -129,7 +133,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
       newStatusId: newStatusId,
     })
   }
-  
+
   const handleViewDetail = (id: string) => {
     navigate(`/staff/service-case-detail/${id}`)
   }
@@ -215,7 +219,10 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
         if (!availableStatuses || availableStatuses.length === 0) {
           return (
             <Space size='middle'>
-              <Button onClick={() => handleViewDetail(record._id)} icon={<ProfileOutlined />}>
+              <Button
+                onClick={() => handleViewDetail(record._id)}
+                icon={<ProfileOutlined />}
+              >
                 Chi tiết
               </Button>
               <Tag color='default'>Không thể cập nhật</Tag>
@@ -225,7 +232,10 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
 
         return (
           <Space size='middle'>
-            <Button onClick={() => handleViewDetail(record._id)} icon={<ProfileOutlined />}>
+            <Button
+              onClick={() => handleViewDetail(record._id)}
+              icon={<ProfileOutlined />}
+            >
               Chi tiết
             </Button>
             <Popconfirm

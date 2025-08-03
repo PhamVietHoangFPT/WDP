@@ -169,6 +169,8 @@ export class DoctorRepository implements IDoctorRepository {
         $project: {
           _id: 1,
           currentStatus: '$currentStatus.testRequestStatus',
+          adnDocumentation: 1,
+          result: 1,
           bookingDetails: {
             bookingDate: '$bookings.bookingDate',
             slotTime: '$slots.startTime',

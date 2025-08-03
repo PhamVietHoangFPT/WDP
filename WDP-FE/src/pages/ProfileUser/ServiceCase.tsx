@@ -119,10 +119,10 @@ export default function ServiceCase() {
       render: (_: any, record: any) => {
         const testTakers = record.caseMember?.testTaker || []
         if (testTakers.length === 0) {
-          return <Text type="secondary">Chưa có</Text>
+          return <Text type='secondary'>Chưa có</Text>
         }
         return (
-          <Space direction="vertical">
+          <Space direction='vertical'>
             {testTakers.map((taker: any) => (
               <Text key={taker._id}>{taker.name}</Text>
             ))}
@@ -136,10 +136,10 @@ export default function ServiceCase() {
       render: (_: any, record: any) => {
         const services = record.caseMember?.service || []
         if (services.length === 0) {
-          return <Text type="secondary">Chưa có</Text>
+          return <Text type='secondary'>Chưa có</Text>
         }
         return (
-          <Space direction="vertical">
+          <Space direction='vertical'>
             {services.map((service: any) => (
               <Text key={service._id}>{service.sample.name}</Text>
             ))}
