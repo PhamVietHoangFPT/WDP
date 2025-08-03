@@ -1,5 +1,5 @@
-import type React from "react"
-import { useState, useEffect } from "react"
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import {
   Typography,
   Spin,
@@ -14,18 +14,18 @@ import {
   Flex,
   Modal,
   Image,
-} from "antd"
+} from 'antd'
 import {
   useGetAllDoneServiceCasesQuery,
   useGetImageByServiceCaseQuery,
-} from "../../features/sampleCollector/sampleCollectorAPI"
+} from '../../features/sampleCollector/sampleCollectorAPI'
 import {
   UserOutlined,
   PhoneOutlined,
   EnvironmentOutlined,
   CarOutlined,
   EyeOutlined,
-} from "@ant-design/icons"
+} from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -81,7 +81,9 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const [isModalVisible, setIsModalVisible] = useState(false)
-  const [selectedServiceCaseId, setSelectedServiceCaseId] = useState<string | null>(null)
+  const [selectedServiceCaseId, setSelectedServiceCaseId] = useState<
+    string | null
+  >(null)
 
   const {
     data: serviceCasesData,
@@ -90,10 +92,11 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
     error: serviceCasesError,
   } = useGetAllDoneServiceCasesQuery({ isAtHome: isAtHome })
 
-  const { data: imagesData, isLoading: isLoadingImages } = useGetImageByServiceCaseQuery(
-    { ServiceCaseId: selectedServiceCaseId! },
-    { skip: !selectedServiceCaseId }
-  )
+  const { data: imagesData, isLoading: isLoadingImages } =
+    useGetImageByServiceCaseQuery(
+      { ServiceCaseId: selectedServiceCaseId! },
+      { skip: !selectedServiceCaseId }
+    )
 
   const showImageModal = (serviceCaseId: string) => {
     setSelectedServiceCaseId(serviceCaseId)
@@ -107,22 +110,23 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Chờ xử lý":
-        return "orange"
-      case "Đang lấy mẫu":
-        return "blue"
-      case "Đã nhận mẫu":
-        return "green"
-      case "Check-in":
-        return "purple"
-      case "Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)":
-        return "cyan"
+      case 'Chờ xử lý':
+        return 'orange'
+      case 'Đang lấy mẫu':
+        return 'blue'
+      case 'Đã nhận mẫu':
+        return 'green'
+      case 'Check-in':
+        return 'purple'
+      case 'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)':
+        return 'cyan'
       default:
-        return "default"
+        return 'default'
     }
   }
 
-  const serviceCases = serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
+  const serviceCases =
+    serviceCasesData?.data && !serviceCasesError ? serviceCasesData.data : []
   const totalItems = serviceCases.length
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
@@ -132,37 +136,39 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý dịch vụ đã hoàn thành</Title>
       <Flex
-        justify="space-between"
-        align="center"
+        justify='space-between'
+        align='center'
         style={{ marginBottom: 16 }}
         gap={8}
-        wrap="wrap"
+        wrap='wrap'
       >
-        <Flex align="center" gap={8} wrap="wrap">
+        <Flex align='center' gap={8} wrap='wrap'>
           <span>Lọc theo loại hình dịch vụ:</span>
           <Select
             value={isAtHome}
             onChange={setIsAtHome}
             style={{ minWidth: 200 }}
             options={[
-              { value: true, label: "🏠 Dịch vụ tại nhà" },
-              { value: false, label: "🏥 Dịch vụ tại cơ sở" },
+              { value: true, label: '🏠 Dịch vụ tại nhà' },
+              { value: false, label: '🏥 Dịch vụ tại cơ sở' },
             ]}
           />
         </Flex>
-        <Flex align="center" gap={8}>
+        <Flex align='center' gap={8}>
           <Tag>Tổng cộng: {totalItems} dịch vụ</Tag>
         </Flex>
       </Flex>
       {isLoadingServices ? (
-        <div style={{ textAlign: "center", padding: "50px 0" }}>
-          <Spin size="large" />
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <Spin size='large' />
         </div>
       ) : serviceCasesError || totalItems === 0 ? (
-        <div style={{ textAlign: "center", padding: "50px 0" }}>
-          <div style={{ fontSize: "16px", color: "#666", marginBottom: "16px" }}>
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <div
+            style={{ fontSize: '16px', color: '#666', marginBottom: '16px' }}
+          >
             {`Không có dịch vụ nào đã hoàn thành với loại hình "${
-              isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"
+              isAtHome ? 'Dịch vụ tại nhà' : 'Dịch vụ tại cơ sở'
             }"`}
           </div>
         </div>
@@ -182,12 +188,13 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
             loading={isFetchingServices}
             locale={{
               emptyText: `Không có dịch vụ nào đã hoàn thành với loại hình "${
-                isAtHome ? "Dịch vụ tại nhà" : "Dịch vụ tại cơ sở"
+                isAtHome ? 'Dịch vụ tại nhà' : 'Dịch vụ tại cơ sở'
               }"`,
             }}
             renderItem={(item) => {
               const record = item
-              const { testTakers, sampleIdentifyNumbers, isSingleService } = record.caseMember
+              const { testTakers, sampleIdentifyNumbers, isSingleService } =
+                record.caseMember
               const account = record.accountDetails
               const fullAddress = account?.address?.fullAddress
               const coordinates = account?.address?.location?.coordinates
@@ -196,18 +203,20 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                 if (!canNavigate) return
                 const encodedAddress = encodeURIComponent(fullAddress)
                 const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
-                window.open(mapsUrl, "_blank", "noopener,noreferrer")
+                window.open(mapsUrl, '_blank', 'noopener,noreferrer')
               }
               const renderSampleNames = (index: number) => {
                 if (!record.services || record.services.length === 0) {
-                  return <Text type="secondary">Không có mẫu</Text>
+                  return <Text type='secondary'>Không có mẫu</Text>
                 }
                 if (isSingleService) {
                   const service = record.services[index]
-                  return service ? <Text type="secondary">{service.sample.name}</Text> : null
+                  return service ? (
+                    <Text type='secondary'>{service.sample.name}</Text>
+                  ) : null
                 } else {
                   return record.services.map((service, i) => (
-                    <Text key={i} type="secondary" style={{ display: "block" }}>
+                    <Text key={i} type='secondary' style={{ display: 'block' }}>
                       {service.sample.name}
                     </Text>
                   ))
@@ -217,41 +226,65 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                 <List.Item>
                   <Card
                     title={
-                      <div style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: "bold" }}>
+                      <div
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                        }}
+                      >
                         Mã dịch vụ: {record._id}
                       </div>
                     }
                   >
                     <Flex vertical gap={12}>
-                      <Flex justify="space-between" align="center">
+                      <Flex justify='space-between' align='center'>
                         <Space>
-                          <Typography.Text strong>Ngày giờ hẹn:</Typography.Text>
+                          <Typography.Text strong>
+                            Ngày giờ hẹn:
+                          </Typography.Text>
                           <Text>
-                            {new Date(record.bookingDetails.bookingDate).toLocaleDateString("vi-VN")} -{" "}
-                            {record.bookingDetails.slotTime}
+                            {new Date(
+                              record.bookingDetails.bookingDate
+                            ).toLocaleDateString('vi-VN')}{' '}
+                            - {record.bookingDetails.slotTime}
                           </Text>
                         </Space>
-                        <Tag color={getStatusColor(record.currentStatus || "")}>
+                        <Tag color={getStatusColor(record.currentStatus || '')}>
                           {record.currentStatus}
                         </Tag>
                       </Flex>
                       {isAtHome && account && (
-                        <Card size="small" title="Thông tin khách hàng">
+                        <Card size='small' title='Thông tin khách hàng'>
                           <Flex vertical gap={4}>
                             <Space>
                               <UserOutlined />
-                              <Typography.Text strong>{account.name}</Typography.Text>
+                              <Typography.Text strong>
+                                {account.name}
+                              </Typography.Text>
                             </Space>
                             <Space>
                               <PhoneOutlined />
-                              <Typography.Text>{account.phoneNumber}</Typography.Text>
+                              <Typography.Text>
+                                {account.phoneNumber}
+                              </Typography.Text>
                             </Space>
                             {fullAddress && (
                               <Tooltip title={fullAddress}>
-                                <Space style={{ maxWidth: "100%", alignItems: "start" }}>
+                                <Space
+                                  style={{
+                                    maxWidth: '100%',
+                                    alignItems: 'start',
+                                  }}
+                                >
                                   <EnvironmentOutlined />
-                                  <div style={{ wordWrap: "break-word", flex: 1 }}>
-                                    <Typography.Text type="secondary" style={{ whiteSpace: "pre-wrap" }}>
+                                  <div
+                                    style={{ wordWrap: 'break-word', flex: 1 }}
+                                  >
+                                    <Typography.Text
+                                      type='secondary'
+                                      style={{ whiteSpace: 'pre-wrap' }}
+                                    >
                                       {fullAddress}
                                     </Typography.Text>
                                   </div>
@@ -261,9 +294,9 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                             {canNavigate && (
                               <Button
                                 icon={<CarOutlined />}
-                                size="small"
+                                size='small'
                                 onClick={handleDirectionsClick}
-                                style={{ marginTop: "4px" }}
+                                style={{ marginTop: '4px' }}
                               >
                                 Chỉ đường
                               </Button>
@@ -272,20 +305,39 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                         </Card>
                       )}
                       {testTakers && testTakers.length > 0 && (
-                        <Card size="small" style={{ height: "300px" }} title="Người xét nghiệm & Mã mẫu">
+                        <Card
+                          size='small'
+                          style={{ height: '300px' }}
+                          title='Người xét nghiệm & Mã mẫu'
+                        >
                           {testTakers.map((taker, index) => (
-                            <div key={taker._id} style={{ marginBottom: index < testTakers.length - 1 ? 8 : 0 }}>
+                            <div
+                              key={taker._id}
+                              style={{
+                                marginBottom:
+                                  index < testTakers.length - 1 ? 8 : 0,
+                              }}
+                            >
                               <Text strong>{taker.name}</Text>
-                              <div style={{ fontSize: "12px", color: "#666" }}>
-                                {sampleIdentifyNumbers && sampleIdentifyNumbers.length > 0 ? (
+                              <div style={{ fontSize: '12px', color: '#666' }}>
+                                {sampleIdentifyNumbers &&
+                                sampleIdentifyNumbers.length > 0 ? (
                                   sampleIdentifyNumbers
                                     .filter((_, i) => i % 2 === index % 2)
-                                    .map((sampleId, i) => <div key={i}>{sampleId}</div>)
+                                    .map((sampleId, i) => (
+                                      <div key={i}>{sampleId}</div>
+                                    ))
                                 ) : (
-                                  <Text type="secondary">Không có mã mẫu</Text>
+                                  <Text type='secondary'>Không có mã mẫu</Text>
                                 )}
                               </div>
-                              <div style={{ fontSize: "12px", color: "#999", marginTop: 4 }}>
+                              <div
+                                style={{
+                                  fontSize: '12px',
+                                  color: '#999',
+                                  marginTop: 4,
+                                }}
+                              >
                                 {renderSampleNames(index)}
                               </div>
                             </div>
@@ -293,13 +345,13 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
                         </Card>
                       )}
                       {(!testTakers || testTakers.length === 0) && (
-                        <Card size="small" title="Người xét nghiệm & Mã mẫu">
-                          <Text type="secondary">—</Text>
+                        <Card size='small' title='Người xét nghiệm & Mã mẫu'>
+                          <Text type='secondary'>—</Text>
                         </Card>
                       )}
                       <Flex style={{ marginTop: 12 }}>
                         <Button
-                          type="primary"
+                          type='primary'
                           icon={<EyeOutlined />}
                           onClick={() => showImageModal(record._id)}
                         >
@@ -317,14 +369,16 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
               current={pageNumber}
               pageSize={pageSize}
               total={totalItems}
-              style={{ textAlign: "center", paddingTop: 20 }}
+              style={{ textAlign: 'center', paddingTop: 20 }}
               onChange={(page, size) => {
                 setPageNumber(page)
                 setPageSize(size || 10)
               }}
               showSizeChanger
               showQuickJumper
-              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} dịch vụ đã hoàn thành`}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} của ${total} dịch vụ đã hoàn thành`
+              }
             />
           )}
         </>
@@ -339,17 +393,24 @@ const SampleCollectorDoneServiceCase: React.FC = () => {
         width={800}
       >
         {isLoadingImages ? (
-          <div style={{ textAlign: "center", padding: "20px" }}>
+          <div style={{ textAlign: 'center', padding: '20px' }}>
             <Spin />
           </div>
         ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '10px',
+              justifyContent: 'center',
+            }}
+          >
             {imagesData && imagesData.length > 0 ? (
               imagesData.map((image: Image) => (
                 <Image
                   key={image._id}
                   src={`http://localhost:5000${image.url}`}
-                  alt="Service Case"
+                  alt='Service Case'
                   width={200}
                 />
               ))

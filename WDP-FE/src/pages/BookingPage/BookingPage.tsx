@@ -17,7 +17,6 @@ import {
   Table,
   Divider,
   Statistic,
-  List,
   Space,
   Checkbox,
 } from 'antd'
@@ -30,9 +29,8 @@ import { useGetFacilitiesNameAndAddressQuery } from '../../features/admin/facili
 import { useGetSlotsListQuery } from '../../features/admin/slotAPI'
 import { useGetSlotTemplateForFacilityQuery } from '../../features/admin/slotAPI'
 import type { Slot } from '../../types/slot'
-import { CalculatorOutlined, CheckOutlined } from '@ant-design/icons'
+import { CalculatorOutlined } from '@ant-design/icons'
 import { useGetAddressesQuery } from '../../features/address/addressAPI'
-import { useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery } from '../../features/samplingKitInventory/samplingKitInventoryAPI'
 import type { CheckboxChangeEvent } from 'antd/lib'
 dayjs.locale('vi')
 dayjs.extend(isoWeek)
@@ -40,7 +38,7 @@ dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
 
 const { Title, Text, Paragraph } = Typography
-const generateTimeSlots = (workTimeStart, workTimeEnd, slotDuration) => {
+const generateTimeSlots = (workTimeStart: any, workTimeEnd: any, slotDuration: number) => {
   const slots = []
   // Sử dụng một ngày giả để thực hiện các phép toán thời gian
   const startDate = new Date(`1970-01-01T${workTimeStart}`)
@@ -48,7 +46,7 @@ const generateTimeSlots = (workTimeStart, workTimeEnd, slotDuration) => {
   const durationInMinutes = slotDuration * 60
 
   // Hàm tiện ích để định dạng thời gian về dạng "HH:mm"
-  const formatTime = (date) => {
+  const formatTime = (date: Date) => {
     const hours = date.getHours().toString().padStart(2, '0')
     const minutes = date.getMinutes().toString().padStart(2, '0')
     return `${hours}:${minutes}`
@@ -97,38 +95,29 @@ interface BookingComponentProps {
   onConfirmBooking: (details: {
     slotId: string
     shippingFee: number
+    totalFee: number // Thêm totalFee vào interface
     addressId: string | null
   }) => void
   onSelectSlot: (slotId: string | null) => void
   selectedSlotId: string | null
-  serviceDetail: {
-    name: string
-    fee: number
-    timeReturn: {
-      timeReturnFee: number
-    }
-    sample: {
-      _id: string
-      fee: number
-    }
-  }
   addressId: string | null
   setAddressId: (addressId: string | null) => void
   setDisabled: (disabled: boolean) => void
   setAgreed: (agreed: boolean) => void
   isAgreed: boolean
+  selectedServices?: any[] // Thêm prop để nhận danh sách dịch vụ đã chọn
 }
 
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371 // Bán kính Trái Đất (km)
   const dLat = (lat2 - lat1) * (Math.PI / 180)
   const dLon = (lon2 - lon1) * (Math.PI / 180)
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   const d = R * c
   return d
@@ -138,34 +127,16 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
   onConfirmBooking,
   onSelectSlot,
   selectedSlotId,
-  serviceDetail,
   addressId,
   setAddressId,
-  setDisabled,
   setAgreed,
   isAgreed,
+  selectedServices = [], // Nhận danh sách dịch vụ đã chọn với giá trị mặc định là mảng rỗng
 }) => {
   const { data: addressesData, isLoading: addressesLoading } =
     useGetAddressesQuery({})
   const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
-  const {
-    data: samplingKitData,
-    isError: samplingKitIsError,
-    error: samplingKitError,
-  } = useGetSamplingKitInventoryBySampleIdAndFacilityIdQuery(
-    { sampleId: serviceDetail?.sample?._id, facilityId },
-    {
-      skip: !facilityId,
-    }
-  )
 
-  useEffect(() => {
-    if (samplingKitIsError) {
-      setDisabled(true)
-    } else {
-      setDisabled(false)
-    }
-  }, [samplingKitIsError, setDisabled])
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
   const isProcessingRef = useRef(false)
 
@@ -258,7 +229,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       setSelectedDisplayDate(value) // Cập nhật ngày hiển thị trong input của DatePicker
     } else {
       // Xử lý khi người dùng xóa lựa chọn (clear)
-      setDateRange([null, null])
+      setDateRange([dayjs(), dayjs()])
       setSelectedDisplayDate(null)
     }
   }
@@ -279,10 +250,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       message.error('Vui lòng chọn địa chỉ của bạn.')
       return
     }
-    if (!serviceDetail) {
-      message.error('Chưa có thông tin dịch vụ.')
-      return
-    }
 
     isProcessingRef.current = true
     setIsCalculatingFee(true)
@@ -291,7 +258,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     try {
       // Lấy tọa độ của người dùng từ địa chỉ đã chọn
       const userAddress = addressesData?.data?.find(
-        (addr) => addr._id === addressId
+        (addr: { _id: string }) => addr._id === addressId
       )
       if (!userAddress?.location?.coordinates) {
         throw new Error('Địa chỉ đã chọn không có thông tin tọa độ.')
@@ -300,7 +267,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
       // Lấy tọa độ của cơ sở
       const facilityRawData = facilitiesData?.data?.find(
-        (f) => f._id === facilityId
+        (f: { _id: string }) => f._id === facilityId
       )
       if (!facilityRawData?.address?.location?.coordinates) {
         throw new Error('Cơ sở này không có thông tin tọa độ.')
@@ -309,10 +276,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
         facilityRawData.address.location.coordinates
 
       // Tính toán phí
-      const serviceFee =
-        (serviceDetail?.fee || 0) +
-        (serviceDetail?.timeReturn?.timeReturnFee || 0) +
-        (serviceDetail?.sample?.fee || 0)
+
       const distance = getDistanceFromLatLonInKm(
         userLat,
         userLon,
@@ -322,7 +286,19 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
       let calculatedShippingFee = distance > 5 ? (distance - 5) * 10000 : 0
       calculatedShippingFee = Math.ceil(calculatedShippingFee / 1000) * 1000
-      const calculatedTotalPrice = serviceFee + calculatedShippingFee
+
+      // Tính tổng phí dịch vụ đã chọn
+      const serviceFee = selectedServices.reduce((total, service) => {
+        if (service) {
+          return total +
+            (service.fee || 0) +
+            (service.timeReturn?.timeReturnFee || 0) +
+            (service.sample?.fee || 0)
+        }
+        return total
+      }, 0)
+
+      const calculatedTotalPrice = calculatedShippingFee + serviceFee
 
       setShippingFee(calculatedShippingFee)
       setTotalPrice(calculatedTotalPrice)
@@ -341,17 +317,17 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       isProcessingRef.current = false
       setIsCalculatingFee(false)
     }
-  }, [facilityId, addressId, serviceDetail, facilitiesData, addressesData])
+  }, [facilityId, addressId, facilitiesData, addressesData])
 
   const selectOptions = useMemo(() => {
     if (!facilitiesData?.data?.length) return []
 
     // Tìm đối tượng địa chỉ đầy đủ mà người dùng đã chọn
     const selectedUserAddress = addressesData?.data?.find(
-      (addr) => addr._id === addressId
+      (addr: { _id: string | null }) => addr._id === addressId
     )
 
-    const mappedFacilities = facilitiesData.data.map((facility) => {
+    const mappedFacilities = facilitiesData.data.map((facility: { address: { fullAddress: string; location: any }; _id: any; facilityName: any }) => {
       const fullAddress = facility.address?.fullAddress || 'N/A'
       const facilityLocation = facility.address?.location
       let distance
@@ -382,7 +358,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
     // Sắp xếp lại nếu đã có địa chỉ được chọn
     if (selectedUserAddress) {
-      mappedFacilities.sort((a, b) => {
+      mappedFacilities.sort((a: { distance: number | undefined }, b: { distance: number | undefined }) => {
         if (a.distance === undefined) return 1
         if (b.distance === undefined) return -1
         return a.distance - b.distance
@@ -397,7 +373,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     // Chỉ chạy khi đã chọn địa chỉ VÀ danh sách cơ sở đã được tính toán/sắp xếp
     if (addressId && selectOptions.length > 0) {
       const nearestFacility = selectOptions.find(
-        (opt) => opt.distance !== undefined
+        (opt: { distance: undefined }) => opt.distance !== undefined
       )
       if (nearestFacility) {
         setFacilityId(nearestFacility.value)
@@ -436,6 +412,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
     onConfirmBooking({
       slotId: selectedSlotId,
       shippingFee: shippingFee, // Giờ sẽ hoạt động đúng kể cả khi phí là 0
+      totalFee: totalPrice || 0, // Truyền totalPrice làm totalFee
       addressId: addressId,
     })
 
@@ -463,7 +440,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   loading={addressesLoading}
                   value={addressId}
                   onChange={(id) => setAddressId(id)} // Cập nhật state từ props
-                  options={addressesData?.data?.map((addr) => ({
+                  options={addressesData?.data?.map((addr: { _id: any; fullAddress: any }) => ({
                     value: addr._id,
                     label: addr.fullAddress,
                   }))}
@@ -532,21 +509,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                     )
                   }
                 />
-                {samplingKitError ? (
-                  <Text type='danger' style={{ marginTop: 8 }}>
-                    {'data' in samplingKitError &&
-                    samplingKitError.data?.message
-                      ? samplingKitError.data.message
-                      : 'Lỗi không xác định. Vui lòng thử lại.'}
-                  </Text>
-                ) : (
-                  samplingKitData && (
-                    <Text type='secondary' style={{ marginTop: 8 }}>
-                      Số lượng bộ kit hiện có:{' '}
-                      {samplingKitData?.data[0]?.inventory || 0}
-                    </Text>
-                  )
-                )}
               </div>
             </Col>
           </Row>
@@ -625,7 +587,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
               scroll={{ x: 'max-content' }} // Đảm bảo bảng có thể cuộn ngang trên màn hình nhỏ
               components={{
                 body: {
-                  cell: (props) => (
+                  cell: (props: any) => (
                     <td {...props} style={{ minHeight: 70, padding: 8 }} />
                   ),
                 },
@@ -654,7 +616,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                       </Text>
                     </>
                   }
-                  render={(text, timeSlot: (typeof TIME_SLOTS)[0]) => {
+                  render={(_text, timeSlot: (typeof TIME_SLOTS)[0]) => {
                     const slots = getSlotsForDayAndTime(date, timeSlot)
 
                     if (slots.length === 0) {
@@ -702,46 +664,36 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
         {selectedSlotId && (
           <Card style={{ marginTop: 24 }}>
             <Title level={5}>Tổng hợp chi phí (Ước tính)</Title>
-            <Flex justify='space-between' align='center'>
-              <Text>Dịch vụ:</Text>
-              <Text strong>{serviceDetail.name}</Text>
-            </Flex>
             <Space direction='vertical' style={{ width: '100%' }}>
-              <List
-                size='small'
-                dataSource={[
-                  {
-                    label: 'Chi phí cho mẫu và trả mẫu',
-                    value:
-                      serviceDetail.fee +
-                      serviceDetail.timeReturn.timeReturnFee +
-                      serviceDetail.sample.fee,
-                    isFee: true,
-                  },
-                  {
-                    label: 'Phí dịch vụ',
-                    value: shippingFee,
-                    isFee: true,
-                    color: '#52c41a',
-                  },
-                ]}
-                renderItem={(item) => (
-                  <List.Item style={{ padding: '8px 0', border: 'none' }}>
-                    <List.Item.Meta
-                      title={<Text type='secondary'>{item.label}</Text>}
-                    />
-                    {item.value !== null ? (
-                      <Text strong style={{ color: item.color }}>
-                        {item.value === 0
-                          ? 'Miễn phí'
-                          : `${item.value.toLocaleString('vi-VN')} ₫`}
-                      </Text>
-                    ) : (
-                      <Text type='secondary'>_</Text>
-                    )}
-                  </List.Item>
-                )}
-              />
+              {/* Hiển thị chi tiết phí dịch vụ */}
+              {selectedServices.length > 0 && (
+                <>
+                  <Text strong>Chi tiết dịch vụ:</Text>
+                  {selectedServices.map((service, index) => {
+                    if (!service) return null
+                    const serviceTotalFee =
+                      (service.fee || 0) +
+                      (service.timeReturn?.timeReturnFee || 0) +
+                      (service.sample?.fee || 0)
+                    return (
+                      <div key={index} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Text>{service.name}</Text>
+                        <Text>{serviceTotalFee.toLocaleString('vi-VN')}₫</Text>
+                      </div>
+                    )
+                  })}
+                  <Divider style={{ margin: '8px 0' }} />
+                </>
+              )}
+
+              {/* Hiển thị phí vận chuyển */}
+              {shippingFee !== null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Text>Phí vận chuyển:</Text>
+                  <Text>{shippingFee.toLocaleString('vi-VN')}₫</Text>
+                </div>
+              )}
+
               <Divider style={{ margin: '0' }} />
               <Statistic
                 title={

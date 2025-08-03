@@ -175,12 +175,12 @@ const ServiceAtFacility = lazy(
 const AdnFacilityRegisteration = lazy(
   () => import('../pages/AdnFacilityRegisteration/AdnFacilityRegisteration')
 )
-const DoctorServiceCaseWithoutResult = lazy(
-  () =>
-    import(
-      '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
-    )
-)
+// const DoctorServiceCaseWithoutResult = lazy(
+//   () =>
+//     import(
+//       '../pages/DoctorServiceCaseWithoutResult/DoctorServiceCaseWithoutResult'
+//     )
+// )
 const AdminService = lazy(() => import('../pages/AdminService/AdminService'))
 const ServiceDetail = lazy(
   () => import('../components/Admin/AdminService/ServiceDetail')
@@ -325,15 +325,11 @@ const routes: LayoutRoute[] = [
       },
       {
         path: '/home-registeration',
-        component: HomeRegisteration,
+        component: ServiceAtHome,
       },
       {
         path: '/adminstrative-services',
         component: AdminstrativeServices,
-      },
-      {
-        path: '/register-service-at-home/:id',
-        component: ServiceAtHome,
       },
       {
         path: '/register-service-at-facility/:id',
@@ -545,10 +541,10 @@ const routes: LayoutRoute[] = [
         path: '/doctor',
         component: DoctorHomePage,
       },
-      {
-        path: '/doctor/service-cases-without-results',
-        component: DoctorServiceCaseWithoutResult,
-      },
+      // {
+      //   path: '/doctor/service-cases-without-results',
+      //   component: DoctorServiceCaseWithoutResult,
+      // },
       {
         path: '/doctor/service-cases-condition',
         component: DoctorUpdateConditionPage,
@@ -564,6 +560,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor/create-adn-document/:serviceCaseId',
         component: DocumentForm,
+      },
+      {
+        path: '/doctor/view-adn-documentation/:serviceCaseId',
+        component: DoneDocumentForm,
       },
     ],
   },

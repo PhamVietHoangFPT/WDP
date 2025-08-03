@@ -119,10 +119,7 @@ export const SideBar = () => {
           key: 'staff/return-fail',
           icon: <TeamOutlined />,
           label: 'Giao kết quả thất bại',
-          onClick: () =>
-            navigate(
-              '/staff/return-fail'
-            ),
+          onClick: () => navigate('/staff/return-fail'),
         },
       ],
     },
