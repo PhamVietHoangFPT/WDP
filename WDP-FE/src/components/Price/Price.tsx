@@ -248,12 +248,8 @@ const Price: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Space style={{ marginTop: 30, marginLeft: 500 }}>
-                <Button
-                  type='primary'
-                  htmlType='submit'
-                  icon={<SearchOutlined />}
-                >
+              <Space style={{ marginTop: 30}}>
+                <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleClear} icon={<ReloadOutlined />}>

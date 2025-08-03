@@ -156,9 +156,7 @@ const PaymentConditionSuccessPage = lazy(
 )
 const PaymentHistory = lazy(() => import('../pages/ProfileUser/PaymentHistory'))
 const PaymentDetail = lazy(() => import('../pages/ProfileUser/PaymentDetail'))
-const HomeRegisteration = lazy(
-  () => import('../pages/HomeRegisteration/homeRegisteration')
-)
+
 const ServiceAtHome = lazy(() => import('../pages/ServiceAtHome/serviceAtHome'))
 const ManagerCreateAccount = lazy(
   () => import('../pages/ManagerCreateAccount/ManagerCreateAccount')
@@ -419,14 +417,7 @@ const routes: LayoutRoute[] = [
         path: '/manager',
         component: ManagerHomePage,
       },
-      {
-        path: '/manager/samples',
-        component: ManagerServiceCaseWithoutSampleCollector,
-      },
-      {
-        path: '/manager/service-cases-without-doctor',
-        component: ManagerServiceCaseWithoutDoctor,
-      },
+      
       {
         path: '/manager/create-account',
         component: ManagerCreateAccount,
