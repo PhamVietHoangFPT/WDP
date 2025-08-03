@@ -11,6 +11,7 @@ import { useCreateServiceCasePaymentMutation } from '../../features/vnpay/vnpayA
 import { useCreateBookingMutation } from '../../features/customer/bookingApi'
 import SingleServiceForm from './SingleServiceForm'
 import MultipleServicesForm from './MultipleServicesForm'
+import { useCreateKitShipmentMutation } from '../../features/kitShipment/kitShipmentAPI'
 interface TestTakerListResponse {
   data: {
     data: TestTaker[]
@@ -33,8 +34,8 @@ const ServiceAtHomeForm: React.FC = () => {
   const [totalFee, setTotalFee] = useState<number | null>(null) // Thêm state để lưu totalFee
   const [isSingle, setIsSingle] = useState<boolean>(true)
   const [showAgnate, setShowAgnate] = useState<boolean>(true)
-
-
+  const [isSelfSampling, setIsSelfSampling] = useState<boolean>(false)
+  const [createKitShipment] = useCreateKitShipmentMutation()
 
   const [testTakerCount] = useState(2)
   const { data } = useGetTestTakersQuery<TestTakerListResponse>({
@@ -49,7 +50,7 @@ const ServiceAtHomeForm: React.FC = () => {
     pageNumber: 1,
     pageSize: 100,
     isAdministration: false,
-    isSelfSampling: false,
+    isSelfSampling: isSelfSampling,
     isAgnate: showAgnate, // Sử dụng API query theo isAgnate
   }, {
     refetchOnMountOrArgChange: true, // Refetch khi component mount hoặc argument thay đổi
@@ -65,7 +66,6 @@ const ServiceAtHomeForm: React.FC = () => {
   const [isAgreed, setIsAgreed] = useState(false)
   const dataTestTaker = data?.data || []
   const selectedTestTakers = Form.useWatch([], form)
-
 
   const handleConfirmBooking = ({
     slotId,
@@ -90,9 +90,9 @@ const ServiceAtHomeForm: React.FC = () => {
     return dataTestTaker.filter((taker) => !selectedIds.includes(taker._id))
   }
 
-  const isServiceDisabled = (serviceId: string, currentField: string) => {
+  const isServiceDisabled = (serviceId: string, currentServiceField: string) => {
     const selectedServiceIds = Object.keys(selectedTestTakers || {})
-      .filter((key) => key.startsWith('service') && key !== currentField)
+      .filter((key) => key.startsWith('service') && key !== currentServiceField)
       .map((key) => selectedTestTakers[key])
       .filter((id) => id)
     return selectedServiceIds.includes(serviceId)
@@ -101,7 +101,7 @@ const ServiceAtHomeForm: React.FC = () => {
   const onFinish = async (values: any) => {
     const token = Cookies.get('userToken')
     if (!token) return message.error('Bạn cần đăng nhập')
-
+    form.resetFields() // Reset form fields after successful submission
     const decoded: any = jwtDecode(token)
     const accountId = decoded?.id || decoded?._id
     if (!accountId) return message.error('Không xác định được tài khoản')
@@ -117,7 +117,6 @@ const ServiceAtHomeForm: React.FC = () => {
         values.service2,
       ].filter((id) => id)
       : values.sharedServices || [] // Sử dụng sharedServices khi isSingle = false
-    console.log(services)
 
     const { slot } = values
 
@@ -146,12 +145,15 @@ const ServiceAtHomeForm: React.FC = () => {
         isSingleService: isSingle,
       }
       const caseMember = await createCaseMember({ data }).unwrap()
-      console.log('caseMember:', caseMember)
       const caseMemberId = caseMember?.data?._id || caseMember?._id
-      console.log('caseMemberId:', caseMemberId)
 
       if (!caseMemberId) {
         throw new Error('Không thể lấy caseMemberId')
+      }
+
+      if (isSelfSampling) {
+        const response = await createKitShipment({ caseMember: caseMemberId }).unwrap()
+        console.log('Kit shipment created:', response)
       }
 
       const serviceCaseData = {
@@ -213,6 +215,15 @@ const ServiceAtHomeForm: React.FC = () => {
               onChange={(checked) => setShowAgnate(checked)}
               checkedChildren="Bên nội"
               unCheckedChildren="Bên ngoại"
+            />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
+            <p style={{ marginTop: "0", marginRight: "8px" }}>Chọn hình thức lấy mẫu:</p>
+            <Switch
+              checked={isSelfSampling}
+              onChange={(checked) => setIsSelfSampling(checked)}
+              checkedChildren="Không tự lấy mẫu"
+              unCheckedChildren="Tự lấy mẫu"
             />
           </div>
         </div>
