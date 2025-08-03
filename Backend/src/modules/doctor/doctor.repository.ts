@@ -47,6 +47,26 @@ export class DoctorRepository implements IDoctorRepository {
       {
         $unwind: { path: '$accountDetails', preserveNullAndEmptyArrays: true },
       },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$doctor' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'doctorDetails',
+        },
+      },
+      // Mo mang doctorDetails
+      {
+        $unwind: { path: '$doctorDetails', preserveNullAndEmptyArrays: true },
+      },
       // Mo bang testRequestStatuses
       {
         $lookup: {
@@ -179,6 +199,12 @@ export class DoctorRepository implements IDoctorRepository {
             _id: '$accountDetails._id',
             name: '$accountDetails.name',
             phoneNumber: '$accountDetails.phoneNumber',
+          },
+          doctorDetails: {
+            _id: '$doctorDetails._id',
+            name: '$doctorDetails.name',
+            phoneNumber: '$doctorDetails.phoneNumber',
+            email: '$doctorDetails.email',
           },
           services: {
             $map: {

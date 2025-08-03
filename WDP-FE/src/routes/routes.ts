@@ -325,15 +325,11 @@ const routes: LayoutRoute[] = [
       },
       {
         path: '/home-registeration',
-        component: HomeRegisteration,
+        component: ServiceAtHome,
       },
       {
         path: '/adminstrative-services',
         component: AdminstrativeServices,
-      },
-      {
-        path: '/register-service-at-home/:id',
-        component: ServiceAtHome,
       },
       {
         path: '/register-service-at-facility/:id',
