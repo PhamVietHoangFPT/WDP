@@ -301,12 +301,13 @@ export default function ServiceCase() {
 
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
-          <Button
-            type='primary'
-            onClick={() => navigate(`/result/${record.result}`)}
-          >
-            Xem kết quả
-          </Button>
+          <span
+    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+  >
+    <Tag color="success">
+      Đã có kết quả
+    </Tag>
+  </span>
         )
       },
     },
@@ -320,12 +321,12 @@ export default function ServiceCase() {
           >
             Xem chi tiết
           </Button>
-          <Button
+          {/* <Button
             onClick={() => handleViewImage(record._id)}
             loading={loadingImageFor === record._id} // Thêm loading state cho nút
           >
             Xem hình ảnh
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
