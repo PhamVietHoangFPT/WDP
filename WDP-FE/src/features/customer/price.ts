@@ -4,9 +4,9 @@ export const priceAPI = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllServiceCasePrice: builder.query({
       query: (params) => ({
-        url: '/services', 
+        url: '/services',
         method: 'GET',
-        params: params, 
+        params: params,
       }),
     }),
   }),
