@@ -61,9 +61,9 @@ export default function SamplingKitInventoryDetail() {
             >
               Quay lại
             </Button>
-            <Button type='primary' icon={<EditOutlined />}>
+            {/* <Button type='primary' icon={<EditOutlined />}>
               Sửa
-            </Button>
+            </Button> */}
           </Space>
         }
       >
