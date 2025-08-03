@@ -13,6 +13,7 @@ import SampleCollectorDoneServiceCase from '../pages/SampleCollectorDoneServiceC
 import { DoctorManagerLayout } from '../components/layout/DoctorManagerLayout'
 import DoctorManagerHomePage from '../pages/DoctorManagerHomePage/DoctorManagerHomePage'
 import StaffServiceCaseByCustomerDetail from '../pages/StaffGetServiceCaseByCustomer/StaffServiceCaseByCustomerDetail'
+import Price from '../components/Price/Price'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -345,6 +346,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/result/:resultId',
         component: UserResult,
+      },
+      {
+        path: '/price',
+        component: Price,
       },
     ],
   },
