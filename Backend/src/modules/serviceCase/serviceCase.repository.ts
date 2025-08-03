@@ -73,7 +73,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           },
           {
             path: 'testTaker',
-            select: 'name personalId',
+            select: 'name personalId dateOfBirth',
           },
           {
             path: 'service',
@@ -601,7 +601,7 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
             },
             {
               path: 'testTaker',
-              select: 'name personalId',
+              select: 'name personalId dateOfBirth',
             },
             {
               path: 'service',

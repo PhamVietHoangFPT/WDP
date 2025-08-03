@@ -21,7 +21,7 @@ import {
 } from '../../features/customer/paymentApi'
 import Cookies from 'js-cookie'
 import { useState, useEffect } from 'react'
-import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
+import { PhoneOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -91,7 +91,7 @@ export default function ServiceCaseDetail() {
               {service.name} ({service.sample.name})
             </Text>
           ))}
-          <Text strong>Phí ship:</Text>
+          <Text strong>Phí dịch vụ phát sinh:</Text>
           <Text strong>Tổng cộng:</Text>
         </Space>
       ),
@@ -204,13 +204,25 @@ export default function ServiceCaseDetail() {
             <Divider />
 
             <Title level={4}>Thông tin người xét nghiệm</Title>
-            <Descriptions bordered size='small' column={1}>
-              {serviceCase?.caseMember?.testTaker.map((taker: any) => (
-                <Descriptions.Item key={taker._id} label='Họ và tên'>
-                  {taker.name} (CMND/CCCD: {taker.personalId})
+            {serviceCase?.caseMember?.testTaker.map((taker: any) => (
+              <Descriptions
+                key={taker._id}
+                title={<Typography.Text strong>{taker.name}</Typography.Text>}
+                bordered
+                size='small'
+                column={1}
+                style={{ marginBottom: 24 }}
+              >
+                <Descriptions.Item label='CMND/CCCD'>
+                  {taker.personalId}
                 </Descriptions.Item>
-              ))}
-            </Descriptions>
+                <Descriptions.Item label='Ngày sinh'>
+                  {taker.dateOfBirth
+                    ? new Date(taker.dateOfBirth).toLocaleDateString('vi-VN')
+                    : 'N/A'}
+                </Descriptions.Item>
+              </Descriptions>
+            ))}
 
             <Divider />
 
@@ -305,28 +317,32 @@ export default function ServiceCaseDetail() {
                     {serviceCase.result.certifierId.name}
                   </Descriptions.Item>
                 </Descriptions>
-                <Title level={5}>Hồ sơ ADN</Title>
-                {serviceCase.adnDocumentation?.profiles.map(
-                  (profile: any, index: number) => (
-                    <div
-                      key={index}
-                      style={{
-                        marginBottom: 20,
-                        border: '1px solid #f0f0f0',
-                        padding: 10,
-                      }}
-                    >
-                      <Text strong>{profile.sampleIdentifyNumber}</Text>
-                      <Table
-                        dataSource={profile.markers}
-                        columns={markerColumns}
-                        pagination={false}
-                        size='small'
-                        rowKey='locus'
-                      />
-                    </div>
-                  )
-                )}
+                <Title level={5}>Hồ sơ xét nghiệm các mẫu ADN</Title>
+                <Row gutter={[24, 24]}>
+                  {serviceCase.adnDocumentation?.profiles.map(
+                    (profile: any, index: number) => (
+                      // Mỗi item trong mảng giờ là một cột (Col)
+                      <Col key={index} xs={24} lg={12}>
+                        <div
+                          style={{
+                            border: '1px solid #f0f0f0',
+                            padding: 10,
+                            height: '100%', // Đảm bảo các ô có chiều cao bằng nhau
+                          }}
+                        >
+                          <Text strong>{profile.sampleIdentifyNumber}</Text>
+                          <Table
+                            dataSource={profile.markers}
+                            columns={markerColumns}
+                            pagination={false}
+                            size='small'
+                            rowKey='locus'
+                          />
+                        </div>
+                      </Col>
+                    )
+                  )}
+                </Row>
               </>
             ) : (
               <Text type='secondary'>Chưa có kết quả xét nghiệm.</Text>
@@ -334,7 +350,9 @@ export default function ServiceCaseDetail() {
 
             <Divider />
 
-            <Title level={4}>Hình ảnh hồ sơ</Title>
+            <Title level={4}>
+              Hình ảnh minh chứng trong quá trình làm hồ sơ
+            </Title>
             {isLoadingImages ? (
               <Spin />
             ) : fullImageUrls.length > 0 ? (
