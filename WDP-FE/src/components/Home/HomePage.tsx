@@ -135,8 +135,6 @@ const Homepage: React.FC = () => {
       >
         <Content
           title='CÁC CHI NHÁNH HOẠT ĐỘNG'
-          btnContent='Xem tất cả chi nhánh'
-          linkURL='/facilities'
         />
         {isFacilitiesLoading ? (
           <LoadingOutlined
