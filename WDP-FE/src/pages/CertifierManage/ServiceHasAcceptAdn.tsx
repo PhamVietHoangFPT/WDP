@@ -49,7 +49,9 @@ interface ServiceCase {
 
 export default function ServiceHasAcceptAdn() {
   const navigate = useNavigate()
+
   const currentStatus = '688f552b8bd4809753741bd8' // Đã có kết quả
+
 
   const { data: serviceCaseData, isLoading } =
     useGetServiceCasesWithoutResultQuery(

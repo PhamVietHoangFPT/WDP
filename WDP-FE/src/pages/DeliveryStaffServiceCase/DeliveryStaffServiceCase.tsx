@@ -120,7 +120,9 @@ const DeliveryStaffServiceCase: React.FC = () => {
   const {
     data: serviceCasesData,
     isLoading: isLoadingCases,
-    isFetching: isFetchingCases, // Dùng isFetching để biết khi nào đang tải lại dữ liệu
+    isFetching: isFetchingCases,
+    isError: isErrorCases,
+    error: errorCases,
     refetch,
   } = useGetAllServiceCasesForDeliveryQuery(
     { serviceCaseStatus: selectedStatus, pageNumber, pageSize },
@@ -362,6 +364,40 @@ const DeliveryStaffServiceCase: React.FC = () => {
   const hasDataToShow =
     serviceCasesData?.data && serviceCasesData.data.length > 0
 
+  if (isErrorCases) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={2}>Quản lý hồ sơ giao kết quả</Title>
+
+        <div style={{ marginBottom: 16 }}>
+          <Select
+            value={selectedStatus}
+            onChange={(value) => {
+              setSelectedStatus(value)
+              setPageNumber(1) // Reset về trang 1 khi thay đổi bộ lọc
+            }}
+            style={{ width: 250 }}
+            placeholder='Chọn trạng thái'
+            loading={isLoadingStatus}
+            disabled={isLoadingStatus}
+          >
+            {(statusListData?.data || []).map((status: ServiceCaseStatus) => (
+              <Select.Option key={status._id} value={status._id}>
+                {status.testRequestStatus}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <Empty
+          description={
+            errorCases?.data?.message ||
+            'Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.'
+          }
+        />
+      </div>
+    )
+  }
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Quản lý hồ sơ giao kết quả</Title>
