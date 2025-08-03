@@ -39,6 +39,7 @@ export default function DoneDocumentForm() {
 
   const profiles = documentation?.data?.[0]?.profiles || []
   const result = resultData
+  console.log(profiles)
 
   const exportPDF = () => {
     if (!pdfRef.current) return
