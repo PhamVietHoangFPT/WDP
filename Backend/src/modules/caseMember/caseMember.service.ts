@@ -29,7 +29,7 @@ export class CaseMemberService implements ICaseMemberService {
     private readonly samplingKitInventoryRepository: ISamplingKitInventoryRepository,
     @Inject(IServiceRepository)
     private readonly serviceRepository: IServiceRepository,
-  ) {}
+  ) { }
 
   private mapToResponseDto(caseMember: CaseMember): CaseMemberResponseDto {
     return new CaseMemberResponseDto({
@@ -182,7 +182,7 @@ export class CaseMemberService implements ICaseMemberService {
         )
 
       // Nếu số lượng kit tìm thấy không khớp, tức là có loại kit đã hết hàng
-      if (findSamplingKitInventory.length !== sampleIds.length) {
+      if (findSamplingKitInventory.length < sampleIds.length) {
         throw new NotFoundException(
           'Một hoặc nhiều mẫu kit xét nghiệm không đủ trong kho.',
         )
@@ -202,7 +202,7 @@ export class CaseMemberService implements ICaseMemberService {
         )
 
       // Nếu số lượng kit tìm thấy không khớp, tức là có loại kit đã hết hàng
-      if (findSamplingKitInventory.length !== sampleIds.length) {
+      if (findSamplingKitInventory.length < sampleIds.length) {
         throw new NotFoundException(
           'Một hoặc nhiều mẫu kit xét nghiệm không đủ trong kho cho tất cả mọi người.',
         )

@@ -1,5 +1,5 @@
 export interface Sample {
-  id: string
+  _id: string
   name: string
   fee: number
   inventory: number

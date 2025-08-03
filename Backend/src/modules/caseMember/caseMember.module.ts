@@ -36,4 +36,4 @@ import { ServiceModule } from '../service/service.module'
   ],
   exports: [ICaseMemberService, ICaseMemberRepository, MongooseModule],
 })
-export class CaseMemberModule {}
+export class CaseMemberModule { }
