@@ -1,19 +1,13 @@
-'use client'
-
 import React, { useState } from 'react'
 import {
   Table,
   Typography,
   Spin,
   Pagination,
-  Card,
   Tag,
   Divider,
-  Row,
-  Col,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { useGetAllServiceCasePriceQuery } from '../../features/customer/price'
 
 const { Title, Text } = Typography
@@ -69,7 +63,8 @@ const Price: React.FC = () => {
       title: 'Phí Dịch Vụ',
       dataIndex: 'fee',
       key: 'fee',
-      render: (fee: number) => `${fee.toLocaleString('vi-VN')} VNĐ`,
+    //   render: (fee: number) => `${fee.toLocaleString('vi-VN')} VNĐ`,
+    render: (fee: number) => <strong>{fee.toLocaleString('vi-VN')} VNĐ</strong>,
       sorter: (a, b) => a.fee - b.fee,
     },
     {
@@ -94,16 +89,16 @@ const Price: React.FC = () => {
       onFilter: (value, record) => record.isAdministration === value,
     },
     {
-      title: 'Quan Hệ Huyết Thống',
+      title: 'Nội/Ngoại',
       key: 'isAgnate',
       render: (_, record) => (
         <Tag color={record.isAgnate ? 'green' : 'orange'}>
-          {record.isAgnate ? 'Có' : 'Không'}
+          {record.isAgnate ? 'Nội' : 'Ngoại'}
         </Tag>
       ),
       filters: [
-        { text: 'Có', value: true },
-        { text: 'Không', value: false },
+        { text: 'Nội', value: true },
+        { text: 'Ngoại', value: false },
       ],
       onFilter: (value, record) => record.isAgnate === value,
     },
