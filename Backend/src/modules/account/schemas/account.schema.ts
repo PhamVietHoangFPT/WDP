@@ -33,7 +33,7 @@ export class Account extends BaseEntity {
   @Prop({ type: Boolean, default: null })
   gender: boolean
 
-  @Prop({ type: String, default: null, unique: true })
+  @Prop({ type: String, default: null, unique: false })
   personalId: string
 
   @Prop({ type: Date, default: null })

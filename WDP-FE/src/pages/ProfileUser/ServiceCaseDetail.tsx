@@ -102,14 +102,14 @@ export default function ServiceCaseDetail() {
       align: 'right' as const,
       render: (services: any[], record: any) => {
         const serviceTotal = services?.reduce((sum, s) => sum + s.fee, 0)
-        const shippingFee = record.shippingFee
+        const shippingFee = record?.shippingFee
         const total = serviceTotal + shippingFee
         return (
           <Space direction='vertical'>
             {services?.map((service, index) => (
               <Text key={index}>{service.fee.toLocaleString('vi-VN')} ₫</Text>
             ))}
-            <Text>{shippingFee.toLocaleString('vi-VN')} ₫</Text>
+            <Text>{shippingFee?.toLocaleString('vi-VN')} ₫</Text>
             <Divider style={{ margin: '4px 0' }} />
             <Text strong>{total.toLocaleString('vi-VN')} ₫</Text>
           </Space>
