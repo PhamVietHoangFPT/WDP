@@ -1,6 +1,7 @@
-import React from 'react'
 import { Table, Typography, Button, Spin } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { MailOutlined, PhoneOutlined } from '@ant-design/icons'
+
 import { useGetServiceCasesWithoutResultQuery } from '../../features/certifier/certifierApi'
 
 const { Title } = Typography
@@ -15,6 +16,11 @@ interface ServiceCase {
   bookingDetails: {
     bookingDate: string
     slotTime: string
+  }
+  doctorDetails: {
+    name: string
+    phoneNumber: string
+    email: string
   }
   caseMember: {
     testTakers: {
@@ -46,14 +52,11 @@ export default function ServiceCaseNeedAcceptAdn() {
   const navigate = useNavigate()
   const currentStatus = '684e9057e4331a7fdfb9b12d' // Chờ duyệt kết quả
 
-  const {
-    data: serviceCaseData,
-    isLoading,
-    error,
-  } = useGetServiceCasesWithoutResultQuery(
-    { currentStatus, resultExists: false },
-    { skip: !currentStatus }
-  )
+  const { data: serviceCaseData, isLoading } =
+    useGetServiceCasesWithoutResultQuery(
+      { currentStatus, resultExists: false },
+      { skip: !currentStatus }
+    )
 
   const columns = [
     {
@@ -78,6 +81,23 @@ export default function ServiceCaseNeedAcceptAdn() {
         bookingDetails.slotTime,
     },
     {
+      title: 'Bác sĩ xét nghiệm',
+      dataIndex: 'doctorDetails',
+      render: (doctor: ServiceCase['doctorDetails']) => (
+        <div>
+          <div>
+            <strong>{doctor.name}</strong>
+          </div>
+          <div>
+            <MailOutlined /> {doctor.email}
+          </div>
+          <div>
+            <PhoneOutlined /> {doctor.phoneNumber}
+          </div>
+        </div>
+      ),
+    },
+    {
       title: 'Người xét nghiệm',
       dataIndex: 'caseMember',
       render: (caseMember: ServiceCase['caseMember']) => (
@@ -95,9 +115,10 @@ export default function ServiceCaseNeedAcceptAdn() {
       dataIndex: 'accountDetails',
       render: (acc: ServiceCase['accountDetails']) => (
         <div>
-          {acc.name}
+          <strong>{acc.name}</strong>
           <br />
-          <span style={{ fontSize: 12, color: '#888' }}>{acc.phoneNumber}</span>
+          <PhoneOutlined />
+          {acc.phoneNumber}
         </div>
       ),
     },

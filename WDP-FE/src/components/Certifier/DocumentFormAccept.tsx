@@ -113,7 +113,7 @@ export default function DocumentFormAccept() {
                           value={marker.alleles[0] || ''}
                           disabled
                           style={{
-                            width: '100%',
+                            width: '80%',
                             border: '1px solid #d9d9d9',
                             borderRadius: 4,
                             padding: '4px 8px',
@@ -123,7 +123,7 @@ export default function DocumentFormAccept() {
                           value={marker.alleles[1] || ''}
                           disabled
                           style={{
-                            width: '100%',
+                            width: '80%',
                             border: '1px solid #d9d9d9',
                             borderRadius: 4,
                             padding: '4px 8px',

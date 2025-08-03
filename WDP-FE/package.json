@@ -26,6 +26,7 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "html-react-parser": "^5.2.2",
+    "html2pdf.js": "^0.10.3",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",
