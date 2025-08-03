@@ -50,12 +50,19 @@ const Navbar: React.FC = () => {
     // Các mục bên phải
     const rightItems = [
       {
+        key: 'price',
+        icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
+        label: 'Bảng giá',
+        url: '/price',
+        // ✅ THÊM DÒNG NÀY: Dòng này sẽ đẩy mục này và tất cả các mục sau nó sang hẳn bên phải
+        style: { marginLeft: 'auto' },
+      },
+
+      {
         key: 'kit',
         icon: <CalendarOutlined style={{ fontSize: '16px' }} />,
         label: 'Lấy mẫu tại nhà',
         url: '/home-registeration',
-        // ✅ THÊM DÒNG NÀY: Dòng này sẽ đẩy mục này và tất cả các mục sau nó sang hẳn bên phải
-        style: { marginLeft: 'auto' },
       },
 
       {
