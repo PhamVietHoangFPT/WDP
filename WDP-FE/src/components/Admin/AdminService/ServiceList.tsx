@@ -374,7 +374,7 @@ export default function ServiceList() {
           }}
         />
       )}
-      {data && (
+      {data ? (
         <div
           style={{
             padding: 24,
@@ -416,6 +416,11 @@ export default function ServiceList() {
           />
           <CreateServiceModelComponent />
         </div>
+      ) : (
+        <>
+          <ServiceHeader />
+          <CreateServiceModelComponent />
+        </>
       )}
     </div>
   )
