@@ -306,7 +306,7 @@ export class SampleCollectorRepository implements ISampleCollectorRepository {
   > {
     return this.testRequestStatusModel
       .find({
-        order: { $in: [2, 3, 4, 5, 6] },
+        order: { $in: [1, 2, 3, 4, 5] },
       })
       .sort({ order: 1 })
       .lean()
