@@ -303,7 +303,7 @@ export default function ServiceCase() {
         return (
           <Button
             type='primary'
-            onClick={() => navigate(`/result/${record.result}`)}
+            onClick={() => navigate(`/service-case-customer/${record._id}`)}
           >
             Xem kết quả
           </Button>
@@ -320,12 +320,12 @@ export default function ServiceCase() {
           >
             Xem chi tiết
           </Button>
-          <Button
+          {/* <Button
             onClick={() => handleViewImage(record._id)}
             loading={loadingImageFor === record._id} // Thêm loading state cho nút
           >
             Xem hình ảnh
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
