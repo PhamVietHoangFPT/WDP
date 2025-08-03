@@ -111,7 +111,7 @@ export default function ServiceCaseNeedCreateAdn() {
           (s: RequestStatus) => s.testRequestStatus === 'Đã nhận mẫu'
         ) ||
         statusData.data.find(
-          (s: RequestStatus) => s._id !== '684e9057e4331a7fdfb9b12e'
+          (s: RequestStatus) => s._id !== '688f552b8bd4809753741bd5'
         )
       if (defaultStatus) {
         setSelectedStatus(defaultStatus._id)
@@ -123,7 +123,7 @@ export default function ServiceCaseNeedCreateAdn() {
   const filteredStatuses = useMemo(
     () =>
       (statusData?.data as RequestStatus[])?.filter(
-        (s) => s._id !== '684e9057e4331a7fdfb9b12e'
+        (s) => s._id !== '688f552b8bd4809753741bd5'
       ),
     [statusData]
   )
@@ -196,7 +196,7 @@ export default function ServiceCaseNeedCreateAdn() {
         )
         const selectedOrder = selectedStatusObj?.order ?? -1
 
-        if (selectedOrder === 7) {
+        if (selectedOrder === 6) {
           return (
             <Button
               type='primary'
@@ -212,7 +212,7 @@ export default function ServiceCaseNeedCreateAdn() {
           )
         }
 
-        if (selectedOrder === 8) {
+        if (selectedOrder === 7) {
           return <Tag color='orange'>Đang chờ duyệt kết quả</Tag>
         }
 
