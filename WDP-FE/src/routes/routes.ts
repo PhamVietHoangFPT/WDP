@@ -14,6 +14,7 @@ import { DoctorManagerLayout } from '../components/layout/DoctorManagerLayout'
 import DoctorManagerHomePage from '../pages/DoctorManagerHomePage/DoctorManagerHomePage'
 import StaffServiceCaseByCustomerDetail from '../pages/StaffGetServiceCaseByCustomer/StaffServiceCaseByCustomerDetail'
 import Price from '../components/Price/Price'
+import ReturnFailDetail from '../pages/Staff/ReturnFailDetail'
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -609,6 +610,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/staff/return-fail',
         component: ReturnFail,
+      },
+      {
+        path: '/staff/return-fail-detail/:id',
+        component: ReturnFailDetail,
       },
       {
         path: '/staff/service-case-detail/:id',

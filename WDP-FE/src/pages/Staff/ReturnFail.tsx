@@ -447,7 +447,7 @@ const ReturnFail: React.FC = () => {
             </Button> */}
             <Button
               onClick={() =>
-                navigate(`/staff/service-case-customer/${record._id}`)
+                navigate(`/staff/return-fail-detail/${record._id}?accountId=${record.accountDetails._id}`)
               }
             >
               Xem chi tiết
