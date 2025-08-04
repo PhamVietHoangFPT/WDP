@@ -13,31 +13,25 @@ import {
   Space,
   Tooltip,
   Empty,
-  Input, // Thêm Input để nhập email
+  Input,
   Upload,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
-  // Thay đổi import từ deliveryStaff sang staff API nếu cần, hoặc đảm bảo deliveryStaff API có đủ hook
-  // Tuy nhiên, theo API bạn cung cấp, useGetServiceCaseByEmailForStaffQuery nằm trong deliveryAPI
-  // nên không cần thay đổi import, chỉ cần thêm hook mới vào.
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
-  useGetServiceCaseByEmailForStaffQuery, // Import hook mới
-  useCreateServiceCaseImageMutation, // Import hook upload ảnh
-} from '../../features/deliveryStaff/deliveryStaff' // Giữ nguyên path vì API mới được inject vào đây
+  useGetServiceCaseByEmailForStaffQuery,
+  useCreateServiceCaseImageMutation,
+} from '../../features/deliveryStaff/deliveryStaff'
 import { UploadOutlined } from '@ant-design/icons'
 
 const { Title } = Typography
 
-// Cập nhật interface ServiceCase để khớp với response từ getServiceCaseByEmailForStaff
-// Data trả về ít trường hơn
 interface ServiceCase {
   _id: string
   created_at: string
-  currentStatus: string // currentStatus giờ là string thay vì object
+  currentStatus: string
   bookingDate: string
-  // Bỏ các trường address, account, caseMember vì chúng không có trong response của getServiceCaseByEmailForStaff
 }
 
 interface ServiceCaseStatus {
@@ -46,17 +40,37 @@ interface ServiceCaseStatus {
   order: number
 }
 
+// Custom hook for debouncing a value
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 const ReturnFail: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
     undefined
   )
-  const [customerEmail, setCustomerEmail] = useState<string>('') // State mới cho email khách hàng
-  const [pageNumber, setPageNumber] = useState<number>(1) // PageNumber và PageSize có thể không cần thiết nếu API staff không hỗ trợ phân trang
-  const [pageSize, setPageSize] = useState<number>(10) // Tùy thuộc vào API getServiceCaseByEmailForStaff có hỗ trợ hay không
+  const [customerEmail, setCustomerEmail] = useState<string>('')
+  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
+
+  // Sử dụng hook debounce cho customerEmail
+  const debouncedEmail = useDebounce(customerEmail, 900) 
 
   const {
     data: statusListData,
@@ -67,7 +81,6 @@ const ReturnFail: React.FC = () => {
     pageSize: 100,
   })
 
-  // Đảm bảo status mặc định là "Giao kết quả không thành công"
   useEffect(() => {
     if (
       isStatusListSuccess &&
@@ -81,7 +94,6 @@ const ReturnFail: React.FC = () => {
       if (defaultFailStatus) {
         setSelectedStatus(defaultFailStatus._id)
       } else if (statusListData.data.length > 0) {
-        // Fallback: nếu không tìm thấy, chọn cái đầu tiên (có thể không mong muốn)
         setSelectedStatus(statusListData.data[0]._id)
       }
     }
@@ -93,36 +105,30 @@ const ReturnFail: React.FC = () => {
     isFetching: isFetchingCases,
     refetch,
   } = useGetServiceCaseByEmailForStaffQuery(
-    // Sử dụng hook mới
     {
-      serviceCaseStatus: selectedStatus as string, // Đảm bảo selectedStatus có giá trị
-      email: customerEmail, // Truyền email vào query
+      serviceCaseStatus: selectedStatus as string,
+      email: debouncedEmail, // Sử dụng email đã được debounce
     },
-    // Bỏ qua query nếu chưa có trạng thái được chọn HOẶC chưa có email
-    { skip: selectedStatus === undefined || !customerEmail }
+    { skip: selectedStatus === undefined || !debouncedEmail }
   )
 
-  // Gọi refetch khi selectedStatus hoặc customerEmail thay đổi
   useEffect(() => {
-    if (selectedStatus !== undefined && customerEmail) {
-      // Chỉ refetch khi có đủ cả status và email
+    // Chỉ refetch khi debouncedEmail thay đổi
+    if (selectedStatus !== undefined && debouncedEmail) {
       refetch()
     }
-  }, [selectedStatus, customerEmail, refetch])
+  }, [selectedStatus, debouncedEmail, refetch])
 
   const [updateStatus, { isLoading: isUpdating }] =
     useUpdateServiceCaseStatusForDeliveryMutation()
 
-  // Create service case image mutation
   const [createServiceCaseImage, { isLoading: isUploading }] =
     useCreateServiceCaseImageMutation()
 
   const getAvailableNextStatuses = (currentStatusString: string) => {
-    // Tìm ID của trạng thái "Đã trả kết quả"
     const deliveredStatus = statusListData?.data?.find(
       (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả'
     )
-    // Nếu trạng thái hiện tại là "Giao kết quả không thành công" và có trạng thái "Đã trả kết quả"
     if (
       currentStatusString === 'Giao kết quả không thành công' &&
       deliveredStatus
@@ -143,13 +149,12 @@ const ReturnFail: React.FC = () => {
       setUpdateModalVisible(false)
       setSelectedServiceCase(null)
       setNewStatusId('')
-      refetch() // Refetch dữ liệu sau khi cập nhật thành công
+      refetch()
     } catch (error: any) {
       message.error(error?.data?.message || 'Cập nhật trạng thái thất bại')
     }
   }
 
-  // Handle image upload
   const handleImageUpload = async (file: File, serviceCase: ServiceCase) => {
     const formData = new FormData()
     formData.append('serviceCase', serviceCase._id)
@@ -164,7 +169,6 @@ const ReturnFail: React.FC = () => {
     }
   }
 
-  // Cập nhật Columns để phù hợp với dữ liệu trả về từ API getServiceCaseByEmailForStaff
   const columns: ColumnsType<ServiceCase> = [
     {
       title: 'Mã hồ sơ',
@@ -188,32 +192,26 @@ const ReturnFail: React.FC = () => {
       title: 'Trạng thái hiện tại',
       key: 'currentStatus',
       width: 200,
-      // currentStatus trong response của staff là string, không phải object
       render: (_, record) => {
-        let color = 'default' // Mặc định
+        let color = 'default'
         if (record.currentStatus === 'Đã có kết quả') {
           color = 'blue'
         } else if (record.currentStatus === 'Đã trả kết quả') {
           color = 'green'
         } else {
-          color = 'red' // Các trạng thái còn lại là màu đỏ
+          color = 'red'
         }
         return <Tag color={color}>{record.currentStatus || '—'}</Tag>
       },
     },
-    // Bỏ cột "Thông tin khách hàng" và "Địa chỉ giao hàng" vì API staff không trả về
-    // Nếu muốn hiển thị, cần lấy thông tin này từ một nguồn khác hoặc API staff cần trả về.
     {
       title: 'Hành động',
       key: 'actions',
       width: 250,
       render: (_, record) => {
-        // Lấy trạng thái "Đã trả kết quả" từ danh sách trạng thái đầy đủ
         const deliveredStatus = statusListData?.data?.find(
           (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả'
         )
-        // Chỉ cho phép cập nhật nếu trạng thái hiện tại là "Giao kết quả không thành công"
-        // và tìm thấy trạng thái "Đã trả kết quả"
         const isUpdatable =
           record.currentStatus === 'Giao kết quả không thành công' &&
           deliveredStatus
@@ -225,7 +223,7 @@ const ReturnFail: React.FC = () => {
               <Upload
                 beforeUpload={(file) => {
                   handleImageUpload(file, record)
-                  return false // Prevent default upload behavior
+                  return false
                 }}
                 showUploadList={false}
                 accept='image/*'
@@ -244,17 +242,15 @@ const ReturnFail: React.FC = () => {
 
         return (
           <Space direction='vertical' size='small'>
-            {/* Chỉ hiển thị nút "Đã trả kết quả" nếu đủ điều kiện */}
             {deliveredStatus && (
               <Button
                 key={deliveredStatus._id}
                 onClick={() => {
                   setSelectedServiceCase(record)
-                  setNewStatusId(deliveredStatus._id) // Set newStatusId là ID của "Đã trả kết quả"
+                  setNewStatusId(deliveredStatus._id)
                   setUpdateModalVisible(true)
                 }}
                 type='primary'
-                // Danger không áp dụng ở đây vì đây là trạng thái thành công
               >
                 Đã trả kết quả
               </Button>
@@ -262,7 +258,7 @@ const ReturnFail: React.FC = () => {
             <Upload
               beforeUpload={(file) => {
                 handleImageUpload(file, record)
-                return false // Prevent default upload behavior
+                return false
               }}
               showUploadList={false}
               accept='image/*'
@@ -281,17 +277,14 @@ const ReturnFail: React.FC = () => {
     },
   ]
 
-  // === LOGIC QUAN TRỌNG ĐỂ XỬ LÝ HIỂN THỊ DỮ LIỆU VÀ TRẠNG THÁI TẢI ===
-  // Xác định xem có đang tải dữ liệu hay không (bao gồm cả tải lần đầu và refetch)
   const isCurrentlyLoading = isLoadingCases || isFetchingCases
-  // Kiểm tra xem có dữ liệu hợp lệ để hiển thị không
   const hasDataToShow =
     serviceCasesData?.data && serviceCasesData.data.length > 0
 
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>
-        Quản lý hồ sơ giao kết quả không thành công (Staff)
+        Quản lý hồ sơ khách hàng
       </Title>
       <div style={{ marginBottom: 16 }}>
         <Input
@@ -300,12 +293,11 @@ const ReturnFail: React.FC = () => {
           onChange={(e) => setCustomerEmail(e.target.value)}
           style={{ width: 300, marginRight: 16 }}
         />
-        {/* Giữ Select Status nhưng giá trị mặc định sẽ là "Giao kết quả không thành công" */}
         <Select
           value={selectedStatus}
           onChange={(value) => {
             setSelectedStatus(value)
-            setPageNumber(1) // Reset về trang 1 khi thay đổi bộ lọc
+            setPageNumber(1)
           }}
           style={{ width: 250 }}
           placeholder='Chọn trạng thái'
@@ -321,22 +313,19 @@ const ReturnFail: React.FC = () => {
       </div>
 
       {isCurrentlyLoading ? (
-        // Hiển thị Spin khi đang tải (tải lần đầu hoặc đang refetch)
         <Spin
           tip='Đang tải dữ liệu...'
           style={{ display: 'block', margin: '50px auto' }}
         />
-      ) : // Nếu không tải, kiểm tra xem có dữ liệu để hiển thị hay không
-      hasDataToShow ? (
+      ) : hasDataToShow ? (
         <Table
           dataSource={serviceCasesData.data}
           columns={columns}
           rowKey='_id'
-          // Pagination có thể không cần thiết hoặc cần điều chỉnh nếu API staff không trả về totalRecords
           pagination={{
             current: pageNumber,
             pageSize,
-            // serviceCasesData?.totalRecords || 0, // Comment out hoặc điều chỉnh nếu API staff không có totalRecords
+            // serviceCasesData?.totalRecords || 0,
             onChange: (page, size) => {
               setPageNumber(page)
               setPageSize(size || 10)
@@ -347,7 +336,6 @@ const ReturnFail: React.FC = () => {
           locale={{ emptyText: <Empty description='Không có dữ liệu' /> }}
         />
       ) : (
-        // Không tải và không có dữ liệu -> hiển thị Empty
         <Empty description='Không có dữ liệu' />
       )}
 
@@ -369,13 +357,12 @@ const ReturnFail: React.FC = () => {
         </p>
         <p>
           Trạng thái hiện tại:{' '}
-          {/* selectedServiceCase?.currentStatus giờ là string */}
           <Tag color='red'>{selectedServiceCase?.currentStatus}</Tag>
         </p>
         <p>
           Trạng thái mới:{' '}
           <Tag
-            color={'green'} // Luôn là màu xanh vì chỉ chuyển sang "Đã trả kết quả"
+            color={'green'}
           >
             {
               statusListData?.data?.find((s) => s._id === newStatusId)
