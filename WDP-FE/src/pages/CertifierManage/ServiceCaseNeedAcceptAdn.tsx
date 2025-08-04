@@ -52,12 +52,6 @@ interface ServiceCase {
   }[]
 }
 
-interface TestRequestStatus {
-  _id: string
-  testRequestStatus: string
-  order: number
-}
-
 export default function ServiceCaseNeedAcceptAdn() {
   const navigate = useNavigate()
 

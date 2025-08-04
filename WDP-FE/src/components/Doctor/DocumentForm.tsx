@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Input, Button, message, Typography } from 'antd'
+import { Table, Input, Button, message, Typography, Modal } from 'antd'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 import { useCreateAdnDocumentationMutation } from '../../features/doctor/doctorAPI'
 
 const { Title } = Typography
+const { confirm } = Modal
 
 const lociList = [
   'D3S1358',
@@ -33,7 +34,6 @@ const lociList = [
   'Y-indel',
 ]
 
-// Hàm lấy cookie
 function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`
   const parts = value.split(`; ${name}=`)
@@ -61,7 +61,6 @@ export default function CreateAdnDocumentPage() {
     const generated: any[] = []
 
     if (isSingleService) {
-      // Trường hợp mỗi người 1 mẫu
       sampleIds.forEach((sampleId: any, index: number) => {
         const taker = testTakers[index] || null
         const sample = services[index % services.length]?.sample
@@ -73,7 +72,6 @@ export default function CreateAdnDocumentPage() {
         })
       })
     } else {
-      // Trường hợp nhiều mẫu, phân luân phiên: testTaker[0], testTaker[1], testTaker[0], testTaker[1],...
       sampleIds.forEach((sampleId: any, index: number) => {
         const taker = testTakers[index % testTakers.length]
         const service = services[Math.floor(index / testTakers.length)]
@@ -115,7 +113,7 @@ export default function CreateAdnDocumentPage() {
     setProfiles(updated)
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const token = getCookie('userToken')
     if (!token || !serviceCaseId) {
       message.error('Thiếu token hoặc mã hồ sơ')
@@ -141,21 +139,30 @@ export default function CreateAdnDocumentPage() {
       return
     }
 
-    const body = {
-      serviceCase: serviceCaseId,
-      doctor: doctorId,
-      profiles: cleanedProfiles,
-    }
+    confirm({
+      title: 'Xác nhận gửi tài liệu?',
+      content:
+        'Vui lòng xác nhận các thông tin. Khi đã bấm gửi, bạn phải chịu trách nhiệm với kết quả. Hành động không thể hoàn tác.',
+      okText: 'Xác nhận gửi',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        const body = {
+          serviceCase: serviceCaseId,
+          doctor: doctorId,
+          profiles: cleanedProfiles,
+        }
 
-    try {
-      console.log('Body gửi lên:', JSON.stringify(body, null, 2))
-      await createAdnDocumentation(body).unwrap()
-      message.success('Tạo tài liệu thành công')
-      navigate(-1)
-    } catch (error: any) {
-      console.error('Lỗi gửi tài liệu:', error)
-      message.error(error?.data?.message || 'Tạo tài liệu thất bại')
-    }
+        try {
+          console.log('Body gửi lên:', JSON.stringify(body, null, 2))
+          await createAdnDocumentation(body).unwrap()
+          message.success('Tạo tài liệu thành công')
+          navigate(-1)
+        } catch (error: any) {
+          console.error('Lỗi gửi tài liệu:', error)
+          message.error(error?.data?.message || 'Tạo tài liệu thất bại')
+        }
+      },
+    })
   }
 
   const columns = [

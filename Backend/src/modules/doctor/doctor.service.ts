@@ -41,7 +41,7 @@ export class DoctorService implements IDoctorService {
 
   async getDoctorTestRequestStatuses(): Promise<TestRequestStatusDocument[]> {
     return this.testRequestStatusModel
-      .find({ order: { $in: [5, 6, 7, 8] } })
+      .find({ order: { $in: [5, 6, 7, 8, 9, 10] } })
       .sort({ order: 1 })
       .lean()
       .exec()
