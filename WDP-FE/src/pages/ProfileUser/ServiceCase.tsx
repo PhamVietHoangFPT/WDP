@@ -16,13 +16,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useGetServiceCasesListQuery,
   useCreatePaymentForConditionMutation,
-  useGetImageQuery, // Import useGetImageQuery
 } from '../../features/customer/paymentApi'
 import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
 import { useState } from 'react'
 const { Title, Text } = Typography
 const { Option } = Select
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
+import type { ColumnType } from 'antd/es/table'
 
 export default function ServiceCase() {
   const navigate = useNavigate()
@@ -40,7 +40,7 @@ export default function ServiceCase() {
   })
 
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
-  const [createPayment, { isLoading: isPaymentLoading }] =
+  const [createPayment] =
     useCreatePaymentForConditionMutation()
 
   // 2. Tạo state để quản lý loading cho từng dòng cụ thể khi thanh toán
@@ -51,7 +51,6 @@ export default function ServiceCase() {
   // States for image display
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([]) // Thay đổi thành mảng các URL
-  const [loadingImageFor, setLoadingImageFor] = useState<string | null>(null) // State để quản lý loading khi lấy ảnh
 
   // 3. Tạo hàm xử lý việc thanh toán
   const handlePayment = async (serviceCaseId: string) => {
@@ -80,39 +79,9 @@ export default function ServiceCase() {
     }
   }
 
-  // Handle viewing image - đã cập nhật để lấy nhiều ảnh
-  const handleViewImage = async (serviceCaseId: string) => {
-    setLoadingImageFor(serviceCaseId) // Bật loading cho nút xem ảnh của dòng này
-    try {
-      // Gọi API getImage
-      const response = await fetch(
-        `http://localhost:5000/images/findForServiceCase/${serviceCaseId}`
-      )
-      if (!response.ok) {
-        throw new Error('Failed to fetch image data.')
-      }
-      const data = await response.json()
 
-      // Kiểm tra nếu có dữ liệu và URL hợp lệ
-      if (data && data.length > 0) {
-        const fullImageUrls = data
-          .filter((item: any) => item.url)
-          .map((item: any) => `http://localhost:5000${item.url}`)
-        setImageUrls(fullImageUrls)
-        setIsImageModalVisible(true)
-      } else {
-        message.info('Không có hình ảnh nào cho hồ sơ này.')
-        setImageUrls([]) // Đảm bảo mảng rỗng nếu không có ảnh
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy ảnh:', error)
-      message.error('Không thể tải hình ảnh. Vui lòng thử lại.')
-    } finally {
-      setLoadingImageFor(null) // Tắt loading
-    }
-  }
 
-  const columns = [
+  const columns: Array<ColumnType<any>> = [
     {
       title: 'Tên người xét nghiệm',
       key: 'testTakerNames',
@@ -302,12 +271,12 @@ export default function ServiceCase() {
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
           <span
-    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
-  >
-    <Tag color="success">
-      Đã có kết quả
-    </Tag>
-  </span>
+          // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+          >
+            <Tag color="success">
+              Đã có kết quả
+            </Tag>
+          </span>
         )
       },
     },

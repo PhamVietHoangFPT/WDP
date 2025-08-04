@@ -58,12 +58,17 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
       this.KitShipmentHistoryRepository.countDocuments(filter),
     ])
 
+    // Filter out documents where kitShipmentStatus is null (didn't match order criteria)
+    const filteredHistories = KitShipmentHistories.filter(
+      (history: any) => history.kitShipmentStatus !== null
+    )
+
     const totalPages = Math.ceil(totalItems / pageSize)
 
     return {
-      data: KitShipmentHistories,
+      data: filteredHistories,
       pagination: {
-        totalItems,
+        totalItems: filteredHistories.length,
         totalPages,
         currentPage: pageNumber,
         pageSize,
