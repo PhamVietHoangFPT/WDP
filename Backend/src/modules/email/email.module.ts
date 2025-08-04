@@ -9,6 +9,10 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { Account, AccountSchema } from '../account/schemas/account.schema'
 import { Facility, FacilitySchema } from '../facility/schemas/facility.schema'
 import { Booking, BookingSchema } from '../booking/schemas/booking.schema'
+import {
+  AdnDocumentation,
+  AdnDocumentationSchema,
+} from '../adnDocumentation/schemas/adnDocumentation.schema'
 @Module({
   imports: [
     ConfigModule, // Đảm bảo ConfigModule đã được import
@@ -31,7 +35,16 @@ import { Booking, BookingSchema } from '../booking/schemas/booking.schema'
         },
         template: {
           dir: join(__dirname, 'emailTemplates'),
-          adapter: new HandlebarsAdapter(),
+          adapter: new HandlebarsAdapter({
+            // ✨ BẮT ĐẦU THÊM VÀO ĐÂY
+            join: function (arr, sep) {
+              if (Array.isArray(arr)) {
+                return arr.join(sep)
+              }
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return arr // Trả về giá trị gốc nếu không phải mảng
+            },
+          }),
           options: {
             strict: true,
           },
@@ -42,6 +55,7 @@ import { Booking, BookingSchema } from '../booking/schemas/booking.schema'
       { name: Account.name, schema: AccountSchema },
       { name: Facility.name, schema: FacilitySchema },
       { name: Booking.name, schema: BookingSchema },
+      { name: AdnDocumentation.name, schema: AdnDocumentationSchema },
     ]),
   ],
   providers: [

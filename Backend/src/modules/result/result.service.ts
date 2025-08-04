@@ -83,6 +83,8 @@ export class ResultService implements IResultService {
         data.adnPercentage,
         doctorId,
         data.conclusion,
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        serviceCaseData._id.toString(),
       )
     }
     return data

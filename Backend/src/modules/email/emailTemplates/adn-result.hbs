@@ -6,103 +6,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kết Quả Xét Nghiệm ADN Của Bạn Từ {{appName}}</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap');
+
     body {
-      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: 'Be Vietnam Pro', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       line-height: 1.6;
       color: #333333;
-      background-color: #f4f4f4;
+      background-color: #f7f8fa;
       margin: 0;
       padding: 0;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 20px auto;
       background-color: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
     .header {
       text-align: center;
       padding-bottom: 20px;
-      border-bottom: 1px solid #eeeeee;
-    }
-
-    .header img {
-      max-width: 150px;
-      /* Thêm logo của công ty bạn nếu có */
-      height: auto;
-      margin-bottom: 15px;
-    }
-
-    .header h1 {
-      color: #2c3e50;
-      font-size: 24px;
-      margin: 0;
-    }
-
-    .content {
-      padding: 20px 0;
-    }
-
-    .content p {
-      margin-bottom: 10px;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+      border-bottom: 2px solid #e9ecef;
       margin-bottom: 20px;
     }
 
-    .data-table th,
-    .data-table td {
-      border: 1px solid #dddddd;
-      padding: 10px;
-      text-align: left;
+    .header h1 {
+      color: #1a3a6e;
+      font-size: 26px;
+      margin: 0;
+      font-weight: 700;
     }
 
-    .data-table th {
-      background-color: #f2f2f2;
-      color: #555555;
-      font-weight: bold;
+    .content p {
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 25px 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+
+    .info-item strong {
+      display: block;
+      color: #495057;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .adn-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      margin-bottom: 30px;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .adn-table th,
+    .adn-table td {
+      border: 1px solid #e9ecef;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .adn-table th {
+      background-color: #f8f9fa;
+      color: #343a40;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .adn-table .locus-col {
+      text-align: left;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .adn-table tbody tr:nth-child(even) {
+      background-color: #fdfdfe;
     }
 
     .conclusion {
-      font-weight: bold;
-      color: #007bff;
-      /* Màu xanh dương nổi bật */
+      font-size: 18px;
       margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #007bff;
-      border-radius: 5px;
-      background-color: #e6f2ff;
+      padding: 20px;
+      border-left: 5px solid #007bff;
+      background-color: #f0f7ff;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .conclusion strong {
+      color: #0056b3;
     }
 
     .footer {
       text-align: center;
       padding-top: 20px;
+      margin-top: 30px;
       border-top: 1px solid #eeeeee;
       font-size: 12px;
       color: #777777;
-    }
-
-    .button-container {
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    .button {
-      display: inline-block;
-      background-color: #007bff;
-      color: #ffffff;
-      padding: 12px 25px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-weight: bold;
     }
   </style>
 </head>
@@ -110,51 +123,63 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Thông Báo Kết Quả Xét Nghiệm ADN</h1>
+      <h1>Kết Quả Phân Tích ADN</h1>
     </div>
     <div class="content">
-      <p>Kính gửi Quý khách {{customerName}}</p>
-      <p>Chúng tôi xin trân trọng thông báo kết quả xét nghiệm ADN của bạn đã sẵn sàng từ <strong>{{appName}}</strong>.</p>
-      <p>{{message}}</p>
+      <p>Kính gửi Quý khách <strong>{{customerName}}</strong>,</p>
+      <p>{{appName}} xin trân trọng thông báo kết quả phân tích ADN của quý khách đã được hoàn tất.</p>
+      <div class="info-grid">
+        <div class="info-item">
+          <strong>Bác sĩ phân tích:</strong>
+          <span>{{doctorName}}</span>
+        </div>
 
-      <table class="data-table">
+        <div class="info-item">
+          <strong>Người duyệt kết quả:</strong>
+          <span>{{certifierName}}</span>
+        </div>
+
+        <div class="info-item">
+          <strong>Cơ sở thực hiện:</strong>
+          <span>{{facilityName}}</span>
+        </div>
+        <div class="info-item">
+          <strong>Tỷ lệ tương thích ADN:</strong>
+          <span><strong>{{adnPercentage}}</strong></span>
+        </div>
+      </div>
+      <h3 style="text-align: center; color: #1a3a6e; margin-top: 40px;">Bảng Genotype Các Locus</h3>
+      <table class="adn-table">
         <thead>
           <tr>
-            <th>Thông tin</th>
-            <th>Chi tiết</th>
+            <th>Locus</th>
+            {{#each profiles}}
+            <th>{{this.sampleIdentifyNumber}}</th>
+            {{/each}}
           </tr>
         </thead>
         <tbody>
+          {{#each profiles.0.markers}}
           <tr>
-            <td>Người thực hiện phân tích</td>
-            <td>{{doctorName}}</td>
+            <td class="locus-col">{{this.locus}}</td>
+            {{#each ../profiles}}
+            <td>{{join (lookup (lookup this.markers @../index) 'alleles') ", "}}</td>
+            {{/each}}
           </tr>
-          <tr>
-            <td>Cơ sở thực hiện xét nghiệm</td>
-            <td>{{facilityName}}</td>
-          </tr>
-          <tr>
-            <td>Tỷ lệ tương thích ADN</td>
-            <td><strong>{{adnPercentage}}</strong></td>
-          </tr>
+          {{/each}}
         </tbody>
       </table>
-
-      <p class="conclusion">
+      <div class="conclusion">
         <strong>Kết luận:</strong> {{conclusion}}
-      </p>
-
-      <div class="button-container">
-        <a href="URL_TO_YOUR_RESULT_PORTAL" class="button">Xem kết quả chi tiết của bạn</a>
       </div>
-
-      <p style="margin-top: 30px;">Nếu Quý khách có bất kỳ thắc mắc nào về kết quả này, xin vui lòng liên hệ với chúng
-        tôi qua thông tin bên dưới.</p>
-      <p>Trân trọng cảm ơn sự tin tưởng của Quý khách.</p>
+      <p style="margin-top: 30px;">Nếu Quý khách có bất kỳ thắc mắc nào, xin vui lòng liên hệ với chúng tôi để được giải
+        đáp.</p>
+      <p>Trân trọng,</p>
+      <p><strong>Đội ngũ {{appName}}</strong></p>
     </div>
     <div class="footer">
       <p>&copy; {{currentYear}} {{appName}}. All rights reserved.</p>
-      <p>Đây là email tự động, vui lòng không trả lời email này.</p>
+      <p>Đây là email được gửi tự động, vui lòng không trả lời thư này.</p>
     </div>
   </div>
 </body>

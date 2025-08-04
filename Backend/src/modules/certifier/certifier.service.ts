@@ -40,6 +40,11 @@ export class CertifierService implements ICertifierService {
         currentStatus,
         resultExists,
       )
+    if (!serviceCases || serviceCases.length === 0) {
+      throw new NotFoundException(
+        'Không tìm thấy hồ sơ dịch vụ nào với trạng thái hiện tại.',
+      )
+    }
     return this.mapServiceCasesToResponseDto(serviceCases)
   }
 
@@ -48,7 +53,8 @@ export class CertifierService implements ICertifierService {
   > {
     // Assuming there's a method in the repository to get test request statuses
     return this.testRequestStatusModel
-      .find({ order: { $in: [5, 6, 7, 8] } })
+      .find({ order: { $in: [7, 8, 9, 10] } })
+      .select('testRequestStatus order _id')
       .sort({ order: 1 })
       .exec()
   }

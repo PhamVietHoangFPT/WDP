@@ -7,6 +7,7 @@ export interface IEmailService {
     adnPercentage: string,
     doctorId: string,
     conclusion: string,
+    serviceCaseId?: string,
   ): Promise<void>
   sendEmailNotificationForCheckIn(
     customerId: string,
