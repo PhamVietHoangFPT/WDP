@@ -222,6 +222,7 @@ export class StaffRepository implements IStaffRepository {
           currentStatus: '$currentStatus.testRequestStatus',
           adnDocumentation: 1,
           result: 1,
+          created_at: 1,
           bookingDetails: {
             bookingDate: '$bookings.bookingDate',
             slotTime: '$slots.startTime',
