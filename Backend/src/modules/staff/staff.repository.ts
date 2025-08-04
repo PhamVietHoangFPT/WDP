@@ -38,7 +38,7 @@ export class StaffRepository implements IStaffRepository {
           let: { customerEmail: email },
           pipeline: [
             { $match: { $expr: { $eq: ['$email', '$$customerEmail'] } } },
-            { $project: { _id: 1, email: 1 } },
+            { $project: { _id: 1, email: 1, name: 1, phoneNumber: 1 } },
           ],
           as: 'accountDetails',
         },
@@ -74,6 +74,29 @@ export class StaffRepository implements IStaffRepository {
       // Mo mang doctorDetails
       {
         $unwind: { path: '$doctorDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$sampleCollector' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'sampleCollectorDetails',
+        },
+      },
+      // Mo mang sampleCollectorDetails
+      {
+        $unwind: {
+          path: '$sampleCollectorDetails',
+          preserveNullAndEmptyArrays: true,
+        },
       },
       // Mo bang testRequestStatuses
       {
@@ -213,6 +236,12 @@ export class StaffRepository implements IStaffRepository {
             name: '$doctorDetails.name',
             phoneNumber: '$doctorDetails.phoneNumber',
             email: '$doctorDetails.email',
+          },
+          sampleCollectorDetails: {
+            _id: '$sampleCollectorDetails._id',
+            name: '$sampleCollectorDetails.name',
+            phoneNumber: '$sampleCollectorDetails.phoneNumber',
+            email: '$sampleCollectorDetails.email',
           },
           services: {
             $map: {
