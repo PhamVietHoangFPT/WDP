@@ -19,9 +19,7 @@ interface TestTakerListResponse {
   isLoading: boolean
 }
 
-
 const ServiceAtHomeForm: React.FC = () => {
-
   const accountId = Cookies.get('userData')
     ? JSON.parse(Cookies.get('userData') as string).id
     : undefined
@@ -44,17 +42,23 @@ const ServiceAtHomeForm: React.FC = () => {
     pageNumber: 1,
   })
 
-
   // Lấy danh sách dịch vụ cho việc chọn
-  const { data: serviceListData, isLoading: isLoadingServices, error: serviceError } = useGetServiceListQuery({
-    pageNumber: 1,
-    pageSize: 100,
-    isAdministration: false,
-    isSelfSampling: isSelfSampling,
-    isAgnate: showAgnate, // Sử dụng API query theo isAgnate
-  }, {
-    refetchOnMountOrArgChange: true, // Refetch khi component mount hoặc argument thay đổi
-  })
+  const {
+    data: serviceListData,
+    isLoading: isLoadingServices,
+    error: serviceError,
+  } = useGetServiceListQuery(
+    {
+      pageNumber: 1,
+      pageSize: 100,
+      isAdministration: false,
+      isSelfSampling: isSelfSampling,
+      isAgnate: showAgnate, // Sử dụng API query theo isAgnate
+    },
+    {
+      refetchOnMountOrArgChange: true, // Refetch khi component mount hoặc argument thay đổi
+    }
+  )
 
   const serviceList = serviceListData?.data || []
   const [createCaseMember, { isLoading: isCreating }] =
@@ -90,7 +94,10 @@ const ServiceAtHomeForm: React.FC = () => {
     return dataTestTaker.filter((taker) => !selectedIds.includes(taker._id))
   }
 
-  const isServiceDisabled = (serviceId: string, currentServiceField: string) => {
+  const isServiceDisabled = (
+    serviceId: string,
+    currentServiceField: string
+  ) => {
     const selectedServiceIds = Object.keys(selectedTestTakers || {})
       .filter((key) => key.startsWith('service') && key !== currentServiceField)
       .map((key) => selectedTestTakers[key])
@@ -106,16 +113,10 @@ const ServiceAtHomeForm: React.FC = () => {
     const accountId = decoded?.id || decoded?._id
     if (!accountId) return message.error('Không xác định được tài khoản')
 
-    const testTakers = [
-      values.testTaker1,
-      values.testTaker2,
-    ].filter((id) => id)
+    const testTakers = [values.testTaker1, values.testTaker2].filter((id) => id)
 
     const services = isSingle
-      ? [
-        values.service1,
-        values.service2,
-      ].filter((id) => id)
+      ? [values.service1, values.service2].filter((id) => id)
       : values.sharedServices || [] // Sử dụng sharedServices khi isSingle = false
 
     const { slot } = values
@@ -152,7 +153,9 @@ const ServiceAtHomeForm: React.FC = () => {
       }
 
       if (isSelfSampling) {
-        const response = await createKitShipment({ caseMember: caseMemberId }).unwrap()
+        const response = await createKitShipment({
+          caseMember: caseMemberId,
+        }).unwrap()
         console.log('Kit shipment created:', response)
       }
 
@@ -195,35 +198,55 @@ const ServiceAtHomeForm: React.FC = () => {
       }}
     >
       <div style={{ width: '100%', maxWidth: '100%' }}>
-        <div
-          style={{ maxWidth: 800, margin: '0 auto', padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '20px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '20px',
+            }}
+          >
             <Radio.Group
               onChange={(e) => setIsSingle(e.target.value)}
               value={isSingle}
             >
-              <Radio value={true}>Single service</Radio>
-              <Radio value={false}>Multiple services</Radio>
+              <Radio value={true}>Mỗi người một dịch vụ</Radio>
+              <Radio value={false}>Nhiều dịch vụ</Radio>
             </Radio.Group>
           </div>
 
-
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
-            <p style={{ marginTop: "0", marginRight: "8px" }}>Chọn bên xét nghiệm:</p>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              marginBottom: '20px',
+            }}
+          >
+            <p style={{ marginTop: '0', marginRight: '8px' }}>
+              Chọn bên xét nghiệm:
+            </p>
             <Switch
               checked={showAgnate}
               onChange={(checked) => setShowAgnate(checked)}
-              checkedChildren="Bên nội"
-              unCheckedChildren="Bên ngoại"
+              checkedChildren='Bên nội'
+              unCheckedChildren='Bên ngoại'
             />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
-            <p style={{ marginTop: "0", marginRight: "8px" }}>Chọn hình thức lấy mẫu:</p>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              marginBottom: '20px',
+            }}
+          >
+            <p style={{ marginTop: '0', marginRight: '8px' }}>
+              Chọn hình thức lấy mẫu:
+            </p>
             <Switch
               checked={isSelfSampling}
               onChange={(checked) => setIsSelfSampling(checked)}
-              checkedChildren="Không tự lấy mẫu"
-              unCheckedChildren="Tự lấy mẫu"
+              checkedChildren='Không tự lấy mẫu'
+              unCheckedChildren='Tự lấy mẫu'
             />
           </div>
         </div>

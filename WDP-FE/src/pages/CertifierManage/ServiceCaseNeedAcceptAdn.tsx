@@ -73,7 +73,7 @@ export default function ServiceCaseNeedAcceptAdn() {
     error,
   } = useGetServiceCasesWithoutResultQuery(
     // ✅ 2. Sử dụng trực tiếp ID của trạng thái đầu tiên
-    { currentStatus: firstStatusId, resultExists: true },
+    { currentStatus: firstStatusId, resultExists: false },
     { skip: !firstStatusId } // Không chạy query khi chưa có ID
   )
 

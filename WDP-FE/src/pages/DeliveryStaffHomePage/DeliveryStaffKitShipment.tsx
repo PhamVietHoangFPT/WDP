@@ -42,12 +42,12 @@ const DeliveryStaffKitShipment: React.FC = () => {
 
   // Status IDs constants
   const STATUS_IDS = {
-    CONFIRMED: '688104fd5153ca0a75de9a67',
-    DELIVERED: '688105125153ca0a75de9a6a',
-    CANCELLED: '688105695153ca0a75de9a80',
-    SAMPLE_SUCCESS: '688105205153ca0a75de9a72',
-    SAMPLE_FAILED: '688105775153ca0a75de9a83',
-    DELIVERED_TO_FACILITY: '688105455153ca0a75de9a75',
+    CONFIRMED: '688f57ffead5d391225cafea',
+    DELIVERED: '688f57ffead5d391225cafeb',
+    CANCELLED: '688f57ffead5d391225cafef',
+    SAMPLE_SUCCESS: '688f57ffead5d391225cafec',
+    SAMPLE_FAILED: '688f57ffead5d391225caff0',
+    DELIVERED_TO_FACILITY: '688f57ffead5d391225cafed',
   }
 
   // Generic status update handler
