@@ -11,6 +11,7 @@ import {
   Button,
   message,
   Modal,
+  InputNumber,
 } from 'antd'
 import Cookies from 'js-cookie'
 import {
@@ -33,7 +34,7 @@ export default function DocumentFormAccept() {
   const location = useLocation()
   const serviceCase = location.state?.serviceCase
 
-  const [adnPercentage, setAdnPercentage] = useState('')
+  const [adnPercentage, setAdnPercentage] = useState()
   const [conclusion, setConclusion] = useState('')
   const [createResult, { isLoading: isSubmitting }] =
     useCreateCertifierResultMutation()
@@ -149,11 +150,18 @@ export default function DocumentFormAccept() {
 
           <Col span={24}>
             <Card title='📝 Nhập kết quả giám định'>
-              <Input
+              <InputNumber
                 addonBefore='% trùng khớp'
                 value={adnPercentage}
-                onChange={(e) => setAdnPercentage(e.target.value)}
+                // ✅ 2. Đơn giản hóa hàm onChange
+                onChange={(value) => setAdnPercentage(value)}
                 placeholder='Ví dụ: 99.999'
+                // ✅ 1. Sửa max và min thành kiểu number
+                max={100}
+                min={0}
+                stringMode
+                step={0.001}
+                style={{ width: '100%' }} // Thêm style để input rộng hơn nếu cần
               />
               <TextArea
                 style={{ marginTop: 12 }}

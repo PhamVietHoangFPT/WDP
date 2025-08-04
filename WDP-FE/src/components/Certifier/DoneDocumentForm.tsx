@@ -157,6 +157,10 @@ export default function DoneDocumentForm() {
                   <strong>Ghi chú:</strong>{' '}
                   {result?.conclusion ?? 'Không có dữ liệu'}
                 </p>
+                <p>
+                  <strong>Người duyệt kết quả:</strong>{' '}
+                  {result?.certifierId.name ?? 'Không có dữ liệu'}
+                </p>
               </Card>
             </Col>
 

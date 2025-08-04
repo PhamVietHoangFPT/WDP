@@ -62,11 +62,15 @@ export default function ServiceCaseAlreadyHasAdn() {
     error,
   } = useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
 
-  const { data: serviceCaseData, isLoading } =
-    useGetServiceCasesWithoutAdnQuery(
-      { currentStatus: selectedStatus, resultExists },
-      { skip: !selectedStatus }
-    )
+  const {
+    data: serviceCaseData,
+    isLoading,
+    isError: isErrorServiceCase,
+    error: serviceCaseError,
+  } = useGetServiceCasesWithoutAdnQuery(
+    { currentStatus: selectedStatus, resultExists },
+    { skip: !selectedStatus }
+  )
 
   const allStatuses = useMemo(
     () => (statusData?.data as RequestStatus[])?.slice(2) || [],
@@ -194,6 +198,24 @@ export default function ServiceCaseAlreadyHasAdn() {
     const errorMessage = apiError?.data?.message || 'Có lỗi xảy ra'
     const errorStatus = apiError?.status || 'Lỗi'
 
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={3}>📄 Hồ sơ chưa có tài liệu ADN</Title>
+        <FilterSection />
+        <Result
+          status={errorStatus === 404 ? '404' : 'error'}
+          title={errorStatus}
+          subTitle={errorMessage}
+          style={{ marginTop: '20px' }}
+        />
+      </div>
+    )
+  }
+
+  if (isErrorServiceCase) {
+    const apiError = serviceCaseError as any
+    const errorMessage = apiError?.data?.message || 'Có lỗi xảy ra'
+    const errorStatus = apiError?.status || 'Lỗi'
     return (
       <div style={{ padding: 24 }}>
         <Title level={3}>📄 Hồ sơ chưa có tài liệu ADN</Title>
