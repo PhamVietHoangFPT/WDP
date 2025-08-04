@@ -1,10 +1,25 @@
-import { Table, Typography, Button, Spin } from 'antd'
+import {
+  Table,
+  Typography,
+  Button,
+  Spin,
+  Select,
+  List,
+  Space,
+  Tag,
+  Result,
+} from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { MailOutlined, PhoneOutlined } from '@ant-design/icons'
-import { useGetServiceCasesWithoutResultQuery } from '../../features/certifier/certifierApi'
+import {
+  useGetServiceCasesWithoutResultQuery,
+  useGetTestRequestStatusesQuery,
+} from '../../features/certifier/certifierApi'
+import { useEffect, useState, useMemo } from 'react' // ✅ Import thêm useMemo
 
 const { Title } = Typography
 
+// ... Các interface ServiceCase, TestRequestStatus không thay đổi ...
 interface ServiceCase {
   _id: string
   currentStatus: {
@@ -47,93 +62,131 @@ interface ServiceCase {
   }[]
 }
 
+interface TestRequestStatus {
+  _id: string
+  testRequestStatus: string
+  order: number
+}
+
 export default function ServiceHasAcceptAdn() {
   const navigate = useNavigate()
 
-  const currentStatus = '688f552b8bd4809753741bd8' // Đã có kết quả
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
+  const { data: statusesData, isLoading: isLoadingStatuses } =
+    useGetTestRequestStatusesQuery({})
 
-  const { data: serviceCaseData, isLoading } =
-    useGetServiceCasesWithoutResultQuery(
-      { currentStatus, resultExists: true },
-      { skip: !currentStatus }
-    )
+  // ✅ 1. Tạo một danh sách trạng thái mới, bỏ đi phần tử đầu tiên
+  const filteredStatuses = useMemo(() => {
+    if (statusesData?.data && statusesData.data.length > 1) {
+      // slice(1) tạo ra một mảng mới từ phần tử thứ 2 (index 1) trở đi
+      return statusesData.data.slice(1)
+    }
+    return []
+  }, [statusesData])
+
+  const {
+    data: serviceCaseData,
+    isLoading: isLoadingServiceCases,
+    error,
+    isError,
+  } = useGetServiceCasesWithoutResultQuery(
+    { currentStatus: selectedStatus, resultExists: true },
+    { skip: !selectedStatus }
+  )
+
+  // ✅ 2. Cập nhật useEffect để hoạt động với danh sách đã lọc
+  useEffect(() => {
+    // Chỉ chạy khi có dữ liệu trong danh sách đã lọc và chưa có trạng thái nào được chọn
+    if (filteredStatuses.length > 0 && !selectedStatus) {
+      // Tìm trạng thái "Đã có kết quả" trong danh sách đã lọc
+      const defaultStatus = filteredStatuses.find(
+        (status: TestRequestStatus) => status._id === '688f552b8bd4809753741bd8'
+      )
+      // Nếu không tìm thấy, lấy trạng thái đầu tiên trong danh sách đã lọc
+      const fallbackStatus = filteredStatuses[0]
+
+      if (defaultStatus) {
+        setSelectedStatus(defaultStatus._id)
+      } else if (fallbackStatus) {
+        setSelectedStatus(fallbackStatus._id)
+      }
+    }
+  }, [filteredStatuses, selectedStatus]) // Phụ thuộc vào danh sách đã lọc
 
   const columns = [
     {
       title: 'Mã hồ sơ',
       dataIndex: '_id',
-      render: (id: string) => (
-        <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-          {id}
-        </span>
-      ),
+      render: (id: string) => <Typography.Text>{id}</Typography.Text>, // Thêm copyable cho tiện
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'bookingDetails',
-      render: (bookingDetails: ServiceCase['bookingDetails']) =>
-        new Date(bookingDetails.bookingDate).toLocaleDateString('vi-VN'),
+      dataIndex: ['bookingDetails', 'bookingDate'],
+      render: (bookingDate: string) =>
+        bookingDate ? new Date(bookingDate).toLocaleDateString('vi-VN') : '',
     },
     {
       title: 'Ca đặt',
-      dataIndex: 'bookingDetails',
-      render: (bookingDetails: ServiceCase['bookingDetails']) =>
-        bookingDetails.slotTime,
+      dataIndex: ['bookingDetails', 'slotTime'],
     },
     {
       title: 'Bác sĩ xét nghiệm',
       dataIndex: 'doctorDetails',
       render: (doctor: ServiceCase['doctorDetails']) => (
-        <div>
-          <div>
-            <strong>{doctor.name}</strong>
-          </div>
-          <div>
+        <Space direction='vertical' size='small'>
+          <Typography.Text strong>{doctor.name}</Typography.Text>
+          <Typography.Text type='secondary'>
             <MailOutlined /> {doctor.email}
-          </div>
-          <div>
+          </Typography.Text>
+          <Typography.Text type='secondary'>
             <PhoneOutlined /> {doctor.phoneNumber}
-          </div>
-        </div>
+          </Typography.Text>
+        </Space>
       ),
     },
     {
       title: 'Người xét nghiệm',
       dataIndex: 'caseMember',
       render: (caseMember: ServiceCase['caseMember']) => (
-        <div>
-          {caseMember.testTakers.map((taker) => (
-            <div key={taker._id}>
-              {taker.name} ({taker.personalId})
-            </div>
-          ))}
-        </div>
+        <List
+          size='small'
+          dataSource={caseMember.testTakers}
+          renderItem={(taker) => (
+            <List.Item style={{ paddingLeft: 0, border: 'none' }}>
+              - {taker.name} ({taker.personalId})
+            </List.Item>
+          )}
+          style={{ background: 'transparent' }}
+        />
       ),
     },
     {
       title: 'Người tạo hồ sơ',
       dataIndex: 'accountDetails',
       render: (acc: ServiceCase['accountDetails']) => (
-        <div>
-          <strong>{acc.name}</strong>
-          <br />
-          <PhoneOutlined />
-          {acc.phoneNumber}
-        </div>
+        <Space direction='vertical' size={0}>
+          <Typography.Text strong>{acc.name}</Typography.Text>
+          <Typography.Text type='secondary'>
+            <PhoneOutlined /> {acc.phoneNumber}
+          </Typography.Text>
+        </Space>
       ),
     },
     {
       title: 'Dịch vụ',
       dataIndex: 'services',
       render: (services: ServiceCase['services']) => (
-        <ul style={{ paddingLeft: 20 }}>
-          {services.map((s) => (
-            <li key={s._id}>
-              {s.sample.name} – {s.timeReturn}
-            </li>
-          ))}
-        </ul>
+        <List
+          size='small'
+          dataSource={services}
+          renderItem={(s) => (
+            <List.Item style={{ paddingLeft: 0, border: 'none' }}>
+              {s.sample.name} – <Tag color='blue'>{s.timeReturn}</Tag>
+            </List.Item>
+          )}
+          style={{ background: 'transparent' }}
+        />
       ),
     },
     {
@@ -155,11 +208,56 @@ export default function ServiceHasAcceptAdn() {
     },
   ]
 
+  if (isError) {
+    const apiError = error as any
+    const errorMessage = apiError?.data?.message || 'Có lỗi xảy ra'
+    const errorStatus = apiError?.status || 'Lỗi'
+
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={3}>📄 Hồ sơ chờ duyệt kết quả ADN</Title>
+        <Select
+          style={{ width: 250, marginBottom: 16 }}
+          placeholder='Chọn trạng thái để lọc'
+          loading={isLoadingStatuses}
+          value={selectedStatus}
+          onChange={(value) => setSelectedStatus(value)}
+        >
+          {/* ✅ 3. Dùng danh sách đã lọc để render các tùy chọn */}
+          {filteredStatuses.map((status: TestRequestStatus) => (
+            <Select.Option key={status._id} value={status._id}>
+              {status.testRequestStatus}
+            </Select.Option>
+          ))}
+        </Select>
+        <Result
+          status={errorStatus === 404 ? '404' : 'error'}
+          title={errorStatus}
+          subTitle={errorMessage}
+          style={{ marginTop: '20px' }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>📄 Hồ sơ đã có kết quả ADN</Title>
-
-      {isLoading ? (
+      <Select
+        style={{ width: 250, marginBottom: 16 }}
+        placeholder='Chọn trạng thái để lọc'
+        loading={isLoadingStatuses}
+        value={selectedStatus}
+        onChange={(value) => setSelectedStatus(value)}
+      >
+        {/* ✅ 3. Dùng danh sách đã lọc để render các tùy chọn */}
+        {filteredStatuses.map((status: TestRequestStatus) => (
+          <Select.Option key={status._id} value={status._id}>
+            {status.testRequestStatus}
+          </Select.Option>
+        ))}
+      </Select>
+      {isLoadingServiceCases ? (
         <Spin />
       ) : (
         <Table

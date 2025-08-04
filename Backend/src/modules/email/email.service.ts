@@ -8,6 +8,7 @@ import { Account } from '../account/schemas/account.schema'
 import { Model, Types } from 'mongoose'
 import { Facility } from '../facility/schemas/facility.schema'
 import { Booking } from '../booking/schemas/booking.schema'
+import { AdnDocumentation } from '../adnDocumentation/schemas/adnDocumentation.schema'
 
 @Injectable()
 export class EmailService implements IEmailService {
@@ -20,6 +21,8 @@ export class EmailService implements IEmailService {
     private readonly facilityModel: Model<Facility>,
     @InjectModel(Booking.name)
     private readonly bookingModel: Model<Booking>,
+    @InjectModel(AdnDocumentation.name)
+    private readonly adnDocumentationModel: Model<AdnDocumentation>,
   ) {}
 
   APP_NAME = this.configService.get<string>('APP_NAME')
@@ -128,8 +131,9 @@ export class EmailService implements IEmailService {
     adnPercentage: string,
     doctorId: string,
     conclusion: string,
+    serviceCaseId?: string,
   ): Promise<void> {
-    const doctorAccount = await this.accountModel
+    const certifierAccount = await this.accountModel
       .findOne({ _id: doctorId })
       .select('name facility -_id')
       .exec()
@@ -138,6 +142,16 @@ export class EmailService implements IEmailService {
         _id: customerId,
       })
       .select('email name -_id')
+      .exec()
+    const adnDocumentation = await this.adnDocumentationModel
+      .findOne({ serviceCase: new Types.ObjectId(serviceCaseId) })
+      .select('profiles doctor -_id') // Thêm 'doctor' vào đây
+      .lean()
+      .exec()
+    const doctorAccount = await this.accountModel
+      .findOne({ _id: adnDocumentation.doctor }) // Sử dụng ID từ tài liệu ADN
+      .select('name facility -_id')
+      .lean() // ✅ (Tối ưu) Thêm .lean()
       .exec()
     const facility = await this.facilityModel
       .findOne({ _id: doctorAccount.facility })
@@ -158,6 +172,8 @@ export class EmailService implements IEmailService {
         adnPercentage: adnPercentage,
         conclusion: conclusion,
         currentYear: new Date().getFullYear(),
+        profiles: adnDocumentation ? adnDocumentation.profiles : [],
+        certifierName: certifierAccount.name,
       },
     })
     console.log(`Email kết quả đã được gửi đến ${customerAccount.email}`)
