@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Table, Select, Typography, Spin, Button } from 'antd'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Table, Select, Typography, Spin, Button, Result, List } from 'antd'
 import {
   useGetAllRequestStatusListQuery,
   useGetServiceCasesWithoutAdnQuery,
@@ -44,13 +44,23 @@ interface ServiceCase {
   }
 }
 
+interface RequestStatus {
+  _id: string
+  testRequestStatus: string
+  order: number
+}
+
 export default function ServiceCaseAlreadyHasAdn() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<number | null>(null)
   const [resultExists] = useState(true)
   const navigate = useNavigate()
-
-  const { data: statusData, isLoading: loadingStatus } =
-    useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
+  const {
+    data: statusData,
+    isLoading: loadingStatus,
+    isError,
+    error,
+  } = useGetAllRequestStatusListQuery({ pageNumber: 1, pageSize: 100 })
 
   const { data: serviceCaseData, isLoading } =
     useGetServiceCasesWithoutAdnQuery(
@@ -58,41 +68,53 @@ export default function ServiceCaseAlreadyHasAdn() {
       { skip: !selectedStatus }
     )
 
+  const allStatuses = useMemo(
+    () => (statusData?.data as RequestStatus[])?.slice(2) || [],
+    [statusData]
+  )
+
   useEffect(() => {
-    setSelectedStatus('684e9057e4331a7fdfb9b12e') // Mặc định chọn trạng thái "Đã có kết quả"
-  }, [])
+    // Chỉ chạy khi có dữ liệu trạng thái và chưa có trạng thái nào được chọn
+    if (statusData?.data?.length && !selectedStatus) {
+      // Ưu tiên tìm "Chờ duyệt kết quả" làm mặc định
+      const defaultStatus = statusData.data.find(
+        (s: RequestStatus) => s.testRequestStatus === 'Chờ duyệt kết quả'
+      )
+      // Nếu không tìm thấy, lấy trạng thái đầu tiên trong danh sách
+      const fallbackStatus = statusData.data[2]
+
+      const statusToSet = defaultStatus || fallbackStatus
+
+      if (statusToSet) {
+        setSelectedStatus(statusToSet._id)
+        setSelectedOrder(statusToSet.order)
+      }
+    }
+  }, [statusData, selectedStatus])
 
   const columns = [
     {
       title: 'Mã hồ sơ',
       dataIndex: '_id',
-      render: (id: string) => (
-        <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-          {id}
-        </span>
-      ),
+      render: (id: string) => <Typography.Text>{id}</Typography.Text>,
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'bookingDetails',
-      render: (bookingDetails: ServiceCase['bookingDetails']) =>
-        new Date(bookingDetails.bookingDate).toLocaleDateString('vi-VN'),
+      dataIndex: ['bookingDetails', 'bookingDate'],
+      render: (bookingDate: string) =>
+        bookingDate ? new Date(bookingDate).toLocaleDateString('vi-VN') : '',
     },
     {
       title: 'Ca đặt',
-      dataIndex: 'bookingDetails',
-      render: (bookingDetails: ServiceCase['bookingDetails']) =>
-        bookingDetails.slotTime,
+      dataIndex: ['bookingDetails', 'slotTime'],
     },
     {
       title: 'Người xét nghiệm',
       dataIndex: 'caseMember',
       render: (caseMember: ServiceCase['caseMember']) => (
         <div>
-          {caseMember.testTakers.map((taker) => (
-            <div key={taker._id}>
-              {taker.name} ({taker.personalId})
-            </div>
+          {caseMember?.testTakers?.map((taker) => (
+            <div key={taker._id}>{`${taker.name} (${taker.personalId})`}</div>
           ))}
         </div>
       ),
@@ -102,10 +124,11 @@ export default function ServiceCaseAlreadyHasAdn() {
       dataIndex: 'accountDetails',
       render: (acc: ServiceCase['accountDetails']) => (
         <div>
-          <strong>{acc.name}</strong>
+          {acc.name}
           <br />
-          <PhoneOutlined />
-          {acc.phoneNumber}
+          <Typography.Text type='secondary' style={{ fontSize: 12 }}>
+            {acc.phoneNumber}
+          </Typography.Text>
         </div>
       ),
     },
@@ -113,16 +136,18 @@ export default function ServiceCaseAlreadyHasAdn() {
       title: 'Dịch vụ',
       dataIndex: 'services',
       render: (services: ServiceCase['services']) => (
-        <ul style={{ paddingLeft: 20 }}>
-          {services.map((s) => (
-            <li key={s._id}>
-              {s.sample.name} – {s.timeReturn}
-            </li>
-          ))}
-        </ul>
+        <List
+          size='small'
+          dataSource={services}
+          renderItem={(s) => (
+            <List.Item style={{ paddingLeft: 0, border: 'none' }}>
+              - {s.sample.name}
+            </List.Item>
+          )}
+          style={{ padding: 0, background: 'transparent' }}
+        />
       ),
     },
-
     {
       title: '',
       key: 'details',
@@ -142,23 +167,51 @@ export default function ServiceCaseAlreadyHasAdn() {
     },
   ]
 
+  const FilterSection = () => (
+    <div style={{ marginBottom: 16 }}>
+      <Select
+        value={selectedStatus}
+        onChange={(value) => {
+          const found = allStatuses.find((s) => s._id === value)
+          setSelectedStatus(value)
+          setSelectedOrder(found?.order || null)
+        }}
+        style={{ width: 250 }}
+        loading={loadingStatus}
+      >
+        {/* ✅ Sử dụng `allStatuses` để hiển thị tất cả các tùy chọn */}
+        {allStatuses.map((s) => (
+          <Select.Option key={s._id} value={s._id}>
+            {s.testRequestStatus}
+          </Select.Option>
+        ))}
+      </Select>
+    </div>
+  )
+
+  if (isError) {
+    const apiError = error as any
+    const errorMessage = apiError?.data?.message || 'Có lỗi xảy ra'
+    const errorStatus = apiError?.status || 'Lỗi'
+
+    return (
+      <div style={{ padding: 24 }}>
+        <Title level={3}>📄 Hồ sơ chưa có tài liệu ADN</Title>
+        <FilterSection />
+        <Result
+          status={errorStatus === 404 ? '404' : 'error'}
+          title={errorStatus}
+          subTitle={errorMessage}
+          style={{ marginTop: '20px' }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>📑 Hồ sơ đã có tài liệu ADN</Title>
-
-      <div style={{ marginBottom: 16 }}>
-        <Select
-          value={selectedStatus}
-          onChange={setSelectedStatus}
-          style={{ width: 250 }}
-          loading={loadingStatus}
-        >
-          <Select.Option value='684e9057e4331a7fdfb9b12e'>
-            Đã có kết quả
-          </Select.Option>
-        </Select>
-      </div>
-
+      <FilterSection />
       {isLoading ? (
         <Spin />
       ) : (
