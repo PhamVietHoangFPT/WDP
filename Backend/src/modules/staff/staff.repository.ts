@@ -75,6 +75,29 @@ export class StaffRepository implements IStaffRepository {
       {
         $unwind: { path: '$doctorDetails', preserveNullAndEmptyArrays: true },
       },
+      {
+        $lookup: {
+          from: 'accounts',
+          let: { accountId: '$sampleCollector' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$accountId'],
+                },
+              },
+            },
+          ],
+          as: 'sampleCollectorDetails',
+        },
+      },
+      // Mo mang sampleCollectorDetails
+      {
+        $unwind: {
+          path: '$sampleCollectorDetails',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       // Mo bang testRequestStatuses
       {
         $lookup: {
@@ -213,6 +236,12 @@ export class StaffRepository implements IStaffRepository {
             name: '$doctorDetails.name',
             phoneNumber: '$doctorDetails.phoneNumber',
             email: '$doctorDetails.email',
+          },
+          sampleCollectorDetails: {
+            _id: '$sampleCollectorDetails._id',
+            name: '$sampleCollectorDetails.name',
+            phoneNumber: '$sampleCollectorDetails.phoneNumber',
+            email: '$sampleCollectorDetails.email',
           },
           services: {
             $map: {
