@@ -6,7 +6,7 @@ export interface IKitShipmentHistoryService {
     pageNumber: number,
     pageSize: number,
     customerId: string,
-    kitShipmentId: string,
+    caseMember: string,
   ): Promise<PaginatedResponse<KitShipmentHistoryDocument>>
 }
 

@@ -19,6 +19,7 @@ import {
   useGetImageQuery,
   useGetServiceCaseByIdQuery,
 } from '../../features/customer/paymentApi'
+import { useGetkitShipmentHistoryListQuery } from '../../features/kitshipmentHistory/kitShipmentHistory'
 import Cookies from 'js-cookie'
 import { useState, useEffect, useRef } from 'react'
 import { PhoneOutlined } from '@ant-design/icons'
@@ -33,7 +34,7 @@ export default function ServiceCaseDetail() {
   let accountId = ''
   try {
     accountId = userData ? JSON.parse(userData).id : ''
-  } catch {}
+  } catch { }
 
   const { data: historyData, isLoading: isLoadingHistory } =
     useGetTestRequestHistoryQuery({
@@ -45,6 +46,22 @@ export default function ServiceCaseDetail() {
     useGetServiceCaseByIdQuery(id as string, {
       skip: !id,
     })
+
+  // Check if this is a self-sampling case to show kit shipment tracking
+  const isSelfSampling = serviceCaseData?.caseMember?.isSelfSampling
+
+  const { data: kitShipmentHistoryData, isLoading: isLoadingKitHistory } =
+    useGetkitShipmentHistoryListQuery(
+      {
+        customerId: accountId,
+        caseMember: serviceCaseData?.caseMember?._id,
+        pageNumber: 1,
+        pageSize: 50,
+      },
+      {
+        skip: !accountId || !serviceCaseData?.caseMember?._id || !isSelfSampling,
+      }
+    )
 
   const { data: imageData, isLoading: isLoadingImages } = useGetImageQuery(
     id as string,
@@ -69,6 +86,40 @@ export default function ServiceCaseDetail() {
   const sortedHistoryData = [...(historyData?.data || [])].sort(
     (a, b) => a.testRequestStatus.order - b.testRequestStatus.order
   )
+
+  // Merge timeline data when self-sampling
+  const mergedTimelineData = () => {
+    if (!isSelfSampling) {
+      // For non-self-sampling cases, return the original data structure
+      return sortedHistoryData.map(item => ({
+        ...item,
+        type: 'test-request',
+        displayTime: new Date(item.created_at),
+        displayText: item.testRequestStatus.testRequestStatus,
+      }))
+    }
+
+    const testRequestHistory = sortedHistoryData.map(item => ({
+      ...item,
+      type: 'test-request',
+      displayTime: new Date(item.created_at),
+      displayText: item.testRequestStatus.testRequestStatus,
+    }))
+
+    const kitShipmentHistory = (kitShipmentHistoryData?.data || []).map((item: any) => ({
+      ...item,
+      type: 'kit-shipment',
+      displayTime: new Date(item.created_at || item.createdAt),
+      displayText: `Kit: ${item.kitShipmentStatus?.status || 'Đang xử lý'}`,
+    }))
+
+    // Combine and sort by time
+    return [...testRequestHistory, ...kitShipmentHistory].sort(
+      (a, b) => a.displayTime.getTime() - b.displayTime.getTime()
+    )
+  }
+
+  const timelineData = mergedTimelineData()
 
   if (isLoadingHistory || isLoadingServiceCase) {
     return (
@@ -188,23 +239,53 @@ export default function ServiceCaseDetail() {
       <Row gutter={16}>
         <Col span={6}>
           <Card style={{ marginBottom: '20px' }}>
-            <Title level={4}>Trạng thái hồ sơ</Title>
-            {isLoadingHistory ? (
+            <Title level={4}>
+              Trạng thái hồ sơ {isSelfSampling && '& Tracking Kit'}
+            </Title>
+            {isLoadingHistory || (isSelfSampling && isLoadingKitHistory) ? (
               <Spin />
             ) : (
               <Timeline mode='left'>
-                {sortedHistoryData.map((item, index) => (
+                {timelineData.map((item, index) => (
                   <Timeline.Item
-                    key={item._id}
+                    key={`${item.type || 'test'}-${item._id}-${index}`}
                     color={
-                      index === sortedHistoryData.length - 1 ? 'green' : 'blue'
+                      item.type === 'kit-shipment'
+                        ? 'orange'
+                        : index === timelineData.length - 1
+                          ? 'green'
+                          : 'blue'
+                    }
+                    dot={
+                      item.type === 'kit-shipment' ? (
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            background: '#ff9c6e',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          📦
+                        </span>
+                      ) : undefined
                     }
                   >
                     <Text strong>
-                      {new Date(item.created_at).toLocaleString('vi-VN')}
+                      {item.displayTime?.toLocaleString('vi-VN') ||
+                        new Date(item.created_at).toLocaleString('vi-VN')}
                     </Text>
                     <br />
-                    <Text>{item.testRequestStatus.testRequestStatus}</Text>
+                    <Text style={{
+                      color: item.type === 'kit-shipment' ? '#ff9c6e' : 'inherit'
+                    }}>
+                      {item.displayText || item.testRequestStatus?.testRequestStatus}
+                    </Text>
                   </Timeline.Item>
                 ))}
               </Timeline>
