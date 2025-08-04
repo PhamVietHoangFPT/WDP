@@ -38,7 +38,7 @@ export class StaffRepository implements IStaffRepository {
           let: { customerEmail: email },
           pipeline: [
             { $match: { $expr: { $eq: ['$email', '$$customerEmail'] } } },
-            { $project: { _id: 1, email: 1 } },
+            { $project: { _id: 1, email: 1, name: 1, phoneNumber: 1 } },
           ],
           as: 'accountDetails',
         },
