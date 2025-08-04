@@ -118,7 +118,7 @@ export const SideBar = () => {
         {
           key: 'staff/return-fail',
           icon: <TeamOutlined />,
-          label: 'Giao kết quả thất bại',
+          label: 'Quản lý hồ sơ khách hàng',
           onClick: () => navigate('/staff/return-fail'),
         },
       ],

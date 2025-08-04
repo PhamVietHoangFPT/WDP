@@ -259,12 +259,10 @@ export default function StaffServiceCase() {
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
           <span
-    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
-  >
-    <Tag color="success">
-      Đã có kết quả
-    </Tag>
-  </span>
+          // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+          >
+            <Tag color='success'>Đã có kết quả</Tag>
+          </span>
         )
       },
     },
@@ -274,7 +272,9 @@ export default function StaffServiceCase() {
       render: (_: any, record: any) => (
         <Space direction='vertical'>
           <Button
-            onClick={() => navigate(`/staff/service-case-customer/${record._id}`)}
+            onClick={() =>
+              navigate(`/staff/service-case-customer/${record._id}`)
+            }
           >
             Xem chi tiết
           </Button>

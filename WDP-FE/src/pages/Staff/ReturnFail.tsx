@@ -11,33 +11,79 @@ import {
   Modal,
   message,
   Space,
-  Tooltip,
   Empty,
-  Input, // Thêm Input để nhập email
-  Upload,
+  Input,
+  Flex,
+  Divider,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
-  // Thay đổi import từ deliveryStaff sang staff API nếu cần, hoặc đảm bảo deliveryStaff API có đủ hook
-  // Tuy nhiên, theo API bạn cung cấp, useGetServiceCaseByEmailForStaffQuery nằm trong deliveryAPI
-  // nên không cần thay đổi import, chỉ cần thêm hook mới vào.
   useGetServiceCaseStatusListForDeliveryQuery,
   useUpdateServiceCaseStatusForDeliveryMutation,
-  useGetServiceCaseByEmailForStaffQuery, // Import hook mới
-  useCreateServiceCaseImageMutation, // Import hook upload ảnh
-} from '../../features/deliveryStaff/deliveryStaff' // Giữ nguyên path vì API mới được inject vào đây
-import { UploadOutlined } from '@ant-design/icons'
+  useGetServiceCaseByEmailForStaffQuery,
+  useCreateServiceCaseImageMutation,
+} from '../../features/deliveryStaff/deliveryStaff'
+import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 
-// Cập nhật interface ServiceCase để khớp với response từ getServiceCaseByEmailForStaff
-// Data trả về ít trường hơn
+interface TestTaker {
+  _id: string
+  name: string
+  personalId: string
+  dateOfBirth: string
+  gender: boolean
+}
+
+interface Service {
+  _id: string
+  name: string
+  fee: number
+  sample: {
+    _id: string
+    name: string
+    fee: number
+  }
+  timeReturn: string
+}
+
 interface ServiceCase {
   _id: string
   created_at: string
-  currentStatus: string // currentStatus giờ là string thay vì object
-  bookingDate: string
-  // Bỏ các trường address, account, caseMember vì chúng không có trong response của getServiceCaseByEmailForStaff
+  currentStatus: string
+  caseMember: {
+    testTakers: TestTaker[]
+    sampleIdentifyNumbers: string[]
+    isSelfSampling: boolean
+    isSingleService: boolean
+  }
+  bookingDetails: {
+    bookingDate: string
+    slotTime: string
+  }
+  services: Service[]
+  accountDetails: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  doctorDetails: {
+    _id: string
+    name: string
+    phoneNumber: string
+    email: string
+  }
+  sampleCollectorDetails: {
+    _id: string
+    name: string
+    phoneNumber: string
+    email: string
+  }
+  adnDocumentation: string
+  result: string
+  condition?: any // Assuming these fields might exist
+  paymentForCondition?: any // Assuming these fields might exist
 }
 
 interface ServiceCaseStatus {
@@ -46,17 +92,38 @@ interface ServiceCaseStatus {
   order: number
 }
 
+// Custom hook for debouncing a value
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 const ReturnFail: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
     undefined
   )
-  const [customerEmail, setCustomerEmail] = useState<string>('') // State mới cho email khách hàng
-  const [pageNumber, setPageNumber] = useState<number>(1) // PageNumber và PageSize có thể không cần thiết nếu API staff không hỗ trợ phân trang
-  const [pageSize, setPageSize] = useState<number>(10) // Tùy thuộc vào API getServiceCaseByEmailForStaff có hỗ trợ hay không
+    const navigate = useNavigate()
+
+  const [customerEmail, setCustomerEmail] = useState<string>('')
+  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
   const [selectedServiceCase, setSelectedServiceCase] =
     useState<ServiceCase | null>(null)
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
+
+  const debouncedEmail = useDebounce(customerEmail, 900)
 
   const {
     data: statusListData,
@@ -67,7 +134,6 @@ const ReturnFail: React.FC = () => {
     pageSize: 100,
   })
 
-  // Đảm bảo status mặc định là "Giao kết quả không thành công"
   useEffect(() => {
     if (
       isStatusListSuccess &&
@@ -81,7 +147,6 @@ const ReturnFail: React.FC = () => {
       if (defaultFailStatus) {
         setSelectedStatus(defaultFailStatus._id)
       } else if (statusListData.data.length > 0) {
-        // Fallback: nếu không tìm thấy, chọn cái đầu tiên (có thể không mong muốn)
         setSelectedStatus(statusListData.data[0]._id)
       }
     }
@@ -93,36 +158,30 @@ const ReturnFail: React.FC = () => {
     isFetching: isFetchingCases,
     refetch,
   } = useGetServiceCaseByEmailForStaffQuery(
-    // Sử dụng hook mới
     {
-      serviceCaseStatus: selectedStatus as string, // Đảm bảo selectedStatus có giá trị
-      email: customerEmail, // Truyền email vào query
+      serviceCaseStatus: selectedStatus as string,
+      email: debouncedEmail,
     },
-    // Bỏ qua query nếu chưa có trạng thái được chọn HOẶC chưa có email
-    { skip: selectedStatus === undefined || !customerEmail }
+    { skip: selectedStatus === undefined || !debouncedEmail }
   )
 
-  // Gọi refetch khi selectedStatus hoặc customerEmail thay đổi
   useEffect(() => {
-    if (selectedStatus !== undefined && customerEmail) {
-      // Chỉ refetch khi có đủ cả status và email
+    if (selectedStatus !== undefined && debouncedEmail) {
       refetch()
     }
-  }, [selectedStatus, customerEmail, refetch])
+  }, [selectedStatus, debouncedEmail, refetch])
 
   const [updateStatus, { isLoading: isUpdating }] =
     useUpdateServiceCaseStatusForDeliveryMutation()
 
-  // Create service case image mutation
   const [createServiceCaseImage, { isLoading: isUploading }] =
     useCreateServiceCaseImageMutation()
 
+  // This function is not used in the final columns, but kept for context.
   const getAvailableNextStatuses = (currentStatusString: string) => {
-    // Tìm ID của trạng thái "Đã trả kết quả"
     const deliveredStatus = statusListData?.data?.find(
       (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả'
     )
-    // Nếu trạng thái hiện tại là "Giao kết quả không thành công" và có trạng thái "Đã trả kết quả"
     if (
       currentStatusString === 'Giao kết quả không thành công' &&
       deliveredStatus
@@ -143,13 +202,12 @@ const ReturnFail: React.FC = () => {
       setUpdateModalVisible(false)
       setSelectedServiceCase(null)
       setNewStatusId('')
-      refetch() // Refetch dữ liệu sau khi cập nhật thành công
+      refetch()
     } catch (error: any) {
       message.error(error?.data?.message || 'Cập nhật trạng thái thất bại')
     }
   }
 
-  // Handle image upload
   const handleImageUpload = async (file: File, serviceCase: ServiceCase) => {
     const formData = new FormData()
     formData.append('serviceCase', serviceCase._id)
@@ -164,105 +222,210 @@ const ReturnFail: React.FC = () => {
     }
   }
 
-  // Cập nhật Columns để phù hợp với dữ liệu trả về từ API getServiceCaseByEmailForStaff
   const columns: ColumnsType<ServiceCase> = [
     {
-      title: 'Mã hồ sơ',
-      dataIndex: '_id',
-      key: '_id',
-      width: 150,
-      render: (text: string) => (
-        <Tooltip title={text}>
-          <span>{text.substring(0, 8)}...</span>
-        </Tooltip>
-      ),
+      title: 'Tên người xét nghiệm',
+      key: 'testTakerNames',
+      render: (_, record) => {
+        const testTakers = record.caseMember?.testTakers || []
+        if (testTakers.length === 0) {
+          return <Text type='secondary'>Chưa có</Text>
+        }
+        return (
+          <Space direction='vertical'>
+            {testTakers.map((taker) => (
+              <Text key={taker._id}>{taker.name}</Text>
+            ))}
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Tên dịch vụ',
+      key: 'serviceNames',
+      render: (_, record) => {
+        const services = record.services || []
+        if (services.length === 0) {
+          return <Text type='secondary'>Chưa có</Text>
+        }
+        return (
+          <Space direction='vertical'>
+            {services.map((service) => (
+              <Text key={service._id}>{service.name}</Text>
+            ))}
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Số tiền (VNĐ)',
+      key: 'fees',
+      render: (_, record) => {
+        // Calculate service fee from services array
+        const serviceFee = (record.services || []).reduce(
+          (sum, service) => sum + service.fee,
+          0
+        )
+        // Shipping fee is not present in the provided JSON, so it's a mock value
+        const shippingFee = 0
+
+        const grandTotal = serviceFee + shippingFee
+
+        return (
+          <div style={{ minWidth: 200 }}>
+            <Flex justify='space-between'>
+              <Typography.Text>Chi phí dịch vụ:</Typography.Text>
+              <Typography.Text>
+                {serviceFee.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+            <Flex justify='space-between'>
+              <Typography.Text>Phí dịch vụ:</Typography.Text>
+              <Typography.Text>
+                {shippingFee.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+            <Divider style={{ margin: '4px 0' }} />
+            <Flex justify='space-between'>
+              <Typography.Text strong>Tổng cộng:</Typography.Text>
+              <Typography.Text strong style={{ color: '#1677ff' }}>
+                {grandTotal.toLocaleString('vi-VN')} ₫
+              </Typography.Text>
+            </Flex>
+          </div>
+        )
+      },
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => {
+        const d = new Date(date)
+        return `${d.toLocaleTimeString('vi-VN')} ${d.toLocaleDateString(
+          'vi-VN'
+        )}`
+      },
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'bookingDate',
       key: 'bookingDate',
-      width: 150,
-      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
-    },
-    {
-      title: 'Trạng thái hiện tại',
-      key: 'currentStatus',
-      width: 200,
-      // currentStatus trong response của staff là string, không phải object
       render: (_, record) => {
-        let color = 'default' // Mặc định
-        if (record.currentStatus === 'Đã có kết quả') {
-          color = 'blue'
-        } else if (record.currentStatus === 'Đã trả kết quả') {
-          color = 'green'
-        } else {
-          color = 'red' // Các trạng thái còn lại là màu đỏ
-        }
-        return <Tag color={color}>{record.currentStatus || '—'}</Tag>
+        const bookingDate = record.bookingDetails?.bookingDate
+        if (!bookingDate) return <Tag color='default'>Chưa đặt</Tag>
+        const date = new Date(bookingDate)
+        return (
+          <Typography.Text>{date.toLocaleDateString('vi-VN')}</Typography.Text>
+        )
       },
     },
-    // Bỏ cột "Thông tin khách hàng" và "Địa chỉ giao hàng" vì API staff không trả về
-    // Nếu muốn hiển thị, cần lấy thông tin này từ một nguồn khác hoặc API staff cần trả về.
+    {
+      title: 'Nhân viên lấy mẫu',
+      key: 'sampleCollector',
+      render: (_, record) => {
+        const collector = record.sampleCollectorDetails
+
+        if (!collector) {
+          return <Tag>Chưa chỉ định</Tag>
+        }
+        return (
+          <Space direction='vertical' size={0}>
+            <Space>
+              <UserOutlined />
+              <Typography.Text strong>{collector.name}</Typography.Text>
+            </Space>
+            <Space>
+              <PhoneOutlined />
+              <Typography.Text type='secondary'>
+                {collector.phoneNumber}
+              </Typography.Text>
+            </Space>
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Bác sĩ phụ trách',
+      key: 'doctor',
+      render: (_, record) => {
+        const doctor = record.doctorDetails
+
+        if (!doctor) {
+          return <Tag>Chưa chỉ định</Tag>
+        }
+        return (
+          <Space>
+            <UserOutlined />
+            <Typography.Text>{doctor.name}</Typography.Text>
+          </Space>
+        )
+      },
+    },
+    {
+      title: 'Kết quả',
+      key: 'result_action',
+      align: 'center',
+      width: 200,
+      render: (_, record) => {
+        if (!record.result) {
+          return <Tag color='default'>Chưa có kết quả</Tag>
+        }
+
+        const isPaymentRequired =
+          record.condition !== null && record.paymentForCondition === null
+
+        if (isPaymentRequired) {
+          return (
+            <Button
+              type='primary'
+              onClick={() => handlePayment(record._id)}
+              loading={loadingPaymentFor === record._id}
+            >
+              Thanh toán chi phí phát sinh để xem kết quả
+            </Button>
+          )
+        }
+
+        return (
+          <span
+            onClick={() => navigate(`/service-case-customer/${record._id}`)}
+          >
+            <Tag color='success'>Đã có kết quả</Tag>
+          </span>
+        )
+      },
+    },
     {
       title: 'Hành động',
       key: 'actions',
       width: 250,
       render: (_, record) => {
-        // Lấy trạng thái "Đã trả kết quả" từ danh sách trạng thái đầy đủ
         const deliveredStatus = statusListData?.data?.find(
           (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả'
         )
-        // Chỉ cho phép cập nhật nếu trạng thái hiện tại là "Giao kết quả không thành công"
-        // và tìm thấy trạng thái "Đã trả kết quả"
         const isUpdatable =
           record.currentStatus === 'Giao kết quả không thành công' &&
           deliveredStatus
 
-        if (!isUpdatable) {
-          return (
-            <Space direction='vertical' size='small'>
-              <Tag color='default'>Không thể cập nhật</Tag>
-              <Upload
-                beforeUpload={(file) => {
-                  handleImageUpload(file, record)
-                  return false // Prevent default upload behavior
-                }}
-                showUploadList={false}
-                accept='image/*'
-              >
-                <Button
-                  icon={<UploadOutlined />}
-                  loading={isUploading}
-                  size='small'
-                >
-                  Upload ảnh
-                </Button>
-              </Upload>
-            </Space>
-          )
-        }
-
         return (
           <Space direction='vertical' size='small'>
-            {/* Chỉ hiển thị nút "Đã trả kết quả" nếu đủ điều kiện */}
-            {deliveredStatus && (
+            {isUpdatable && (
               <Button
-                key={deliveredStatus._id}
+                key={deliveredStatus?._id}
                 onClick={() => {
                   setSelectedServiceCase(record)
-                  setNewStatusId(deliveredStatus._id) // Set newStatusId là ID của "Đã trả kết quả"
+                  setNewStatusId(deliveredStatus?._id || '')
                   setUpdateModalVisible(true)
                 }}
                 type='primary'
-                // Danger không áp dụng ở đây vì đây là trạng thái thành công
               >
                 Đã trả kết quả
               </Button>
             )}
-            <Upload
+            {/* <Upload
               beforeUpload={(file) => {
                 handleImageUpload(file, record)
-                return false // Prevent default upload behavior
+                return false
               }}
               showUploadList={false}
               accept='image/*'
@@ -274,25 +437,34 @@ const ReturnFail: React.FC = () => {
               >
                 Upload ảnh
               </Button>
-            </Upload>
+            </Upload> */}
+            {/* <Button
+              onClick={() => handleViewImage(record._id)}
+              loading={loadingImageFor === record._id}
+              size='small'
+            >
+              Xem hình ảnh
+            </Button> */}
+            <Button
+              onClick={() =>
+                navigate(`/staff/return-fail-detail/${record._id}?accountId=${record.accountDetails._id}`)
+              }
+            >
+              Xem chi tiết
+            </Button>
           </Space>
         )
       },
     },
   ]
 
-  // === LOGIC QUAN TRỌNG ĐỂ XỬ LÝ HIỂN THỊ DỮ LIỆU VÀ TRẠNG THÁI TẢI ===
-  // Xác định xem có đang tải dữ liệu hay không (bao gồm cả tải lần đầu và refetch)
   const isCurrentlyLoading = isLoadingCases || isFetchingCases
-  // Kiểm tra xem có dữ liệu hợp lệ để hiển thị không
   const hasDataToShow =
     serviceCasesData?.data && serviceCasesData.data.length > 0
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>
-        Quản lý hồ sơ giao kết quả không thành công (Staff)
-      </Title>
+      <Title level={2}>Quản lý hồ sơ khách hàng</Title>
       <div style={{ marginBottom: 16 }}>
         <Input
           placeholder='Nhập Email khách hàng'
@@ -300,12 +472,11 @@ const ReturnFail: React.FC = () => {
           onChange={(e) => setCustomerEmail(e.target.value)}
           style={{ width: 300, marginRight: 16 }}
         />
-        {/* Giữ Select Status nhưng giá trị mặc định sẽ là "Giao kết quả không thành công" */}
         <Select
           value={selectedStatus}
           onChange={(value) => {
             setSelectedStatus(value)
-            setPageNumber(1) // Reset về trang 1 khi thay đổi bộ lọc
+            setPageNumber(1)
           }}
           style={{ width: 250 }}
           placeholder='Chọn trạng thái'
@@ -321,22 +492,19 @@ const ReturnFail: React.FC = () => {
       </div>
 
       {isCurrentlyLoading ? (
-        // Hiển thị Spin khi đang tải (tải lần đầu hoặc đang refetch)
         <Spin
           tip='Đang tải dữ liệu...'
           style={{ display: 'block', margin: '50px auto' }}
         />
-      ) : // Nếu không tải, kiểm tra xem có dữ liệu để hiển thị hay không
-      hasDataToShow ? (
+      ) : hasDataToShow ? (
         <Table
           dataSource={serviceCasesData.data}
           columns={columns}
           rowKey='_id'
-          // Pagination có thể không cần thiết hoặc cần điều chỉnh nếu API staff không trả về totalRecords
           pagination={{
             current: pageNumber,
             pageSize,
-            // serviceCasesData?.totalRecords || 0, // Comment out hoặc điều chỉnh nếu API staff không có totalRecords
+            // serviceCasesData?.totalRecords || 0,
             onChange: (page, size) => {
               setPageNumber(page)
               setPageSize(size || 10)
@@ -347,7 +515,6 @@ const ReturnFail: React.FC = () => {
           locale={{ emptyText: <Empty description='Không có dữ liệu' /> }}
         />
       ) : (
-        // Không tải và không có dữ liệu -> hiển thị Empty
         <Empty description='Không có dữ liệu' />
       )}
 
@@ -369,14 +536,11 @@ const ReturnFail: React.FC = () => {
         </p>
         <p>
           Trạng thái hiện tại:{' '}
-          {/* selectedServiceCase?.currentStatus giờ là string */}
           <Tag color='red'>{selectedServiceCase?.currentStatus}</Tag>
         </p>
         <p>
           Trạng thái mới:{' '}
-          <Tag
-            color={'green'} // Luôn là màu xanh vì chỉ chuyển sang "Đã trả kết quả"
-          >
+          <Tag color={'green'}>
             {
               statusListData?.data?.find((s) => s._id === newStatusId)
                 ?.testRequestStatus
