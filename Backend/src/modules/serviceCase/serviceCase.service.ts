@@ -235,6 +235,8 @@ export class ServiceCaseService implements IServiceCaseService {
   @Cron('0 */3 * * * *')
   async handleCron() {
     this.logger.log(`Bắt đầu cron job lúc ${new Date().toISOString()}`)
+    const currentTime = new Date()
+    currentTime.setMinutes(currentTime.getMinutes() - 10)
 
     // 1. Lấy ID các trạng thái cần thiết (Giữ nguyên)
     const pendingStatusId =
@@ -247,16 +249,16 @@ export class ServiceCaseService implements IServiceCaseService {
       )
     const cancelledStatusId =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
-        'Hủy (do thanh toán thất bại hoặc chưa thanh toán)',
+        'Hủy do không thanh toán thành công',
       )
 
     // 2. Lấy danh sách cần xử lý
     const pendingCases = await this.serviceCaseRepository.getBookingIdsByTime(
-      new Date(),
+      currentTime,
       pendingStatusId,
     )
     const failedCases = await this.serviceCaseRepository.getBookingIdsByTime(
-      new Date(),
+      currentTime,
       failedStatusId,
     )
 
@@ -277,10 +279,12 @@ export class ServiceCaseService implements IServiceCaseService {
       .filter(Boolean)
     // Chuẩn bị sẵn các document để ghi lịch sử
     const historyDocs = casesToProcess.map((c) => ({
-      testRequest: c._id,
+      serviceCase: c._id,
       testRequestStatus: cancelledStatusId,
       account: c.account,
     }))
+
+    console.log(historyDocs)
 
     // 4. THỰC HIỆN CẬP NHẬT HÀNG LOẠT (Chỉ 3 lệnh gọi DB)
 
