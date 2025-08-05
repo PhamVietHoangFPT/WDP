@@ -40,8 +40,7 @@ export default function ServiceCase() {
   })
 
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
-  const [createPayment] =
-    useCreatePaymentForConditionMutation()
+  const [createPayment] = useCreatePaymentForConditionMutation()
 
   // 2. Tạo state để quản lý loading cho từng dòng cụ thể khi thanh toán
   const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
@@ -78,8 +77,6 @@ export default function ServiceCase() {
       setLoadingPaymentFor(null) // Tắt loading sau khi hoàn tất
     }
   }
-
-
 
   const columns: Array<ColumnType<any>> = [
     {
@@ -189,6 +186,14 @@ export default function ServiceCase() {
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
       render: (_, record: any) => {
+        // 1. ƯU TIÊN KIỂM TRA TRƯỚC: Nếu là tự lấy mẫu
+        // Dùng optional chaining (?.) để tránh lỗi nếu record.caseMember không tồn tại
+        if (record.caseMember?.isSelfSampling === true) {
+          // Sử dụng Tag để đồng bộ về giao diện và chọn màu khác để phân biệt
+          return <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+        }
+
+        // 2. Nếu không phải tự lấy mẫu, tiếp tục với logic cũ
         const collector = record.sampleCollector
 
         // Nếu không có thông tin nhân viên, hiển thị tag
@@ -213,7 +218,6 @@ export default function ServiceCase() {
         )
       },
     },
-
     {
       title: 'Bác sĩ phụ trách',
       key: 'doctor',
@@ -230,6 +234,36 @@ export default function ServiceCase() {
             <UserOutlined />
             <Typography.Text>{doctor.name}</Typography.Text>
           </Space>
+        )
+      },
+    },
+    {
+      title: 'Trạng thái',
+      key: 'status',
+      dataIndex: ['currentStatus', 'testRequestStatus'],
+      render: (status: string) => {
+        // Giữ nguyên logic chọn màu
+        let color = 'default'
+        if (status?.includes('Chờ')) color = 'blue'
+        else if (status?.includes('hoàn thành')) color = 'green'
+        else if (status?.includes('Hủy')) color = 'red'
+
+        if (!status) {
+          return <Tag>N/A</Tag>
+        }
+
+        const maxLength = 25 // Giới hạn 25 ký tự, bạn có thể thay đổi
+        let displayStatus = status
+
+        if (status.length > maxLength) {
+          displayStatus = status.substring(0, maxLength) + '...'
+        }
+
+        // Dùng title của Tag để làm tooltip đơn giản
+        return (
+          <Tag color={color} title={status}>
+            {displayStatus}
+          </Tag>
         )
       },
     },
@@ -273,9 +307,7 @@ export default function ServiceCase() {
           <span
           // onClick={() => navigate(`/service-case-customer/${record._id}`)}
           >
-            <Tag color="success">
-              Đã có kết quả
-            </Tag>
+            <Tag color='success'>Đã có kết quả</Tag>
           </span>
         )
       },

@@ -29,7 +29,7 @@ export default function ReturnFailDetail() {
   const { id } = useParams()
   const pdfRef = useRef(null)
   const [searchParams] = useSearchParams()
-  
+
   const accountId = searchParams.get('accountId') || ''
 
   const { data: historyData, isLoading: isLoadingHistory } =
@@ -261,7 +261,14 @@ export default function ReturnFailDetail() {
               ))}
               <Descriptions.Item label='Hình thức lấy mẫu'>
                 {serviceCase?.caseMember?.isAtHome ? (
-                  <Tag color='green'>Lấy mẫu tại nhà</Tag>
+                  <>
+                    <Tag color='green'>Lấy mẫu tại nhà</Tag>
+                    {serviceCase?.caseMember?.isSelfSampling ? (
+                      <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+                    ) : (
+                      <Tag color='blue'>Nhân viên đến lấy mẫu</Tag>
+                    )}
+                  </>
                 ) : (
                   <Tag>Lấy mẫu tại trung tâm</Tag>
                 )}

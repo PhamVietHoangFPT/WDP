@@ -177,6 +177,14 @@ export default function StaffServiceCase() {
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
       render: (_, record: any) => {
+        // 1. ƯU TIÊN KIỂM TRA TRƯỚC: Nếu là tự lấy mẫu
+        // Dùng optional chaining (?.) để tránh lỗi nếu record.caseMember không tồn tại
+        if (record.caseMember?.isSelfSampling === true) {
+          // Sử dụng Tag để đồng bộ về giao diện và chọn màu khác để phân biệt
+          return <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+        }
+
+        // 2. Nếu không phải tự lấy mẫu, tiếp tục với logic cũ
         const collector = record.sampleCollector
 
         // Nếu không có thông tin nhân viên, hiển thị tag
@@ -201,7 +209,6 @@ export default function StaffServiceCase() {
         )
       },
     },
-
     {
       title: 'Bác sĩ phụ trách',
       key: 'doctor',
