@@ -284,8 +284,6 @@ export class ServiceCaseService implements IServiceCaseService {
       account: c.account,
     }))
 
-    console.log(historyDocs)
-
     // 4. THỰC HIỆN CẬP NHẬT HÀNG LOẠT (Chỉ 3 lệnh gọi DB)
 
     // Cập nhật tất cả slot cần giải phóng trong MỘT LỆNH
