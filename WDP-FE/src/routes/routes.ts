@@ -1,20 +1,51 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
-import DeliveryStaffKitShipment from '../pages/DeliveryStaffHomePage/DeliveryStaffKitShipment'
-import StaffServiceCase from '../pages/Staff/StaffServiceCase'
-import StaffServiceCaseDetail from '../pages/Staff/StaffServiceCaseDetail'
-import StaffPaymentHistory from '../pages/Staff/PaymentHistory'
-import StaffPaymentHistoryDetail from '../pages/Staff/PaymentDetail'
-import StaffServeServiceCase from '../pages/Staff/StaffServeServiceCase'
-import ManagerServiceCaseWithoutDelivery from '../pages/ManagerServiceCaseWithoutDelivery/ManagerServiceCaseWithoutDelivery'
-import DeliveryStaffServiceCase from '../pages/DeliveryStaffServiceCase/DeliveryStaffServiceCase'
-import ReturnFail from '../pages/Staff/ReturnFail'
-import SampleCollectorDoneServiceCase from '../pages/SampleCollectorDoneServiceCase/SampleCollectorDoneServiceCase'
-import { DoctorManagerLayout } from '../components/layout/DoctorManagerLayout'
-import DoctorManagerHomePage from '../pages/DoctorManagerHomePage/DoctorManagerHomePage'
-import StaffServiceCaseByCustomerDetail from '../pages/StaffGetServiceCaseByCustomer/StaffServiceCaseByCustomerDetail'
-import Price from '../components/Price/Price'
-import ReturnFailDetail from '../pages/Staff/ReturnFailDetail'
+const DeliveryStaffKitShipment = lazy(
+  () => import('../pages/DeliveryStaffHomePage/DeliveryStaffKitShipment')
+)
+const StaffServiceCase = lazy(() => import('../pages/Staff/StaffServiceCase'))
+const StaffServiceCaseDetail = lazy(
+  () => import('../pages/Staff/StaffServiceCaseDetail')
+)
+const StaffPaymentHistory = lazy(() => import('../pages/Staff/PaymentHistory'))
+const StaffPaymentHistoryDetail = lazy(
+  () => import('../pages/Staff/PaymentDetail')
+)
+const StaffServeServiceCase = lazy(
+  () => import('../pages/Staff/StaffServeServiceCase')
+)
+const ManagerServiceCaseWithoutDelivery = lazy(
+  () =>
+    import(
+      '../pages/ManagerServiceCaseWithoutDelivery/ManagerServiceCaseWithoutDelivery'
+    )
+)
+const DeliveryStaffServiceCase = lazy(
+  () => import('../pages/DeliveryStaffServiceCase/DeliveryStaffServiceCase')
+)
+const ReturnFail = lazy(() => import('../pages/Staff/ReturnFail'))
+const SampleCollectorDoneServiceCase = lazy(
+  () =>
+    import(
+      '../pages/SampleCollectorDoneServiceCase/SampleCollectorDoneServiceCase'
+    )
+)
+const DoctorManagerLayout = lazy(() =>
+  import('../components/layout/DoctorManagerLayout').then((module) => ({
+    default: module.DoctorManagerLayout,
+  }))
+)
+const DoctorManagerHomePage = lazy(
+  () => import('../pages/DoctorManagerHomePage/DoctorManagerHomePage')
+)
+const StaffServiceCaseByCustomerDetail = lazy(
+  () =>
+    import(
+      '../pages/StaffGetServiceCaseByCustomer/StaffServiceCaseByCustomerDetail'
+    )
+)
+const Price = lazy(() => import('../components/Price/Price'))
+const ReturnFailDetail = lazy(() => import('../pages/Staff/ReturnFailDetail'))
 
 const StaffAdministrationRegister = lazy(
   () => import('../pages/Staff/StaffAdministrationRegister')
@@ -418,7 +449,7 @@ const routes: LayoutRoute[] = [
         path: '/manager',
         component: ManagerHomePage,
       },
-      
+
       {
         path: '/manager/create-account',
         component: ManagerCreateAccount,
