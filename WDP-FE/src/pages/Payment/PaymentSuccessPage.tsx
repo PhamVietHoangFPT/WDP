@@ -70,12 +70,16 @@ export default function PaymentSuccessPage() {
         <Text type='secondary'>
           Giao dịch không thành công hoặc bị từ chối.
         </Text>
+        <Text type='secondary' style={{ display: 'block', marginTop: 8 }}>
+          Vui lòng truy cập vào trang lịch sử trường hợp dịch vụ để thanh toán
+          lại.
+        </Text>
       </>
     )
   }
 
   return (
-    <Card style={{ maxWidth: 500, margin: '40px auto', textAlign: 'center' }}>
+    <Card style={{ maxWidth: 550, margin: '40px auto', textAlign: 'center' }}>
       {renderContent()}
       <Button
         type='primary'
