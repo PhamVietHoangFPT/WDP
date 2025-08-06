@@ -10,7 +10,8 @@ import {
   Select,
   message,
   Space,
-  Modal, // Import Modal
+  Modal,
+  Tooltip, // Import Modal
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -247,6 +248,7 @@ export default function ServiceCase() {
         if (status?.includes('Chờ')) color = 'blue'
         else if (status?.includes('hoàn thành')) color = 'green'
         else if (status?.includes('Hủy')) color = 'red'
+        else if (status?.includes('Đã trả kết quả')) color = 'green'
 
         if (!status) {
           return <Tag>N/A</Tag>
@@ -261,9 +263,9 @@ export default function ServiceCase() {
 
         // Dùng title của Tag để làm tooltip đơn giản
         return (
-          <Tag color={color} title={status}>
-            {displayStatus}
-          </Tag>
+          <Tooltip title={status}>
+            <Tag color={color}>{displayStatus}</Tag>
+          </Tooltip>
         )
       },
     },
