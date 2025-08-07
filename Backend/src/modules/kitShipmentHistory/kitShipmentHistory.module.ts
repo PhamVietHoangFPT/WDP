@@ -4,7 +4,10 @@ import {
   KitShipmentHistory,
   KitShipmentHistorySchema,
 } from './schemas/KitShipmentHistory.schema'
-import { KitShipment, KitShipmentSchema } from '../KitShipment/schemas/kitShipment.schema'
+import {
+  KitShipment,
+  KitShipmentSchema,
+} from '../KitShipment/schemas/kitShipment.schema'
 import { KitShipmentHistoryController } from './KitShipmentHistory.controller'
 import { IKitShipmentHistoryService } from './interfaces/iKitShipmentHistory.service'
 import { KitShipmentHistoryService } from './KitShipmentHistory.service'
@@ -39,4 +42,4 @@ import { KitShipmentModule } from '../KitShipment/kitShipment.module'
     MongooseModule,
   ],
 })
-export class KitShipmentHistoryModule { }
+export class KitShipmentHistoryModule {}

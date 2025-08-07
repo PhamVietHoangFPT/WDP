@@ -115,7 +115,6 @@ export const SideBar = () => {
           onClick: () =>
             navigate('/staff/test-takers/served?pageNumber=1&pageSize=10'),
         },
-        
       ],
     },
     // {
@@ -126,11 +125,11 @@ export const SideBar = () => {
     // },
     // ...
     {
-          key: 'staff/return-fail',
-          icon: <TeamOutlined />,
-          label: 'Quản lý hồ sơ khách hàng',
-          onClick: () => navigate('/staff/return-fail'),
-        },
+      key: 'staff/return-fail',
+      icon: <TeamOutlined />,
+      label: 'Quản lý hồ sơ khách hàng',
+      onClick: () => navigate('/staff/return-fail'),
+    },
   ]
 
   return (

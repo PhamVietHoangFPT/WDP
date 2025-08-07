@@ -65,7 +65,7 @@ export default function ReturnFailDetail() {
 
   const sortedHistoryData = [...(historyData?.data || [])].sort(
     (a, b) => a.created_at - b.created_at
-  );
+  )
 
   if (isLoadingHistory || isLoadingServiceCase) {
     return (
@@ -225,11 +225,11 @@ export default function ReturnFailDetail() {
                     serviceCase.caseMember.booking.bookingDate
                   ).toLocaleDateString('vi-VN')}
               </Descriptions.Item>
-              <Descriptions.Item label="Thời gian lấy mẫu">
+              <Descriptions.Item label='Thời gian lấy mẫu'>
                 {serviceCase?.caseMember?.booking?.slot?.startTime} -{' '}
                 {serviceCase?.caseMember?.booking?.slot?.endTime}
               </Descriptions.Item>
-              <Descriptions.Item label="Cơ sở">
+              <Descriptions.Item label='Cơ sở'>
                 {
                   serviceCase?.caseMember?.booking?.slot?.slotTemplate?.facility
                     ?.facilityName

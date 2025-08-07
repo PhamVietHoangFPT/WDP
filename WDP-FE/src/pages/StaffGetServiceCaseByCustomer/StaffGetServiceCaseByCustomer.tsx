@@ -153,7 +153,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
     },
     {
       title: 'Ngày Đặt Lịch',
-      dataIndex: ['bookingDetails','bookingDate'],
+      dataIndex: ['bookingDetails', 'bookingDate'],
       key: 'bookingDate',
       render: (date) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
     },

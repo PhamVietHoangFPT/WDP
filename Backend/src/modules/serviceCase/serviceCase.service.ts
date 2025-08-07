@@ -261,7 +261,7 @@ export class ServiceCaseService implements IServiceCaseService {
       )
     const cancelledStatusId =
       await this.testRequestStatusRepository.getTestRequestStatusIdByName(
-        'Hủy do không thanh toán thành công',
+        'Hủy do thanh toán không thành công',
       )
 
     // 2. Lấy danh sách cần xử lý

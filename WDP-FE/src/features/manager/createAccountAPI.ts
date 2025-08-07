@@ -49,5 +49,9 @@ const createAccountAPI = apiSlice.injectEndpoints({
   }),
 })
 
-export const { useGetRoleListQuery, useCreateAccountMutation, useGetStaffListQuery, useDeleteAccountMutation } =
-  createAccountAPI
+export const {
+  useGetRoleListQuery,
+  useCreateAccountMutation,
+  useGetStaffListQuery,
+  useDeleteAccountMutation,
+} = createAccountAPI

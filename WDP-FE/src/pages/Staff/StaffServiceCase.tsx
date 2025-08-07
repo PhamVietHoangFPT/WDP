@@ -50,7 +50,6 @@ export default function StaffServiceCase() {
 
   //     const response = await createPayment({ serviceCaseId }).unwrap()
 
-
   //     if (
   //       typeof response.redirectUrl === 'string' &&
   //       response.redirectUrl.trim() !== ''
@@ -64,7 +63,7 @@ export default function StaffServiceCase() {
   //     console.error('Lỗi khi tạo yêu cầu thanh toán:', err)
   //     message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
   //   } finally {
-  //     setLoadingPaymentFor(null) 
+  //     setLoadingPaymentFor(null)
   //   }
   // }
 
@@ -161,11 +160,19 @@ export default function StaffServiceCase() {
       key: 'bookingDate',
       render: (
         _: any,
-        record: { caseMember: { booking: { bookingDate: string, slot?: { slotTemplate?: { facility?: { facilityName: string } } } } } }
+        record: {
+          caseMember: {
+            booking: {
+              bookingDate: string
+              slot?: { slotTemplate?: { facility?: { facilityName: string } } }
+            }
+          }
+        }
       ) => {
         const bookingDate = record.caseMember?.booking?.bookingDate
-        const facilityName = record.caseMember?.booking?.slot?.slotTemplate?.facility?.facilityName
-        
+        const facilityName =
+          record.caseMember?.booking?.slot?.slotTemplate?.facility?.facilityName
+
         if (!bookingDate) {
           return <Tag color='default'>Chưa đặt</Tag>
         }
@@ -177,7 +184,7 @@ export default function StaffServiceCase() {
           <Space direction='vertical' size={2}>
             <Typography.Text>{formattedDate}</Typography.Text>
             {facilityName && (
-              <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+              <Typography.Text type='secondary' style={{ fontSize: '12px' }}>
                 ({facilityName})
               </Typography.Text>
             )}

@@ -86,6 +86,7 @@ export default function DocumentFormAccept() {
           await createResult(requestData).unwrap()
 
           message.success('Tạo kết quả thành công')
+          window.history.back()
         } catch (err) {
           console.error('❌ Tạo kết quả lỗi:', err)
           message.error('Tạo kết quả thất bại')

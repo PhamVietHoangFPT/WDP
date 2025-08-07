@@ -318,7 +318,7 @@ const DeliveryStaffServiceCase: React.FC = () => {
                     }}
                     type='primary'
                   >
-                    Thành công 
+                    Thành công
                   </Button>
                 )}
                 {failureStatus && (
@@ -353,7 +353,9 @@ const DeliveryStaffServiceCase: React.FC = () => {
                 }} // Màu xanh lá cây
               ></Button>
             )}
-            {!isUpdatable && !isNotCompleted && <Tag color='default'>Không thể cập nhật</Tag>}
+            {!isUpdatable && !isNotCompleted && (
+              <Tag color='default'>Không thể cập nhật</Tag>
+            )}
           </Space>
         )
       },

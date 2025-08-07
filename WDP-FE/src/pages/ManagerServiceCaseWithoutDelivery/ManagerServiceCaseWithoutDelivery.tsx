@@ -1,5 +1,5 @@
-import type React from 'react';
-import { useState } from 'react';
+import type React from 'react'
+import { useState } from 'react'
 import {
   Table,
   Button,
@@ -13,62 +13,62 @@ import {
   Tag,
   Modal,
   DatePicker,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import {
   UserAddOutlined,
   DownOutlined,
   ExclamationCircleOutlined,
   CalendarOutlined,
-} from '@ant-design/icons';
+} from '@ant-design/icons'
 import {
   useGetDeliveryStaffListQuery,
   useGetServiceCaseNoDeliveryStaffListQuery,
   useAddDeliveryStaffToServiceCaseMutation,
-} from '../../features/manager/deliveryStaffAPI';
-import moment from 'moment';
+} from '../../features/manager/deliveryStaffAPI'
+import moment from 'moment'
 
-const { Title } = Typography;
+const { Title } = Typography
 
 interface ServiceCase {
-  _id: string;
-  totalFee: number;
+  _id: string
+  totalFee: number
   account: {
-    _id: string;
-    name: string;
-    email: string;
-    phoneNumber: string; // Thêm phoneNumber vào đây
-  };
-  phoneNumber: string;
-  bookingDate: string;
-  bookingTime: string;
+    _id: string
+    name: string
+    email: string
+    phoneNumber: string // Thêm phoneNumber vào đây
+  }
+  phoneNumber: string
+  bookingDate: string
+  bookingTime: string
   facility: {
-    _id: string;
-    name: string;
-  };
-  isAtHome?: boolean;
-  currentStatus?: string;
-  created_at?: string;
+    _id: string
+    name: string
+  }
+  isAtHome?: boolean
+  currentStatus?: string
+  created_at?: string
 }
 
 interface DeliveryStaff {
-  _id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
+  _id: string
+  name: string
+  email: string
+  phoneNumber: string
 }
 
 const ManagerServiceCaseWithoutDelivery: React.FC = () => {
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false)
   const [selectedServiceCase, setSelectedServiceCase] =
-    useState<ServiceCase | null>(null);
+    useState<ServiceCase | null>(null)
   const [selectedDeliveryStaff, setSelectedDeliveryStaff] =
-    useState<DeliveryStaff | null>(null);
+    useState<DeliveryStaff | null>(null)
   const [selectedBookingDate, setSelectedBookingDate] = useState<
     string | undefined
-  >(undefined);
+  >(undefined)
 
   const {
     data: serviceCasesData,
@@ -79,58 +79,56 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     pageNumber: 1,
     pageSize: 100,
     bookingDate: selectedBookingDate,
-  });
+  })
 
-  const {
-    data: deliveryStaffsData,
-    isLoading: isLoadingDeliveryStaffs,
-  } = useGetDeliveryStaffListQuery({
-    pageNumber: 1,
-    pageSize: 100,
-  });
+  const { data: deliveryStaffsData, isLoading: isLoadingDeliveryStaffs } =
+    useGetDeliveryStaffListQuery({
+      pageNumber: 1,
+      pageSize: 100,
+    })
 
   const [addDeliveryStaffToServiceCase, { isLoading: isAssigning }] =
-    useAddDeliveryStaffToServiceCaseMutation();
+    useAddDeliveryStaffToServiceCaseMutation()
 
   const handleAssignDeliveryStaff = (
     serviceCase: ServiceCase,
     deliveryStaff: DeliveryStaff
   ) => {
-    setSelectedServiceCase(serviceCase);
-    setSelectedDeliveryStaff(deliveryStaff);
-    setConfirmModalVisible(true);
-  };
+    setSelectedServiceCase(serviceCase)
+    setSelectedDeliveryStaff(deliveryStaff)
+    setConfirmModalVisible(true)
+  }
 
   const handleConfirmAssignment = async () => {
-    if (!selectedServiceCase || !selectedDeliveryStaff) return;
+    if (!selectedServiceCase || !selectedDeliveryStaff) return
 
     try {
       await addDeliveryStaffToServiceCase({
         serviceCaseId: selectedServiceCase._id,
         deliveryStaffId: selectedDeliveryStaff._id,
         data: {},
-      }).unwrap();
+      }).unwrap()
 
       message.success(
         `Đã gán nhân viên giao hàng ${selectedDeliveryStaff.name} cho dịch vụ thành công!`
-      );
-      setConfirmModalVisible(false);
-      setSelectedServiceCase(null);
-      setSelectedDeliveryStaff(null);
+      )
+      setConfirmModalVisible(false)
+      setSelectedServiceCase(null)
+      setSelectedDeliveryStaff(null)
     } catch (error: any) {
-      console.error('Error assigning delivery staff:', error);
-      message.error(error?.data?.message || 'Gán nhân viên giao hàng thất bại!');
+      console.error('Error assigning delivery staff:', error)
+      message.error(error?.data?.message || 'Gán nhân viên giao hàng thất bại!')
     }
-  };
+  }
 
   const handleCancelAssignment = () => {
-    setConfirmModalVisible(false);
-    setSelectedServiceCase(null);
-    setSelectedDeliveryStaff(null);
-  };
+    setConfirmModalVisible(false)
+    setSelectedServiceCase(null)
+    setSelectedDeliveryStaff(null)
+  }
 
   const getDeliveryStaffMenu = (serviceCaseId: string) => {
-    const deliveryStaffs = deliveryStaffsData?.data || [];
+    const deliveryStaffs = deliveryStaffsData?.data || []
 
     if (deliveryStaffs.length === 0) {
       return (
@@ -147,10 +145,10 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             },
           ]}
         />
-      );
+      )
     }
 
-    const serviceCases = serviceCasesData?.data || []; // Lấy serviceCases từ data
+    const serviceCases = serviceCasesData?.data || [] // Lấy serviceCases từ data
     return (
       <Menu
         items={deliveryStaffs.map((deliveryStaff: DeliveryStaff) => ({
@@ -160,9 +158,9 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               onClick={() => {
                 const serviceCase = serviceCases.find(
                   (sc) => sc._id === serviceCaseId
-                );
+                )
                 if (serviceCase) {
-                  handleAssignDeliveryStaff(serviceCase, deliveryStaff);
+                  handleAssignDeliveryStaff(serviceCase, deliveryStaff)
                 }
               }}
             >
@@ -177,8 +175,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           ),
         }))}
       />
-    );
-  };
+    )
+  }
 
   const columns: ColumnsType<ServiceCase> = [
     {
@@ -207,7 +205,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       dataIndex: 'bookingDate',
       key: 'bookingDate',
       render: (date: string, record) => {
-        const formattedDate = new Date(date).toLocaleDateString('vi-VN');
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN')
         return (
           <>
             <div>{formattedDate}</div>
@@ -215,7 +213,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               ({record.bookingTime})
             </div>
           </>
-        );
+        )
       },
       sorter: (a, b) =>
         new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
@@ -258,13 +256,13 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
         </Space>
       ),
     },
-  ];
+  ]
 
-  const serviceCases = serviceCasesData?.data || [];
-  const totalItems = serviceCases.length;
-  const startIndex = (pageNumber - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedData = serviceCases.slice(startIndex, endIndex);
+  const serviceCases = serviceCasesData?.data || []
+  const totalItems = serviceCases.length
+  const startIndex = (pageNumber - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const paginatedData = serviceCases.slice(startIndex, endIndex)
 
   // Removed disabledDate function to allow selecting past dates
   // const disabledDate = (current: moment.Moment) => {
@@ -291,8 +289,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             format='YYYY-MM-DD'
             placeholder='Chọn ngày đặt lịch'
             onChange={(date, dateString) => {
-              setSelectedBookingDate(dateString || undefined);
-              setPageNumber(1);
+              setSelectedBookingDate(dateString || undefined)
+              setPageNumber(1)
             }}
             style={{ width: 180, marginLeft: '80px' }}
             allowClear
@@ -351,8 +349,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               total={totalItems}
               style={{ textAlign: 'center', paddingTop: 20 }}
               onChange={(page, size) => {
-                setPageNumber(page);
-                setPageSize(size || 10);
+                setPageNumber(page)
+                setPageSize(size || 10)
               }}
               showSizeChanger
               showQuickJumper
@@ -396,9 +394,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
                     ).toLocaleDateString('vi-VN')
                   : 'N/A'}
               </div>
-              <div>
-                • Giờ hẹn: {selectedServiceCase?.bookingTime || 'N/A'}{' '}
-              </div>
+              <div>• Giờ hẹn: {selectedServiceCase?.bookingTime || 'N/A'} </div>
               <div>
                 • Tổng phí:{' '}
                 {selectedServiceCase?.totalFee
@@ -413,9 +409,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             <div style={{ marginLeft: '16px', marginTop: '8px' }}>
               <div>• Tên: {selectedDeliveryStaff?.name}</div>
               <div>• Email: {selectedDeliveryStaff?.email}</div>
-              <div>
-                • Số điện thoại: {selectedDeliveryStaff?.phoneNumber}
-              </div>
+              <div>• Số điện thoại: {selectedDeliveryStaff?.phoneNumber}</div>
             </div>
           </div>
 
@@ -431,13 +425,14 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             <strong style={{ color: '#d46b08' }}>⚠️ Lưu ý:</strong>
             <div style={{ color: '#d46b08', marginTop: '4px' }}>
               Sau khi gán nhân viên giao hàng, dịch vụ sẽ được chuyển sang trạng
-              thái "Đã có nhân viên giao hàng phụ trách" và không thể hoàn tác.{' '}
+              thái "Đã có nhân viên giao hàng phụ trách" và không thể hoàn
+              tác.{' '}
             </div>
           </div>
         </div>
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default ManagerServiceCaseWithoutDelivery;
+export default ManagerServiceCaseWithoutDelivery

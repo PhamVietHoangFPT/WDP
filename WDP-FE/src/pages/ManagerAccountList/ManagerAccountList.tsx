@@ -10,7 +10,7 @@ import {
   Typography,
   Card,
   Spin,
-  App
+  App,
 } from 'antd'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import {
@@ -70,7 +70,8 @@ export default function ManagerAccountList() {
 
   const roles = rolesData?.data || []
 
-  const staffs = staffsData?.data?.filter((staff) => staff.deleted_at === null) || []
+  const staffs =
+    staffsData?.data?.filter((staff) => staff.deleted_at === null) || []
 
   const columns = [
     {
@@ -113,10 +114,7 @@ export default function ManagerAccountList() {
     },
   ]
 
-  
-
   return (
-
     <div className='p-6'>
       <Card>
         <div style={{ padding: '24px' }}>
@@ -130,7 +128,6 @@ export default function ManagerAccountList() {
             }}
           >
             <Space>
-
               <Search
                 placeholder='Tìm kiếm theo email...'
                 value={emailFilter}
@@ -155,7 +152,6 @@ export default function ManagerAccountList() {
             </Space>
 
             <div>
-
               <Button
                 type='primary'
                 onClick={handleCreateAccount}
@@ -172,7 +168,8 @@ export default function ManagerAccountList() {
             {isStaffError ? (
               <div style={{ textAlign: 'center', padding: '50px' }}>
                 <Typography.Text type='danger'>
-                    {staffError?.data?.message || 'Lỗi khi tải danh sách nhân viên.'}
+                  {staffError?.data?.message ||
+                    'Lỗi khi tải danh sách nhân viên.'}
                 </Typography.Text>
               </div>
             ) : (
@@ -189,6 +186,4 @@ export default function ManagerAccountList() {
       </Card>
     </div>
   )
-
 }
-
