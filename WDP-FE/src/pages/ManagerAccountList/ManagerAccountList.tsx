@@ -69,6 +69,7 @@ export default function ManagerAccountList() {
   }
 
   const roles = rolesData?.data || []
+
   const staffs = staffsData?.data?.filter((staff) => staff.deleted_at === null) || []
 
   const columns = [
@@ -115,6 +116,7 @@ export default function ManagerAccountList() {
   
 
   return (
+
     <div className='p-6'>
       <Card>
         <div style={{ padding: '24px' }}>
@@ -128,6 +130,7 @@ export default function ManagerAccountList() {
             }}
           >
             <Space>
+
               <Search
                 placeholder='Tìm kiếm theo email...'
                 value={emailFilter}
@@ -150,7 +153,9 @@ export default function ManagerAccountList() {
                 ))}
               </Select>
             </Space>
+
             <div>
+
               <Button
                 type='primary'
                 onClick={handleCreateAccount}
@@ -161,8 +166,8 @@ export default function ManagerAccountList() {
             </div>
           </Space>
         </div>
+
         <div style={{ padding: '0 24px 24px' }}>
-          {/* Lồng logic kiểm tra lỗi vào bên trong Spin */}
           <Spin spinning={isStaffLoading}>
             {isStaffError ? (
               <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -184,4 +189,6 @@ export default function ManagerAccountList() {
       </Card>
     </div>
   )
+
 }
+
