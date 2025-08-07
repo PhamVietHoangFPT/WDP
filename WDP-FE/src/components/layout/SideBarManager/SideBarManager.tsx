@@ -83,7 +83,7 @@ export const SideBar = () => {
       key: 'manager/create-account',
       icon: <IdcardOutlined />,
       label: 'Quản trị tài khoản',
-      onClick: () => navigate('manager/create-account'),
+      onClick: () => navigate('manager/account'),
     },
   ]
 

@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import type { LayoutRoute } from '../types/routes'
+import ManagerAccountList from '../pages/ManagerAccountList/ManagerAccountList'
 const DeliveryStaffKitShipment = lazy(
   () => import('../pages/DeliveryStaffHomePage/DeliveryStaffKitShipment')
 )
@@ -451,8 +452,12 @@ const routes: LayoutRoute[] = [
       },
 
       {
-        path: '/manager/create-account',
+        path: '/manager/account/create',
         component: ManagerCreateAccount,
+      },
+      {
+        path: '/manager/account',
+        component: ManagerAccountList,
       },
       {
         path: 'manager/kit-shipment-without-delivery-staff',
