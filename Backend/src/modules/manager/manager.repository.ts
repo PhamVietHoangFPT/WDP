@@ -1055,6 +1055,7 @@ export class ManagerRepository implements IManagerRepository {
           name: 1,
           phoneNumber: 1,
           role: '$role.role',
+          deleted_at: 1,
         },
       },
     ])

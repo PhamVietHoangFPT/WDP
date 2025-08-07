@@ -24,6 +24,7 @@ export class ManagerService implements IManagerService {
       phoneNumber: user.phoneNumber,
       role: user.role,
       facility: user.facility,
+      deleted_at: user.deleted_at,
     })
   }
 
@@ -229,7 +230,7 @@ export class ManagerService implements IManagerService {
     if (!staffs || staffs.length === 0) {
       throw new NotFoundException('Không tìm thấy nhân viên nào')
     }
-    return staffs.map((item) => new AccountResponseDto(item))
+    return staffs.map((item) => this.mapToResponseDto(item))
   }
 
   async deleteAccount(
@@ -243,6 +244,6 @@ export class ManagerService implements IManagerService {
     if (!deletedAccount) {
       throw new NotFoundException('Không tìm thấy tài khoản để xóa')
     }
-    return new AccountResponseDto(deletedAccount)
+    return this.mapToResponseDto(deletedAccount)
   }
 }
