@@ -34,40 +34,39 @@ export default function StaffServiceCase() {
     currentStatus: currentStatus,
   })
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
-  const [createPayment, { isLoading: isPaymentLoading }] =
-    useCreatePaymentForConditionMutation()
+  // const [createPayment, { isLoading: isPaymentLoading }] =
+  //   useCreatePaymentForConditionMutation()
 
   // 2. Tạo state để quản lý loading cho từng dòng cụ thể
-  const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
-    null
-  )
+  // const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
+  //   null
+  // )
 
   // 3. Tạo hàm xử lý việc thanh toán
-  const handlePayment = async (serviceCaseId: string) => {
-    setLoadingPaymentFor(serviceCaseId) // Bật loading cho dòng được click
-    console.log(serviceCaseId)
-    try {
-      // Gọi API, .unwrap() sẽ trả về data nếu thành công hoặc ném lỗi nếu thất bại
-      const response = await createPayment({ serviceCaseId }).unwrap()
+  // const handlePayment = async (serviceCaseId: string) => {
+  //   setLoadingPaymentFor(serviceCaseId) // Bật loading cho dòng được click
+  //   console.log(serviceCaseId)
+  //   try {
 
-      // Nếu có redirectUrl, chuyển hướng người dùng
-      if (
-        typeof response.redirectUrl === 'string' &&
-        response.redirectUrl.trim() !== ''
-      ) {
-        // Mở URL trong một tab mới.
-        // Thêm 'noopener,noreferrer' là một thông lệ tốt để tăng cường bảo mật.
-        window.open(response.redirectUrl, '_blank', 'noopener,noreferrer')
-      } else {
-        message.error('Không nhận được đường dẫn thanh toán.')
-      }
-    } catch (err) {
-      console.error('Lỗi khi tạo yêu cầu thanh toán:', err)
-      message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
-    } finally {
-      setLoadingPaymentFor(null) // Tắt loading sau khi hoàn tất
-    }
-  }
+  //     const response = await createPayment({ serviceCaseId }).unwrap()
+
+
+  //     if (
+  //       typeof response.redirectUrl === 'string' &&
+  //       response.redirectUrl.trim() !== ''
+  //     ) {
+
+  //       window.open(response.redirectUrl, '_blank', 'noopener,noreferrer')
+  //     } else {
+  //       message.error('Không nhận được đường dẫn thanh toán.')
+  //     }
+  //   } catch (err) {
+  //     console.error('Lỗi khi tạo yêu cầu thanh toán:', err)
+  //     message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
+  //   } finally {
+  //     setLoadingPaymentFor(null) 
+  //   }
+  // }
 
   const columns = [
     {
@@ -248,20 +247,20 @@ export default function StaffServiceCase() {
         }
 
         // Case 2: Cần thanh toán chi phí phát sinh
-        const isPaymentRequired =
-          record.condition !== null && record.paymentForCondition === null
+        // const isPaymentRequired =
+        //   record.condition !== null && record.paymentForCondition === null
 
-        if (isPaymentRequired) {
-          return (
-            <Button
-              type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
-              onClick={() => handlePayment(record._id)}
-              loading={loadingPaymentFor === record._id}
-            >
-              Thanh toán chi phí phát sinh để xem kết quả
-            </Button>
-          )
-        }
+        // if (isPaymentRequired) {
+        //   return (
+        //     <Button
+        //       type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
+        //       onClick={() => handlePayment(record._id)}
+        //       loading={loadingPaymentFor === record._id}
+        //     >
+        //       Thanh toán chi phí phát sinh để xem kết quả
+        //     </Button>
+        //   )
+        // }
 
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (

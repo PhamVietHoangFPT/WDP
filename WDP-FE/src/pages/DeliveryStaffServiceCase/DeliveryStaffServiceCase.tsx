@@ -1,12 +1,9 @@
-'use client'
-
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import {
   Table,
   Typography,
   Spin,
-  Pagination,
   Select,
   Tag,
   Button,

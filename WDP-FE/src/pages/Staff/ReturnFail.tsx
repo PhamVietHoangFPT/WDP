@@ -1,4 +1,3 @@
-'use client'
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import {
@@ -124,7 +123,7 @@ const ReturnFail: React.FC = () => {
   const [newStatusId, setNewStatusId] = useState<string>('')
   const [updateModalVisible, setUpdateModalVisible] = useState(false)
 
-  const debouncedEmail = useDebounce(customerEmail, 900)
+  const debouncedEmail = useDebounce(customerEmail, 500)
 
   const {
     data: statusListData,
