@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   Table,
   Button,
-  message,
   Input,
   Select,
   Popconfirm,
@@ -11,6 +10,7 @@ import {
   Typography,
   Card,
   Spin,
+  App
 } from 'antd'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import {
@@ -24,6 +24,7 @@ const { Search } = Input
 
 export default function ManagerAccountList() {
   const navigate = useNavigate()
+  const { message } = App.useApp() // Sử dụng App context để lấy message
   const [emailFilter, setEmailFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [debouncedEmail, setDebouncedEmail] = useState('')
@@ -35,6 +36,8 @@ export default function ManagerAccountList() {
   const {
     data: staffsData,
     isLoading: isStaffLoading,
+    isError: isStaffError,
+    error: staffError,
     refetch,
   } = useGetStaffListQuery({
     email: debouncedEmail || undefined,
@@ -109,6 +112,8 @@ export default function ManagerAccountList() {
     },
   ]
 
+  
+
   return (
     <div className='p-6'>
       <Card>
@@ -157,14 +162,23 @@ export default function ManagerAccountList() {
           </Space>
         </div>
         <div style={{ padding: '0 24px 24px' }}>
+          {/* Lồng logic kiểm tra lỗi vào bên trong Spin */}
           <Spin spinning={isStaffLoading}>
-            <Table
-              columns={columns}
-              dataSource={staffs}
-              rowKey='_id'
-              locale={{ emptyText: 'Không có nhân viên nào' }}
-              pagination={false}
-            />
+            {isStaffError ? (
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <Typography.Text type='danger'>
+                    {staffError?.data?.message || 'Lỗi khi tải danh sách nhân viên.'}
+                </Typography.Text>
+              </div>
+            ) : (
+              <Table
+                columns={columns}
+                dataSource={staffs}
+                rowKey='_id'
+                locale={{ emptyText: 'Không có nhân viên nào' }}
+                pagination={false}
+              />
+            )}
           </Spin>
         </div>
       </Card>
