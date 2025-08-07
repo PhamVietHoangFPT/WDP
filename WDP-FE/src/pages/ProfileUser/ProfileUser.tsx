@@ -83,7 +83,7 @@ export default function ProfileUser() {
               src='https://tse1.explicit.bing.net/th/id/OIP.lvzPu-WOW4Iv7QyjP-IkrgHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3'
               style={{ border: '2px solid #d9d9d9' }}
             />
-            <EditOutlined
+            {/* <EditOutlined
               style={{
                 position: 'absolute',
                 right: 'calc(50% - 48px)',
@@ -94,7 +94,7 @@ export default function ProfileUser() {
                 boxShadow: '0 0 6px rgba(0,0,0,0.2)',
                 cursor: 'pointer',
               }}
-            />
+            /> */}
           </div>
 
           <Form layout='vertical'>
@@ -131,11 +131,11 @@ export default function ProfileUser() {
               </Col>
             </Row>
 
-            <div style={{ textAlign: 'right' }}>
+            {/* <div style={{ textAlign: 'right' }}>
               <Button type='primary' onClick={() => navigate('/edit-profile')}>
                 Chỉnh sửa thông tin
               </Button>
-            </div>
+            </div> */}
           </Form>
         </Card>
       </Content>

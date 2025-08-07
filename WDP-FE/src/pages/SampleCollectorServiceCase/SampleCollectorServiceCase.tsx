@@ -464,7 +464,7 @@ const SampleCollectorServiceCase: React.FC = () => {
                       {testTakers && testTakers.length > 0 && (
                         <Card
                           size='small'
-                          style={{ height: '300px' }}
+                          style={{ height: 'auto' }}
                           title='Người xét nghiệm & Mã mẫu'
                         >
                           {testTakers.map((taker, index) => (
