@@ -5,7 +5,10 @@ import { IKitShipmentHistoryRepository } from './interfaces/iKitShipmentHistory.
 import { IKitShipmentHistoryService } from './interfaces/iKitShipmentHistory.service'
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface'
 import { KitShipmentHistoryDocument } from './schemas/KitShipmentHistory.schema'
-import { KitShipment, KitShipmentDocument } from '../KitShipment/schemas/kitShipment.schema'
+import {
+  KitShipment,
+  KitShipmentDocument,
+} from '../KitShipment/schemas/kitShipment.schema'
 
 @Injectable()
 export class KitShipmentHistoryService implements IKitShipmentHistoryService {
@@ -14,7 +17,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
     private readonly KitShipmentHistoryRepository: IKitShipmentHistoryRepository,
     @InjectModel(KitShipment.name)
     private readonly kitShipmentModel: Model<KitShipmentDocument>,
-  ) { }
+  ) {}
   async findAllKitShipmentHistory(
     pageNumber: number,
     pageSize: number,
@@ -47,7 +50,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
         }
       }
 
-      const kitShipmentIds = kitShipments.map(ks => ks._id)
+      const kitShipmentIds = kitShipments.map((ks) => ks._id)
       filter.kitShipment = { $in: kitShipmentIds }
     }
 
@@ -60,7 +63,7 @@ export class KitShipmentHistoryService implements IKitShipmentHistoryService {
 
     // Filter out documents where kitShipmentStatus is null (didn't match order criteria)
     const filteredHistories = KitShipmentHistories.filter(
-      (history: any) => history.kitShipmentStatus !== null
+      (history: any) => history.kitShipmentStatus !== null,
     )
 
     const totalPages = Math.ceil(totalItems / pageSize)

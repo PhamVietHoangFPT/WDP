@@ -32,7 +32,7 @@ export class KitShipmentHistoryController {
   constructor(
     @Inject(IKitShipmentHistoryService)
     private readonly KitShipmentHistoryService: IKitShipmentHistoryService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Lấy tất cả lịch sử xét nghiệm ADN' })

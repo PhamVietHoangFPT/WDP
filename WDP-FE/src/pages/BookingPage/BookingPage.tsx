@@ -38,7 +38,11 @@ dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
 
 const { Title, Text, Paragraph } = Typography
-const generateTimeSlots = (workTimeStart: any, workTimeEnd: any, slotDuration: number) => {
+const generateTimeSlots = (
+  workTimeStart: any,
+  workTimeEnd: any,
+  slotDuration: number
+) => {
   const slots = []
   // Sử dụng một ngày giả để thực hiện các phép toán thời gian
   const startDate = new Date(`1970-01-01T${workTimeStart}`)
@@ -108,16 +112,21 @@ interface BookingComponentProps {
   selectedServices?: any[] // Thêm prop để nhận danh sách dịch vụ đã chọn
 }
 
-function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+function getDistanceFromLatLonInKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
   const R = 6371 // Bán kính Trái Đất (km)
   const dLat = (lat2 - lat1) * (Math.PI / 180)
   const dLon = (lon2 - lon1) * (Math.PI / 180)
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2)
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   const d = R * c
   return d
@@ -290,10 +299,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       // Tính tổng phí dịch vụ đã chọn
       const serviceFee = selectedServices.reduce((total, service) => {
         if (service) {
-          return total +
+          return (
+            total +
             (service.fee || 0) +
             (service.timeReturn?.timeReturnFee || 0) +
             (service.sample?.fee || 0)
+          )
         }
         return total
       }, 0)
@@ -327,42 +338,53 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
       (addr: { _id: string | null }) => addr._id === addressId
     )
 
-    const mappedFacilities = facilitiesData.data.map((facility: { address: { fullAddress: string; location: any }; _id: any; facilityName: any }) => {
-      const fullAddress = facility.address?.fullAddress || 'N/A'
-      const facilityLocation = facility.address?.location
-      let distance
+    const mappedFacilities = facilitiesData.data.map(
+      (facility: {
+        address: { fullAddress: string; location: any }
+        _id: any
+        facilityName: any
+      }) => {
+        const fullAddress = facility.address?.fullAddress || 'N/A'
+        const facilityLocation = facility.address?.location
+        let distance
 
-      // Chỉ tính khoảng cách khi người dùng đã chọn địa chỉ VÀ cả hai đều có tọa độ
-      if (
-        selectedUserAddress?.location?.coordinates &&
-        facilityLocation?.coordinates
-      ) {
-        const [userLon, userLat] = selectedUserAddress.location.coordinates
-        const [facilityLon, facilityLat] = facilityLocation.coordinates
-        distance = getDistanceFromLatLonInKm(
-          userLat,
-          userLon,
-          facilityLat,
-          facilityLon
-        )
-      }
+        // Chỉ tính khoảng cách khi người dùng đã chọn địa chỉ VÀ cả hai đều có tọa độ
+        if (
+          selectedUserAddress?.location?.coordinates &&
+          facilityLocation?.coordinates
+        ) {
+          const [userLon, userLat] = selectedUserAddress.location.coordinates
+          const [facilityLon, facilityLat] = facilityLocation.coordinates
+          distance = getDistanceFromLatLonInKm(
+            userLat,
+            userLon,
+            facilityLat,
+            facilityLon
+          )
+        }
 
-      return {
-        value: facility._id,
-        label: facility.facilityName,
-        address: fullAddress,
-        searchLabel: `${facility.facilityName} ${fullAddress}`,
-        distance,
+        return {
+          value: facility._id,
+          label: facility.facilityName,
+          address: fullAddress,
+          searchLabel: `${facility.facilityName} ${fullAddress}`,
+          distance,
+        }
       }
-    })
+    )
 
     // Sắp xếp lại nếu đã có địa chỉ được chọn
     if (selectedUserAddress) {
-      mappedFacilities.sort((a: { distance: number | undefined }, b: { distance: number | undefined }) => {
-        if (a.distance === undefined) return 1
-        if (b.distance === undefined) return -1
-        return a.distance - b.distance
-      })
+      mappedFacilities.sort(
+        (
+          a: { distance: number | undefined },
+          b: { distance: number | undefined }
+        ) => {
+          if (a.distance === undefined) return 1
+          if (b.distance === undefined) return -1
+          return a.distance - b.distance
+        }
+      )
     }
 
     return mappedFacilities
@@ -440,10 +462,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                   loading={addressesLoading}
                   value={addressId}
                   onChange={(id) => setAddressId(id)} // Cập nhật state từ props
-                  options={addressesData?.data?.map((addr: { _id: any; fullAddress: any }) => ({
-                    value: addr._id,
-                    label: addr.fullAddress,
-                  }))}
+                  options={addressesData?.data?.map(
+                    (addr: { _id: any; fullAddress: any }) => ({
+                      value: addr._id,
+                      label: addr.fullAddress,
+                    })
+                  )}
                   notFoundContent={
                     addressesLoading ? (
                       <Spin size='small' />
@@ -676,7 +700,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
                       (service.timeReturn?.timeReturnFee || 0) +
                       (service.sample?.fee || 0)
                     return (
-                      <div key={index} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div
+                        key={index}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
                         <Text>{service.name}</Text>
                         <Text>{serviceTotalFee.toLocaleString('vi-VN')}₫</Text>
                       </div>
@@ -688,7 +718,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({
 
               {/* Hiển thị phí vận chuyển */}
               {shippingFee !== null && (
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between' }}
+                >
                   <Text>Phí vận chuyển:</Text>
                   <Text>{shippingFee.toLocaleString('vi-VN')}₫</Text>
                 </div>

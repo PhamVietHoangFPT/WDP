@@ -66,7 +66,7 @@ export const SideBar = () => {
       label: 'Quản trị',
       onClick: () => navigate('manager'),
     },
-    
+
     {
       key: 'manager/service-cases-without-delivery-staff',
       icon: <UnorderedListOutlined />,

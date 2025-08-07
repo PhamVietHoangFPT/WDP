@@ -49,7 +49,11 @@ dayjs.extend(isBetween)
 
 const { Title, Text } = Typography
 
-const generateTimeSlots = (workTimeStart: any, workTimeEnd: any, slotDuration: number) => {
+const generateTimeSlots = (
+  workTimeStart: any,
+  workTimeEnd: any,
+  slotDuration: number
+) => {
   const slots = []
   // Sử dụng một ngày giả để thực hiện các phép toán thời gian
   const startDate = new Date(`1970-01-01T${workTimeStart}`)
@@ -132,15 +136,22 @@ export default function StaffAdministrationRegister() {
   const staffFacilityId = staffData?.facility._id
   const staffAddressId = staffData?.facility.address
 
-  const { data: serviceListData, isLoading: isLoadingServices, error: serviceError } = useGetServiceListQuery({
-    pageNumber: 1,
-    pageSize: 100,
-    isAdministration: true,
-    isSelfSampling: false,
-    isAgnate: showAgnate, // Sử dụng API query theo isAgnate
-  }, {
-    refetchOnMountOrArgChange: true, // Refetch khi component mount hoặc argument thay đổi
-  })
+  const {
+    data: serviceListData,
+    isLoading: isLoadingServices,
+    error: serviceError,
+  } = useGetServiceListQuery(
+    {
+      pageNumber: 1,
+      pageSize: 100,
+      isAdministration: true,
+      isSelfSampling: false,
+      isAgnate: showAgnate, // Sử dụng API query theo isAgnate
+    },
+    {
+      refetchOnMountOrArgChange: true, // Refetch khi component mount hoặc argument thay đổi
+    }
+  )
 
   // --- LẤY DỮ LIỆU CHO BƯỚC 2 & 3 ---
   const { data: testTakersData, isLoading: testTakersLoading } =
@@ -174,29 +185,40 @@ export default function StaffAdministrationRegister() {
   const selectedTestTakers = Form.useWatch([], form)
 
   // Hàm tính tổng phí dịch vụ
-  const calculateTotalServiceFee = useCallback((selectedServiceIds: string[]) => {
-    if (!selectedServiceIds || selectedServiceIds.length === 0) return 0
+  const calculateTotalServiceFee = useCallback(
+    (selectedServiceIds: string[]) => {
+      if (!selectedServiceIds || selectedServiceIds.length === 0) return 0
 
-    const total = selectedServiceIds.reduce((sum, serviceId) => {
-      const service = serviceListData?.data?.find((s: any) => s._id === serviceId)
-      if (service) {
-        return sum +
-          (service.fee || 0) +
-          (service.timeReturn?.timeReturnFee || 0) +
-          (service.sample?.fee || 0)
-      }
-      return sum
-    }, 0)
+      const total = selectedServiceIds.reduce((sum, serviceId) => {
+        const service = serviceListData?.data?.find(
+          (s: any) => s._id === serviceId
+        )
+        if (service) {
+          return (
+            sum +
+            (service.fee || 0) +
+            (service.timeReturn?.timeReturnFee || 0) +
+            (service.sample?.fee || 0)
+          )
+        }
+        return sum
+      }, 0)
 
-    return total
-  }, [serviceListData])
+      return total
+    },
+    [serviceListData]
+  )
 
   // Cập nhật tổng phí khi services thay đổi
   useEffect(() => {
     const services = selectedTestTakers?.sharedServices || []
     const total = calculateTotalServiceFee(services)
     setTotalServiceFee(total)
-  }, [selectedTestTakers?.sharedServices, serviceListData, calculateTotalServiceFee])
+  }, [
+    selectedTestTakers?.sharedServices,
+    serviceListData,
+    calculateTotalServiceFee,
+  ])
 
   // Reset form khi thay đổi bên xét nghiệm
   useEffect(() => {
@@ -236,10 +258,7 @@ export default function StaffAdministrationRegister() {
       return message.error('Vui lòng chọn ít nhất một dịch vụ.')
 
     try {
-      const testTakers = [
-        values.testTaker1,
-        values.testTaker2,
-      ].filter(Boolean)
+      const testTakers = [values.testTaker1, values.testTaker2].filter(Boolean)
 
       const bookingRes = await createBooking({
         slot: selectedSlotId,
@@ -340,8 +359,6 @@ export default function StaffAdministrationRegister() {
     })
   }
 
-
-
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>Đăng ký Dịch vụ Hành chính</Title>
@@ -350,7 +367,6 @@ export default function StaffAdministrationRegister() {
       </Text>
       (
       <Card style={{ marginTop: 24 }}>
-
         <div
           style={{
             marginTop: 24,
@@ -398,29 +414,42 @@ export default function StaffAdministrationRegister() {
 
             {/* Phần chọn dịch vụ */}
             <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
-                <Text style={{ marginTop: "0", marginRight: "8px" }}>Chọn bên xét nghiệm:</Text>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  marginBottom: '20px',
+                }}
+              >
+                <Text style={{ marginTop: '0', marginRight: '8px' }}>
+                  Chọn bên xét nghiệm:
+                </Text>
                 <Switch
                   checked={showAgnate}
                   onChange={(checked) => setShowAgnate(checked)}
-                  checkedChildren="Bên nội"
-                  unCheckedChildren="Bên ngoại"
+                  checkedChildren='Bên nội'
+                  unCheckedChildren='Bên ngoại'
                 />
               </div>
 
-              <div style={{
-                padding: '16px',
-                border: '1px solid #d9d9d9',
-                borderRadius: '6px',
-                backgroundColor: '#fff3cd'
-              }}>
-                <Title level={5} style={{ marginBottom: '16px', color: '#856404' }}>
+              <div
+                style={{
+                  padding: '16px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '6px',
+                  backgroundColor: '#fff3cd',
+                }}
+              >
+                <Title
+                  level={5}
+                  style={{ marginBottom: '16px', color: '#856404' }}
+                >
                   Dịch vụ chung cho tất cả người xét nghiệm
                 </Title>
 
                 <Form.Item
-                  name="sharedServices"
-                  label="Chọn các dịch vụ (có thể chọn nhiều)"
+                  name='sharedServices'
+                  label='Chọn các dịch vụ (có thể chọn nhiều)'
                   rules={[
                     {
                       required: true,
@@ -430,49 +459,65 @@ export default function StaffAdministrationRegister() {
                 >
                   <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {isLoadingServices ? (
-                      <div style={{
-                        textAlign: 'center',
-                        padding: '40px 20px',
-                        color: '#999',
-                        fontSize: '16px'
-                      }}>
+                      <div
+                        style={{
+                          textAlign: 'center',
+                          padding: '40px 20px',
+                          color: '#999',
+                          fontSize: '16px',
+                        }}
+                      >
                         Đang tải dịch vụ...
                       </div>
                     ) : serviceError ? (
-                      <div style={{
-                        textAlign: 'center',
-                        padding: '40px 20px',
-                        color: 'gray',
-                        fontSize: '16px'
-                      }}>
+                      <div
+                        style={{
+                          textAlign: 'center',
+                          padding: '40px 20px',
+                          color: 'gray',
+                          fontSize: '16px',
+                        }}
+                      >
                         {(serviceError as any)?.data?.message}
                       </div>
                     ) : (
                       <Row gutter={[12, 12]}>
                         {(serviceListData?.data || []).map((service: any) => {
-                          const isSelected = selectedTestTakers?.sharedServices?.includes(service._id);
+                          const isSelected =
+                            selectedTestTakers?.sharedServices?.includes(
+                              service._id
+                            )
                           return (
                             <Col xs={24} sm={12} md={8} key={service._id}>
                               <Card
-                                size="small"
+                                size='small'
                                 hoverable
                                 style={{
                                   cursor: 'pointer',
                                   border: isSelected
                                     ? '2px solid #1890ff'
-                                    : '1px solid #d9d9d9'
+                                    : '1px solid #d9d9d9',
                                 }}
                                 onClick={() => {
-                                  const currentServices = selectedTestTakers?.sharedServices || [];
-                                  let newServices;
+                                  const currentServices =
+                                    selectedTestTakers?.sharedServices || []
+                                  let newServices
                                   if (currentServices.includes(service._id)) {
                                     // Bỏ chọn service
-                                    newServices = currentServices.filter((id: string) => id !== service._id);
+                                    newServices = currentServices.filter(
+                                      (id: string) => id !== service._id
+                                    )
                                   } else {
                                     // Thêm service
-                                    newServices = [...currentServices, service._id];
+                                    newServices = [
+                                      ...currentServices,
+                                      service._id,
+                                    ]
                                   }
-                                  form.setFieldValue('sharedServices', newServices);
+                                  form.setFieldValue(
+                                    'sharedServices',
+                                    newServices
+                                  )
                                 }}
                               >
                                 <Card.Meta
@@ -480,7 +525,10 @@ export default function StaffAdministrationRegister() {
                                     <div>
                                       <Typography.Title
                                         level={5}
-                                        style={{ marginTop: 0, marginBottom: 4 }}
+                                        style={{
+                                          marginTop: 0,
+                                          marginBottom: 4,
+                                        }}
                                         ellipsis={{ tooltip: service.name }}
                                       >
                                         {service.name}
@@ -494,21 +542,32 @@ export default function StaffAdministrationRegister() {
                                     </div>
                                   }
                                   description={
-                                    <Space direction='vertical' size='small' style={{ width: '100%' }}>
-                                      <Tag color={service.isAgnate ? 'blue' : 'purple'}>
-                                        {service.isAgnate ? 'Bên nội' : 'Bên ngoại'}
+                                    <Space
+                                      direction='vertical'
+                                      size='small'
+                                      style={{ width: '100%' }}
+                                    >
+                                      <Tag
+                                        color={
+                                          service.isAgnate ? 'blue' : 'purple'
+                                        }
+                                      >
+                                        {service.isAgnate
+                                          ? 'Bên nội'
+                                          : 'Bên ngoại'}
                                       </Tag>
                                       <Statistic
                                         value={
                                           (service.fee || 0) +
-                                          (service.timeReturn?.timeReturnFee || 0) +
+                                          (service.timeReturn?.timeReturnFee ||
+                                            0) +
                                           (service.sample?.fee || 0)
                                         }
                                         precision={0}
                                         valueStyle={{
                                           color: '#1565C0',
                                           fontSize: '14px',
-                                          fontWeight: 'bold'
+                                          fontWeight: 'bold',
                                         }}
                                         suffix='₫'
                                       />
@@ -580,10 +639,7 @@ export default function StaffAdministrationRegister() {
                 components={{
                   body: {
                     cell: (props: any) => (
-                      <td
-                        {...props}
-                        style={{ minHeight: 70, padding: 8 }}
-                      />
+                      <td {...props} style={{ minHeight: 70, padding: 8 }} />
                     ),
                   },
                 }}
@@ -655,8 +711,14 @@ export default function StaffAdministrationRegister() {
 
             {/* Hiển thị tổng phí dịch vụ */}
             {totalServiceFee > 0 && (
-              <Card style={{ marginTop: 24, backgroundColor: '#f6ffed', border: '1px solid #b7eb8f' }}>
-                <Row justify="space-between" align="middle">
+              <Card
+                style={{
+                  marginTop: 24,
+                  backgroundColor: '#f6ffed',
+                  border: '1px solid #b7eb8f',
+                }}
+              >
+                <Row justify='space-between' align='middle'>
                   <Col>
                     <Typography.Text strong style={{ fontSize: '16px' }}>
                       Tổng phí dịch vụ:
@@ -668,15 +730,16 @@ export default function StaffAdministrationRegister() {
                       style={{
                         fontSize: '18px',
                         color: '#52c41a',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
                       }}
                     >
                       {totalServiceFee.toLocaleString()} ₫
                     </Typography.Text>
                   </Col>
                 </Row>
-                <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                  * Phí đã bao gồm: phí dịch vụ + phí mẫu + phí thời gian trả kết quả
+                <Typography.Text type='secondary' style={{ fontSize: '12px' }}>
+                  * Phí đã bao gồm: phí dịch vụ + phí mẫu + phí thời gian trả
+                  kết quả
                 </Typography.Text>
               </Card>
             )}
@@ -709,9 +772,7 @@ export default function StaffAdministrationRegister() {
           </Form>
         </div>
       </Card>
-      )
-
-      {/* Modal tạo Test Taker mới */}
+      ){/* Modal tạo Test Taker mới */}
       <Modal
         title='Tạo hồ sơ người xét nghiệm mới'
         open={isModalOpen}
@@ -724,11 +785,7 @@ export default function StaffAdministrationRegister() {
           layout='vertical'
           onFinish={handleCreateTestTaker}
         >
-          <Form.Item
-            name='name'
-            label='Họ và tên'
-            rules={[{ required: true }]}
-          >
+          <Form.Item name='name' label='Họ và tên' rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item
