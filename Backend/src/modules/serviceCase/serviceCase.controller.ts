@@ -100,6 +100,7 @@ export class ServiceCaseController {
     RoleEnum.DOCTOR,
     RoleEnum.SAMPLE_COLLECTOR,
     RoleEnum.STAFF,
+    RoleEnum.CUSTOMER,
   )
   @ApiOperation({ summary: 'Cập nhật trạng thái hiện tại của hồ sơ dịch vụ' })
   @ApiParam({
