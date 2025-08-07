@@ -69,7 +69,19 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
         populate: [
           {
             path: 'booking',
-            select: 'bookingDate',
+            select: 'bookingDate slot',
+            populate: {
+              path: 'slot',
+              select: 'startTime endTime',
+              populate: {
+                path: 'slotTemplate',
+                select: 'facility',
+                populate: {
+                  path: 'facility',
+                  select: 'facilityName',
+                },
+              },
+            },
           },
           {
             path: 'testTaker',
@@ -597,7 +609,19 @@ export class ServiceCaseRepository implements IServiceCaseRepository {
           populate: [
             {
               path: 'booking',
-              select: 'bookingDate',
+              select: 'bookingDate slot',
+              populate: {
+                path: 'slot',
+                select: 'startTime endTime',
+                populate: {
+                  path: 'slotTemplate',
+                  select: 'facility',
+                  populate: {
+                    path: 'facility',
+                    select: 'facilityName',
+                  },
+                },
+              },
             },
             {
               path: 'testTaker',
