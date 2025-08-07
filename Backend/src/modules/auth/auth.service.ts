@@ -68,6 +68,10 @@ export class AuthService {
       throw new NotFoundException('Tài khoản không tồn tại')
     }
 
+    if (account.deleted_at) {
+      throw new HttpException('Tài khoản đã bị xóa', HttpStatus.BAD_REQUEST)
+    }
+
     const isPasswordValid = await this.comparePassword(
       password,
       account.password,

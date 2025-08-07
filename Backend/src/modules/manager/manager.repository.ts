@@ -1005,4 +1005,77 @@ export class ManagerRepository implements IManagerRepository {
       })
       .exec()
   }
+
+  async getAllStaffs(
+    facilityId: string,
+    userRole: string,
+    email?: string,
+    role?: string,
+  ): Promise<AccountDocument[]> {
+    const facilityIdObject = new Types.ObjectId(facilityId)
+    const matchConditions: any = {
+      facility: facilityIdObject,
+    }
+    if (email) {
+      matchConditions.email = email
+    }
+    if (role) {
+      const userRoleObjectId = new Types.ObjectId(role)
+      matchConditions.role = userRoleObjectId
+    }
+    return await this.accountModel.aggregate([
+      {
+        $match: {
+          ...matchConditions,
+        },
+      },
+      {
+        $lookup: {
+          from: 'roles',
+          localField: 'role',
+          foreignField: '_id',
+          as: 'role',
+        },
+      },
+      {
+        $unwind: {
+          path: '$role',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          'role.role': { $ne: userRole }, // Không lấy theo vai trò này
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          name: 1,
+          phoneNumber: 1,
+          role: '$role.role',
+        },
+      },
+    ])
+  }
+
+  async deleteAccount(
+    accountId: string,
+    userId: string,
+  ): Promise<AccountDocument | null> {
+    const accountIdObjectId = new Types.ObjectId(accountId)
+    const userIdObjectId = new Types.ObjectId(userId)
+    const updatedAccount = await this.accountModel
+      .findByIdAndUpdate(
+        accountIdObjectId,
+        {
+          deleted_at: new Date(),
+          deleted_by: userIdObjectId,
+        },
+        { new: true },
+      )
+      .lean()
+    return updatedAccount
+  }
 }

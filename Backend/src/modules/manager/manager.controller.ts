@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Inject,
@@ -44,6 +45,48 @@ export class ManagerController {
     @Inject(IManagerService)
     private readonly managerService: IManagerService,
   ) {}
+
+  @Get('staffs')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy danh sách nhân viên' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Danh sách nhân viên',
+    type: AccountResponseDto,
+    isArray: true,
+  })
+  @ApiQuery({
+    name: 'email',
+    required: false,
+    type: String,
+    description: 'Lọc theo email của nhân viên',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    type: String,
+    description: 'Lọc theo vai trò của nhân viên (truyền id của vai trò)',
+  })
+  async getAllStaffs(
+    @Req() req: any,
+    @Query('email') email?: string,
+    @Query('role') role?: string,
+  ): Promise<ApiResponseDto<AccountResponseDto>> {
+    const facilityId = req.user.facility._id
+    const userRole = req.user.role
+    const data = await this.managerService.getAllStaffs(
+      facilityId,
+      userRole,
+      email,
+      role,
+    )
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Danh sách nhân viên',
+      data: data.map((item) => new AccountResponseDto(item)),
+    }
+  }
 
   @Get('sample-collectors')
   @ApiBearerAuth()
@@ -450,6 +493,33 @@ export class ManagerController {
       success: true,
       message: 'Danh sách vai trò',
       data: data,
+    }
+  }
+
+  @Delete('accounts/:accountId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Xóa tài khoản' })
+  @ApiParam({
+    name: 'accountId',
+    description: 'ID của tài khoản cần xóa',
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Xóa tài khoản thành công',
+    type: ApiResponseDto<AccountResponseDto>,
+  })
+  async deleteAccount(
+    @Param('accountId') accountId: string,
+    @Req() req: any,
+  ): Promise<ApiResponseDto<AccountResponseDto>> {
+    const userId = req.user.id
+    const data = await this.managerService.deleteAccount(accountId, userId)
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Xóa tài khoản thành công',
+      data: [data],
     }
   }
 }
