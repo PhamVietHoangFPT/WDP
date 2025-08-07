@@ -1,5 +1,5 @@
-import type React from 'react'
-import { useState } from 'react'
+import type React from 'react';
+import { useState } from 'react';
 import {
   Table,
   Button,
@@ -13,63 +13,62 @@ import {
   Tag,
   Modal,
   DatePicker,
-} from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+} from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import {
   UserAddOutlined,
   DownOutlined,
-  HomeOutlined,
-  ShopOutlined,
   ExclamationCircleOutlined,
   CalendarOutlined,
-} from '@ant-design/icons'
+} from '@ant-design/icons';
 import {
-  useGetDeliveryStaffListQuery, // Đổi từ useGetDoctorListQuery
-  useGetServiceCaseNoDeliveryStaffListQuery, // Đổi từ useGetServiceCaseNoDoctorListQuery
-  useAddDeliveryStaffToServiceCaseMutation, // Đổi từ useAddDoctorToServiceCaseMutation
-} from '../../features/manager/deliveryStaffAPI' // Thay đổi đường dẫn import API
-import moment from 'moment'
+  useGetDeliveryStaffListQuery,
+  useGetServiceCaseNoDeliveryStaffListQuery,
+  useAddDeliveryStaffToServiceCaseMutation,
+} from '../../features/manager/deliveryStaffAPI';
+import moment from 'moment';
 
-const { Title } = Typography
+const { Title } = Typography;
 
 interface ServiceCase {
-  _id: string
-  totalFee: number
+  _id: string;
+  totalFee: number;
   account: {
-    _id: string
-    name: string
-    email: string
-  }
-  phoneNumber: string
-  bookingDate: string
-  bookingTime: string // Thêm bookingTime từ API response
+    _id: string;
+    name: string;
+    email: string;
+    phoneNumber: string; // Thêm phoneNumber vào đây
+  };
+  phoneNumber: string;
+  bookingDate: string;
+  bookingTime: string;
   facility: {
-    _id: string
-    name: string
-  }
-  isAtHome?: boolean
-  currentStatus?: string // Đổi từ status sang currentStatus
-  created_at?: string // Thêm created_at
+    _id: string;
+    name: string;
+  };
+  isAtHome?: boolean;
+  currentStatus?: string;
+  created_at?: string;
 }
 
 interface DeliveryStaff {
-  _id: string
-  name: string
-  email: string
-  phoneNumber: string
+  _id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
 }
 
 const ManagerServiceCaseWithoutDelivery: React.FC = () => {
-  const [pageNumber, setPageNumber] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(10)
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false)
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedServiceCase, setSelectedServiceCase] =
-    useState<ServiceCase | null>(null)
+    useState<ServiceCase | null>(null);
   const [selectedDeliveryStaff, setSelectedDeliveryStaff] =
-    useState<DeliveryStaff | null>(null) // Đổi từ selectedDoctor
+    useState<DeliveryStaff | null>(null);
   const [selectedBookingDate, setSelectedBookingDate] = useState<
     string | undefined
-  >(undefined)
+  >(undefined);
 
   const {
     data: serviceCasesData,
@@ -77,85 +76,81 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     isFetching: isFetchingServices,
     error: serviceCasesError,
   } = useGetServiceCaseNoDeliveryStaffListQuery({
-    // Đổi hook query
     pageNumber: 1,
     pageSize: 100,
     bookingDate: selectedBookingDate,
-  })
+  });
 
   const {
     data: deliveryStaffsData,
     isLoading: isLoadingDeliveryStaffs,
   } = useGetDeliveryStaffListQuery({
-      // Đổi hook query
-      pageNumber: 1,
-      pageSize: 100,
-    })
+    pageNumber: 1,
+    pageSize: 100,
+  });
 
-  const [addDeliveryStaffToServiceCase, { isLoading: isAssigning }] = // Đổi hook mutation
-    useAddDeliveryStaffToServiceCaseMutation() // Đổi hook mutation
+  const [addDeliveryStaffToServiceCase, { isLoading: isAssigning }] =
+    useAddDeliveryStaffToServiceCaseMutation();
 
   const handleAssignDeliveryStaff = (
     serviceCase: ServiceCase,
     deliveryStaff: DeliveryStaff
   ) => {
-    // Đổi tên hàm và param
-    setSelectedServiceCase(serviceCase)
-    setSelectedDeliveryStaff(deliveryStaff) 
-    setConfirmModalVisible(true)
-  }
+    setSelectedServiceCase(serviceCase);
+    setSelectedDeliveryStaff(deliveryStaff);
+    setConfirmModalVisible(true);
+  };
 
   const handleConfirmAssignment = async () => {
-    if (!selectedServiceCase || !selectedDeliveryStaff) return 
+    if (!selectedServiceCase || !selectedDeliveryStaff) return;
 
     try {
       await addDeliveryStaffToServiceCase({
-        // Đổi hook mutation
         serviceCaseId: selectedServiceCase._id,
-        deliveryStaffId: selectedDeliveryStaff._id, 
+        deliveryStaffId: selectedDeliveryStaff._id,
         data: {},
-      }).unwrap()
+      }).unwrap();
 
       message.success(
-        `Đã gán nhân viên giao hàng ${selectedDeliveryStaff.name} cho dịch vụ thành công!` // Đổi thông báo
-      )
-      setConfirmModalVisible(false)
-      setSelectedServiceCase(null)
-      setSelectedDeliveryStaff(null) 
+        `Đã gán nhân viên giao hàng ${selectedDeliveryStaff.name} cho dịch vụ thành công!`
+      );
+      setConfirmModalVisible(false);
+      setSelectedServiceCase(null);
+      setSelectedDeliveryStaff(null);
     } catch (error: any) {
-      console.error('Error assigning delivery staff:', error) // Đổi thông báo
-      message.error(error?.data?.message || 'Gán nhân viên giao hàng thất bại!') // Đổi thông báo
+      console.error('Error assigning delivery staff:', error);
+      message.error(error?.data?.message || 'Gán nhân viên giao hàng thất bại!');
     }
-  }
+  };
 
   const handleCancelAssignment = () => {
-    setConfirmModalVisible(false)
-    setSelectedServiceCase(null)
-    setSelectedDeliveryStaff(null) 
-  }
+    setConfirmModalVisible(false);
+    setSelectedServiceCase(null);
+    setSelectedDeliveryStaff(null);
+  };
 
   const getDeliveryStaffMenu = (serviceCaseId: string) => {
-    // Đổi tên hàm
-    const deliveryStaffs = deliveryStaffsData?.data || [] 
+    const deliveryStaffs = deliveryStaffsData?.data || [];
 
     if (deliveryStaffs.length === 0) {
       return (
         <Menu
           items={[
             {
-              key: 'no-delivery-staffs', // Đổi key
+              key: 'no-delivery-staffs',
               label: (
                 <span style={{ color: '#999' }}>
                   Không có nhân viên giao hàng nào
                 </span>
-              ), // Đổi label
+              ),
               disabled: true,
             },
           ]}
         />
-      )
+      );
     }
 
+    const serviceCases = serviceCasesData?.data || []; // Lấy serviceCases từ data
     return (
       <Menu
         items={deliveryStaffs.map((deliveryStaff: DeliveryStaff) => ({
@@ -165,9 +160,9 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               onClick={() => {
                 const serviceCase = serviceCases.find(
                   (sc) => sc._id === serviceCaseId
-                )
+                );
                 if (serviceCase) {
-                  handleAssignDeliveryStaff(serviceCase, deliveryStaff) // Đổi hàm gọi
+                  handleAssignDeliveryStaff(serviceCase, deliveryStaff);
                 }
               }}
             >
@@ -182,8 +177,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           ),
         }))}
       />
-    )
-  }
+    );
+  };
 
   const columns: ColumnsType<ServiceCase> = [
     {
@@ -196,8 +191,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             {record.account.email}
           </div>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            {record.account.phoneNumber}{' '}
-            {/* Thay record.phoneNumber bằng record.account.phoneNumber */}
+            {record.account.phoneNumber}
           </div>
         </div>
       ),
@@ -213,7 +207,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       dataIndex: 'bookingDate',
       key: 'bookingDate',
       render: (date: string, record) => {
-        const formattedDate = new Date(date).toLocaleDateString('vi-VN')
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN');
         return (
           <>
             <div>{formattedDate}</div>
@@ -221,7 +215,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               ({record.bookingTime})
             </div>
           </>
-        )
+        );
       },
       sorter: (a, b) =>
         new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime(),
@@ -239,9 +233,9 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       render: (_, record) => record.facility?.name || 'N/A',
     },
     {
-      title: 'Trạng thái hiện tại', // Đổi tên cột
+      title: 'Trạng thái hiện tại',
       key: 'currentStatus',
-      render: (_, record) => <Tag color='orange'>{record.currentStatus}</Tag>, // Lấy từ currentStatus
+      render: (_, record) => <Tag color='orange'>{record.currentStatus}</Tag>,
     },
     {
       title: 'Hành động',
@@ -249,37 +243,37 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       render: (_, record) => (
         <Space size='middle'>
           <Dropdown
-            overlay={getDeliveryStaffMenu(record._id)} // Đổi tên hàm gọi
+            overlay={getDeliveryStaffMenu(record._id)}
             trigger={['click']}
-            disabled={isLoadingDeliveryStaffs} // Đổi từ isLoadingDoctors
+            disabled={isLoadingDeliveryStaffs}
           >
             <Button
               type='primary'
               icon={<UserAddOutlined />}
-              loading={isLoadingDeliveryStaffs} // Đổi từ isLoadingDoctors
+              loading={isLoadingDeliveryStaffs}
             >
-              Gán nhân viên giao hàng <DownOutlined /> {/* Đổi text hiển thị */}
+              Gán nhân viên giao hàng <DownOutlined />
             </Button>
           </Dropdown>
         </Space>
       ),
     },
-  ]
+  ];
 
-  const serviceCases = serviceCasesData?.data || []
-  const totalItems = serviceCases.length
-  const startIndex = (pageNumber - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  const paginatedData = serviceCases.slice(startIndex, endIndex)
+  const serviceCases = serviceCasesData?.data || [];
+  const totalItems = serviceCases.length;
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = serviceCases.slice(startIndex, endIndex);
 
-  const disabledDate = (current: moment.Moment) => {
-    return current && current < moment().startOf('day')
-  }
+  // Removed disabledDate function to allow selecting past dates
+  // const disabledDate = (current: moment.Moment) => {
+  //   return current && current < moment().startOf('day');
+  // };
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao hàng</Title>{' '}
-      {/* Đổi Title */}
+      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao hàng</Title>
       <div
         style={{
           marginBottom: 16,
@@ -291,19 +285,19 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '16px', fontWeight: '500' }}>
-            Danh sách dịch vụ chưa được gán nhân viên giao hàng {/* Đổi text */}
+            Danh sách dịch vụ chưa được gán nhân viên giao hàng
           </span>
           <DatePicker
             format='YYYY-MM-DD'
             placeholder='Chọn ngày đặt lịch'
             onChange={(date, dateString) => {
-              setSelectedBookingDate(dateString || undefined)
-              setPageNumber(1)
+              setSelectedBookingDate(dateString || undefined);
+              setPageNumber(1);
             }}
             style={{ width: 180, marginLeft: '80px' }}
             allowClear
             suffixIcon={<CalendarOutlined />}
-            disabledDate={disabledDate}
+            // disabledDate={disabledDate} // Removed this line
           />
         </div>
 
@@ -322,12 +316,10 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           <div
             style={{ fontSize: '16px', color: '#666', marginBottom: '16px' }}
           >
-            Không có dịch vụ nào chưa được gán nhân viên giao hàng{' '}
-            {/* Đổi text */}
+            Không có dịch vụ nào chưa được gán nhân viên giao hàng
           </div>
           <div style={{ fontSize: '14px', color: '#999' }}>
-            Tất cả dịch vụ đã được phân công nhân viên giao hàng phụ trách{' '}
-            {/* Đổi text */}
+            Tất cả dịch vụ đã được phân công nhân viên giao hàng phụ trách
           </div>
         </div>
       ) : serviceCasesError ? (
@@ -348,7 +340,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             scroll={{ x: 'max-content' }}
             locale={{
               emptyText:
-                'Không có dịch vụ nào chưa được gán nhân viên giao hàng', // Đổi text
+                'Không có dịch vụ nào chưa được gán nhân viên giao hàng',
             }}
           />
 
@@ -359,8 +351,8 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               total={totalItems}
               style={{ textAlign: 'center', paddingTop: 20 }}
               onChange={(page, size) => {
-                setPageNumber(page)
-                setPageSize(size || 10)
+                setPageNumber(page);
+                setPageSize(size || 10);
               }}
               showSizeChanger
               showQuickJumper
@@ -376,7 +368,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <ExclamationCircleOutlined style={{ color: '#faad14' }} />
-            <span>Xác nhận gán nhân viên giao hàng</span> {/* Đổi Title */}
+            <span>Xác nhận gán nhân viên giao hàng</span>
           </div>
         }
         open={confirmModalVisible}
@@ -395,8 +387,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               <div>• Email: {selectedServiceCase?.account.email}</div>
               <div>
                 • Số điện thoại: {selectedServiceCase?.account.phoneNumber}
-              </div>{' '}
-              {/* Thay selectedServiceCase?.phoneNumber */}
+              </div>
               <div>
                 • Ngày đặt:{' '}
                 {selectedServiceCase?.bookingDate
@@ -407,7 +398,6 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
               </div>
               <div>
                 • Giờ hẹn: {selectedServiceCase?.bookingTime || 'N/A'}{' '}
-                {/* Thêm bookingTime */}
               </div>
               <div>
                 • Tổng phí:{' '}
@@ -419,16 +409,13 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <strong>Nhân viên giao hàng được chọn:</strong> {/* Đổi text */}
+            <strong>Nhân viên giao hàng được chọn:</strong>
             <div style={{ marginLeft: '16px', marginTop: '8px' }}>
-              <div>• Tên: {selectedDeliveryStaff?.name}</div>{' '}
-              {/* Đổi từ selectedDoctor */}
-              <div>• Email: {selectedDeliveryStaff?.email}</div>{' '}
-              {/* Đổi từ selectedDoctor */}
+              <div>• Tên: {selectedDeliveryStaff?.name}</div>
+              <div>• Email: {selectedDeliveryStaff?.email}</div>
               <div>
                 • Số điện thoại: {selectedDeliveryStaff?.phoneNumber}
-              </div>{' '}
-              {/* Đổi từ selectedDoctor */}
+              </div>
             </div>
           </div>
 
@@ -445,13 +432,12 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
             <div style={{ color: '#d46b08', marginTop: '4px' }}>
               Sau khi gán nhân viên giao hàng, dịch vụ sẽ được chuyển sang trạng
               thái "Đã có nhân viên giao hàng phụ trách" và không thể hoàn tác.{' '}
-              {/* Đổi text */}
             </div>
           </div>
         </div>
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default ManagerServiceCaseWithoutDelivery
+export default ManagerServiceCaseWithoutDelivery;

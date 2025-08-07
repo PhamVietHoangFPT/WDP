@@ -129,6 +129,7 @@ const ReturnFail: React.FC = () => {
     useState<ServiceCase | null>(null);
   const [newStatusId, setNewStatusId] = useState<string>('');
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [checkInModalVisible, setCheckInModalVisible] = useState(false);
 
   const debouncedEmail = useDebounce(customerEmail, 500);
 
@@ -204,19 +205,6 @@ const ReturnFail: React.FC = () => {
   const [createServiceCaseImage, { isLoading: isUploading }] =
     useCreateServiceCaseImageMutation();
 
-  const getAvailableNextStatuses = (currentStatusString: string) => {
-    const deliveredStatus = statusListData?.data?.find(
-      (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả',
-    );
-    if (
-      currentStatusString === 'Giao kết quả không thành công' &&
-      deliveredStatus
-    ) {
-      return [deliveredStatus];
-    }
-    return [];
-  };
-
   const handleStatusUpdate = async () => {
     if (!selectedServiceCase || !newStatusId) return;
     try {
@@ -226,6 +214,7 @@ const ReturnFail: React.FC = () => {
       }).unwrap();
       message.success('Cập nhật trạng thái thành công');
       setUpdateModalVisible(false);
+      setCheckInModalVisible(false);
       setSelectedServiceCase(null);
       setNewStatusId('');
       refetch();
@@ -247,7 +236,7 @@ const ReturnFail: React.FC = () => {
       message.error(error?.data?.message || 'Upload ảnh thất bại!');
     }
   };
-
+  
   const columns: ColumnsType<ServiceCase> = [
     {
       title: 'Tên người xét nghiệm',
@@ -346,7 +335,6 @@ const ReturnFail: React.FC = () => {
     {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
-      dataIndex: ['sampleCollector', 'name'],
       render: (_, record: any) => {
         if (record.caseMember?.isSelfSampling === true) {
           return <Tag color="purple">Khách hàng tự lấy mẫu</Tag>;
@@ -354,9 +342,7 @@ const ReturnFail: React.FC = () => {
 
         const collector = record.sampleCollectorDetails;
 
-        console.log(collector);
-
-        if (!collector) {
+        if (!collector || !collector.name) {
           return <Tag>Chưa chỉ định</Tag>;
         }
 
@@ -419,9 +405,18 @@ const ReturnFail: React.FC = () => {
         const deliveredStatus = statusListData?.find(
           (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả',
         );
+
+        const checkinStatus = statusListData?.find(
+          (s: ServiceCaseStatus) => s.testRequestStatus === 'Check-in',
+        );
         const isUpdatable =
           record.currentStatus === 'Giao kết quả không thành công' &&
           deliveredStatus;
+
+        const isCheckinable =
+          record.currentStatus ===
+            'Đã thanh toán. Chờ đến lịch hẹn đến cơ sở để check-in (nếu quý khách chọn lấy mẫu tại nhà, không cần đến cơ sở để check-in)' &&
+          !record.caseMember?.isSelfSampling;
 
         return (
           <Space direction="vertical" size="small">
@@ -436,6 +431,19 @@ const ReturnFail: React.FC = () => {
                 type="primary"
               >
                 Đã trả kết quả
+              </Button>
+            )}
+            {isCheckinable && (
+              <Button
+                key={checkinStatus?._id}
+                onClick={() => {
+                  setSelectedServiceCase(record);
+                  setNewStatusId(checkinStatus?._id || '');
+                  setCheckInModalVisible(true);
+                }}
+                type="primary"
+              >
+                Check-in
               </Button>
             )}
             <Button
@@ -557,6 +565,25 @@ const ReturnFail: React.FC = () => {
                 ?.testRequestStatus
             }
           </Tag>
+        </p>
+      </Modal>
+
+      <Modal
+        title="Xác nhận Check-in"
+        open={checkInModalVisible}
+        onOk={handleStatusUpdate}
+        confirmLoading={isUpdating}
+        onCancel={() => {
+          setCheckInModalVisible(false);
+          setSelectedServiceCase(null);
+          setNewStatusId('');
+        }}
+        okText="Check-in"
+        cancelText="Hủy"
+      >
+        <p>
+          Bạn có chắc chắn muốn cập nhật trạng thái của hồ sơ{' '}
+          <strong>{selectedServiceCase?._id}</strong> sang "Check-in" không?
         </p>
       </Modal>
     </div>

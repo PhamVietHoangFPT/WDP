@@ -302,7 +302,7 @@ const ManagerServiceCaseWithoutSampleCollector: React.FC = () => {
             style={{ width: 180 }}
             allowClear
             suffixIcon={<CalendarOutlined />}
-            disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
+            // disabledDate={disabledDate} // Thêm thuộc tính disabledDate vào đây
           />
         </div>
 
