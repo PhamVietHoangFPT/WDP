@@ -63,6 +63,15 @@ export interface IManagerService {
     facilityId: string,
     bookingDate: string,
   ): Promise<ServiceCaseResponseDto[]>
+
+  getAllStaffs(
+    facilityId: string,
+    userRole: string,
+    email?: string,
+    role?: string,
+  ): Promise<AccountResponseDto[]>
+
+  deleteAccount(accountId: string, userId: string): Promise<AccountResponseDto>
 }
 
 export const IManagerService = Symbol('IManagerService')

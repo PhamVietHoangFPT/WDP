@@ -68,6 +68,18 @@ export interface IManagerRepository {
     deliveryStaffId: string,
     userId: string,
   ): Promise<ServiceCaseDocument>
+
+  getAllStaffs(
+    facilityId: string,
+    userRole: string,
+    email?: string,
+    role?: string,
+  ): Promise<AccountDocument[]>
+
+  deleteAccount(
+    accountId: string,
+    userId: string,
+  ): Promise<AccountDocument | null>
 }
 
 export const IManagerRepository = Symbol('IManagerRepository')

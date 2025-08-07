@@ -213,4 +213,36 @@ export class ManagerService implements IManagerService {
     }
     return serviceCases.map((item) => new ServiceCaseResponseDto(item))
   }
+
+  async getAllStaffs(
+    facilityId: string,
+    userRole: string,
+    email?: string,
+    role?: string,
+  ): Promise<AccountResponseDto[]> {
+    const staffs = await this.managerRepository.getAllStaffs(
+      facilityId,
+      userRole,
+      email,
+      role,
+    )
+    if (!staffs || staffs.length === 0) {
+      throw new NotFoundException('Không tìm thấy nhân viên nào')
+    }
+    return staffs.map((item) => new AccountResponseDto(item))
+  }
+
+  async deleteAccount(
+    accountId: string,
+    userId: string,
+  ): Promise<AccountResponseDto> {
+    const deletedAccount = await this.managerRepository.deleteAccount(
+      accountId,
+      userId,
+    )
+    if (!deletedAccount) {
+      throw new NotFoundException('Không tìm thấy tài khoản để xóa')
+    }
+    return new AccountResponseDto(deletedAccount)
+  }
 }

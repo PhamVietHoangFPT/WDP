@@ -14,6 +14,7 @@ export interface AccountBase {
   facility: Types.ObjectId | string
   gender: boolean
   password: string
+  deleted_at?: Date | null
 }
 
 export interface LeanPopulatedAccount extends Omit<AccountBase, 'role'> {
