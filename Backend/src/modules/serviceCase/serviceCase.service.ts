@@ -40,6 +40,33 @@ export class ServiceCaseService implements IServiceCaseService {
     private testRequestHistoryRepository: ITestRequestHistoryRepository,
   ) {}
 
+  /**
+   * Định nghĩa các bước chuyển đổi trạng thái hợp lệ.
+   * LOGIC ĐÃ ĐƯỢC CẬP NHẬT THEO PHẢN HỒI.
+   */
+  VALID_TRANSITIONS: Record<number, number[]> = {
+    // --- Luồng chính (Happy Path) ---
+    0: [1, 11, 13], // Chờ thanh toán -> Đã thanh toán | Thanh toán thất bại | Hủy
+    1: [2, 13], // Đã thanh toán -> Check-in | Hủy
+    2: [3, 13], // Check-in -> Chờ xử lý | Hủy
+    3: [4, 13], // Chờ xử lý -> Đang lấy mẫu | Hủy
+    4: [5, 13], // Đang lấy mẫu -> Đã nhận mẫu | Hủy
+    5: [6, 13], // Đã nhận mẫu -> Đang phân tích | Hủy
+    6: [7, 13], // Đang phân tích -> Chờ duyệt kết quả | Hủy
+    7: [8, 13], // Chờ duyệt kết quả -> Đã có kết quả | Hủy
+
+    // --- ĐIỂM THAY ĐỔI QUAN TRỌNG ---
+    8: [9, 12, 13], // Đã có kết quả -> Đã trả kết quả (THÀNH CÔNG) | Giao không thành công (THẤT BẠI) | Hủy
+    9: [10], // Đã trả kết quả -> Hoàn thành (chỉ có một đường đi tới thành công)
+
+    // --- Các luồng phụ và trạng thái kết thúc ---
+    10: [], // Hoàn thành (trạng thái cuối cùng)
+    11: [14], // Thanh toán thất bại -> Hủy do thanh toán không thành công
+    12: [9, 13], // Giao kết quả không thành công -> Có thể thử lại việc trả kết quả (về 9) | Hủy
+    13: [], // Hủy (trạng thái cuối cùng)
+    14: [], // Hủy do thanh toán không thành công (trạng thái cuối cùng)
+  }
+
   private mapToResponseDto(serviceCase: ServiceCase): ServiceCaseResponseDto {
     return new ServiceCaseResponseDto({
       _id: serviceCase._id,
@@ -134,67 +161,52 @@ export class ServiceCaseService implements IServiceCaseService {
 
   async updateCurrentStatus(
     id: string,
-    currentStatus: string,
+    newStatusId: string, // Đổi tên biến để rõ ràng hơn
     staffId?: string,
     sampleCollectorId?: string,
     doctorId?: string,
     deliveryStaffId?: string,
   ): Promise<ServiceCaseResponseDto | null> {
-    const oldServiceCaseStatusId =
-      await this.serviceCaseRepository.getCurrentStatusId(id)
+    // --- Bước 1: Lấy thông tin order của trạng thái cũ và mới ---
+    const oldStatusId = await this.serviceCaseRepository.getCurrentStatusId(id)
 
-    const oldServiceCaseStatusOrder =
+    const oldOrder =
       await this.testRequestStatusRepository.getTestRequestStatusOrder(
-        oldServiceCaseStatusId,
+        oldStatusId,
       )
 
-    const newServiceCaseStatusOrder =
+    const newOrder =
       await this.testRequestStatusRepository.getTestRequestStatusOrder(
-        currentStatus,
+        newStatusId,
       )
 
-    if (newServiceCaseStatusOrder <= oldServiceCaseStatusOrder) {
+    // --- Bước 2: Kiểm tra tính hợp lệ của việc chuyển trạng thái ---
+    const allowedNextOrders = this.VALID_TRANSITIONS[oldOrder] || []
+
+    if (!allowedNextOrders.includes(newOrder)) {
+      // Câu báo lỗi có thể chi tiết hơn để dễ debug
       throw new ConflictException(
-        'Trạng thái hiện tại không thể cập nhật xuống trạng thái cũ',
+        `Không được phép chuyển từ trạng thái có order [${oldOrder}] sang [${newOrder}].`,
       )
     }
-    let updatedServiceCase: ServiceCase | null
-    if (newServiceCaseStatusOrder - oldServiceCaseStatusOrder > 1) {
-      if (newServiceCaseStatusOrder === 4 && oldServiceCaseStatusOrder === 2) {
-        updatedServiceCase =
-          await this.serviceCaseRepository.updateCurrentStatus(
-            id,
-            currentStatus,
-            staffId,
-            sampleCollectorId,
-            doctorId,
-            deliveryStaffId,
-          )
-        if (!updatedServiceCase) {
-          throw new Error('Cập nhật trạng thái hiện tại không thành công')
-        }
-        return this.mapToResponseDto(updatedServiceCase)
-      } else {
-        throw new ConflictException(
-          'Trạng thái hiện tại không thể cập nhật quá 1 bước từ trạng thái cũ',
-        )
-      }
+
+    // --- Bước 3: Nếu hợp lệ, tiến hành cập nhật ---
+    const updatedServiceCase =
+      await this.serviceCaseRepository.updateCurrentStatus(
+        id,
+        newStatusId, // Dùng ID trạng thái mới
+        staffId,
+        sampleCollectorId,
+        doctorId,
+        deliveryStaffId,
+      )
+
+    if (!updatedServiceCase) {
+      throw new Error('Cập nhật trạng thái hiện tại không thành công.')
     }
 
-    updatedServiceCase = await this.serviceCaseRepository.updateCurrentStatus(
-      id,
-      currentStatus,
-      staffId,
-      sampleCollectorId,
-      doctorId,
-      deliveryStaffId,
-    )
-    if (!updatedServiceCase) {
-      throw new Error('Cập nhật trạng thái hiện tại không thành công')
-    }
     return this.mapToResponseDto(updatedServiceCase)
   }
-
   async updateCondition(
     id: string,
     condition: string,
