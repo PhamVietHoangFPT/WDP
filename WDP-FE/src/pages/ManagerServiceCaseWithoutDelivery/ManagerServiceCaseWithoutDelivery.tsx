@@ -271,7 +271,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao hàng</Title>
+      <Title level={2}>Quản lý dịch vụ chưa có nhân viên giao kết quả</Title>
       <div
         style={{
           marginBottom: 16,
@@ -283,7 +283,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '16px', fontWeight: '500' }}>
-            Danh sách dịch vụ chưa được gán nhân viên giao hàng
+            Danh sách dịch vụ chưa được gán nhân viên giao kết quả
           </span>
           <DatePicker
             format='YYYY-MM-DD'
