@@ -1,5 +1,3 @@
-'use client'
-
 import type React from 'react'
 import { useState } from 'react'
 import {
@@ -8,7 +6,6 @@ import {
   Button,
   Typography,
   message,
-  Select,
   AutoComplete,
   Spin,
 } from 'antd'
@@ -52,7 +49,6 @@ const CreateFacilityForm: React.FC = () => {
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
   const [houseNumberValue, setHouseNumberValue] = useState<string>('')
 
-  // API queries
   const { data: provincesData, isLoading: provincesLoading } =
     useGetProvinceListQuery({
       pageNumber: 1,
@@ -90,7 +86,6 @@ const CreateFacilityForm: React.FC = () => {
     setProvinceOptions(filtered || [])
   }
 
-  // Thay thế hàm handleWardSearch của bạn bằng hàm này
   const handleWardSearch = (searchText: string) => {
     if (!searchText) {
       setWardOptions([])
@@ -107,7 +102,7 @@ const CreateFacilityForm: React.FC = () => {
       }))
     setWardOptions(filtered || [])
   }
-  // Thay thế hàm handleProvinceChange của bạn bằng hàm này
+
   const handleProvinceChange = (
     value: string,
     option?: { object: Province } | { object: Province }[] | undefined
@@ -131,7 +126,6 @@ const CreateFacilityForm: React.FC = () => {
     }
   }
 
-  // Thay thế hàm handleWardChange của bạn bằng hàm này
   const handleWardChange = (
     value: string,
     option?: { object: Ward } | { object: Ward }[] | undefined

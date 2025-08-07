@@ -40,7 +40,6 @@ interface ServicePrice {
 
 const Price: React.FC = () => {
   const [form] = Form.useForm()
-  // Sửa lỗi cú pháp: chỉ cần một lần khai báo currentPage
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
   const [filters, setFilters] = useState({

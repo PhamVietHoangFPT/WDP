@@ -34,7 +34,10 @@ interface ServiceCase {
   _id: string
   created_at: string
   currentStatus: string
-  bookingDate: string
+  bookingDetails: {
+    bookingDate: string
+  }
+
   customerEmail?: string
   serviceName?: string
 }
@@ -150,7 +153,7 @@ const StaffGetServiceCaseByCustomer: React.FC = () => {
     },
     {
       title: 'Ngày Đặt Lịch',
-      dataIndex: 'bookingDate',
+      dataIndex: ['bookingDetails','bookingDate'],
       key: 'bookingDate',
       render: (date) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
     },

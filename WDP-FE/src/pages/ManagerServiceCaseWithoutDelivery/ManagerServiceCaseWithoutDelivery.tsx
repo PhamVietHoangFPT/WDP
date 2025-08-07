@@ -1,5 +1,3 @@
-'use client'
-
 import type React from 'react'
 import { useState } from 'react'
 import {
@@ -88,8 +86,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
   const {
     data: deliveryStaffsData,
     isLoading: isLoadingDeliveryStaffs,
-  } = // Đổi từ doctorsData và isLoadingDoctors
-    useGetDeliveryStaffListQuery({
+  } = useGetDeliveryStaffListQuery({
       // Đổi hook query
       pageNumber: 1,
       pageSize: 100,
@@ -104,18 +101,18 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
   ) => {
     // Đổi tên hàm và param
     setSelectedServiceCase(serviceCase)
-    setSelectedDeliveryStaff(deliveryStaff) // Đổi từ selectedDoctor
+    setSelectedDeliveryStaff(deliveryStaff) 
     setConfirmModalVisible(true)
   }
 
   const handleConfirmAssignment = async () => {
-    if (!selectedServiceCase || !selectedDeliveryStaff) return // Đổi từ selectedDoctor
+    if (!selectedServiceCase || !selectedDeliveryStaff) return 
 
     try {
       await addDeliveryStaffToServiceCase({
         // Đổi hook mutation
         serviceCaseId: selectedServiceCase._id,
-        deliveryStaffId: selectedDeliveryStaff._id, // Đổi từ doctorId
+        deliveryStaffId: selectedDeliveryStaff._id, 
         data: {},
       }).unwrap()
 
@@ -124,7 +121,7 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
       )
       setConfirmModalVisible(false)
       setSelectedServiceCase(null)
-      setSelectedDeliveryStaff(null) // Đổi từ selectedDoctor
+      setSelectedDeliveryStaff(null) 
     } catch (error: any) {
       console.error('Error assigning delivery staff:', error) // Đổi thông báo
       message.error(error?.data?.message || 'Gán nhân viên giao hàng thất bại!') // Đổi thông báo
@@ -134,12 +131,12 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
   const handleCancelAssignment = () => {
     setConfirmModalVisible(false)
     setSelectedServiceCase(null)
-    setSelectedDeliveryStaff(null) // Đổi từ selectedDoctor
+    setSelectedDeliveryStaff(null) 
   }
 
   const getDeliveryStaffMenu = (serviceCaseId: string) => {
     // Đổi tên hàm
-    const deliveryStaffs = deliveryStaffsData?.data || [] // Đổi từ doctorsData
+    const deliveryStaffs = deliveryStaffsData?.data || [] 
 
     if (deliveryStaffs.length === 0) {
       return (
@@ -162,7 +159,6 @@ const ManagerServiceCaseWithoutDelivery: React.FC = () => {
     return (
       <Menu
         items={deliveryStaffs.map((deliveryStaff: DeliveryStaff) => ({
-          // Đổi từ Doctor sang DeliveryStaff
           key: deliveryStaff._id,
           label: (
             <div

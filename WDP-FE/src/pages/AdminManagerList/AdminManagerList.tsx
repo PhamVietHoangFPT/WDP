@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState } from 'react'
 import {
   Table,
@@ -82,7 +80,6 @@ export default function AdminManagerList() {
 
   const handleCreateManager = async (values: CreateManagerFormValues) => {
     try {
-      // Bỏ hoàn toàn role ID hardcode ở đây. API sẽ tự gán hoặc không cần.
       await createManager({ data: values }).unwrap()
 
       notification.success({
