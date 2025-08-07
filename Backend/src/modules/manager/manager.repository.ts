@@ -235,6 +235,7 @@ export class ManagerRepository implements IManagerRepository {
       {
         $match: {
           'caseMembers.isAtHome': isAtHome, // Lọc chính xác các serviceCase có casemember isAtHome mong muốn
+          'caseMembers.isSelfSampling': false, // Loại trừ các trường hợp tự lấy mẫu
         },
       },
       // Tim booking trong caseMembers

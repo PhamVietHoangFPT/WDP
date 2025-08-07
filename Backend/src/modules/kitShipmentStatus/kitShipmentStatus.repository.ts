@@ -37,7 +37,9 @@ export class KitShipmentStatusRepository
   }
 
   async findAll(): Promise<KitShipmentStatusDocument[]> {
-    return this.KitShipmentStatusModel.find({ deleted_at: null }).exec()
+    return this.KitShipmentStatusModel.find({ deleted_at: null })
+      .sort({ order: 1 })
+      .exec()
   }
 
   async findById(id: string): Promise<KitShipmentStatusDocument | null> {

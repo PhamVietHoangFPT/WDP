@@ -85,7 +85,7 @@ export class PaymentService implements IPaymentService {
         paymentData.responseCode !== '00'
       ) {
         kitShipmentStatus = await this.kitShipmentStatusRepository.findByName(
-          'Hủy do không thanh toán thành công',
+          'Hủy do thanh toán không thành công',
         )
       } else if (
         paymentData.transactionStatus === '00' &&
