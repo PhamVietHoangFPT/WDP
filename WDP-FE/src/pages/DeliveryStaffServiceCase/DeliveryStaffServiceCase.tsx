@@ -219,7 +219,8 @@ const DeliveryStaffServiceCase: React.FC = () => {
         if (record.currentStatus?.testRequestStatus === 'Đã có kết quả') {
           color = 'blue'
         } else if (
-          record.currentStatus?.testRequestStatus === 'Đã trả kết quả'
+          record.currentStatus?.testRequestStatus === 'Đã trả kết quả' ||
+          record.currentStatus?.testRequestStatus === 'Hoàn thành'
         ) {
           color = 'green'
         } else {
@@ -281,6 +282,9 @@ const DeliveryStaffServiceCase: React.FC = () => {
         // Chỉ cho phép cập nhật nếu trạng thái hiện tại là 'Đã có kết quả'
         const isUpdatable =
           record.currentStatus?.testRequestStatus === 'Đã có kết quả'
+        // Kiểm tra nếu trạng thái hiện tại KHÔNG PHẢI là 'Hoàn thành'
+        const isNotCompleted =
+          record.currentStatus?.testRequestStatus !== 'Hoàn thành'
 
         // Lấy các trạng thái tiếp theo có thể cập nhật
         const availableNextStatuses = getAvailableNextStatuses(
@@ -314,7 +318,7 @@ const DeliveryStaffServiceCase: React.FC = () => {
                     }}
                     type='primary'
                   >
-                    Thành công
+                    Thành công 
                   </Button>
                 )}
                 {failureStatus && (
@@ -331,23 +335,25 @@ const DeliveryStaffServiceCase: React.FC = () => {
                     Thất bại
                   </Button>
                 )}
-                {/* Nút Upload ảnh */}
-                <Button
-                  key='upload-image'
-                  onClick={() => {
-                    setUploadingServiceCaseId(record._id) // Lưu ID của service case hiện tại
-                    setUploadModalVisible(true) // Mở modal upload
-                  }}
-                  icon={<UploadOutlined />}
-                  style={{
-                    backgroundColor: '#28a745',
-                    borderColor: '#28a745',
-                    color: 'white',
-                  }} // Màu xanh lá cây
-                ></Button>
               </>
             )}
-            {!isUpdatable && <Tag color='default'>Không thể cập nhật</Tag>}
+            {/* Nút Upload ảnh được thêm vào đây, hiển thị nếu trạng thái hiện tại không phải là "Hoàn thành" */}
+            {isNotCompleted && (
+              <Button
+                key='upload-image'
+                onClick={() => {
+                  setUploadingServiceCaseId(record._id) // Lưu ID của service case hiện tại
+                  setUploadModalVisible(true) // Mở modal upload
+                }}
+                icon={<UploadOutlined />}
+                style={{
+                  backgroundColor: '#28a745',
+                  borderColor: '#28a745',
+                  color: 'white',
+                }} // Màu xanh lá cây
+              ></Button>
+            )}
+            {!isUpdatable && !isNotCompleted && <Tag color='default'>Không thể cập nhật</Tag>}
           </Space>
         )
       },

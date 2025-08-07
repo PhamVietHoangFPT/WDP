@@ -67,8 +67,12 @@ export default function StaffServiceCaseDetail() {
   }, [imageData])
 
   const sortedHistoryData = [...(historyData?.data || [])].sort(
-    (a, b) => a.testRequestStatus.order - b.testRequestStatus.order
-  )
+    (a, b) => a.created_at - b.created_at
+  );
+
+//   const sortedHistoryData = [...(historyData?.data || [])].sort(
+//   (a, b) => b.testRequestStatus.order-a.testRequestStatus.order 
+// )
 
   if (isLoadingHistory || isLoadingServiceCase) {
     return (
@@ -228,6 +232,16 @@ export default function StaffServiceCaseDetail() {
                     serviceCase.caseMember.booking.bookingDate
                   ).toLocaleDateString('vi-VN')}
               </Descriptions.Item>
+              <Descriptions.Item label="Thời gian lấy mẫu">
+                              {serviceCase?.caseMember?.booking?.slot?.startTime} -{' '}
+                              {serviceCase?.caseMember?.booking?.slot?.endTime}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Cơ sở">
+                              {
+                                serviceCase?.caseMember?.booking?.slot?.slotTemplate?.facility
+                                  ?.facilityName
+                              }
+                            </Descriptions.Item>
               <Descriptions.Item label='Trạng thái hiện tại'>
                 <Tag color='blue'>
                   {serviceCase?.currentStatus?.testRequestStatus}

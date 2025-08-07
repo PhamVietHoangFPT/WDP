@@ -11,14 +11,17 @@ import {
   message,
   Space,
   Modal,
-  Tooltip, // Import Modal
+  Tooltip,
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useGetServiceCasesListQuery,
   useCreatePaymentForConditionMutation,
 } from '../../features/customer/paymentApi'
-import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
+import {
+  useGetAllStatusForCustomerQuery,
+  useUpdateServiceCaseStatusForStaffMutation,
+} from '../../features/staff/staffAPI'
 import { useState } from 'react'
 const { Title, Text } = Typography
 const { Option } = Select
@@ -32,9 +35,9 @@ export default function ServiceCase() {
   const pageSize = searchParams.get('pageSize') || '5'
   const currentStatusParam = searchParams.get('currentStatus') || null
   const [currentStatus, setCurrentStatus] = useState(currentStatusParam)
-  const { data: statusData } = useGetAllStatusForCustomerQuery({})
 
-  const { data, isLoading } = useGetServiceCasesListQuery({
+  const { data: statusData } = useGetAllStatusForCustomerQuery({})
+  const { data, isLoading, refetch } = useGetServiceCasesListQuery({
     pageSize: Number(pageSize),
     pageNumber: Number(pageNumber),
     currentStatus: currentStatus,
@@ -42,31 +45,32 @@ export default function ServiceCase() {
 
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
   const [createPayment] = useCreatePaymentForConditionMutation()
+  // Thêm mutation cho update status
+  const [updateServiceCaseStatus] = useUpdateServiceCaseStatusForStaffMutation()
 
   // 2. Tạo state để quản lý loading cho từng dòng cụ thể khi thanh toán
   const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
     null
   )
+  // Thêm state để quản lý loading cho nút hoàn thành
+  const [loadingCompleteFor, setLoadingCompleteFor] = useState<string | null>(
+    null
+  )
 
   // States for image display
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
-  const [imageUrls, setImageUrls] = useState<string[]>([]) // Thay đổi thành mảng các URL
+  const [imageUrls, setImageUrls] = useState<string[]>([])
 
   // 3. Tạo hàm xử lý việc thanh toán
   const handlePayment = async (serviceCaseId: string) => {
-    setLoadingPaymentFor(serviceCaseId) // Bật loading cho dòng được click
+    setLoadingPaymentFor(serviceCaseId)
     console.log(serviceCaseId)
     try {
-      // Gọi API, .unwrap() sẽ trả về data nếu thành công hoặc ném lỗi nếu thất bại
       const response = await createPayment({ serviceCaseId }).unwrap()
-
-      // Nếu có redirectUrl, chuyển hướng người dùng
       if (
         typeof response.redirectUrl === 'string' &&
         response.redirectUrl.trim() !== ''
       ) {
-        // Mở URL trong một tab mới.
-        // Thêm 'noopener,noreferrer' là một thông lệ tốt để tăng cường bảo mật.
         window.open(response.redirectUrl, '_blank', 'noopener,noreferrer')
       } else {
         message.error('Không nhận được đường dẫn thanh toán.')
@@ -75,7 +79,36 @@ export default function ServiceCase() {
       console.error('Lỗi khi tạo yêu cầu thanh toán:', err)
       message.error('Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.')
     } finally {
-      setLoadingPaymentFor(null) // Tắt loading sau khi hoàn tất
+      setLoadingPaymentFor(null)
+    }
+  }
+
+  // Thêm hàm xử lý hoàn thành
+  const handleComplete = async (serviceCaseId: string) => {
+    setLoadingCompleteFor(serviceCaseId)
+    try {
+      // Tìm ID của trạng thái "Hoàn thành"
+      const completeStatus = statusData?.find(
+        (status: any) => status.testRequestStatus === 'Hoàn thành'
+      )
+
+      if (!completeStatus) {
+        message.error('Không tìm thấy trạng thái hoàn thành.')
+        return
+      }
+
+      await updateServiceCaseStatus({
+        id: serviceCaseId,
+        currentStatus: completeStatus._id,
+      }).unwrap()
+
+      message.success('Đã cập nhật trạng thái thành công!')
+      refetch() // Tải lại dữ liệu để cập nhật bảng
+    } catch (err) {
+      console.error('Lỗi khi cập nhật trạng thái:', err)
+      message.error('Không thể cập nhật trạng thái. Vui lòng thử lại.')
+    } finally {
+      setLoadingCompleteFor(null)
     }
   }
 
@@ -118,17 +151,12 @@ export default function ServiceCase() {
       title: 'Số tiền (VNĐ)',
       key: 'fees',
       render: (_: any, record: { totalFee: number; shippingFee: number }) => {
-        // Để code dễ đọc hơn, ta coi totalFee là phí dịch vụ
         const serviceFee =
           typeof record.totalFee === 'number' ? record.totalFee : 0
         const shippingFee =
           typeof record.shippingFee === 'number' ? record.shippingFee : 0
-
-        // Tính tổng cộng
         const grandTotal = serviceFee + shippingFee
-
         return (
-          // Sử dụng Flex để căn chỉnh các mục dễ dàng
           <div style={{ minWidth: 200 }}>
             <Flex justify='space-between'>
               <Typography.Text>Chi phí dịch vụ:</Typography.Text>
@@ -136,16 +164,13 @@ export default function ServiceCase() {
                 {serviceFee.toLocaleString('vi-VN')} ₫
               </Typography.Text>
             </Flex>
-
             <Flex justify='space-between'>
               <Typography.Text>Phí dịch vụ:</Typography.Text>
               <Typography.Text>
                 {shippingFee.toLocaleString('vi-VN')} ₫
               </Typography.Text>
             </Flex>
-
             <Divider style={{ margin: '4px 0' }} />
-
             <Flex justify='space-between'>
               <Typography.Text strong>Tổng cộng:</Typography.Text>
               <Typography.Text strong style={{ color: '#1677ff' }}>
@@ -172,37 +197,48 @@ export default function ServiceCase() {
       key: 'bookingDate',
       render: (
         _: any,
-        record: { caseMember: { booking: { bookingDate: string } } }
+        record: {
+          caseMember: {
+            booking: {
+              bookingDate: string
+              slot?: { slotTemplate?: { facility?: { facilityName: string } } }
+            }
+          }
+        }
       ) => {
         const bookingDate = record.caseMember?.booking?.bookingDate
-        if (!bookingDate) return <Tag color='default'>Chưa đặt</Tag>
+        const facilityName =
+          record.caseMember?.booking?.slot?.slotTemplate?.facility?.facilityName
+
+        if (!bookingDate) {
+          return <Tag color='default'>Chưa đặt</Tag>
+        }
         const date = new Date(bookingDate)
+        const formattedDate = date.toLocaleDateString('vi-VN')
         return (
-          <Typography.Text>{date.toLocaleDateString('vi-VN')}</Typography.Text>
+          <Space direction='vertical' size={2}>
+            <Typography.Text>{formattedDate}</Typography.Text>
+            {facilityName && (
+              <Typography.Text type='secondary' style={{ fontSize: '12px' }}>
+                ({facilityName})
+              </Typography.Text>
+            )}
+          </Space>
         )
       },
     },
     {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
-      dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
+      dataIndex: ['sampleCollector', 'name'],
       render: (_, record: any) => {
-        // 1. ƯU TIÊN KIỂM TRA TRƯỚC: Nếu là tự lấy mẫu
-        // Dùng optional chaining (?.) để tránh lỗi nếu record.caseMember không tồn tại
         if (record.caseMember?.isSelfSampling === true) {
-          // Sử dụng Tag để đồng bộ về giao diện và chọn màu khác để phân biệt
           return <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
         }
-
-        // 2. Nếu không phải tự lấy mẫu, tiếp tục với logic cũ
         const collector = record.sampleCollector
-
-        // Nếu không có thông tin nhân viên, hiển thị tag
         if (!collector) {
           return <Tag>Chưa chỉ định</Tag>
         }
-
-        // Nếu có, hiển thị tên và số điện thoại
         return (
           <Space direction='vertical' size={0}>
             <Space>
@@ -225,11 +261,9 @@ export default function ServiceCase() {
       dataIndex: ['doctor', 'name'],
       render: (_, record: any) => {
         const doctor = record.doctor
-
         if (!doctor) {
           return <Tag>Chưa chỉ định</Tag>
         }
-
         return (
           <Space>
             <UserOutlined />
@@ -243,25 +277,19 @@ export default function ServiceCase() {
       key: 'status',
       dataIndex: ['currentStatus', 'testRequestStatus'],
       render: (status: string) => {
-        // Giữ nguyên logic chọn màu
         let color = 'default'
         if (status?.includes('Chờ')) color = 'blue'
         else if (status?.includes('hoàn thành')) color = 'green'
         else if (status?.includes('Hủy')) color = 'red'
         else if (status?.includes('Đã trả kết quả')) color = 'green'
-
         if (!status) {
           return <Tag>N/A</Tag>
         }
-
-        const maxLength = 25 // Giới hạn 25 ký tự, bạn có thể thay đổi
+        const maxLength = 25
         let displayStatus = status
-
         if (status.length > maxLength) {
           displayStatus = status.substring(0, maxLength) + '...'
         }
-
-        // Dùng title của Tag để làm tooltip đơn giản
         return (
           <Tooltip title={status}>
             <Tag color={color}>{displayStatus}</Tag>
@@ -270,68 +298,29 @@ export default function ServiceCase() {
       },
     },
     {
-      title: 'Kết quả',
-      key: 'result_action',
-      align: 'center',
-      width: 200, // Tăng chiều rộng để chứa nút mới
-      render: (
-        _: any,
-        record: {
-          _id: string
-          result: string
-          condition: any
-          paymentForCondition: any
-        }
-      ) => {
-        // Case 1: Chưa có kết quả (giữ nguyên)
-        if (!record.result) {
-          return <Tag color='default'>Chưa có kết quả</Tag>
-        }
-
-        // Case 2: Cần thanh toán chi phí phát sinh
-        const isPaymentRequired =
-          record.condition !== null && record.paymentForCondition === null
-
-        if (isPaymentRequired) {
-          return (
-            <Button
-              type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
-              onClick={() => handlePayment(record._id)}
-              loading={loadingPaymentFor === record._id}
-            >
-              Thanh toán chi phí phát sinh để xem kết quả
-            </Button>
-          )
-        }
-
-        // Case 3: Có thể xem kết quả (giữ nguyên)
+      title: 'Hành động',
+      key: 'actions',
+      render: (_: any, record: any) => {
+        const currentStatusText = record.currentStatus?.testRequestStatus
         return (
-          <span
-          // onClick={() => navigate(`/service-case-customer/${record._id}`)}
-          >
-            <Tag color='success'>Đã có kết quả</Tag>
-          </span>
+          <Space direction='vertical'>
+            {/* {currentStatusText === 'Đã trả kết quả' && (
+              <Button
+                type='primary'
+                onClick={() => handleComplete(record._id)}
+                loading={loadingCompleteFor === record._id}
+              >
+                Hoàn thành
+              </Button>
+            )} */}
+            <Button
+              onClick={() => navigate(`/service-case-customer/${record._id}`)}
+            >
+              Xem chi tiết
+            </Button>
+          </Space>
         )
       },
-    },
-    {
-      title: 'Chi tiết',
-      key: 'action',
-      render: (_: any, record: any) => (
-        <Space direction='vertical'>
-          <Button
-            onClick={() => navigate(`/service-case-customer/${record._id}`)}
-          >
-            Xem chi tiết
-          </Button>
-          {/* <Button
-            onClick={() => handleViewImage(record._id)}
-            loading={loadingImageFor === record._id} // Thêm loading state cho nút
-          >
-            Xem hình ảnh
-          </Button> */}
-        </Space>
-      ),
     },
   ]
 
@@ -348,7 +337,7 @@ export default function ServiceCase() {
             <Text>Trạng thái:</Text>
             <Select
               value={currentStatus || ''}
-              style={{ width: 200 }} // Antd Select thường cần set width
+              style={{ width: 200 }}
               onChange={(value) => {
                 setCurrentStatus(value)
                 navigate(
@@ -395,32 +384,30 @@ export default function ServiceCase() {
           }}
         />
       </Card>
-
-      {/* Modal để hiển thị hình ảnh */}
       <Modal
         title='Hình ảnh hồ sơ dịch vụ'
         open={isImageModalVisible}
         onCancel={() => {
           setIsImageModalVisible(false)
-          setImageUrls([]) // Reset mảng URL khi đóng modal
+          setImageUrls([])
         }}
-        footer={null} // Không hiển thị footer
+        footer={null}
         centered
-        width={700} // Điều chỉnh chiều rộng modal
+        width={700}
       >
         {imageUrls.length > 0 ? (
           <Space direction='vertical' style={{ width: '100%' }}>
             {imageUrls.map((url, index) => (
               <img
                 key={index}
-                src={url}
+                src={url || '/placeholder.svg'}
                 alt={`Service Case Image ${index + 1}`}
                 style={{
                   maxWidth: '100%',
                   height: 'auto',
                   display: 'block',
-                  margin: '10px auto', // Khoảng cách giữa các ảnh
-                  border: '1px solid #eee', // Thêm border cho đẹp
+                  margin: '10px auto',
+                  border: '1px solid #eee',
                 }}
               />
             ))}

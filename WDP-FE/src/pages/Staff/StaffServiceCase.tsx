@@ -161,13 +161,27 @@ export default function StaffServiceCase() {
       key: 'bookingDate',
       render: (
         _: any,
-        record: { caseMember: { booking: { bookingDate: string } } }
+        record: { caseMember: { booking: { bookingDate: string, slot?: { slotTemplate?: { facility?: { facilityName: string } } } } } }
       ) => {
         const bookingDate = record.caseMember?.booking?.bookingDate
-        if (!bookingDate) return <Tag color='default'>Chưa đặt</Tag>
+        const facilityName = record.caseMember?.booking?.slot?.slotTemplate?.facility?.facilityName
+        
+        if (!bookingDate) {
+          return <Tag color='default'>Chưa đặt</Tag>
+        }
+
         const date = new Date(bookingDate)
+        const formattedDate = date.toLocaleDateString('vi-VN')
+
         return (
-          <Typography.Text>{date.toLocaleDateString('vi-VN')}</Typography.Text>
+          <Space direction='vertical' size={2}>
+            <Typography.Text>{formattedDate}</Typography.Text>
+            {facilityName && (
+              <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                ({facilityName})
+              </Typography.Text>
+            )}
+          </Space>
         )
       },
     },
@@ -227,51 +241,51 @@ export default function StaffServiceCase() {
         )
       },
     },
-    {
-      title: 'Kết quả',
-      key: 'result_action',
-      align: 'center',
-      width: 200, // Tăng chiều rộng để chứa nút mới
-      render: (
-        _: any,
-        record: {
-          _id: string
-          result: string
-          condition: any
-          paymentForCondition: any
-        }
-      ) => {
-        // Case 1: Chưa có kết quả (giữ nguyên)
-        if (!record.result) {
-          return <Tag color='default'>Chưa có kết quả</Tag>
-        }
+    // {
+    //   title: 'Kết quả',
+    //   key: 'result_action',
+    //   align: 'center',
+    //   width: 200, // Tăng chiều rộng để chứa nút mới
+    //   render: (
+    //     _: any,
+    //     record: {
+    //       _id: string
+    //       result: string
+    //       condition: any
+    //       paymentForCondition: any
+    //     }
+    //   ) => {
+    //     // Case 1: Chưa có kết quả (giữ nguyên)
+    //     if (!record.result) {
+    //       return <Tag color='default'>Chưa có kết quả</Tag>
+    //     }
 
-        // Case 2: Cần thanh toán chi phí phát sinh
-        // const isPaymentRequired =
-        //   record.condition !== null && record.paymentForCondition === null
+    //     // Case 2: Cần thanh toán chi phí phát sinh
+    //     // const isPaymentRequired =
+    //     //   record.condition !== null && record.paymentForCondition === null
 
-        // if (isPaymentRequired) {
-        //   return (
-        //     <Button
-        //       type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
-        //       onClick={() => handlePayment(record._id)}
-        //       loading={loadingPaymentFor === record._id}
-        //     >
-        //       Thanh toán chi phí phát sinh để xem kết quả
-        //     </Button>
-        //   )
-        // }
+    //     // if (isPaymentRequired) {
+    //     //   return (
+    //     //     <Button
+    //     //       type='primary' // ✅ Thay `danger` bằng `primary` cho hợp lý hơn
+    //     //       onClick={() => handlePayment(record._id)}
+    //     //       loading={loadingPaymentFor === record._id}
+    //     //     >
+    //     //       Thanh toán chi phí phát sinh để xem kết quả
+    //     //     </Button>
+    //     //   )
+    //     // }
 
-        // Case 3: Có thể xem kết quả (giữ nguyên)
-        return (
-          <span
-          // onClick={() => navigate(`/service-case-customer/${record._id}`)}
-          >
-            <Tag color='success'>Đã có kết quả</Tag>
-          </span>
-        )
-      },
-    },
+    //     // Case 3: Có thể xem kết quả (giữ nguyên)
+    //     return (
+    //       <span
+    //       // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+    //       >
+    //         <Tag color='success'>Đã có kết quả</Tag>
+    //       </span>
+    //     )
+    //   },
+    // },
     {
       title: 'Chi tiết',
       key: 'action',
