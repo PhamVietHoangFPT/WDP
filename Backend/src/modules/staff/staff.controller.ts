@@ -16,13 +16,19 @@ import { ApiResponseDto } from 'src/common/dto/api-response.dto'
 @ApiTags('staff')
 @Controller('staff')
 @ApiBearerAuth()
-@Roles(RoleEnum.STAFF)
 export class StaffController {
   constructor(
     @Inject(IStaffService) private readonly staffService: IStaffService,
   ) {}
 
   @Get('/service-cases')
+  @Roles(
+    RoleEnum.STAFF,
+    RoleEnum.MANAGER,
+    RoleEnum.CERTIFIER,
+    RoleEnum.DOCTOR_MANAGER,
+    RoleEnum.DOCTOR,
+  )
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ theo email khách hàng' })
   @ApiResponse({
