@@ -12,6 +12,7 @@ import {
   Tag,
   Table,
   Divider,
+  message,
 } from 'antd'
 import { useParams } from 'react-router-dom'
 import {
@@ -19,10 +20,12 @@ import {
   useGetImageQuery,
   useGetServiceCaseByIdQuery,
 } from '../../features/customer/paymentApi'
+import { useGetkitShipmentHistoryListQuery } from '../../features/kitshipmentHistory/kitShipmentHistory'
 import Cookies from 'js-cookie'
 import { useState, useEffect, useRef } from 'react'
-import { PhoneOutlined } from '@ant-design/icons'
+import { PhoneOutlined, ReloadOutlined } from '@ant-design/icons'
 import html2pdf from 'html2pdf.js'
+import { useCreateServiceCasePaymentMutation } from '../../features/vnpay/vnpayApi'
 
 const { Title, Text } = Typography
 
@@ -34,6 +37,7 @@ export default function ServiceCaseDetail() {
   try {
     accountId = userData ? JSON.parse(userData).id : ''
   } catch {}
+  const [createPaymentUrl] = useCreateServiceCasePaymentMutation()
 
   const { data: historyData, isLoading: isLoadingHistory } =
     useGetTestRequestHistoryQuery({
@@ -45,6 +49,23 @@ export default function ServiceCaseDetail() {
     useGetServiceCaseByIdQuery(id as string, {
       skip: !id,
     })
+
+  // Check if this is a self-sampling case to show kit shipment tracking
+  const isSelfSampling = serviceCaseData?.caseMember?.isSelfSampling
+
+  const { data: kitShipmentHistoryData, isLoading: isLoadingKitHistory } =
+    useGetkitShipmentHistoryListQuery(
+      {
+        customerId: accountId,
+        caseMember: serviceCaseData?.caseMember?._id,
+        pageNumber: 1,
+        pageSize: 50,
+      },
+      {
+        skip:
+          !accountId || !serviceCaseData?.caseMember?._id || !isSelfSampling,
+      }
+    )
 
   const { data: imageData, isLoading: isLoadingImages } = useGetImageQuery(
     id as string,
@@ -69,6 +90,59 @@ export default function ServiceCaseDetail() {
   const sortedHistoryData = [...(historyData?.data || [])].sort(
     (a, b) => a.testRequestStatus.order - b.testRequestStatus.order
   )
+
+  // Merge timeline data when self-sampling
+  const mergedTimelineData = () => {
+    if (!isSelfSampling) {
+      // For non-self-sampling cases, return the original data structure
+      const data = sortedHistoryData.map((item) => ({
+        ...item,
+        type: 'test-request',
+        displayTime: new Date(item.created_at),
+        displayText: item.testRequestStatus.testRequestStatus,
+      }))
+      console.log(data)
+      return data
+    }
+
+    const testRequestHistory = sortedHistoryData.map((item) => ({
+      ...item,
+      type: 'test-request',
+      displayTime: new Date(item.created_at),
+      displayText: item.testRequestStatus.testRequestStatus,
+    }))
+
+    const kitShipmentHistory = (kitShipmentHistoryData?.data || []).map(
+      (item: any) => ({
+        ...item,
+        type: 'kit-shipment',
+        displayTime: new Date(item.created_at || item.createdAt),
+        displayText: `Kit: ${item.kitShipmentStatus?.status || 'Đang xử lý'}`,
+      })
+    )
+
+    // Combine and sort by time
+    return [...testRequestHistory, ...kitShipmentHistory].sort(
+      (a, b) => a.displayTime.getTime() - b.displayTime.getTime()
+    )
+  }
+
+  const timelineData = mergedTimelineData()
+
+  // 1. Lấy ra trạng thái mới nhất từ mảng timelineData
+  const latestStatusItem = timelineData[timelineData.length - 1]
+
+  // 2. Lấy ra chuỗi văn bản của trạng thái mới nhất
+  // (Dựa trên cấu trúc dữ liệu bạn dùng để render trong <Timeline.Item>)
+  const latestStatusText =
+    latestStatusItem?.displayText ||
+    latestStatusItem?.testRequestStatus?.testRequestStatus
+
+  // 3. Định nghĩa một danh sách các trạng thái được phép thanh toán lại
+  const retryableStatuses = ['Chờ thanh toán', 'Thanh toán thất bại']
+
+  // 4. Điều kiện hiển thị cuối cùng
+  const shouldShowRetryButton = retryableStatuses.includes(latestStatusText)
 
   if (isLoadingHistory || isLoadingServiceCase) {
     return (
@@ -182,32 +256,91 @@ export default function ServiceCaseDetail() {
     },
   ]
 
+  const handleRetryPayment = async (serviceCase: any) => {
+    const paymentResponse = await createPaymentUrl({
+      serviceCaseId: serviceCase._id,
+    }).unwrap()
+    const redirectUrl = paymentResponse
+    console.log('Redirect URL:', redirectUrl)
+    window.open(redirectUrl, '_blank')
+
+    message.success('Đăng ký thành công')
+  }
+
   return (
     <div style={{ padding: '20px' }}>
       <Title level={2}>Chi tiết hồ sơ dịch vụ</Title>
       <Row gutter={16}>
         <Col span={6}>
           <Card style={{ marginBottom: '20px' }}>
-            <Title level={4}>Trạng thái hồ sơ</Title>
-            {isLoadingHistory ? (
+            <Title level={4}>
+              Trạng thái hồ sơ {isSelfSampling && '& Tracking Kit'}
+            </Title>
+            {isLoadingHistory || (isSelfSampling && isLoadingKitHistory) ? (
               <Spin />
             ) : (
               <Timeline mode='left'>
-                {sortedHistoryData.map((item, index) => (
+                {timelineData.map((item, index) => (
                   <Timeline.Item
-                    key={item._id}
+                    key={`${item.type || 'test'}-${item._id}-${index}`}
                     color={
-                      index === sortedHistoryData.length - 1 ? 'green' : 'blue'
+                      item.type === 'kit-shipment'
+                        ? 'orange'
+                        : index === timelineData.length - 1
+                          ? 'green'
+                          : 'blue'
+                    }
+                    dot={
+                      item.type === 'kit-shipment' ? (
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            background: '#ff9c6e',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          📦
+                        </span>
+                      ) : undefined
                     }
                   >
                     <Text strong>
-                      {new Date(item.created_at).toLocaleString('vi-VN')}
+                      {item.displayTime?.toLocaleString('vi-VN') ||
+                        new Date(item.created_at).toLocaleString('vi-VN')}
                     </Text>
                     <br />
-                    <Text>{item.testRequestStatus.testRequestStatus}</Text>
+                    <Text
+                      style={{
+                        color:
+                          item.type === 'kit-shipment' ? '#ff9c6e' : 'inherit',
+                      }}
+                    >
+                      {item.displayText ||
+                        item.testRequestStatus?.testRequestStatus}
+                    </Text>
                   </Timeline.Item>
                 ))}
               </Timeline>
+            )}
+            {shouldShowRetryButton && (
+              <Button
+                type='primary'
+                shape='round'
+                icon={<ReloadOutlined />}
+                onClick={() => handleRetryPayment(serviceCase)}
+                style={{
+                  marginTop: '16px',
+                  width: '100%',
+                }}
+              >
+                Thanh toán lại
+              </Button>
             )}
           </Card>
         </Col>
@@ -264,7 +397,14 @@ export default function ServiceCaseDetail() {
               ))}
               <Descriptions.Item label='Hình thức lấy mẫu'>
                 {serviceCase?.caseMember?.isAtHome ? (
-                  <Tag color='green'>Lấy mẫu tại nhà</Tag>
+                  <>
+                    <Tag color='green'>Lấy mẫu tại nhà</Tag>
+                    {serviceCase?.caseMember?.isSelfSampling ? (
+                      <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+                    ) : (
+                      <Tag color='blue'>Nhân viên đến lấy mẫu</Tag>
+                    )}
+                  </>
                 ) : (
                   <Tag>Lấy mẫu tại trung tâm</Tag>
                 )}

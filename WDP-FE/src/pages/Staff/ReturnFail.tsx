@@ -24,6 +24,7 @@ import {
 } from '../../features/deliveryStaff/deliveryStaff'
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
 
 const { Title, Text } = Typography
 
@@ -112,7 +113,7 @@ const ReturnFail: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
     undefined
   )
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const [customerEmail, setCustomerEmail] = useState<string>('')
   const [pageNumber, setPageNumber] = useState<number>(1)
@@ -128,7 +129,7 @@ const ReturnFail: React.FC = () => {
     data: statusListData,
     isLoading: isLoadingStatus,
     isSuccess: isStatusListSuccess,
-  } = useGetServiceCaseStatusListForDeliveryQuery({
+  } = useGetAllStatusForCustomerQuery({
     pageNumber: 1,
     pageSize: 100,
   })
@@ -136,17 +137,17 @@ const ReturnFail: React.FC = () => {
   useEffect(() => {
     if (
       isStatusListSuccess &&
-      statusListData?.data?.length &&
+      statusListData?.length &&
       selectedStatus === undefined
     ) {
-      const defaultFailStatus = statusListData.data.find(
+      const defaultFailStatus = statusListData.find(
         (s: ServiceCaseStatus) =>
           s.testRequestStatus === 'Giao kết quả không thành công'
       )
       if (defaultFailStatus) {
         setSelectedStatus(defaultFailStatus._id)
-      } else if (statusListData.data.length > 0) {
-        setSelectedStatus(statusListData.data[0]._id)
+      } else if (statusListData.length > 0) {
+        setSelectedStatus(statusListData[0]._id)
       }
     }
   }, [statusListData, isStatusListSuccess, selectedStatus])
@@ -321,12 +322,26 @@ const ReturnFail: React.FC = () => {
     {
       title: 'Nhân viên lấy mẫu',
       key: 'sampleCollector',
-      render: (_, record) => {
+      dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
+      render: (_, record: any) => {
+        // 1. ƯU TIÊN KIỂM TRA TRƯỚC: Nếu là tự lấy mẫu
+        // Dùng optional chaining (?.) để tránh lỗi nếu record.caseMember không tồn tại
+        if (record.caseMember?.isSelfSampling === true) {
+          // Sử dụng Tag để đồng bộ về giao diện và chọn màu khác để phân biệt
+          return <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+        }
+
+        // 2. Nếu không phải tự lấy mẫu, tiếp tục với logic cũ
         const collector = record.sampleCollectorDetails
 
+        console.log(collector)
+
+        // Nếu không có thông tin nhân viên, hiển thị tag
         if (!collector) {
           return <Tag>Chưa chỉ định</Tag>
         }
+
+        // Nếu có, hiển thị tên và số điện thoại
         return (
           <Space direction='vertical' size={0}>
             <Space>
@@ -348,8 +363,7 @@ const ReturnFail: React.FC = () => {
       key: 'doctor',
       render: (_, record) => {
         const doctor = record.doctorDetails
-
-        if (!doctor) {
+        if (!doctor || !doctor.name) {
           return <Tag>Chưa chỉ định</Tag>
         }
         return (
@@ -370,21 +384,6 @@ const ReturnFail: React.FC = () => {
           return <Tag color='default'>Chưa có kết quả</Tag>
         }
 
-        const isPaymentRequired =
-          record.condition !== null && record.paymentForCondition === null
-
-        if (isPaymentRequired) {
-          return (
-            <Button
-              type='primary'
-              onClick={() => handlePayment(record._id)}
-              loading={loadingPaymentFor === record._id}
-            >
-              Thanh toán chi phí phát sinh để xem kết quả
-            </Button>
-          )
-        }
-
         return (
           <span
             onClick={() => navigate(`/service-case-customer/${record._id}`)}
@@ -399,7 +398,7 @@ const ReturnFail: React.FC = () => {
       key: 'actions',
       width: 250,
       render: (_, record) => {
-        const deliveredStatus = statusListData?.data?.find(
+        const deliveredStatus = statusListData?.find(
           (s: ServiceCaseStatus) => s.testRequestStatus === 'Đã trả kết quả'
         )
         const isUpdatable =
@@ -421,32 +420,11 @@ const ReturnFail: React.FC = () => {
                 Đã trả kết quả
               </Button>
             )}
-            {/* <Upload
-              beforeUpload={(file) => {
-                handleImageUpload(file, record)
-                return false
-              }}
-              showUploadList={false}
-              accept='image/*'
-            >
-              <Button
-                icon={<UploadOutlined />}
-                loading={isUploading}
-                size='small'
-              >
-                Upload ảnh
-              </Button>
-            </Upload> */}
-            {/* <Button
-              onClick={() => handleViewImage(record._id)}
-              loading={loadingImageFor === record._id}
-              size='small'
-            >
-              Xem hình ảnh
-            </Button> */}
             <Button
               onClick={() =>
-                navigate(`/staff/return-fail-detail/${record._id}?accountId=${record.accountDetails._id}`)
+                navigate(
+                  `/staff/return-fail-detail/${record._id}?accountId=${record.accountDetails._id}`
+                )
               }
             >
               Xem chi tiết
@@ -482,7 +460,7 @@ const ReturnFail: React.FC = () => {
           loading={isLoadingStatus}
           disabled={isLoadingStatus}
         >
-          {(statusListData?.data || []).map((status: ServiceCaseStatus) => (
+          {(statusListData || []).map((status: ServiceCaseStatus) => (
             <Select.Option key={status._id} value={status._id}>
               {status.testRequestStatus}
             </Select.Option>
@@ -541,7 +519,7 @@ const ReturnFail: React.FC = () => {
           Trạng thái mới:{' '}
           <Tag color={'green'}>
             {
-              statusListData?.data?.find((s) => s._id === newStatusId)
+              statusListData?.find((s) => s._id === newStatusId)
                 ?.testRequestStatus
             }
           </Tag>

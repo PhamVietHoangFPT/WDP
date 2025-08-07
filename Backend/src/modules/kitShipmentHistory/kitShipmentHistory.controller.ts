@@ -32,7 +32,7 @@ export class KitShipmentHistoryController {
   constructor(
     @Inject(IKitShipmentHistoryService)
     private readonly KitShipmentHistoryService: IKitShipmentHistoryService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'Lấy tất cả lịch sử xét nghiệm ADN' })
@@ -55,10 +55,10 @@ export class KitShipmentHistoryController {
     description: 'ID của tài khoản để lọc lịch sử xét nghiệm',
   })
   @ApiQuery({
-    name: 'kitShipmentId',
+    name: 'caseMember',
     required: false,
     type: String,
-    description: 'ID của trường hợp dịch vụ để lọc lịch sử xét nghiệm',
+    description: 'ID của case member để lọc lịch sử xét nghiệm',
   })
   @ApiResponse({
     status: 200,
@@ -68,13 +68,13 @@ export class KitShipmentHistoryController {
   async findAll(
     @Query() paginationQuery: PaginationQueryDto,
     @Query('customerId') customerId: string,
-    @Query('kitShipmentId') kitShipmentId: string,
+    @Query('caseMember') caseMember: string,
   ): Promise<PaginatedResponse<KitShipmentHistoryDocument>> {
     return this.KitShipmentHistoryService.findAllKitShipmentHistory(
       paginationQuery.pageNumber,
       paginationQuery.pageSize,
       customerId,
-      kitShipmentId,
+      caseMember,
     )
   }
 }

@@ -9,12 +9,11 @@ import { IKitShipmentHistoryRepository } from './interfaces/iKitShipmentHistory.
 
 @Injectable()
 export class KitShipmentHistoryRepository
-  implements IKitShipmentHistoryRepository
-{
+  implements IKitShipmentHistoryRepository {
   constructor(
     @InjectModel(KitShipmentHistory.name)
     private KitShipmentHistoryModel: Model<KitShipmentHistoryDocument>,
-  ) {}
+  ) { }
 
   async createKitShipmentHistory(
     kitShipmentStatus: string,
@@ -33,16 +32,19 @@ export class KitShipmentHistoryRepository
   findAllKitShipmentHistory(
     filter: Record<string, unknown>,
   ): mongoose.Query<KitShipmentHistoryDocument[], KitShipmentHistoryDocument> {
+    // Return as promise for better debugging
     return this.KitShipmentHistoryModel.find(filter)
-      .select('_id kitShipmentStatus kitShipment created_at')
       .populate({
         path: 'kitShipmentStatus',
         select: 'status order -_id',
+        match: { order: { $in: [2, 3, 4, 6] } }
       })
-      .lean()
+      .select('_id kitShipmentStatus kitShipment created_at')
+      .lean() as any
   }
 
   async countDocuments(filter: Record<string, unknown>): Promise<number> {
+    // For now, count all matching documents and filter later
     return this.KitShipmentHistoryModel.countDocuments(filter).exec()
   }
 

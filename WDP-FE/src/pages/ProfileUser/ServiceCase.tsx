@@ -10,19 +10,20 @@ import {
   Select,
   message,
   Space,
-  Modal, // Import Modal
+  Modal,
+  Tooltip, // Import Modal
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useGetServiceCasesListQuery,
   useCreatePaymentForConditionMutation,
-  useGetImageQuery, // Import useGetImageQuery
 } from '../../features/customer/paymentApi'
 import { useGetAllStatusForCustomerQuery } from '../../features/staff/staffAPI'
 import { useState } from 'react'
 const { Title, Text } = Typography
 const { Option } = Select
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons'
+import type { ColumnType } from 'antd/es/table'
 
 export default function ServiceCase() {
   const navigate = useNavigate()
@@ -40,8 +41,7 @@ export default function ServiceCase() {
   })
 
   // 1. Lấy hàm trigger mutation và trạng thái loading từ hook
-  const [createPayment, { isLoading: isPaymentLoading }] =
-    useCreatePaymentForConditionMutation()
+  const [createPayment] = useCreatePaymentForConditionMutation()
 
   // 2. Tạo state để quản lý loading cho từng dòng cụ thể khi thanh toán
   const [loadingPaymentFor, setLoadingPaymentFor] = useState<string | null>(
@@ -51,7 +51,6 @@ export default function ServiceCase() {
   // States for image display
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([]) // Thay đổi thành mảng các URL
-  const [loadingImageFor, setLoadingImageFor] = useState<string | null>(null) // State để quản lý loading khi lấy ảnh
 
   // 3. Tạo hàm xử lý việc thanh toán
   const handlePayment = async (serviceCaseId: string) => {
@@ -80,39 +79,7 @@ export default function ServiceCase() {
     }
   }
 
-  // Handle viewing image - đã cập nhật để lấy nhiều ảnh
-  const handleViewImage = async (serviceCaseId: string) => {
-    setLoadingImageFor(serviceCaseId) // Bật loading cho nút xem ảnh của dòng này
-    try {
-      // Gọi API getImage
-      const response = await fetch(
-        `http://localhost:5000/images/findForServiceCase/${serviceCaseId}`
-      )
-      if (!response.ok) {
-        throw new Error('Failed to fetch image data.')
-      }
-      const data = await response.json()
-
-      // Kiểm tra nếu có dữ liệu và URL hợp lệ
-      if (data && data.length > 0) {
-        const fullImageUrls = data
-          .filter((item: any) => item.url)
-          .map((item: any) => `http://localhost:5000${item.url}`)
-        setImageUrls(fullImageUrls)
-        setIsImageModalVisible(true)
-      } else {
-        message.info('Không có hình ảnh nào cho hồ sơ này.')
-        setImageUrls([]) // Đảm bảo mảng rỗng nếu không có ảnh
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy ảnh:', error)
-      message.error('Không thể tải hình ảnh. Vui lòng thử lại.')
-    } finally {
-      setLoadingImageFor(null) // Tắt loading
-    }
-  }
-
-  const columns = [
+  const columns: Array<ColumnType<any>> = [
     {
       title: 'Tên người xét nghiệm',
       key: 'testTakerNames',
@@ -220,6 +187,14 @@ export default function ServiceCase() {
       key: 'sampleCollector',
       dataIndex: ['sampleCollector', 'name'], // Giúp cho việc sắp xếp theo tên
       render: (_, record: any) => {
+        // 1. ƯU TIÊN KIỂM TRA TRƯỚC: Nếu là tự lấy mẫu
+        // Dùng optional chaining (?.) để tránh lỗi nếu record.caseMember không tồn tại
+        if (record.caseMember?.isSelfSampling === true) {
+          // Sử dụng Tag để đồng bộ về giao diện và chọn màu khác để phân biệt
+          return <Tag color='purple'>Khách hàng tự lấy mẫu</Tag>
+        }
+
+        // 2. Nếu không phải tự lấy mẫu, tiếp tục với logic cũ
         const collector = record.sampleCollector
 
         // Nếu không có thông tin nhân viên, hiển thị tag
@@ -244,7 +219,6 @@ export default function ServiceCase() {
         )
       },
     },
-
     {
       title: 'Bác sĩ phụ trách',
       key: 'doctor',
@@ -261,6 +235,37 @@ export default function ServiceCase() {
             <UserOutlined />
             <Typography.Text>{doctor.name}</Typography.Text>
           </Space>
+        )
+      },
+    },
+    {
+      title: 'Trạng thái',
+      key: 'status',
+      dataIndex: ['currentStatus', 'testRequestStatus'],
+      render: (status: string) => {
+        // Giữ nguyên logic chọn màu
+        let color = 'default'
+        if (status?.includes('Chờ')) color = 'blue'
+        else if (status?.includes('hoàn thành')) color = 'green'
+        else if (status?.includes('Hủy')) color = 'red'
+        else if (status?.includes('Đã trả kết quả')) color = 'green'
+
+        if (!status) {
+          return <Tag>N/A</Tag>
+        }
+
+        const maxLength = 25 // Giới hạn 25 ký tự, bạn có thể thay đổi
+        let displayStatus = status
+
+        if (status.length > maxLength) {
+          displayStatus = status.substring(0, maxLength) + '...'
+        }
+
+        // Dùng title của Tag để làm tooltip đơn giản
+        return (
+          <Tooltip title={status}>
+            <Tag color={color}>{displayStatus}</Tag>
+          </Tooltip>
         )
       },
     },
@@ -302,12 +307,10 @@ export default function ServiceCase() {
         // Case 3: Có thể xem kết quả (giữ nguyên)
         return (
           <span
-    // onClick={() => navigate(`/service-case-customer/${record._id}`)}
-  >
-    <Tag color="success">
-      Đã có kết quả
-    </Tag>
-  </span>
+          // onClick={() => navigate(`/service-case-customer/${record._id}`)}
+          >
+            <Tag color='success'>Đã có kết quả</Tag>
+          </span>
         )
       },
     },
