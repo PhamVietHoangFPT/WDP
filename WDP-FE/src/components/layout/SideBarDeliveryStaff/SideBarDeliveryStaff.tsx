@@ -74,7 +74,7 @@ export const SideBar = () => {
     {
       key: 'delivery-staff/service-case', // Đảm bảo key khớp với path
       icon: <BarChartOutlined />, // Có thể thay bằng icon khác phù hợp hơn nếu có
-      label: 'Giao hàng',
+      label: 'Giao kết quả',
       onClick: () => navigate('delivery-staff/service-case'),
     },
     // Thêm các mục menu khác của Delivery vào đây nếu có

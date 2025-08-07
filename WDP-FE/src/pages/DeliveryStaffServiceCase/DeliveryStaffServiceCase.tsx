@@ -370,7 +370,7 @@ const DeliveryStaffServiceCase: React.FC = () => {
   if (isErrorCases) {
     return (
       <div style={{ padding: 24 }}>
-        <Title level={2}>Quản lý hồ sơ giao kết quả</Title>
+        <Title level={2}>Quản lý hồ sơ đã có kết quả</Title>
 
         <div style={{ marginBottom: 16 }}>
           <Select
