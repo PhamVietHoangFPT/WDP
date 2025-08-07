@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -48,7 +50,7 @@ export default function ManagerAccountList() {
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [emailFilter]) 
+  }, [emailFilter])
 
   const handleDelete = async (accountId: string) => {
     try {
@@ -66,7 +68,7 @@ export default function ManagerAccountList() {
   }
 
   const roles = rolesData?.data || []
-  const staffs = staffsData?.data || []
+  const staffs = staffsData?.data?.filter((staff) => staff.deleted_at === null) || []
 
   const columns = [
     {
@@ -110,12 +112,19 @@ export default function ManagerAccountList() {
   ]
 
   return (
-    <div className=''>
+    <div className='p-6'>
       <Card>
-        <Title level={3}>Danh sách nhân viên</Title>
-        <div className='' style={{ display: 'flex', width: '100%' }}>
-          <Space className='' >
-            <Space style={{ paddingRight: '520px' }}>
+        <div style={{ padding: '24px' }}>
+          <Title level={3}>Danh sách nhân viên</Title>
+          <Space
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+            }}
+          >
+            <Space>
               <Search
                 placeholder='Tìm kiếm theo email...'
                 value={emailFilter}
@@ -138,7 +147,7 @@ export default function ManagerAccountList() {
                 ))}
               </Select>
             </Space>
-            <div className=''>
+            <div>
               <Button
                 type='primary'
                 onClick={handleCreateAccount}
@@ -149,7 +158,7 @@ export default function ManagerAccountList() {
             </div>
           </Space>
         </div>
-        <div className=''>
+        <div style={{ padding: '0 24px 24px' }}>
           <Spin spinning={isStaffLoading}>
             <Table
               columns={columns}
