@@ -115,21 +115,22 @@ export const SideBar = () => {
           onClick: () =>
             navigate('/staff/test-takers/served?pageNumber=1&pageSize=10'),
         },
-        {
+        
+      ],
+    },
+    // {
+    //   key: 'staff/update-service-case-status-for-customer',
+    //   icon: <TeamOutlined />,
+    //   label: 'Cập nhật tình trạng',
+    //   onClick: () => navigate('/staff/update-service-case-status-for-customer'),
+    // },
+    // ...
+    {
           key: 'staff/return-fail',
           icon: <TeamOutlined />,
           label: 'Quản lý hồ sơ khách hàng',
           onClick: () => navigate('/staff/return-fail'),
         },
-      ],
-    },
-    {
-      key: 'staff/update-service-case-status-for-customer',
-      icon: <TeamOutlined />,
-      label: 'Cập nhật tình trạng',
-      onClick: () => navigate('/staff/update-service-case-status-for-customer'),
-    },
-    // ...
   ]
 
   return (
