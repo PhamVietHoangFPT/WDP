@@ -245,8 +245,8 @@ const ServiceAtHomeForm: React.FC = () => {
             <Switch
               checked={isSelfSampling}
               onChange={(checked) => setIsSelfSampling(checked)}
-              checkedChildren='Không tự lấy mẫu'
-              unCheckedChildren='Tự lấy mẫu'
+              unCheckedChildren='Không tự lấy mẫu'
+              checkedChildren='Tự lấy mẫu'
             />
           </div>
         </div>
